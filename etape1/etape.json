@@ -1,0 +1,25 @@
+{
+  "id": "etape1",
+  "nom": "Étape 1",
+  "type": "BT250",
+  "date": "2026-02-27",
+  "maxEquipes": 8,
+
+  "inscriptions": {
+    "ouverture": "2026-02-18T12:00:00-03:00",
+    "cloture": "2026-02-20T23:59:59-03:00",
+    "inscriptionsTardivesPossibles": true
+  },
+
+  "horairesIndicatifs": {
+    "debutEvenement": "18:00",
+    "finEvenement": "23:30",
+    "debutMatchs": "18:00"
+  },
+
+  "tirageAuSortIndicatif": {
+    "fenetreDebut": "12:00",
+    "fenetreFin": "13:00",
+    "commentaire": "Horaires indicatifs : l'admin peut ajuster."
+  }
+}
