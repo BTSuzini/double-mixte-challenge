@@ -1,7 +1,7 @@
 :root{
   --max: 980px;
-  --green: #1f7a3a;      /* vert bandeau */
-  --green-dark: #16602d; /* vert plus sombre */
+  --green: #1f7a3a;       /* vert bandeau */
+  --green-dark: #16602d;  /* vert plus sombre */
   --text: #111;
   --muted: #666;
   --border: #e8e8e8;
@@ -10,6 +10,7 @@
 }
 
 *{ box-sizing:border-box; }
+
 body{
   margin:0;
   font-family:-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
@@ -33,13 +34,13 @@ a{ color:inherit; text-decoration:none; }
 }
 
 .topbar .container{
-  padding:12px 16px;
+  padding:10px 16px; /* un peu plus compact */
 }
 
 /* Ligne bandeau: logo | titre | logo */
 .topbar-row{
   display:grid;
-  grid-template-columns: 44px 1fr 44px;
+  grid-template-columns: 64px 1fr 64px; /* logos plus grands */
   align-items:center;
   gap:12px;
 }
@@ -54,10 +55,10 @@ a{ color:inherit; text-decoration:none; }
 
 /* Logos */
 .brand-logo{
-  width:44px;
-  height:44px;
-  border-radius:10px;
-  background: rgba(255,255,255,.10);
+  width:64px;              /* + grand */
+  height:64px;             /* + grand */
+  border-radius:14px;      /* un peu plus doux */
+  background: rgba(255,255,255,.12);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -65,8 +66,8 @@ a{ color:inherit; text-decoration:none; }
 }
 
 .brand-logo img{
-  width:100%;
-  height:100%;
+  width:90%;               /* évite l’effet “perdu” */
+  height:90%;
   object-fit:contain;
   display:block;
 }
@@ -134,6 +135,22 @@ a{ color:inherit; text-decoration:none; }
   margin:10px 0 0;
   color:var(--muted);
   font-size:14px;
+}
+
+/* ===== Responsive (mobile) ===== */
+@media (max-width: 520px){
+  .topbar-row{
+    grid-template-columns: 52px 1fr 52px; /* logos un peu moins grands sur tel */
+  }
+
+  .brand-logo{
+    width:52px;
+    height:52px;
+  }
+
+  .brand-title{
+    font-size:16px;
+  }
 }
 
 /* ===== Responsive (PC) ===== */
