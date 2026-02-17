@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Étape 1 — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260216g" />
+  <title>Étape 1 — BT250</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
 </head>
 <body>
 
@@ -14,7 +14,9 @@
       <div class="brand-logo">
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
+
       <h1 class="brand-title">Étape 1 — BT250</h1>
+
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
@@ -22,294 +24,22 @@
 
     <nav class="nav">
       <a href="../index.html">Accueil</a>
-      <a href="../pages/reglement.html">Règlement</a>
-      <a href="../pages/infos.html">Infos</a>
-      <a href="#" id="btnModeMobile">Mobile</a>
-      <a href="#" id="btnModeAdmin">Admin</a>
-      <a href="#" id="btnModeJat">JAT</a>
+      <a href="#">Programmation</a>
+      <a href="inscriptions.html">Inscriptions</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
 
-  <!-- MOBILE (public) -->
-  <section class="card" id="viewMobile">
-    <h2>✅ Inscriptions</h2>
-    <p class="muted">Tous les champs sont obligatoires.</p>
-
-    <form id="signupForm" class="form" novalidate>
-      <label class="field">
-        <span>Nom de l’équipe *</span>
-        <input id="teamName" type="text" required minlength="2" maxlength="40" placeholder="Ex : Les Tortues Volantes">
-      </label>
-
-      <hr class="sep">
-
-      <h3 class="h3">Joueur 1</h3>
-      <div class="row2">
-        <label class="field"><span>Nom *</span>
-          <input id="p1LastName" type="text" required minlength="2" maxlength="40" placeholder="Nom">
-        </label>
-        <label class="field"><span>Prénom *</span>
-          <input id="p1FirstName" type="text" required minlength="2" maxlength="40" placeholder="Prénom">
-        </label>
-      </div>
-
-      <label class="field"><span>N° de licence *</span>
-        <input id="p1Licence" type="text" required minlength="3" maxlength="20" placeholder="Ex : 1234567A" autocapitalize="characters">
-      </label>
-      <label class="field"><span>Téléphone *</span>
-        <input id="p1Phone" type="tel" required minlength="6" maxlength="25" placeholder="+594 6.. .. .. ..">
-      </label>
-      <label class="field"><span>Email *</span>
-        <input id="p1Email" type="email" required maxlength="80" placeholder="prenom.nom@email.com">
-      </label>
-
-      <hr class="sep">
-
-      <h3 class="h3">Joueur 2</h3>
-      <div class="row2">
-        <label class="field"><span>Nom *</span>
-          <input id="p2LastName" type="text" required minlength="2" maxlength="40" placeholder="Nom">
-        </label>
-        <label class="field"><span>Prénom *</span>
-          <input id="p2FirstName" type="text" required minlength="2" maxlength="40" placeholder="Prénom">
-        </label>
-      </div>
-
-      <label class="field"><span>N° de licence *</span>
-        <input id="p2Licence" type="text" required minlength="3" maxlength="20" placeholder="Ex : 7654321B" autocapitalize="characters">
-      </label>
-      <label class="field"><span>Téléphone *</span>
-        <input id="p2Phone" type="tel" required minlength="6" maxlength="25" placeholder="+594 6.. .. .. ..">
-      </label>
-      <label class="field"><span>Email *</span>
-        <input id="p2Email" type="email" required maxlength="80" placeholder="prenom.nom@email.com">
-      </label>
-
-      <div style="height:12px"></div>
-      <button class="btn" type="submit" id="submitBtn">✅ Valider l’inscription</button>
-      <p id="status" class="muted" style="margin-top:10px;"></p>
-    </form>
-  </section>
-
-  <!-- ADMIN -->
-  <section class="card" id="viewAdmin" style="display:none;">
-    <h2>🛠️ Admin — Inscriptions</h2>
-    <p class="muted" id="adminInfo"></p>
-    <div id="adminList" class="muted">Chargement…</div>
-  </section>
-
-  <!-- JAT -->
-  <section class="card" id="viewJat" style="display:none;">
-    <h2>🎾 JAT — Inscriptions</h2>
-    <p class="muted" id="jatInfo"></p>
-    <div id="jatList" class="muted">Chargement…</div>
+  <section class="card">
+    <h2>Bienvenue sur l’étape 1</h2>
+    <p class="muted">
+      Retrouvez ici la programmation et le module d’inscription.
+    </p>
   </section>
 
 </main>
-
-<!-- mini styles formulaire -->
-<style>
-  .form { display:grid; gap:10px; }
-  .field { display:grid; gap:6px; }
-  .field span { font-weight:600; }
-  input{ width:100%; padding:12px; border:1px solid #ddd; border-radius:12px; font-size:16px; background:#fff; }
-  .row2{ display:grid; grid-template-columns:1fr; gap:10px; }
-  .sep{ border:0; border-top:1px solid #eee; margin:8px 0; }
-  .h3{ margin:6px 0 0; font-size:16px; }
-  @media (min-width:720px){ .row2{ grid-template-columns:1fr 1fr; } }
-</style>
-
-<script type="module">
-  import { db } from "../shared/firebase.js";
-  import { onSessionChange, login, logout, getSession } from "../assets/js/session.js";
-
-  import { collection, addDoc, serverTimestamp, getDocs, query, orderBy }
-    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  const $ = (id) => document.getElementById(id);
-  const clean = (s) => (s || "").trim();
-  const isEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-
-  const viewMobile = $("viewMobile");
-  const viewAdmin  = $("viewAdmin");
-  const viewJat    = $("viewJat");
-
-  function setView(role){
-    viewMobile.style.display = (role === "mobile") ? "" : "none";
-    viewAdmin.style.display  = (role === "admin")  ? "" : "none";
-    viewJat.style.display    = (role === "jat")    ? "" : "none";
-  }
-
-  async function renderLists(){
-    const s = getSession();
-    if (!s.user) return;
-
-    const q = query(collection(db, "inscriptions_etape1"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    const rows = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-
-    // Admin : affiche tout
-    if (s.role === "admin"){
-      $("adminInfo").textContent = `Connecté : ${s.user.email} (admin) — ${rows.length} inscription(s)`;
-      $("adminList").innerHTML = rows.length ? `
-        <div style="overflow:auto;">
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">Équipe</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">J1</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">J2</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(r => `
-                <tr>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;"><b>${r.teamName || ""}</b></td>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;">
-                    ${r.p1FirstName || ""} ${r.p1LastName || ""}<br>
-                    Lic: ${r.p1Licence || ""}<br>
-                    Tel: ${r.p1Phone || ""}<br>
-                    Mail: ${r.p1Email || ""}
-                  </td>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;">
-                    ${r.p2FirstName || ""} ${r.p2LastName || ""}<br>
-                    Lic: ${r.p2Licence || ""}<br>
-                    Tel: ${r.p2Phone || ""}<br>
-                    Mail: ${r.p2Email || ""}
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      ` : "Aucune inscription pour l’instant.";
-    }
-
-    // JAT : affiche (par défaut) sans tel/email (tu pourras changer si tu veux)
-    if (s.role === "jat"){
-      $("jatInfo").textContent = `Connecté : ${s.user.email} (JAT) — ${rows.length} équipe(s)`;
-      $("jatList").innerHTML = rows.length ? `
-        <div style="overflow:auto;">
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">Équipe</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">J1</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid #eee;">J2</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(r => `
-                <tr>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;"><b>${r.teamName || ""}</b></td>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;">
-                    ${r.p1FirstName || ""} ${r.p1LastName || ""}<br>Lic: ${r.p1Licence || ""}
-                  </td>
-                  <td style="padding:8px; border-bottom:1px solid #f2f2f2;">
-                    ${r.p2FirstName || ""} ${r.p2LastName || ""}<br>Lic: ${r.p2Licence || ""}
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      ` : "Aucune inscription pour l’instant.";
-    }
-  }
-
-  // Boutons mode (login/logout)
-  async function promptLogin(){
-    const email = prompt("Email :");
-    if (!email) return;
-    const password = prompt("Mot de passe :");
-    if (!password) return;
-    try {
-      await login(email, password);
-    } catch(e){
-      alert("Connexion impossible. Vérifie email/mot de passe.");
-      console.error(e);
-    }
-  }
-
-  $("btnModeAdmin").addEventListener("click", async (e)=>{ e.preventDefault(); await promptLogin(); });
-  $("btnModeJat").addEventListener("click", async (e)=>{ e.preventDefault(); await promptLogin(); });
-  $("btnModeMobile").addEventListener("click", async (e)=>{ e.preventDefault(); await logout(); });
-
-  // Form inscription (mobile)
-  const form = $("signupForm");
-  const status = $("status");
-  const submitBtn = $("submitBtn");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    status.textContent = "";
-    submitBtn.disabled = true;
-
-    const payload = {
-      teamName: clean($("teamName").value),
-
-      p1LastName: clean($("p1LastName").value),
-      p1FirstName: clean($("p1FirstName").value),
-      p1Licence: clean($("p1Licence").value).toUpperCase(),
-      p1Phone: clean($("p1Phone").value),
-      p1Email: clean($("p1Email").value).toLowerCase(),
-
-      p2LastName: clean($("p2LastName").value),
-      p2FirstName: clean($("p2FirstName").value),
-      p2Licence: clean($("p2Licence").value).toUpperCase(),
-      p2Phone: clean($("p2Phone").value),
-      p2Email: clean($("p2Email").value).toLowerCase(),
-
-      createdAt: serverTimestamp()
-    };
-
-    const required = [
-      "teamName",
-      "p1LastName","p1FirstName","p1Licence","p1Phone","p1Email",
-      "p2LastName","p2FirstName","p2Licence","p2Phone","p2Email"
-    ];
-    for (const k of required) {
-      if (!payload[k] || payload[k].length < 2) {
-        status.textContent = "⚠️ Merci de remplir tous les champs.";
-        submitBtn.disabled = false;
-        return;
-      }
-    }
-    if (!isEmail(payload.p1Email) || !isEmail(payload.p2Email)) {
-      status.textContent = "⚠️ Merci de saisir des emails valides.";
-      submitBtn.disabled = false;
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "inscriptions_etape1"), payload);
-      status.textContent = "✅ Inscription envoyée !";
-      form.reset();
-    } catch (err) {
-      console.error(err);
-      status.textContent = "❌ Erreur lors de l’envoi. Réessaie.";
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
-
-  // Session → affiche la bonne vue automatiquement
-  onSessionChange(async (s) => {
-    setView(s.role);
-
-    // si connecté mais sans rôle → mobile + message
-    if (s.user && s.role === "mobile"){
-      alert("Connecté, mais aucun rôle trouvé. Ajoute ton email dans Firestore > roles (admin/jat).");
-    }
-
-    if (s.role === "admin" || s.role === "jat"){
-      await renderLists();
-    }
-  });
-</script>
 
 </body>
 </html>
