@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inscriptions — Étape 1</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <h1 class="brand-title">Inscriptions — Étape 1</h1>
+
+    <nav class="nav">
+      <a href="index.html">← Retour Étape 1</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+<section class="card">
+  <h2>📋 Formulaire d’inscription</h2>
+  <p class="muted">Tous les champs sont obligatoires.</p>
+
+  <form id="signupForm" class="form">
+
+    <label class="field">
+      <span>Nom de l’équipe *</span>
+      <input id="teamName" required>
+    </label>
+
+    <hr class="sep">
+
+    <h3>Joueur 1</h3>
+    <label class="field"><span>Nom *</span><input id="p1LastName" required></label>
+    <label class="field"><span>Prénom *</span><input id="p1FirstName" required></label>
+    <label class="field"><span>Licence *</span><input id="p1Licence" required></label>
+    <label class="field"><span>Téléphone *</span><input id="p1Phone" required></label>
+    <label class="field"><span>Email *</span><input id="p1Email" required></label>
+
+    <hr class="sep">
+
+    <h3>Joueur 2</h3>
+    <label class="field"><span>Nom *</span><input id="p2LastName" required></label>
+    <label class="field"><span>Prénom *</span><input id="p2FirstName" required></label>
+    <label class="field"><span>Licence *</span><input id="p2Licence" required></label>
+    <label class="field"><span>Téléphone *</span><input id="p2Phone" required></label>
+    <label class="field"><span>Email *</span><input id="p2Email" required></label>
+
+    <button class="btn" type="submit">✅ Valider</button>
+
+    <p id="status" class="muted"></p>
+  </form>
+</section>
+
+</main>
+
+<style>
+.form{display:grid;gap:10px;}
+.field{display:grid;gap:6px;}
+input{padding:12px;border:1px solid #ddd;border-radius:12px;}
+.sep{border:0;border-top:1px solid #eee;}
+</style>
+
+<script type="module">
+import { db } from "../shared/firebase.js";
+import { collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const $ = (id)=>document.getElementById(id);
+
+$("signupForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+
+  const payload = {
+    teamName: $("teamName").value.trim(),
+
+    p1LastName: $("p1LastName").value.trim(),
+    p1FirstName: $("p1FirstName").value.trim(),
+    p1Licence: $("p1Licence").value.trim(),
+    p1Phone: $("p1Phone").value.trim(),
+    p1Email: $("p1Email").value.trim(),
+
+    p2LastName: $("p2LastName").value.trim(),
+    p2FirstName: $("p2FirstName").value.trim(),
+    p2Licence: $("p2Licence").value.trim(),
+    p2Phone: $("p2Phone").value.trim(),
+    p2Email: $("p2Email").value.trim(),
+
+    createdAt: serverTimestamp()
+  };
+
+  try{
+    await addDoc(collection(db,"inscriptions_etape1"), payload);
+    $("status").textContent="✅ Inscription envoyée !";
+    e.target.reset();
+  }catch(err){
+    $("status").textContent="❌ Erreur, réessaie.";
+    console.error(err);
+  }
+});
+</script>
+
+</body>
+</html>
