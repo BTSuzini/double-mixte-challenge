@@ -1,9 +1,12 @@
 :root{
   --max: 980px;
+
   --green: #1f7a3a;       /* vert bandeau */
   --green-dark: #16602d;  /* vert plus sombre */
+
   --text: #111;
   --muted: #666;
+
   --border: #e8e8e8;
   --card: #fff;
   --bg: #f6f7f8;
@@ -34,13 +37,13 @@ a{ color:inherit; text-decoration:none; }
 }
 
 .topbar .container{
-  padding:10px 16px; /* un peu plus compact */
+  padding:10px 16px;
 }
 
 /* Ligne bandeau: logo | titre | logo */
 .topbar-row{
   display:grid;
-  grid-template-columns: 64px 1fr 64px; /* logos plus grands */
+  grid-template-columns: 72px 1fr 72px; /* un peu + grand par défaut */
   align-items:center;
   gap:12px;
 }
@@ -53,26 +56,28 @@ a{ color:inherit; text-decoration:none; }
   letter-spacing:.2px;
 }
 
-/* Logos */
+/* Logos (boîte) */
 .brand-logo{
-  width:64px;              /* + grand */
-  height:64px;             /* + grand */
-  border-radius:14px;      /* un peu plus doux */
+  width:72px;
+  height:72px;
+  border-radius:14px;
   background: rgba(255,255,255,.12);
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
+  overflow:hidden; /* indispensable pour le zoom */
 }
 
+/* Logos (image)
+   -> cover + 120% : corrige les PNG avec marges/blanc autour */
 .brand-logo img{
-  width:90%;               /* évite l’effet “perdu” */
-  height:90%;
-  object-fit:contain;
+  width:120%;
+  height:120%;
+  object-fit:cover;
   display:block;
 }
 
-/* Nav sous le titre (optionnel) */
+/* Nav sous le titre */
 .nav{
   margin-top:10px;
   display:flex;
@@ -140,16 +145,23 @@ a{ color:inherit; text-decoration:none; }
 /* ===== Responsive (mobile) ===== */
 @media (max-width: 520px){
   .topbar-row{
-    grid-template-columns: 52px 1fr 52px; /* logos un peu moins grands sur tel */
+    grid-template-columns: 56px 1fr 56px;
   }
 
   .brand-logo{
-    width:52px;
-    height:52px;
+    width:56px;
+    height:56px;
+    border-radius:12px;
   }
 
   .brand-title{
     font-size:16px;
+  }
+
+  /* sur mobile on réduit un poil le zoom */
+  .brand-logo img{
+    width:115%;
+    height:115%;
   }
 }
 
@@ -158,5 +170,3 @@ a{ color:inherit; text-decoration:none; }
   .brand-title{ font-size:20px; }
   .grid{ grid-template-columns: 1fr 1fr; }
 }
-
-body{ background:#ffe4e6 !important; }
