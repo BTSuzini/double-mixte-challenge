@@ -3,26 +3,218 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Étape 1 — Mobile</title>
-  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <title>Étape 1 — Inscriptions</title>
+
+  <!-- Cache buster: change la lettre si besoin -->
+  <link rel="stylesheet" href="../../assets/css/main.css?v=20260216f" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="container">
-      <a class="back" href="../index.html">← Étape 1</a>
-      <h1 class="title">Mobile — Étape 1</h1>
-    </div>
-  </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Inscriptions</h2>
-      <p class="muted">Bientôt : formulaire d’inscription + liste des équipes.</p>
-    </section>
-    <section class="card">
-      <h2>Matchs & tableau</h2>
-      <p class="muted">Bientôt : matchs passés / en cours / à venir.</p>
-    </section>
-  </main>
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Étape 1 — Inscriptions</h1>
+
+      <div class="brand-logo">
+        <img src="../../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Retour Étape 1</a>
+      <a href="../../pages/reglement.html">Règlement</a>
+      <a href="../../pages/infos.html">Infos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>✅ Inscription (mobile)</h2>
+    <p class="muted">Tous les champs sont obligatoires.</p>
+
+    <form id="signupForm" class="form" novalidate>
+      <label class="field">
+        <span>Nom de l’équipe *</span>
+        <input id="teamName" type="text" required minlength="2" maxlength="40" placeholder="Ex : Les Tortues Volantes">
+      </label>
+
+      <hr class="sep">
+
+      <h3 class="h3">Joueur 1</h3>
+      <div class="row2">
+        <label class="field">
+          <span>Nom *</span>
+          <input id="p1LastName" type="text" required minlength="2" maxlength="40" placeholder="Nom">
+        </label>
+        <label class="field">
+          <span>Prénom *</span>
+          <input id="p1FirstName" type="text" required minlength="2" maxlength="40" placeholder="Prénom">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>N° de licence *</span>
+        <input id="p1Licence" type="text" required minlength="3" maxlength="20" placeholder="Ex : 1234567A" autocapitalize="characters">
+      </label>
+
+      <label class="field">
+        <span>Téléphone *</span>
+        <input id="p1Phone" type="tel" required minlength="6" maxlength="25" placeholder="+594 6.. .. .. ..">
+      </label>
+
+      <label class="field">
+        <span>Email *</span>
+        <input id="p1Email" type="email" required maxlength="80" placeholder="prenom.nom@email.com">
+      </label>
+
+      <hr class="sep">
+
+      <h3 class="h3">Joueur 2</h3>
+      <div class="row2">
+        <label class="field">
+          <span>Nom *</span>
+          <input id="p2LastName" type="text" required minlength="2" maxlength="40" placeholder="Nom">
+        </label>
+        <label class="field">
+          <span>Prénom *</span>
+          <input id="p2FirstName" type="text" required minlength="2" maxlength="40" placeholder="Prénom">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>N° de licence *</span>
+        <input id="p2Licence" type="text" required minlength="3" maxlength="20" placeholder="Ex : 7654321B" autocapitalize="characters">
+      </label>
+
+      <label class="field">
+        <span>Téléphone *</span>
+        <input id="p2Phone" type="tel" required minlength="6" maxlength="25" placeholder="+594 6.. .. .. ..">
+      </label>
+
+      <label class="field">
+        <span>Email *</span>
+        <input id="p2Email" type="email" required maxlength="80" placeholder="prenom.nom@email.com">
+      </label>
+
+      <div style="height:12px"></div>
+
+      <button class="btn" type="submit" id="submitBtn">✅ Valider l’inscription</button>
+      <p id="status" class="muted" style="margin-top:10px;"></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Confidentialité</h2>
+    <p class="muted">
+      Les emails et téléphones sont utilisés uniquement pour l’organisation de l’étape.
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .form { display:grid; gap:10px; }
+  .field { display:grid; gap:6px; }
+  .field span { font-weight:600; }
+
+  input{
+    width:100%;
+    padding:12px 12px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    font-size:16px;
+    background:#fff;
+  }
+
+  .row2{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .sep{ border:0; border-top:1px solid #eee; margin:8px 0; }
+  .h3{ margin:6px 0 0; font-size:16px; }
+
+  @media (min-width: 720px){
+    .row2{ grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<script type="module">
+  import { db } from "../../shared/firebase.js";
+  import { collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  const form = $("signupForm");
+  const status = $("status");
+  const submitBtn = $("submitBtn");
+
+  const clean = (s) => (s || "").trim();
+  const isEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    status.textContent = "";
+    submitBtn.disabled = true;
+
+    const payload = {
+      teamName: clean($("teamName").value),
+
+      p1LastName: clean($("p1LastName").value),
+      p1FirstName: clean($("p1FirstName").value),
+      p1Licence: clean($("p1Licence").value).toUpperCase(),
+      p1Phone: clean($("p1Phone").value),
+      p1Email: clean($("p1Email").value).toLowerCase(),
+
+      p2LastName: clean($("p2LastName").value),
+      p2FirstName: clean($("p2FirstName").value),
+      p2Licence: clean($("p2Licence").value).toUpperCase(),
+      p2Phone: clean($("p2Phone").value),
+      p2Email: clean($("p2Email").value).toLowerCase(),
+
+      createdAt: serverTimestamp()
+    };
+
+    const required = [
+      "teamName",
+      "p1LastName","p1FirstName","p1Licence","p1Phone","p1Email",
+      "p2LastName","p2FirstName","p2Licence","p2Phone","p2Email"
+    ];
+
+    for (const k of required) {
+      if (!payload[k] || payload[k].length < 2) {
+        status.textContent = "⚠️ Merci de remplir tous les champs.";
+        submitBtn.disabled = false;
+        return;
+      }
+    }
+
+    if (!isEmail(payload.p1Email) || !isEmail(payload.p2Email)) {
+      status.textContent = "⚠️ Merci de saisir des emails valides.";
+      submitBtn.disabled = false;
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "inscriptions_etape1"), payload);
+      status.textContent = "✅ Inscription envoyée ! À très vite sur les terrains 🎾";
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      status.textContent = "❌ Erreur lors de l’envoi. Vérifie ta connexion et réessaie.";
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>
