@@ -54,5 +54,56 @@
   </main>
 
   <script src="assets/js/main.js"></script>
+
+<section class="card">
+  <h2>🔐 Accès organisateurs</h2>
+
+  <div class="grid">
+    <a class="btn" href="#" id="btnMobile">📱 Mode Mobile</a>
+    <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
+    <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
+  </div>
+
+  <p class="muted">
+    Admin et JAT : accès sécurisé par mot de passe.
+  </p>
+</section>
+
+<script type="module">
+  import { login, logout } from "./assets/js/session.js";
+
+  async function promptLogin(){
+    const email = prompt("Email :");
+    if (!email) return;
+    const password = prompt("Mot de passe :");
+    if (!password) return;
+    try {
+      await login(email, password);
+      alert("Connexion réussie ✅");
+    } catch(e){
+      alert("Erreur de connexion ❌");
+    }
+  }
+
+  document.getElementById("btnAdmin").onclick = (e)=>{
+    e.preventDefault();
+    promptLogin();
+  };
+
+  document.getElementById("btnJat").onclick = (e)=>{
+    e.preventDefault();
+    promptLogin();
+  };
+
+  document.getElementById("btnMobile").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    alert("Retour mode mobile 📱");
+  };
+</script>
+
+
+
+
 </body>
 </html>
