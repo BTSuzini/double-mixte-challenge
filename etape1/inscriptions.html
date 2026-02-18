@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inscriptions — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=3" />
 </head>
 <body>
 
@@ -25,7 +25,7 @@
     <nav class="nav">
       <a href="index.html">Accueil</a>
       <a href="programmation.html">Programmation</a>
-      <a href="inscription.html">Inscriptions</a>
+      <a href="inscriptions.html">Inscriptions</a>
     </nav>
   </div>
 </header>
@@ -37,7 +37,6 @@
     <p class="muted">Tous les champs sont obligatoires.</p>
 
     <form id="signupForm" class="form" autocomplete="on">
-
       <label class="field">
         <span>Nom de l’équipe *</span>
         <input id="teamName" required />
@@ -72,7 +71,6 @@
     from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const $ = (id)=>document.getElementById(id);
-
   const cleanText = (v)=> (v ?? "").toString().trim();
   const cleanPhone = (v)=> cleanText(v).replace(/[^0-9+]/g, "");
 
@@ -100,8 +98,7 @@
       "teamName","p1LastName","p1FirstName","p1Licence","p1Phone",
       "p2LastName","p2FirstName","p2Licence","p2Phone"
     ];
-    const missing = required.filter(k => !payload[k]);
-    if (missing.length){
+    if (required.some(k => !payload[k])) {
       $("status").textContent = "❌ Merci de compléter tous les champs obligatoires.";
       return;
     }
