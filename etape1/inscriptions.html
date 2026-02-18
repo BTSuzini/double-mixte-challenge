@@ -15,10 +15,7 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        Étape 1 - 27 février 2026
-        <span class="brand-subtitle">BT250</span>
-      </h1>
+      <h1 class="brand-title">Étape 1 — 27 février 2026<br><span style="opacity:.95;font-weight:800;">BT250</span></h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -27,8 +24,9 @@
 
     <nav class="nav">
       <a href="../index.html">Accueil</a>
-      <a href="index.html">Étape 1</a>
+      <a href="programmation.html">Programmation</a>
       <a href="equipes.html">Équipes</a>
+      <a href="inscriptions.html" aria-current="page">Inscriptions</a>
     </nav>
   </div>
 </header>
@@ -36,92 +34,168 @@
 <main class="container">
 
   <section class="card">
-    <h2>📋 Formulaire d’inscription</h2>
-    <p class="muted">Tous les champs sont obligatoires.</p>
+    <h2>Formulaire d’inscription</h2>
+    <p class="muted">Tous les champs marqués d’un * sont obligatoires.</p>
 
     <form id="signupForm" class="form" autocomplete="on">
 
-      <label class="field">
-        <span>Nom de l’équipe *</span>
-        <input id="teamName" required>
-      </label>
+      <div class="field">
+        <label for="teamName">Nom de l’équipe *</label>
+        <input id="teamName" name="teamName" type="text" required maxlength="40" placeholder="Ex : Les Lobstars">
+      </div>
 
-      <hr class="sep">
+      <hr class="sep" />
 
-      <h3>Joueur 1</h3>
-      <label class="field"><span>Nom *</span><input id="p1LastName" required></label>
-      <label class="field"><span>Prénom *</span><input id="p1FirstName" required></label>
-      <label class="field"><span>N° Licence *</span><input id="p1Licence" required></label>
-      <label class="field"><span>Téléphone *</span><input id="p1Phone" required inputmode="tel"></label>
+      <h3 style="margin:0;">Joueuse 👩</h3>
 
-      <hr class="sep">
+      <div class="field">
+        <label for="p1LastName">Nom *</label>
+        <input id="p1LastName" name="p1LastName" type="text" required placeholder="Nom">
+      </div>
 
-      <h3>Joueur 2</h3>
-      <label class="field"><span>Nom *</span><input id="p2LastName" required></label>
-      <label class="field"><span>Prénom *</span><input id="p2FirstName" required></label>
-      <label class="field"><span>N° Licence *</span><input id="p2Licence" required></label>
-      <label class="field"><span>Téléphone *</span><input id="p2Phone" required inputmode="tel"></label>
+      <div class="field">
+        <label for="p1FirstName">Prénom *</label>
+        <input id="p1FirstName" name="p1FirstName" type="text" required placeholder="Prénom">
+      </div>
 
-      <button class="btn" type="submit">✅ Valider</button>
-      <p id="status" class="muted" aria-live="polite"></p>
+      <div class="field">
+        <label for="p1Licence">N° Licence *</label>
+        <input id="p1Licence" name="p1Licence" type="text" required placeholder="Ex : 0123456A">
+      </div>
+
+      <div class="field">
+        <label for="p1Phone">Téléphone *</label>
+        <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
+      </div>
+
+      <div class="field">
+        <label for="p1Email">Email</label>
+        <input id="p1Email" name="p1Email" type="email" placeholder="optionnel">
+      </div>
+
+      <hr class="sep" />
+
+      <h3 style="margin:0;">Joueur 👨</h3>
+
+      <div class="field">
+        <label for="p2LastName">Nom *</label>
+        <input id="p2LastName" name="p2LastName" type="text" required placeholder="Nom">
+      </div>
+
+      <div class="field">
+        <label for="p2FirstName">Prénom *</label>
+        <input id="p2FirstName" name="p2FirstName" type="text" required placeholder="Prénom">
+      </div>
+
+      <div class="field">
+        <label for="p2Licence">N° Licence *</label>
+        <input id="p2Licence" name="p2Licence" type="text" required placeholder="Ex : 0123456A">
+      </div>
+
+      <div class="field">
+        <label for="p2Phone">Téléphone *</label>
+        <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
+      </div>
+
+      <div class="field">
+        <label for="p2Email">Email</label>
+        <input id="p2Email" name="p2Email" type="email" placeholder="optionnel">
+      </div>
+
+      <hr class="sep" />
+
+      <button id="submitBtn" class="btn" type="submit" style="font-weight:800;">
+        ✅ Valider
+      </button>
+
+      <p id="status" class="muted" role="status" aria-live="polite"></p>
+
     </form>
   </section>
 
 </main>
 
+<!-- Firebase + Firestore (module) -->
 <script type="module">
-  import { db } from "../shared/firebase.js";
-  import { collection, addDoc, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const $ = (id)=>document.getElementById(id);
-  const cleanText = (v)=> (v ?? "").toString().trim();
-  const cleanPhone = (v)=> cleanText(v).replace(/[^0-9+]/g, "");
+  // ✅ Ta config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDAW66BD1V2Kr2w6ksM1_8bHGugeG6_cUI",
+    authDomain: "suzini-double-mixte-challenge.firebaseapp.com",
+    projectId: "suzini-double-mixte-challenge",
+    storageBucket: "suzini-double-mixte-challenge.firebasestorage.app",
+    messagingSenderId: "148641893645",
+    appId: "1:148641893645:web:d73cb1727a7b96af3ff444"
+  };
 
-  $("signupForm").addEventListener("submit", async (e)=>{
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 🔧 Collections (si tu veux d’autres noms, dis-moi)
+  const COL_PRIVATE = "inscriptions_etape1";
+  const COL_PUBLIC  = "inscriptions_etape1_public";
+
+  const form = document.getElementById("signupForm");
+  const statusEl = document.getElementById("status");
+  const submitBtn = document.getElementById("submitBtn");
+
+  const setStatus = (msg) => { statusEl.textContent = msg; };
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    $("status").textContent = "⏳ Envoi en cours...";
+    submitBtn.disabled = true;
+    submitBtn.classList.add("disabled");
+    setStatus("Envoi en cours...");
 
-    const teamName = cleanText($("teamName").value);
+    try {
+      const data = {
+        createdAt: serverTimestamp(),
+        teamName: (form.teamName.value || "").trim(),
 
-    const p1LastName = cleanText($("p1LastName").value);
-    const p1FirstName = cleanText($("p1FirstName").value);
-    const p1Licence = cleanText($("p1Licence").value);
-    const p1Phone = cleanPhone($("p1Phone").value);
+        p1FirstName: (form.p1FirstName.value || "").trim(),
+        p1LastName:  (form.p1LastName.value || "").trim(),
+        p1Licence:   (form.p1Licence.value || "").trim(),
+        p1Phone:     (form.p1Phone.value || "").trim(),
+        p1Email:     (form.p1Email.value || "").trim(),
 
-    const p2LastName = cleanText($("p2LastName").value);
-    const p2FirstName = cleanText($("p2FirstName").value);
-    const p2Licence = cleanText($("p2Licence").value);
-    const p2Phone = cleanPhone($("p2Phone").value);
+        p2FirstName: (form.p2FirstName.value || "").trim(),
+        p2LastName:  (form.p2LastName.value || "").trim(),
+        p2Licence:   (form.p2Licence.value || "").trim(),
+        p2Phone:     (form.p2Phone.value || "").trim(),
+        p2Email:     (form.p2Email.value || "").trim(),
+      };
 
-    const required = [teamName,p1LastName,p1FirstName,p1Licence,p1Phone,p2LastName,p2FirstName,p2Licence,p2Phone];
-    if (required.some(v => !v)) {
-      $("status").textContent = "❌ Merci de compléter tous les champs obligatoires.";
-      return;
-    }
+      // Petite validation “humaine”
+      if (!data.teamName || !data.p1FirstName || !data.p1LastName || !data.p2FirstName || !data.p2LastName) {
+        throw new Error("Merci de compléter tous les champs obligatoires.");
+      }
 
-    try{
-      // 1) PRIVÉ : tout
-      await addDoc(collection(db,"inscriptions_etape1_private"), {
-        teamName,
-        p1LastName, p1FirstName, p1Licence, p1Phone,
-        p2LastName, p2FirstName, p2Licence, p2Phone,
-        createdAt: serverTimestamp()
+      // 1) Privé : tout
+      await addDoc(collection(db, COL_PRIVATE), data);
+
+      // 2) Public : seulement équipe + prénoms + timestamp
+      await addDoc(collection(db, COL_PUBLIC), {
+        createdAt: serverTimestamp(),
+        teamName: data.teamName,
+        p1FirstName: data.p1FirstName,
+        p2FirstName: data.p2FirstName
       });
 
-      // 2) PUBLIC : uniquement nom équipe + prénoms
-      await addDoc(collection(db,"equipes_etape1_public"), {
-        teamName,
-        p1FirstName,
-        p2FirstName,
-        createdAt: serverTimestamp()
-      });
-
-      $("status").textContent = "✅ Inscription envoyée !";
-      e.target.reset();
-    }catch(err){
+      form.reset();
+      setStatus("✅ Inscription enregistrée !");
+    } catch (err) {
       console.error(err);
-      $("status").textContent = "❌ Erreur, réessaie.";
+      setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("disabled");
     }
   });
 </script>
