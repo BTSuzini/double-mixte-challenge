@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Équipes — Étape 1</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        Étape 1 - 27 février 2026
+        <span class="brand-subtitle">BT250</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil</a>
+      <a href="index.html">Étape 1</a>
+      <a href="inscriptions.html">Inscriptions</a>
+      <a href="equipes.html">Équipes</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>👥 Équipes inscrites</h2>
+    <p class="muted">
+      Liste affichée dans l’ordre d’inscription.
+    </p>
+
+    <div id="status" class="muted">Chargement…</div>
+
+    <div id="teams" class="teams"></div>
+  </section>
+
+</main>
+
+<style>
+  .teams{ display:grid; gap:10px; margin-top:12px; }
+  .team-row{
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:12px 14px;
+    background:#fff;
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  .team-left{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+  .team-name{ font-weight:800; }
+  .team-players{ color:#444; }
+  .team-index{ color:#888; font-size:13px; min-width:2.5ch; text-align:right; }
+</style>
+
+<script type="module">
+  import { db } from "../shared/firebase.js";
+  import {
+    collection, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const statusEl = document.getElementById("status");
+  const teamsEl = document.getElementById("teams");
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  async function loadTeams(){
+    statusEl.textContent = "Chargement…";
+
+    let snap;
+
+    // 1) On essaye le tri Firestore sur createdAt (si champ exploitable)
+    try{
+      const q1 = query(collection(db, "inscriptions_etape1"), orderBy("createdAt", "asc"));
+      snap = await getDocs(q1);
+    }catch(e){
+      // 2) Fallback si createdAt ne permet pas le orderBy (index / valeurs nulles / règles)
+      const q2 = query(collection(db, "inscriptions_etape1"));
+      snap = await getDocs(q2);
+    }
+
+    const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data() || {};
+      rows.push({
+        id: doc.id,
+        teamName: d.teamName || "",
+        p1FirstName: d.p1FirstName || "",
+        p2FirstName: d.p2FirstName || "",
+        createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0
+      });
+    });
+
+    // Si on a dû passer par le fallback, on trie côté navigateur
+    rows.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+    if(rows.length === 0){
+      statusEl.textContent = "Aucune équipe inscrite pour le moment.";
+      teamsEl.innerHTML = "";
+      return;
+    }
+
+    statusEl.textContent = `${rows.length} équipe(s) inscrite(s).`;
+
+    teamsEl.innerHTML = rows.map((r, idx) => `
+      <div class="team-row">
+        <div class="team-left">
+          <span class="team-name">${esc(r.teamName)}</span>
+          <span class="team-players">— ${esc(r.p1FirstName)} / ${esc(r.p2FirstName)}</span>
+        </div>
+        <div class="team-index">#${idx+1}</div>
+      </div>
+    `).join("");
+  }
+
+  loadTeams();
+</script>
+
+</body>
+</html>
