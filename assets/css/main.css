@@ -1,7 +1,7 @@
 :root{
   --max: 980px;
 
-  /* Couleurs principales */
+  /* Couleurs */
   --green: #1f7a3a;
   --green-dark: #16602d;
 
@@ -13,23 +13,26 @@
   --bg: #f6f7f8;
 
   /* ================================
-     Responsive automatique
+     Responsive auto (BONUS logos +)
      iPhone → iPad → Desktop
   ================================= */
-
-  /* Logos : bien visibles sur mobile */
-  --logo-size: clamp(56px, 12vw, 92px);
-
-  /* Taille du titre */
+  --logo-size: clamp(64px, 14vw, 100px);
   --title-size: clamp(18px, 3.4vw, 26px);
-
-  /* Taille des boutons menu */
   --nav-font: clamp(13px, 2.4vw, 15px);
+
+  /* Détails “pro” */
+  --topbar-pad-y: 14px;
+  --topbar-gap: 14px;
+  --topbar-radius: 18px;
+  --topbar-shadow: 0 10px 24px rgba(0,0,0,.10);
+  --pill-border: rgba(255,255,255,.26);
+  --pill-bg: rgba(255,255,255,.10);
+  --pill-bg-hover: rgba(255,255,255,.18);
 }
 
-*{
-  box-sizing:border-box;
-}
+*{ box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; }
 
 body{
   margin:0;
@@ -39,10 +42,7 @@ body{
   background:var(--bg);
 }
 
-a{
-  color:inherit;
-  text-decoration:none;
-}
+a{ color:inherit; text-decoration:none; }
 
 .container{
   max-width:var(--max);
@@ -51,16 +51,24 @@ a{
 }
 
 /* ======================================
-   HEADER / BANDEAU
+   BANDEAU PRO (sticky + profondeur)
 ====================================== */
 
 .topbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
   background: linear-gradient(180deg, var(--green), var(--green-dark));
   color:#fff;
+
+  /* Effet “pro” */
+  box-shadow: var(--topbar-shadow);
 }
 
+/* Conteneur du bandeau : plus compact horizontalement, respirant verticalement */
 .topbar .container{
-  padding:14px 16px; /* plus aéré */
+  padding: var(--topbar-pad-y) 16px;
 }
 
 /* Ligne : logo | titre | logo */
@@ -68,17 +76,7 @@ a{
   display:grid;
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   align-items:center;
-  gap:14px;
-}
-
-/* Titre */
-.brand-title{
-  margin:0;
-  text-align:center;
-  font-weight:800;
-  font-size:var(--title-size);
-  letter-spacing:.3px;
-  line-height:1.2;
+  gap: var(--topbar-gap);
 }
 
 /* Logos */
@@ -90,23 +88,31 @@ a{
   justify-content:center;
   overflow:hidden;
   background:transparent;
+  border-radius: 0;
 }
 
-/* Image logo */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
-
-  /* Mange légèrement les marges invisibles */
   transform: scale(1.12);
 }
 
-/* ======================================
-   NAVIGATION
-====================================== */
+/* Titre */
+.brand-title{
+  margin:0;
+  text-align:center;
+  font-weight:900;
+  font-size:var(--title-size);
+  letter-spacing:.3px;
+  line-height:1.1;
 
+  /* meilleure lisibilité */
+  text-shadow: 0 1px 0 rgba(0,0,0,.14);
+}
+
+/* Nav */
 .nav{
   margin-top:12px;
   display:flex;
@@ -118,17 +124,25 @@ a{
 .nav a{
   color:#fff;
   font-size:var(--nav-font);
-  padding:8px 14px;
+  padding:9px 16px;
   border-radius:999px;
 
-  border:1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.10);
+  border:1px solid var(--pill-border);
+  background: var(--pill-bg);
 
-  transition:.2s;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  transition: .18s ease;
 }
 
 .nav a:hover{
-  background: rgba(255,255,255,.18);
+  background: var(--pill-bg-hover);
+  transform: translateY(-1px);
+}
+
+.nav a:active{
+  transform: translateY(0px);
 }
 
 /* ======================================
@@ -141,6 +155,9 @@ a{
   border-radius:16px;
   padding:18px;
   margin:16px 0;
+
+  /* petit relief subtil */
+  box-shadow: 0 6px 16px rgba(0,0,0,.05);
 }
 
 .card h2{
@@ -148,7 +165,6 @@ a{
   font-size:20px;
 }
 
-/* Grille responsive */
 .grid{
   display:grid;
   grid-template-columns:1fr;
@@ -156,7 +172,6 @@ a{
   margin-top:12px;
 }
 
-/* Boutons */
 .btn{
   display:block;
   padding:14px 16px;
@@ -164,20 +179,18 @@ a{
   border:1px solid #ddd;
   background:#fafafa;
   font-weight:600;
-
-  transition:.2s;
+  transition:.18s ease;
 }
 
-.btn:hover{
-  background:#f0f0f0;
-}
+.btn:hover{ background:#f0f0f0; }
+
+.btn:active{ transform: translateY(1px); }
 
 .btn.disabled{
   opacity:.55;
   pointer-events:none;
 }
 
-/* Texte secondaire */
 .muted{
   margin:10px 0 0;
   color:var(--muted);
@@ -188,23 +201,16 @@ a{
    FORMULAIRES
 ====================================== */
 
-.form{
-  display:grid;
-  gap:12px;
-}
+.form{ display:grid; gap:12px; }
 
-.field{
-  display:grid;
-  gap:6px;
-}
+.field{ display:grid; gap:6px; }
 
-input,
-select,
-textarea{
+input, select, textarea{
   padding:12px;
   border:1px solid #ddd;
   border-radius:12px;
   font:inherit;
+  background:#fff;
 }
 
 .sep{
@@ -214,11 +220,17 @@ textarea{
 }
 
 /* ======================================
-   RESPONSIVE PC / TABLETTE
+   RESPONSIVE
 ====================================== */
 
 @media (min-width: 780px){
-  .grid{
-    grid-template-columns: 1fr 1fr;
+  .grid{ grid-template-columns: 1fr 1fr; }
+}
+
+/* Option “pro” : sur très petits écrans, on évite un bandeau trop haut */
+@media (max-width: 360px){
+  :root{
+    --logo-size: clamp(58px, 16vw, 88px);
   }
+  .nav a{ padding:8px 14px; }
 }
