@@ -10,10 +10,22 @@
 
 <header class="topbar">
   <div class="container">
-    <h1 class="brand-title">Inscriptions — Étape 1</h1>
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Étape 1 — BT250</h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
 
     <nav class="nav">
-      <a href="index.html">← Retour Étape 1</a>
+      <a href="index.html">Accueil</a>
+      <a href="programmation.html">Programmation</a>
+      <a href="inscription.html">Inscriptions</a>
     </nav>
   </div>
 </header>
@@ -28,39 +40,31 @@
 
       <label class="field">
         <span>Nom de l’équipe *</span>
-        <input id="teamName" required autocomplete="organization" />
+        <input id="teamName" required />
       </label>
 
       <hr class="sep">
 
       <h3>Joueur 1</h3>
-      <label class="field"><span>Nom *</span><input id="p1LastName" required autocomplete="family-name" /></label>
-      <label class="field"><span>Prénom *</span><input id="p1FirstName" required autocomplete="given-name" /></label>
-      <label class="field"><span>N° Licence *</span><input id="p1Licence" required inputmode="text" /></label>
-      <label class="field"><span>Téléphone *</span><input id="p1Phone" required inputmode="tel" autocomplete="tel" /></label>
+      <label class="field"><span>Nom *</span><input id="p1LastName" required /></label>
+      <label class="field"><span>Prénom *</span><input id="p1FirstName" required /></label>
+      <label class="field"><span>N° Licence *</span><input id="p1Licence" required /></label>
+      <label class="field"><span>Téléphone *</span><input id="p1Phone" required inputmode="tel" /></label>
 
       <hr class="sep">
 
       <h3>Joueur 2</h3>
-      <label class="field"><span>Nom *</span><input id="p2LastName" required autocomplete="family-name" /></label>
-      <label class="field"><span>Prénom *</span><input id="p2FirstName" required autocomplete="given-name" /></label>
-      <label class="field"><span>N° Licence *</span><input id="p2Licence" required inputmode="text" /></label>
-      <label class="field"><span>Téléphone *</span><input id="p2Phone" required inputmode="tel" autocomplete="tel" /></label>
+      <label class="field"><span>Nom *</span><input id="p2LastName" required /></label>
+      <label class="field"><span>Prénom *</span><input id="p2FirstName" required /></label>
+      <label class="field"><span>N° Licence *</span><input id="p2Licence" required /></label>
+      <label class="field"><span>Téléphone *</span><input id="p2Phone" required inputmode="tel" /></label>
 
       <button class="btn" type="submit">✅ Valider</button>
-
       <p id="status" class="muted" aria-live="polite"></p>
     </form>
   </section>
 
 </main>
-
-<style>
-  .form{display:grid;gap:10px;}
-  .field{display:grid;gap:6px;}
-  input{padding:12px;border:1px solid #ddd;border-radius:12px;}
-  .sep{border:0;border-top:1px solid #eee;margin:8px 0;}
-</style>
 
 <script type="module">
   import { db } from "../shared/firebase.js";
@@ -69,14 +73,8 @@
 
   const $ = (id)=>document.getElementById(id);
 
-  function cleanText(v){
-    return (v ?? "").toString().trim();
-  }
-
-  function cleanPhone(v){
-    // On garde + et chiffres, et espaces/tirets sont retirés
-    return cleanText(v).replace(/[^0-9+]/g, "");
-  }
+  const cleanText = (v)=> (v ?? "").toString().trim();
+  const cleanPhone = (v)=> cleanText(v).replace(/[^0-9+]/g, "");
 
   $("signupForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
@@ -98,24 +96,23 @@
       createdAt: serverTimestamp()
     };
 
-    // Petit contrôle front (évite inscriptions vides)
-    const requiredKeys = [
+    const required = [
       "teamName","p1LastName","p1FirstName","p1Licence","p1Phone",
       "p2LastName","p2FirstName","p2Licence","p2Phone"
     ];
-    const missing = requiredKeys.filter(k => !payload[k] || payload[k].length === 0);
+    const missing = required.filter(k => !payload[k]);
     if (missing.length){
       $("status").textContent = "❌ Merci de compléter tous les champs obligatoires.";
       return;
     }
 
     try{
-      await addDoc(collection(db, "inscriptions_etape1"), payload);
-      $("status").textContent = "✅ Inscription envoyée !";
+      await addDoc(collection(db,"inscriptions_etape1"), payload);
+      $("status").textContent="✅ Inscription envoyée !";
       e.target.reset();
     }catch(err){
       console.error(err);
-      $("status").textContent = "❌ Erreur, réessaie.";
+      $("status").textContent="❌ Erreur, réessaie.";
     }
   });
 </script>
