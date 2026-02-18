@@ -1,6 +1,7 @@
 :root{
   --max: 980px;
 
+  /* Couleurs principales */
   --green: #1f7a3a;
   --green-dark: #16602d;
 
@@ -11,12 +12,24 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  /* Taille logos responsive (iPhone -> iPad -> desktop) */
-  --logo-size: clamp(44px, 7vw, 64px);
-  --title-size: clamp(16px, 2.4vw, 20px);
+  /* ================================
+     Responsive automatique
+     iPhone → iPad → Desktop
+  ================================= */
+
+  /* Logos : bien visibles sur mobile */
+  --logo-size: clamp(56px, 12vw, 92px);
+
+  /* Taille du titre */
+  --title-size: clamp(18px, 3.4vw, 26px);
+
+  /* Taille des boutons menu */
+  --nav-font: clamp(13px, 2.4vw, 15px);
 }
 
-*{ box-sizing:border-box; }
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -26,7 +39,10 @@ body{
   background:var(--bg);
 }
 
-a{ color:inherit; text-decoration:none; }
+a{
+  color:inherit;
+  text-decoration:none;
+}
 
 .container{
   max-width:var(--max);
@@ -34,57 +50,65 @@ a{ color:inherit; text-decoration:none; }
   padding:16px;
 }
 
-/* ===== Bandeau ===== */
+/* ======================================
+   HEADER / BANDEAU
+====================================== */
+
 .topbar{
   background: linear-gradient(180deg, var(--green), var(--green-dark));
   color:#fff;
 }
 
 .topbar .container{
-  padding:10px 16px;
+  padding:14px 16px; /* plus aéré */
 }
 
-/* Ligne bandeau: logo | titre | logo */
+/* Ligne : logo | titre | logo */
 .topbar-row{
   display:grid;
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   align-items:center;
-  gap:12px;
+  gap:14px;
 }
 
+/* Titre */
 .brand-title{
   margin:0;
   text-align:center;
   font-weight:800;
   font-size:var(--title-size);
-  letter-spacing:.2px;
+  letter-spacing:.3px;
+  line-height:1.2;
 }
 
-/* Logos (sans cadre) */
+/* Logos */
 .brand-logo{
   width:var(--logo-size);
   height:var(--logo-size);
-  background:transparent;
-  border-radius:0;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
+  background:transparent;
 }
 
+/* Image logo */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
 
-  /* “mange” légèrement les marges blanches/transparentes du PNG */
-  transform: scale(1.08);
+  /* Mange légèrement les marges invisibles */
+  transform: scale(1.12);
 }
 
-/* Nav sous le titre */
+/* ======================================
+   NAVIGATION
+====================================== */
+
 .nav{
-  margin-top:10px;
+  margin-top:12px;
   display:flex;
   justify-content:center;
   gap:10px;
@@ -93,23 +117,30 @@ a{ color:inherit; text-decoration:none; }
 
 .nav a{
   color:#fff;
-  opacity:.95;
-  font-size:14px;
-  padding:7px 12px;
+  font-size:var(--nav-font);
+  padding:8px 14px;
   border-radius:999px;
+
   border:1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
+
+  transition:.2s;
 }
 
-.nav a:hover{ background: rgba(255,255,255,.16); }
+.nav a:hover{
+  background: rgba(255,255,255,.18);
+}
 
-/* ===== Cartes / boutons ===== */
+/* ======================================
+   CARTES / CONTENU
+====================================== */
+
 .card{
   border:1px solid var(--border);
   background:var(--card);
-  border-radius:14px;
-  padding:16px;
-  margin:14px 0;
+  border-radius:16px;
+  padding:18px;
+  margin:16px 0;
 }
 
 .card h2{
@@ -117,39 +148,59 @@ a{ color:inherit; text-decoration:none; }
   font-size:20px;
 }
 
+/* Grille responsive */
 .grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:10px;
-  margin-top:10px;
+  gap:12px;
+  margin-top:12px;
 }
 
+/* Boutons */
 .btn{
   display:block;
-  padding:12px 14px;
-  border-radius:12px;
+  padding:14px 16px;
+  border-radius:14px;
   border:1px solid #ddd;
   background:#fafafa;
+  font-weight:600;
+
+  transition:.2s;
 }
 
-.btn:hover{ background:#f2f2f2; }
+.btn:hover{
+  background:#f0f0f0;
+}
 
 .btn.disabled{
   opacity:.55;
   pointer-events:none;
 }
 
+/* Texte secondaire */
 .muted{
   margin:10px 0 0;
   color:var(--muted);
   font-size:14px;
 }
 
-/* ===== Formulaires (utilisable partout) ===== */
-.form{display:grid;gap:10px;}
-.field{display:grid;gap:6px;}
+/* ======================================
+   FORMULAIRES
+====================================== */
 
-input, select, textarea{
+.form{
+  display:grid;
+  gap:12px;
+}
+
+.field{
+  display:grid;
+  gap:6px;
+}
+
+input,
+select,
+textarea{
   padding:12px;
   border:1px solid #ddd;
   border-radius:12px;
@@ -159,10 +210,15 @@ input, select, textarea{
 .sep{
   border:0;
   border-top:1px solid #eee;
-  margin:8px 0;
+  margin:10px 0;
 }
 
-/* ===== Responsive (PC) ===== */
+/* ======================================
+   RESPONSIVE PC / TABLETTE
+====================================== */
+
 @media (min-width: 780px){
-  .grid{ grid-template-columns: 1fr 1fr; }
+  .grid{
+    grid-template-columns: 1fr 1fr;
+  }
 }
