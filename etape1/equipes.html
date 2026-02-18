@@ -38,12 +38,9 @@
 
   <section class="card">
     <h2>👥 Équipes inscrites</h2>
-    <p class="muted">
-      Liste affichée dans l’ordre d’inscription.
-    </p>
+    <p class="muted">Liste affichée dans l’ordre d’inscription.</p>
 
     <div id="status" class="muted">Chargement…</div>
-
     <div id="teams" class="teams"></div>
   </section>
 
@@ -69,9 +66,8 @@
 
 <script type="module">
   import { db } from "../shared/firebase.js";
-  import {
-    collection, getDocs, query, orderBy
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { collection, getDocs, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const statusEl = document.getElementById("status");
   const teamsEl = document.getElementById("teams");
@@ -87,22 +83,16 @@
     statusEl.textContent = "Chargement…";
 
     let snap;
-
-    // 1) On essaye le tri Firestore sur createdAt (si champ exploitable)
     try{
-      const q1 = query(collection(db, "inscriptions_etape1"), orderBy("createdAt", "asc"));
-      snap = await getDocs(q1);
+      snap = await getDocs(query(collection(db, "equipes_etape1_public"), orderBy("createdAt", "asc")));
     }catch(e){
-      // 2) Fallback si createdAt ne permet pas le orderBy (index / valeurs nulles / règles)
-      const q2 = query(collection(db, "inscriptions_etape1"));
-      snap = await getDocs(q2);
+      snap = await getDocs(query(collection(db, "equipes_etape1_public")));
     }
 
     const rows = [];
     snap.forEach(doc => {
       const d = doc.data() || {};
       rows.push({
-        id: doc.id,
         teamName: d.teamName || "",
         p1FirstName: d.p1FirstName || "",
         p2FirstName: d.p2FirstName || "",
@@ -110,8 +100,7 @@
       });
     });
 
-    // Si on a dû passer par le fallback, on trie côté navigateur
-    rows.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+    rows.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
 
     if(rows.length === 0){
       statusEl.textContent = "Aucune équipe inscrite pour le moment.";
