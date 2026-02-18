@@ -20,87 +20,104 @@
 
 <main class="container">
 
-<section class="card">
-  <h2>📋 Formulaire d’inscription</h2>
-  <p class="muted">Tous les champs sont obligatoires.</p>
+  <section class="card">
+    <h2>📋 Formulaire d’inscription</h2>
+    <p class="muted">Tous les champs sont obligatoires.</p>
 
-  <form id="signupForm" class="form">
+    <form id="signupForm" class="form" autocomplete="on">
 
-    <label class="field">
-      <span>Nom de l’équipe *</span>
-      <input id="teamName" required>
-    </label>
+      <label class="field">
+        <span>Nom de l’équipe *</span>
+        <input id="teamName" required autocomplete="organization" />
+      </label>
 
-    <hr class="sep">
+      <hr class="sep">
 
-    <h3>Joueur 1</h3>
-    <label class="field"><span>Nom *</span><input id="p1LastName" required></label>
-    <label class="field"><span>Prénom *</span><input id="p1FirstName" required></label>
-    <label class="field"><span>Licence *</span><input id="p1Licence" required></label>
-    <label class="field"><span>Téléphone *</span><input id="p1Phone" required></label>
-    <label class="field"><span>Email *</span><input id="p1Email" required></label>
+      <h3>Joueur 1</h3>
+      <label class="field"><span>Nom *</span><input id="p1LastName" required autocomplete="family-name" /></label>
+      <label class="field"><span>Prénom *</span><input id="p1FirstName" required autocomplete="given-name" /></label>
+      <label class="field"><span>N° Licence *</span><input id="p1Licence" required inputmode="text" /></label>
+      <label class="field"><span>Téléphone *</span><input id="p1Phone" required inputmode="tel" autocomplete="tel" /></label>
 
-    <hr class="sep">
+      <hr class="sep">
 
-    <h3>Joueur 2</h3>
-    <label class="field"><span>Nom *</span><input id="p2LastName" required></label>
-    <label class="field"><span>Prénom *</span><input id="p2FirstName" required></label>
-    <label class="field"><span>Licence *</span><input id="p2Licence" required></label>
-    <label class="field"><span>Téléphone *</span><input id="p2Phone" required></label>
-    <label class="field"><span>Email *</span><input id="p2Email" required></label>
+      <h3>Joueur 2</h3>
+      <label class="field"><span>Nom *</span><input id="p2LastName" required autocomplete="family-name" /></label>
+      <label class="field"><span>Prénom *</span><input id="p2FirstName" required autocomplete="given-name" /></label>
+      <label class="field"><span>N° Licence *</span><input id="p2Licence" required inputmode="text" /></label>
+      <label class="field"><span>Téléphone *</span><input id="p2Phone" required inputmode="tel" autocomplete="tel" /></label>
 
-    <button class="btn" type="submit">✅ Valider</button>
+      <button class="btn" type="submit">✅ Valider</button>
 
-    <p id="status" class="muted"></p>
-  </form>
-</section>
+      <p id="status" class="muted" aria-live="polite"></p>
+    </form>
+  </section>
 
 </main>
 
 <style>
-.form{display:grid;gap:10px;}
-.field{display:grid;gap:6px;}
-input{padding:12px;border:1px solid #ddd;border-radius:12px;}
-.sep{border:0;border-top:1px solid #eee;}
+  .form{display:grid;gap:10px;}
+  .field{display:grid;gap:6px;}
+  input{padding:12px;border:1px solid #ddd;border-radius:12px;}
+  .sep{border:0;border-top:1px solid #eee;margin:8px 0;}
 </style>
 
 <script type="module">
-import { db } from "../shared/firebase.js";
-import { collection, addDoc, serverTimestamp }
-  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { db } from "../shared/firebase.js";
+  import { collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const $ = (id)=>document.getElementById(id);
+  const $ = (id)=>document.getElementById(id);
 
-$("signupForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-
-  const payload = {
-    teamName: $("teamName").value.trim(),
-
-    p1LastName: $("p1LastName").value.trim(),
-    p1FirstName: $("p1FirstName").value.trim(),
-    p1Licence: $("p1Licence").value.trim(),
-    p1Phone: $("p1Phone").value.trim(),
-    p1Email: $("p1Email").value.trim(),
-
-    p2LastName: $("p2LastName").value.trim(),
-    p2FirstName: $("p2FirstName").value.trim(),
-    p2Licence: $("p2Licence").value.trim(),
-    p2Phone: $("p2Phone").value.trim(),
-    p2Email: $("p2Email").value.trim(),
-
-    createdAt: serverTimestamp()
-  };
-
-  try{
-    await addDoc(collection(db,"inscriptions_etape1"), payload);
-    $("status").textContent="✅ Inscription envoyée !";
-    e.target.reset();
-  }catch(err){
-    $("status").textContent="❌ Erreur, réessaie.";
-    console.error(err);
+  function cleanText(v){
+    return (v ?? "").toString().trim();
   }
-});
+
+  function cleanPhone(v){
+    // On garde + et chiffres, et espaces/tirets sont retirés
+    return cleanText(v).replace(/[^0-9+]/g, "");
+  }
+
+  $("signupForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    $("status").textContent = "⏳ Envoi en cours...";
+
+    const payload = {
+      teamName: cleanText($("teamName").value),
+
+      p1LastName: cleanText($("p1LastName").value),
+      p1FirstName: cleanText($("p1FirstName").value),
+      p1Licence: cleanText($("p1Licence").value),
+      p1Phone: cleanPhone($("p1Phone").value),
+
+      p2LastName: cleanText($("p2LastName").value),
+      p2FirstName: cleanText($("p2FirstName").value),
+      p2Licence: cleanText($("p2Licence").value),
+      p2Phone: cleanPhone($("p2Phone").value),
+
+      createdAt: serverTimestamp()
+    };
+
+    // Petit contrôle front (évite inscriptions vides)
+    const requiredKeys = [
+      "teamName","p1LastName","p1FirstName","p1Licence","p1Phone",
+      "p2LastName","p2FirstName","p2Licence","p2Phone"
+    ];
+    const missing = requiredKeys.filter(k => !payload[k] || payload[k].length === 0);
+    if (missing.length){
+      $("status").textContent = "❌ Merci de compléter tous les champs obligatoires.";
+      return;
+    }
+
+    try{
+      await addDoc(collection(db, "inscriptions_etape1"), payload);
+      $("status").textContent = "✅ Inscription envoyée !";
+      e.target.reset();
+    }catch(err){
+      console.error(err);
+      $("status").textContent = "❌ Erreur, réessaie.";
+    }
+  });
 </script>
 
 </body>
