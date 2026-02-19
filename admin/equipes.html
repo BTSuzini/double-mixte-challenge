@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Équipes Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <title>Admin — Équipes</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
 </head>
 <body>
 
@@ -15,7 +15,9 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">Équipes (admin)<br><span style="opacity:.95;font-weight:800;">Étape 1 — BT250</span></h1>
+      <h1 class="brand-title" id="pageTitle">
+        Équipes (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -23,8 +25,11 @@
     </div>
 
     <nav class="nav">
-      <a href="index.html">Inscriptions (admin)</a>
-      <a href="../etape1/equipes.html">Vue publique</a>
+      <a href="#" id="tabEquipes" aria-current="page">👥 Équipes</a>
+      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
+      <a href="#" id="tabResultats">🏁 Résultats</a>
+      <a href="#" id="btnPublic">Vue publique</a>
+      <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
   </div>
@@ -93,19 +98,43 @@
     collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const COL_PRIVATE = "inscriptions_etape1_private";
-  const COL_PUBLIC  = "equipes_etape1_public";
+  // ---- scope helpers
+  const params = new URLSearchParams(location.search);
+  const scope = params.get("scope") || "etape1"; // default
+
+  const stepNum = scope.replace("etape",""); // "1"...
+  const stepLabel = `Étape ${stepNum}`;
+
+  // 🔧 Collections selon scope
+  const COL_PRIVATE = `inscriptions_${scope}_private`; // ex: inscriptions_etape1_private
+  const COL_PUBLIC  = `equipes_${scope}_public`;       // ex: equipes_etape1_public
+
+  // UI title
+  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`; // tu ajusteras BT250 par étape plus tard
+
+  // Nav links keep scope
+  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
+
+  // Vue publique (pour etape1 -> ../etape1/equipes.html)
+  document.getElementById("btnPublic").onclick = (e)=>{
+    e.preventDefault();
+    if(scope === "etape1") window.location.href = "../etape1/equipes.html";
+    else alert("Vue publique non encore prête pour " + stepLabel);
+  };
 
   const body = document.getElementById("body");
   const statusEl = document.getElementById("status");
 
   const totalEl = document.getElementById("total");
-  const mainEl = document.getElementById("main");
-  const waitEl = document.getElementById("wait");
-  const stbyEl = document.getElementById("stby");
+  const mainEl  = document.getElementById("main");
+  const waitEl  = document.getElementById("wait");
+  const stbyEl  = document.getElementById("stby");
 
   function esc(s){
-    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
   async function ensureAdmin(){
@@ -115,39 +144,40 @@
     return r === "admin";
   }
 
+  // ⚡ perf: 1 lecture privée + 1 lecture publique, puis merge en mémoire
   async function fetchAll(){
     statusEl.textContent = "Chargement…";
 
-    const privSnap = await getDocs(collection(db, COL_PRIVATE));
+    const [privSnap, pubSnap] = await Promise.all([
+      getDocs(collection(db, COL_PRIVATE)),
+      getDocs(collection(db, COL_PUBLIC)),
+    ]);
+
+    // map public by id
+    const pubById = new Map();
+    pubSnap.forEach(d=>{
+      pubById.set(d.id, d.data() || {});
+    });
 
     const rows = [];
-    privSnap.forEach(d => {
+    privSnap.forEach(d=>{
       const data = d.data() || {};
+      const pub = pubById.get(d.id) || {};
       rows.push({
         id: d.id,
         createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0,
-        ...data
+        ...data,
+        list: pub.list || null,
+        stby: pub.stby === true
       });
     });
 
     rows.sort((a,b)=> (a.createdAtMs||0) - (b.createdAtMs||0));
-
-    // récupère en plus les flags publics (list/stby) pour l’affichage admin
-    for (const r of rows) {
-      const pub = await getDoc(doc(db, COL_PUBLIC, r.id));
-      const pd = pub.exists() ? pub.data() : {};
-      r.list = pd.list || null;      // "main" | "wait" | null
-      r.stby = pd.stby === true;     // bool
-    }
-
     return rows;
   }
 
   async function setPublicFlags(id, patch){
-    await setDoc(doc(db, COL_PUBLIC, id), {
-      ...patch,
-      updatedAt: serverTimestamp()
-    }, { merge:true });
+    await setDoc(doc(db, COL_PUBLIC, id), { ...patch, updatedAt: serverTimestamp() }, { merge:true });
   }
 
   async function moveList(id, to){
@@ -159,16 +189,13 @@
   }
 
   async function removeTeam(id){
-    // confirmation obligatoire
-    const ok = confirm("Supprimer cette équipe ? (action irréversible)");
+    const ok = confirm("Supprimer cette équipe ?\n\n⚠️ Action irréversible.");
     if(!ok) return;
-
     await deleteDoc(doc(db, COL_PRIVATE, id));
     await deleteDoc(doc(db, COL_PUBLIC, id));
   }
 
   async function editTeam(row){
-    // simple & efficace : prompts (on fera un vrai modal plus tard)
     const teamName = prompt("Nom équipe :", row.teamName || "");
     if(teamName === null) return;
 
@@ -196,14 +223,12 @@
     const p2Licence = prompt("Licence Joueur :", row.p2Licence || "");
     if(p2Licence === null) return;
 
-    // update privé
     await updateDoc(doc(db, COL_PRIVATE, row.id), {
       teamName,
       p1FirstName, p1LastName, p1Phone, p1Licence,
       p2FirstName, p2LastName, p2Phone, p2Licence
     });
 
-    // update public (juste ce qui est public)
     await setDoc(doc(db, COL_PUBLIC, row.id), {
       teamName,
       p1FirstName,
@@ -213,19 +238,23 @@
 
   function render(rows){
     const total = rows.length;
-    const main = rows.filter(r => r.list === "main" && !r.stby).length;
-    const wait = rows.filter(r => r.list === "wait" && !r.stby).length;
-    const stby = rows.filter(r => r.stby).length;
+    const main  = rows.filter(r => r.list === "main" && !r.stby).length;
+    const wait  = rows.filter(r => r.list === "wait" && !r.stby).length;
+    const stby  = rows.filter(r => r.stby).length;
 
     totalEl.textContent = total;
-    mainEl.textContent = main;
-    waitEl.textContent = wait;
-    stbyEl.textContent = stby;
+    mainEl.textContent  = main;
+    waitEl.textContent  = wait;
+    stbyEl.textContent  = stby;
 
     body.innerHTML = rows.map((r, idx) => `
       <tr>
-        <td class="num">#${idx+1}</td>
-        <td><strong>${esc(r.teamName)}</strong><br><span class="pill">list: ${esc(r.list || "auto")}</span> ${r.stby ? '<span class="pill">STBY</span>' : ''}</td>
+        <td>#${idx+1}</td>
+        <td>
+          <strong>${esc(r.teamName)}</strong><br>
+          <span class="pill">list: ${esc(r.list || "auto")}</span>
+          ${r.stby ? '<span class="pill">STBY</span>' : ''}
+        </td>
         <td>${esc(r.p1FirstName)} ${esc(r.p1LastName)}</td>
         <td>${esc(r.p2FirstName)} ${esc(r.p2LastName)}</td>
         <td>${esc(r.p1Phone)}</td>
@@ -264,7 +293,7 @@
     if(!btn) return;
 
     const act = btn.dataset.act;
-    const id = btn.dataset.id;
+    const id  = btn.dataset.id;
 
     const rows = await fetchAll();
     const row = rows.find(x => x.id === id);
@@ -277,7 +306,7 @@
       if(act === "main") await moveList(id, "main");
       if(act === "wait") await moveList(id, "wait");
       if(act === "stby") await toggleStby(id, row.stby);
-      if(act === "del") await removeTeam(id);
+      if(act === "del")  await removeTeam(id);
 
       await refresh();
     }catch(err){
