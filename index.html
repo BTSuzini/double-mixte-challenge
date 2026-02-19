@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="assets/css/main.css?v=20260219" />
 </head>
 <body>
 
@@ -26,11 +26,14 @@
       <a href="pages/classement.html">Classement</a>
       <a href="pages/reglement.html">Règlement</a>
       <a href="pages/infos.html">Infos</a>
+      <a href="pages/boutique.html">Boutique</a>
+      <a href="pages/contact.html">Contact</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
+
   <section class="card">
     <h2>Les étapes</h2>
     <div class="grid">
@@ -49,6 +52,8 @@
       <a class="btn" href="pages/classement.html">Voir le classement général</a>
       <a class="btn" href="pages/reglement.html">Lire le règlement</a>
       <a class="btn" href="pages/infos.html">Fil d’infos</a>
+      <a class="btn" href="pages/boutique.html">Boutique / Paiement</a>
+      <a class="btn" href="pages/contact.html">Contact</a>
     </div>
   </section>
 
@@ -64,6 +69,7 @@
     <p class="muted">Accès sécurisé (email / mot de passe).</p>
     <p class="muted" id="authHint" style="margin-top:8px;"></p>
   </section>
+
 </main>
 
 <script type="module">
@@ -73,7 +79,7 @@
 
   document.getElementById("btnAdmin").onclick = async (e)=>{
     e.preventDefault();
-    await loginAndRedirect(); // redirige vers /admin/ ou /jat/
+    await loginAndRedirect();
   };
 
   document.getElementById("btnJat").onclick = async (e)=>{
