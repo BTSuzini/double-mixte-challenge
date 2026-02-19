@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Règlement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
 </head>
 <body>
 
@@ -15,7 +15,7 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">Règlement</h1>
+      <h1 class="brand-title">Suzini BT — Double Mixte Challenge</h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -23,7 +23,6 @@
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil</a>
       <a href="classement.html">Classement</a>
       <a href="reglement.html" aria-current="page">Règlement</a>
       <a href="infos.html">Infos</a>
@@ -33,67 +32,201 @@
 
 <main class="container">
 
-  <section class="card">
-    <h2>📄 Règlement officiel</h2>
+  <!-- Barre d'actions : Télécharger + Langue -->
+  <section class="card" style="margin-bottom:14px;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <!-- ✅ Mets ici le chemin réel de ton PDF dans le repo -->
+        <a class="btn" href="../assets/docs/reglement-double-mixte-challenge.pdf" download style="font-weight:800;">
+          📄 Télécharger le règlement complet
+        </a>
+      </div>
 
-    <div class="grid">
-      <a class="btn" href="../assets/docs/reglement-double-mixte.pdf" target="_blank" rel="noopener">
-        Télécharger le règlement PDF
-      </a>
-
-      <button class="btn" id="btnLang" type="button" style="font-weight:800; color:#111;">
-        🇵🇹 Ver em Português
-      </button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn" type="button" id="btnFR" aria-label="Français" title="Français" style="font-weight:800;">
+          🇫🇷
+        </button>
+        <button class="btn" type="button" id="btnPT" aria-label="Português (Brasil)" title="Português (Brasil)" style="font-weight:800;">
+          🇧🇷
+        </button>
+      </div>
     </div>
 
-    <p class="muted" style="margin-top:10px;">
-      Résumé (la version PDF fait foi).
+    <p class="muted" style="margin:10px 0 0;">
+      Résumé court (≈ 1 page) — version FR/PT.
     </p>
   </section>
 
-  <section class="card" id="resumeFR">
-    <h2>Résumé — Français</h2>
-    <ul>
-      <li><strong>Principe</strong> : challenge multi-étapes, indépendant des autres événements.</li>
-      <li><strong>Classement</strong> : établi par joueur (les joueurs peuvent changer d’équipe selon les étapes).</li>
-      <li><strong>Départage</strong> en cas d’ex æquo : (1) matchs gagnés sur le challenge, (2) manches gagnées, (3) jeux gagnés. Si besoin, ex æquo maintenu.</li>
-      <li><strong>Inscriptions</strong> : modalités et calendrier indiqués dans le règlement (certaines dates/horaires peuvent être indicatifs).</li>
-      <li><strong>Organisation</strong> : programme, horaires, tirages et informations pratiques publiés au fil de l’eau.</li>
-    </ul>
-  </section>
+  <!-- Résumé du règlement -->
+  <section class="card" id="reglement-resume">
+    <h2 style="margin:0;">📘 Règlement — Résumé (1 page)</h2>
 
-  <section class="card" id="resumePT" style="display:none;">
-    <h2>Resumo — Português</h2>
-    <ul>
-      <li><strong>Princípio</strong> : desafio em várias etapas, independente de outros eventos.</li>
-      <li><strong>Classificação</strong> : feita por jogador (os jogadores podem mudar de dupla entre etapas).</li>
-      <li><strong>Desempate</strong> em caso de igualdade: (1) jogos/partidas vencidas no desafio, (2) sets vencidos, (3) games vencidos. Se necessário, mantém-se o empate.</li>
-      <li><strong>Inscrições</strong> : regras e calendário no regulamento (algumas datas/horários podem ser indicativos).</li>
-      <li><strong>Organização</strong> : programação, horários, sorteios e infos práticas serão publicados conforme necessário.</li>
-    </ul>
+    <!-- FR -->
+    <div id="langFR" style="margin-top:12px;">
+      <p class="muted" style="margin-top:0;">
+        Suzini BT — Double Mixte Challenge (février → avril 2026) 🎾
+      </p>
+
+      <h3 style="margin:12px 0 6px;">🗓️ Les 5 étapes (Arena de Suzini, 18h00–23h30)</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Étape 1 : <b>BT250 Mixte</b> — <b>ven. 27/02/2026</b></li>
+        <li>Étape 2 : <b>BT100 Mixte</b> — <b>jeu. 12/03/2026</b></li>
+        <li>Étape 3 : <b>BT100 Mixte</b> — <b>jeu. 26/03/2026</b></li>
+        <li>Étape 4 : <b>BT100 Mixte</b> — <b>jeu. 09/04/2026</b></li>
+        <li>Étape 5 : <b>BT250 Mixte</b> — <b>ven. 17/04/2026</b></li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">✅ Conditions & inscription</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Licence FFT <b>Beach tennis / multi-raquettes 2026</b> obligatoire 🪪</li>
+        <li>Seniors, ouvert dès <b>U16</b> (U12 possible avec dérogation + certificat sport &lt; 6 mois) 👶</li>
+        <li>BT250 : <b>poids équipe ≤ 120</b> (somme des classements) ⚖️</li>
+        <li>BT100 : hommes ≤ <b>200 FFT</b> / femmes ≤ <b>150 FFT</b> 📊</li>
+        <li>Inscription <b>par équipe uniquement</b> (pas d’inscription individuelle) 👥</li>
+        <li><b>20€ / équipe</b> par étape 💶</li>
+        <li>Inscriptions via le mini-site du challenge 🌐</li>
+        <li>Ouverture : <b>lundi 12h00</b> après l’étape précédente (dérogation étape 1 : <b>ven. 20/02 12h00</b>) ⏱️</li>
+        <li>Clôture : <b>au plus tard 7 jours</b> avant (dérogation étape 1 : <b>mer. 25/02</b>) 🔒</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">📋 Listes (8 équipes max) + liste d’attente</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Liste établie <b>par ordre d’inscription</b> et publiée après clôture 🧾</li>
+        <li>Si 8 équipes atteintes : création d’une <b>liste d’attente</b> ⏳</li>
+        <li>Remplacements possibles <b>jusqu’à validation définitive & tirage</b> ; après tirage : <b>aucun remplacement</b> ❌</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🎾 Format sportif & règles</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>2 terrains homologués <b>16m x 8m</b> ; filet <b>1,70m</b> ; zone d’exclusion service <b>3m</b> 📏</li>
+        <li>Format : <b>TMC</b> à 8 équipes → chaque équipe joue <b>3 matchs</b> (matchs de classement obligatoires) 🔁</li>
+        <li><b>Format 3</b> : 2 sets de 4 jeux (point décisif), TB à 4-4 ; 3e set = super TB à 10 🧠</li>
+        <li>Repos <b>30 min</b> entre matchs (réductible par décision du JAT avec accord des 2 équipes) ⏸️</li>
+        <li>Balles : 3 balles / terrain ; en BT250 : balles neuves en <b>demi-finales & finale</b> 🟡</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🎲 Tirage au sort</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>La veille, entre <b>12h00 et 13h00</b> 🕛</li>
+        <li>2 têtes de série (TS1, TS2) selon le classement de référence ; TS1 ligne 1, TS2 ligne 8 🧩</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">⏰ Présence / retards / WO</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Convocation à partir de <b>17h45</b> (début matchs <b>18h00</b>) 🏁</li>
+        <li>Retard : <b>5 min = 1 jeu</b>, <b>10 min = 2 jeux</b>, <b>15 min = WO</b> (décision JAT) ⚠️</li>
+        <li>Obligation de disputer toutes les parties prévues (sauf décision JAT / cas justifié) ✅</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🏆 Classements & lots</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Points FFT selon classement (BT100/BT250) ; points du challenge = <b>mêmes points que FFT</b> 📈</li>
+        <li>Classement final : addition des points sur l’ensemble des étapes (un joueur apparaît dès sa 1ère participation) 🧮</li>
+        <li>Pas de prize money 💸❌, mais <b>lots</b> pour les meilleures équipes 🎁</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🧑‍⚖️ Organisation & règles de vie</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Comité : Jules PARISIS, Quentin SAVOYEN, Mélanie FREITAS 👥</li>
+        <li>Juge-arbitre référent : <b>Maïté SIRE</b> 🎾</li>
+        <li>Météo / force majeure : adaptation, suspension ou annulation possible ; <b>remboursement</b> si annulation 🌧️</li>
+        <li>Droit à l’image : photos/vidéos possibles pour la communication du club 📸</li>
+        <li>Respect & fair-play : sanctions possibles jusqu’à disqualification 🟨🟥</li>
+      </ul>
+
+      <p class="muted" style="margin:10px 0 0;">
+        📄 Version courte — se référer au règlement complet pour tous les détails.
+      </p>
+    </div>
+
+    <!-- PT -->
+    <div id="langPT" style="margin-top:12px; display:none;">
+      <p class="muted" style="margin-top:0;">
+        Suzini BT — Double Mixte Challenge (fevereiro → abril 2026) 🎾
+      </p>
+
+      <h3 style="margin:12px 0 6px;">🗓️ 5 etapas (Arena de Suzini, 18h00–23h30)</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Etapa 1: <b>BT250 Misto</b> — <b>sex. 27/02/2026</b></li>
+        <li>Etapa 2: <b>BT100 Misto</b> — <b>qui. 12/03/2026</b></li>
+        <li>Etapa 3: <b>BT100 Misto</b> — <b>qui. 26/03/2026</b></li>
+        <li>Etapa 4: <b>BT100 Misto</b> — <b>qui. 09/04/2026</b></li>
+        <li>Etapa 5: <b>BT250 Misto</b> — <b>sex. 17/04/2026</b></li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">✅ Condições & inscrição</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Licença FFT <b>Beach tennis / multi-raquetes 2026</b> obrigatória 🪪</li>
+        <li>Sênior, aberto a partir de <b>U16</b> (U12 com autorização + atestado médico &lt; 6 meses) 👶</li>
+        <li>BT250: <b>peso da dupla ≤ 120</b> (soma das classificações) ⚖️</li>
+        <li>BT100: homens ≤ <b>200 FFT</b> / mulheres ≤ <b>150 FFT</b> 📊</li>
+        <li>Inscrição <b>somente por dupla</b> (não individual) 👥</li>
+        <li><b>20€ por dupla</b> em cada etapa 💶</li>
+        <li>Inscrições pelo mini-site do challenge 🌐</li>
+        <li>Abertura: <b>segunda 12h00</b> após a etapa anterior (exceção etapa 1: <b>sex. 20/02 12h00</b>) ⏱️</li>
+        <li>Encerramento: no máximo <b>7 dias antes</b> (exceção etapa 1: <b>qua. 25/02</b>) 🔒</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">📋 Lista principal (máx. 8) + lista de espera</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Ordem por <b>data/hora de inscrição</b> 🧾</li>
+        <li>Ao atingir 8 duplas: <b>lista de espera</b> ⏳</li>
+        <li>Trocas possíveis <b>até validação final & sorteio</b>; após o sorteio: <b>sem substituições</b> ❌</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🎾 Formato & regras</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>2 quadras homologadas <b>16m x 8m</b>; rede <b>1,70m</b>; zona de exclusão no saque <b>3m</b> 📏</li>
+        <li><b>TMC</b> com 8 duplas → cada dupla joga <b>3 jogos</b> (jogos de classificação obrigatórios) 🔁</li>
+        <li><b>Formato 3</b>: 2 sets de 4 games (ponto decisivo), tie-break em 4-4; 3º set = super TB a 10 🧠</li>
+        <li>Descanso <b>30 min</b> entre jogos (pode reduzir com decisão do árbitro e acordo das duplas) ⏸️</li>
+        <li>Bolas: 3 bolas/quadra; no BT250: bolas novas nas <b>semifinais e final</b> 🟡</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">⏰ Presença / atrasos / WO</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Chegada a partir de <b>17h45</b> (início <b>18h00</b>) 🏁</li>
+        <li>Atraso: <b>5 min = 1 game</b>, <b>10 min = 2 games</b>, <b>15 min = WO</b> ⚠️</li>
+      </ul>
+
+      <h3 style="margin:12px 0 6px;">🏆 Pontos & prêmios</h3>
+      <ul style="margin:0 0 10px 18px;">
+        <li>Pontos do challenge = <b>mesmos pontos FFT</b>; ranking final = soma das etapas 🧮</li>
+        <li>Sem prize money 💸❌, mas <b>brindes</b> para as melhores duplas 🎁</li>
+      </ul>
+
+      <p class="muted" style="margin:10px 0 0;">
+        📄 Resumo — consultar o regulamento completo para detalhes.
+      </p>
+    </div>
   </section>
 
 </main>
 
 <script>
-  const btn = document.getElementById("btnLang");
-  const fr = document.getElementById("resumeFR");
-  const pt = document.getElementById("resumePT");
-  let lang = "fr";
+  (function(){
+    const fr = document.getElementById('langFR');
+    const pt = document.getElementById('langPT');
+    const btnFR = document.getElementById('btnFR');
+    const btnPT = document.getElementById('btnPT');
 
-  btn.addEventListener("click", ()=>{
-    if(lang === "fr"){
-      fr.style.display = "none";
-      pt.style.display = "block";
-      btn.textContent = "🇫🇷 Voir en Français";
-      lang = "pt";
-    }else{
-      pt.style.display = "none";
-      fr.style.display = "block";
-      btn.textContent = "🇵🇹 Ver em Português";
-      lang = "fr";
+    function showFR(){
+      fr.style.display = 'block';
+      pt.style.display = 'none';
+      document.documentElement.lang = 'fr';
     }
-  });
+    function showPT(){
+      fr.style.display = 'none';
+      pt.style.display = 'block';
+      document.documentElement.lang = 'pt-BR';
+    }
+
+    btnFR.addEventListener('click', showFR);
+    btnPT.addEventListener('click', showPT);
+
+    // Par défaut : FR
+    showFR();
+  })();
 </script>
 
 </body>
