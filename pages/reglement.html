@@ -55,10 +55,36 @@
     }
     .mini-card li{ margin:6px 0; }
 
-    /* Un peu plus aéré sur mobile */
+    /* Viewer PDF (lecture directe) */
+    .pdfViewerWrap{
+      display:none; /* ouvert via bouton */
+      margin-top:12px;
+    }
+    .pdfViewer{
+      width:100%;
+      border:1px solid #eee;
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow: 0 6px 16px rgba(0,0,0,.05);
+    }
+    /* Ratio A4 approx + hauteur mini */
+    .pdfFrame{
+      width:100%;
+      height:78vh;
+      min-height:520px;
+      border:0;
+      display:block;
+      background:#fff;
+    }
     @media (max-width: 480px){
       .mini-card{ padding:14px; }
       .mini-card h3{ font-size:17px; }
+
+      .pdfFrame{
+        height:72vh;
+        min-height:480px;
+      }
     }
   </style>
 </head>
@@ -89,20 +115,25 @@
 
 <main class="container">
 
-  <!-- Barre d'actions : Télécharger + Langue -->
+  <!-- Barre d'actions : Consulter + Langue -->
   <section class="card" style="margin-bottom:14px;">
     <div class="actions-bar">
 
       <div class="actions-left">
-        <!-- FR PDF -->
-        <a class="btn" id="viewFR" href="../assets/docs/reglement-double-mixte-challenge.pdf" target="_blank" rel="noopener" download style="font-weight:800; color:#111;">
+        <!-- IMPORTANT :
+             - PAS de download
+             - PAS de target blank obligatoire
+             -> on ouvre un viewer intégré dans la page -->
+        <button class="btn" id="btnViewFR" type="button" style="font-weight:800; color:#111;">
           📄 Consulter le règlement complet (FR)
-        </a>
+        </button>
 
-        
+        <!-- Optionnel PT (mets le bon fichier quand tu l'auras) -->
+        <button class="btn" id="btnViewPT" type="button" style="font-weight:800; color:#111;">
+          📄 Consultar o regulamento completo (PT-BR)
+        </button>
       </div>
 
-      
       <div class="actions-right">
         <div class="lang-label">🌍 Langue</div>
         <button class="btn" type="button" id="btnFR" aria-label="Français" title="Français" style="font-weight:800; color:#111;">🇫🇷</button>
@@ -110,13 +141,30 @@
       </div>
 
     </div>
+
+    <!-- Viewer (affiché à la demande) -->
+    <div class="pdfViewerWrap" id="pdfWrap" aria-live="polite">
+      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 10px;">
+        <div class="muted" id="pdfTitle" style="margin:0; font-weight:800;">📄 Règlement complet</div>
+        <button class="btn" id="btnClosePdf" type="button" style="font-weight:800; color:#111;">✖️ Fermer</button>
+      </div>
+
+      <div class="pdfViewer">
+        <iframe class="pdfFrame" id="pdfFrame" title="Règlement complet (PDF)"></iframe>
+      </div>
+
+      <p class="muted" style="margin:10px 0 0;">
+        Astuce 📱 : si ton navigateur n’affiche pas le PDF, utilise le bouton “Partager” puis “Ouvrir dans…” (iOS).
+      </p>
+    </div>
+
   </section>
 
   <!-- Résumé du règlement -->
   <section class="card" id="reglement-resume">
     <!-- FR -->
     <div id="langFR">
-      <h2 style="margin:0;">📘 Règlement — Résumé </h2>
+      <h2 style="margin:0;">📘 Règlement — Résumé</h2>
       <p class="muted" style="margin:8px 0 0;">
         Version simplifiée pour lecture mobile 📱 — se référer au règlement complet pour tous les détails.
       </p>
@@ -198,7 +246,7 @@
 
     <!-- PT -->
     <div id="langPT" style="display:none;">
-      <h2 style="margin:0;">📘 Regulamento — Resumo </h2>
+      <h2 style="margin:0;">📘 Regulamento — Resumo</h2>
       <p class="muted" style="margin:8px 0 0;">
         Versão simplificada para leitura no celular 📱 — consulte o regulamento completo para todos os detalhes.
       </p>
@@ -284,6 +332,7 @@
 
 <script>
   (function(){
+    // ===== Lang switch (résumé)
     const fr = document.getElementById('langFR');
     const pt = document.getElementById('langPT');
     const btnFR = document.getElementById('btnFR');
@@ -309,6 +358,39 @@
     let saved = "fr";
     try{ saved = localStorage.getItem("reglement_lang") || "fr"; }catch(e){}
     if(saved === "pt") showPT(); else showFR();
+
+    // ===== PDF viewer (lecture directe)
+    const pdfWrap  = document.getElementById("pdfWrap");
+    const pdfFrame = document.getElementById("pdfFrame");
+    const pdfTitle = document.getElementById("pdfTitle");
+    const btnClosePdf = document.getElementById("btnClosePdf");
+
+    // ⚠️ Mets tes vrais chemins ici
+    const PDF_FR = "../assets/docs/reglement-double-mixte-challenge.pdf";
+    const PDF_PT = "../assets/docs/regulamento-double-mixte-challenge-ptbr.pdf"; // <- à créer/mettre si tu l'as
+
+    function openPdf(url, title){
+      pdfTitle.textContent = title;
+      pdfFrame.src = url;     // affiche le PDF dans l'iframe
+      pdfWrap.style.display = "block";
+      // scroll vers viewer
+      try{ pdfWrap.scrollIntoView({ behavior:"smooth", block:"start" }); }catch(e){}
+    }
+
+    function closePdf(){
+      pdfFrame.src = "";
+      pdfWrap.style.display = "none";
+    }
+
+    document.getElementById("btnViewFR").addEventListener("click", ()=>{
+      openPdf(PDF_FR, "📄 Règlement complet (FR)");
+    });
+
+    document.getElementById("btnViewPT").addEventListener("click", ()=>{
+      openPdf(PDF_PT, "📄 Regulamento completo (PT-BR)");
+    });
+
+    btnClosePdf.addEventListener("click", closePdf);
   })();
 </script>
 
