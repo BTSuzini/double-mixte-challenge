@@ -3,62 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Règlement complet — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <title>Règlement complet (PDF)</title>
+
+  <!-- Redirection immédiate vers le PDF (viewer natif du navigateur) -->
+  <meta http-equiv="refresh" content="0; url=../assets/docs/reglement-double-mixte-challenge.pdf">
+  <script>
+    // Fallback JS (au cas où le meta refresh serait bloqué)
+    window.location.replace("../assets/docs/reglement-double-mixte-challenge.pdf");
+  </script>
+
   <style>
-    .pdf-wrapper{
-      width:100%;
-      height:calc(100vh - 140px);
-      border:none;
-      border-radius:14px;
-      overflow:hidden;
-      background:#fff;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      line-height: 1.4;
+      background: #fff;
+      color: #111;
     }
-    iframe{
-      width:100%;
-      height:100%;
-      border:none;
-    }
+    a{ color: #0a66ff; font-weight: 700; }
+    .muted{ color:#666; }
   </style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="container">
-    <div class="topbar-row">
-      <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
-      </div>
-
-      <h1 class="brand-title">
-        📘 Règlement complet
-      </h1>
-
-      <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
-      </div>
-    </div>
-
-    <nav class="nav">
-      <a href="reglement.html">⬅ Retour au résumé</a>
-      <a href="../index.html">Accueil</a>
-    </nav>
-  </div>
-</header>
-
-<main class="container">
-
-  <section class="card">
-    <div class="pdf-wrapper">
-      <iframe 
-        src="../assets/docs/reglement-double-mixte-challenge.pdf#zoom=page-width"
-        title="Règlement complet">
-      </iframe>
-    </div>
-  </section>
-
-</main>
-
+  <p><strong>Ouverture du règlement complet…</strong></p>
+  <p class="muted">Si rien ne s’ouvre automatiquement, clique ici :</p>
+  <p>
+    <a href="../assets/docs/reglement-double-mixte-challenge.pdf">
+      Ouvrir le PDF du règlement complet
+    </a>
+  </p>
 </body>
 </html>
