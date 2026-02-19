@@ -3,26 +3,114 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Étape 1 — Mobile</title>
-  <link rel="stylesheet" href="../../assets/css/main.css" />
+  <title>Admin — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="container">
-      <a class="back" href="../index.html">← Étape 1</a>
-      <h1 class="title">Mobile — Étape 1</h1>
-    </div>
-  </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Inscriptions</h2>
-      <p class="muted">Bientôt : formulaire d’inscription + liste des équipes.</p>
-    </section>
-    <section class="card">
-      <h2>Matchs & tableau</h2>
-      <p class="muted">Bientôt : matchs passés / en cours / à venir.</p>
-    </section>
-  </main>
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Mode Admin<br><span style="opacity:.95;font-weight:800;">Étape 1</span></h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="equipes.html">Équipes (admin)</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>🔧 Inscriptions — contrôle</h2>
+
+    <p class="muted">État actuel : <strong><span id="stateLabel">…</span></strong></p>
+
+    <div class="grid">
+      <button class="btn" id="btnOpen" style="font-weight:800;">✅ Ouvrir</button>
+      <button class="btn" id="btnPause" style="font-weight:800;">⏸️ Suspendre</button>
+      <button class="btn" id="btnClose" style="font-weight:800;">🔒 Clôturer</button>
+    </div>
+
+    <p id="status" class="muted" style="margin-top:10px;"></p>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const stateLabel = document.getElementById("stateLabel");
+  const statusEl = document.getElementById("status");
+
+  function label(state){
+    if(state === "open") return "OUVERTES";
+    if(state === "paused") return "SUSPENDUES";
+    if(state === "closed") return "CLÔTURÉES";
+    return "PAS ENCORE OUVERTES";
+  }
+
+  async function ensureAdmin(){
+    const u = auth.currentUser;
+    if(!u) return false;
+    const role = await getRoleByEmail(u.email);
+    return role === "admin";
+  }
+
+  async function loadState(){
+    const snap = await getDoc(doc(db,"config","etape1"));
+    const state = snap.exists() ? snap.data().inscriptionsState : "not_open";
+    stateLabel.textContent = label(state);
+  }
+
+  async function setState(state){
+    statusEl.textContent = "Enregistrement…";
+    await setDoc(doc(db,"config","etape1"), {
+      inscriptionsState: state,
+      updatedAt: serverTimestamp()
+    }, { merge:true });
+    await loadState();
+    statusEl.textContent = "✅ OK";
+  }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){
+      window.location.href = "../index.html";
+      return;
+    }
+    const ok = await ensureAdmin();
+    if(!ok){
+      alert("Accès refusé (admin uniquement).");
+      window.location.href = "../index.html";
+      return;
+    }
+    await loadState();
+  });
+
+  document.getElementById("btnOpen").onclick  = ()=> setState("open");
+  document.getElementById("btnPause").onclick = ()=> setState("paused");
+  document.getElementById("btnClose").onclick = ()=> setState("closed");
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+</script>
+
 </body>
 </html>
