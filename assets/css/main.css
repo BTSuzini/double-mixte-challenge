@@ -13,31 +13,37 @@
   --bg: #f6f7f8;
 
   /* ================================
-     Responsive auto (BONUS logos +)
+     Responsive auto (logos +)
      iPhone → iPad → Desktop
   ================================= */
+  /* Logos plus visibles sur iPhone */
   --logo-size: clamp(64px, 14vw, 100px);
+
+  /* Titre et nav */
   --title-size: clamp(18px, 3.4vw, 26px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
   /* Détails “pro” */
   --topbar-pad-y: 14px;
   --topbar-gap: 14px;
-  --topbar-radius: 18px;
   --topbar-shadow: 0 10px 24px rgba(0,0,0,.10);
   --pill-border: rgba(255,255,255,.26);
   --pill-bg: rgba(255,255,255,.10);
   --pill-bg-hover: rgba(255,255,255,.18);
+
+  /* Radius standard */
+  --radius-card: 16px;
+  --radius-btn: 14px;
+  --radius-input: 12px;
 }
 
 *{ box-sizing:border-box; }
-
 html{ scroll-behavior:smooth; }
 
 body{
   margin:0;
   font-family:-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-  line-height:1.4;
+  line-height:1.45;
   color:var(--text);
   background:var(--bg);
 }
@@ -62,11 +68,9 @@ a{ color:inherit; text-decoration:none; }
   background: linear-gradient(180deg, var(--green), var(--green-dark));
   color:#fff;
 
-  /* Effet “pro” */
   box-shadow: var(--topbar-shadow);
 }
 
-/* Conteneur du bandeau : plus compact horizontalement, respirant verticalement */
 .topbar .container{
   padding: var(--topbar-pad-y) 16px;
 }
@@ -88,7 +92,7 @@ a{ color:inherit; text-decoration:none; }
   justify-content:center;
   overflow:hidden;
   background:transparent;
-  border-radius: 0;
+  border-radius:0;
 }
 
 .brand-logo img{
@@ -96,7 +100,9 @@ a{ color:inherit; text-decoration:none; }
   height:100%;
   object-fit:contain;
   display:block;
-  transform: scale(1.12);
+
+  /* Remplit mieux, “mange” les marges transparentes */
+  transform: scale(1.18);
 }
 
 /* Titre */
@@ -107,11 +113,10 @@ a{ color:inherit; text-decoration:none; }
   font-size:var(--title-size);
   letter-spacing:.3px;
   line-height:1.1;
-
-  /* meilleure lisibilité */
   text-shadow: 0 1px 0 rgba(0,0,0,.14);
 }
 
+/* Optionnel si tu utilises un sous-titre en <span class="brand-subtitle"> */
 .brand-subtitle{
   display:block;
   font-size:0.9em;
@@ -134,7 +139,6 @@ a{ color:inherit; text-decoration:none; }
   font-size:var(--nav-font);
   padding:9px 16px;
   border-radius:999px;
-
   border:1px solid var(--pill-border);
   background: var(--pill-bg);
 
@@ -150,7 +154,12 @@ a{ color:inherit; text-decoration:none; }
 }
 
 .nav a:active{
-  transform: translateY(0px);
+  transform: translateY(0);
+}
+
+.nav a[aria-current="page"]{
+  background: rgba(255,255,255,.22);
+  border-color: rgba(255,255,255,.35);
 }
 
 /* ======================================
@@ -160,11 +169,9 @@ a{ color:inherit; text-decoration:none; }
 .card{
   border:1px solid var(--border);
   background:var(--card);
-  border-radius:16px;
+  border-radius:var(--radius-card);
   padding:18px;
   margin:16px 0;
-
-  /* petit relief subtil */
   box-shadow: 0 6px 16px rgba(0,0,0,.05);
 }
 
@@ -183,18 +190,18 @@ a{ color:inherit; text-decoration:none; }
 .btn{
   display:block;
   padding:14px 16px;
-  border-radius:14px;
+  border-radius:var(--radius-btn);
   border:1px solid #ddd;
   background:#fafafa;
-  font-weight:600;
+  font-weight:650;
   transition:.18s ease;
 }
 
 .btn:hover{ background:#f0f0f0; }
-
 .btn:active{ transform: translateY(1px); }
 
-.btn.disabled{
+.btn.disabled,
+.btn[aria-disabled="true"]{
   opacity:.55;
   pointer-events:none;
 }
@@ -210,15 +217,21 @@ a{ color:inherit; text-decoration:none; }
 ====================================== */
 
 .form{ display:grid; gap:12px; }
-
 .field{ display:grid; gap:6px; }
+
+label{ font-weight:650; }
 
 input, select, textarea{
   padding:12px;
   border:1px solid #ddd;
-  border-radius:12px;
+  border-radius:var(--radius-input);
   font:inherit;
   background:#fff;
+}
+
+input:disabled, select:disabled, textarea:disabled{
+  background:#f3f3f3;
+  color:#777;
 }
 
 .sep{
@@ -228,6 +241,45 @@ input, select, textarea{
 }
 
 /* ======================================
+   TABLES (utile pour équipes)
+====================================== */
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid #eee;
+  border-radius:14px;
+  background:#fff;
+}
+
+.teams-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:980px;
+}
+
+.teams-table thead th{
+  text-align:left;
+  font-size:13px;
+  color:#444;
+  background:#f7f7f7;
+  border-bottom:1px solid #eee;
+  padding:12px;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+.teams-table tbody td{
+  padding:12px;
+  border-bottom:1px solid #f0f0f0;
+  font-size:14px;
+  vertical-align:top;
+}
+
+.teams-table tbody tr:last-child td{ border-bottom:none; }
+
+/* ======================================
    RESPONSIVE
 ====================================== */
 
@@ -235,10 +287,11 @@ input, select, textarea{
   .grid{ grid-template-columns: 1fr 1fr; }
 }
 
-/* Option “pro” : sur très petits écrans, on évite un bandeau trop haut */
+/* Très petits écrans : éviter un bandeau trop haut */
 @media (max-width: 360px){
   :root{
     --logo-size: clamp(58px, 16vw, 88px);
+    --topbar-pad-y: 12px;
   }
   .nav a{ padding:8px 14px; }
 }
