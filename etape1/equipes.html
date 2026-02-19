@@ -27,6 +27,8 @@
       <a href="programmation.html">Programmation</a>
       <a href="equipes.html" aria-current="page">Équipes</a>
       <a href="inscriptions.html">Inscriptions</a>
+      <a href="repas.html">Repas</a>
+      <a href="tirage.html">Tirage au sort</a>
     </nav>
   </div>
 </header>
@@ -45,10 +47,10 @@
     </p>
 
     <div class="subtabs" role="tablist" aria-label="Affichage équipes">
-      <button class="subtab" id="tabInscrits" type="button" role="tab" aria-selected="true">
+      <button class="subtab" id="tabInscrits" type="button" role="tab" aria-selected="true" aria-controls="panelInscrits">
         ✅ Inscrits
       </button>
-      <button class="subtab" id="tabClassees" type="button" role="tab" aria-selected="false">
+      <button class="subtab" id="tabClassees" type="button" role="tab" aria-selected="false" aria-controls="panelClassees">
         🏷️ Classées
       </button>
     </div>
@@ -57,7 +59,7 @@
   </section>
 
   <!-- =========================
-       VUE 1 : INSCRITS (actuel)
+       VUE 1 : INSCRITS
   ========================== -->
   <div id="panelInscrits" role="tabpanel" aria-labelledby="tabInscrits">
 
@@ -279,7 +281,6 @@
   }
 
   function toNum(v){
-    // accepte number ou string numérique
     if(v === null || v === undefined || v === "") return null;
     const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
     return Number.isFinite(n) ? n : null;
@@ -337,7 +338,6 @@
   }
 
   function computeLists(rows){
-    // ordre inscription
     rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
     const forcedMain = rows.filter(r => r.list === "main");
@@ -386,7 +386,7 @@
       ? wait.map((r,i) => rowHtml(main.length + i + 1, r)).join("")
       : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
 
-    // CLASSÉES (seulement main, tri par teamRank asc)
+    // CLASSÉES : seulement main, tri par teamRank asc (missing ranks => en bas)
     const ranked = [...main];
     ranked.sort((a,b)=>{
       const a1 = toNum(a.p1Rank), a2 = toNum(a.p2Rank);
@@ -394,8 +394,6 @@
       const at = (a1 !== null && a2 !== null) ? (a1+a2) : Number.POSITIVE_INFINITY;
       const bt = (b1 !== null && b2 !== null) ? (b1+b2) : Number.POSITIVE_INFINITY;
       if(at !== bt) return at - bt;
-
-      // si égalité : on garde l'ordre d'inscription
       return (a.createdAtMs||0) - (b.createdAtMs||0);
     });
 
@@ -433,7 +431,7 @@
     showInscrits();
   }
 
-  // 🔴 SNAPSHOT (temps réel)
+  // 🔴 SNAPSHOT
   const q = query(collection(db, COL_PUBLIC), orderBy("createdAt", "asc"));
 
   onSnapshot(q, (snap) => {
@@ -448,8 +446,6 @@
         createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
         list: d.list || null,
         stby: d.stby === true,
-
-        // ✅ nouveaux champs (admin les remplira)
         p1Rank: d.p1Rank ?? null,
         p2Rank: d.p2Rank ?? null
       });
