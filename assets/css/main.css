@@ -12,10 +12,10 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  /* Logos plus grands (iPhone -> desktop) */
-  --logo-size: clamp(86px, 17vw, 130px);
+  /* Logos (recadrés => moins gros) */
+  --logo-size: clamp(74px, 14vw, 112px);
 
-  /* Bandeau un peu plus discret */
+  /* Bandeau */
   --title-size: clamp(16px, 3.0vw, 22px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
@@ -86,13 +86,13 @@ a, a:visited, a:hover, a:active{
   overflow:hidden;
 }
 
-/* remplit davantage les logos (réduit la marge “vide” des PNG) */
+/* ✅ Logos recadrés => on enlève l'ancienne "compensation" */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
-  transform: scale(1.30);
+  transform: scale(1);
 }
 
 .brand-title{
@@ -218,7 +218,7 @@ input, select, textarea{
 /* très petits écrans */
 @media (max-width: 360px){
   :root{
-    --logo-size: clamp(78px, 18vw, 118px);
+    --logo-size: clamp(68px, 15vw, 102px);
     --title-size: clamp(15px, 3.8vw, 20px);
   }
   .nav a{ padding:8px 14px; }
