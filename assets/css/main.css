@@ -16,7 +16,7 @@
   --logo-size: clamp(74px, 14vw, 112px);
 
   /* Bandeau */
-  --title-size: clamp(16px, 3.0vw, 22px);
+  --title-size: clamp(16px, 3.2vw, 23px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
   --topbar-pad-y: 14px;
@@ -33,6 +33,8 @@
 
 *{ box-sizing:border-box; }
 
+html, body{ height:100%; }
+
 body{
   margin:0;
   font-family:-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
@@ -41,10 +43,13 @@ body{
   background:var(--bg);
 }
 
-/* ✅ Anti “liens bleus iOS” (blindé) */
+/* ✅ Anti “liens bleus iOS” + tap highlight */
 a, a:visited, a:hover, a:active{
   color:inherit;
   text-decoration:none;
+}
+a, button{
+  -webkit-tap-highlight-color: transparent;
 }
 
 .container{
@@ -100,7 +105,7 @@ a, a:visited, a:hover, a:active{
   text-align:center;
   font-weight:900;
   font-size:var(--title-size);
-  line-height:1.15;
+  line-height:1.18;
   letter-spacing:.2px;
   text-shadow: 0 1px 0 rgba(0,0,0,.15);
 }
@@ -125,6 +130,7 @@ a, a:visited, a:hover, a:active{
   border:1px solid var(--pill-border);
   background: var(--pill-bg);
   transition:.18s ease;
+  white-space:nowrap;
 }
 
 .nav a:hover{
@@ -216,10 +222,14 @@ input, select, textarea{
 }
 
 /* très petits écrans */
+@media (max-width: 420px){
+  .nav a{ padding:8px 14px; }
+}
+
 @media (max-width: 360px){
   :root{
-    --logo-size: clamp(68px, 15vw, 102px);
-    --title-size: clamp(15px, 3.8vw, 20px);
+    --logo-size: clamp(66px, 15vw, 98px);
+    --title-size: clamp(15px, 3.9vw, 20px);
   }
-  .nav a{ padding:8px 14px; }
+  .nav a{ padding:8px 12px; }
 }
