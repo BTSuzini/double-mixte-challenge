@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260218a" />
+  <link rel="stylesheet" href="assets/css/main.css?v=20260218b" />
 </head>
 <body>
 
@@ -34,13 +34,16 @@
 
   <section class="card">
     <h2>Les étapes</h2>
+
     <div class="grid">
-      <a class="btn" href="etape1/index.html">Étape 1 — BT250 (27/02/2026)</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 2 — bientôt</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 3 — bientôt</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 4 — bientôt</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 5 — bientôt</a>
+      <a class="btn" href="etape1/index.html">Étape 1 — 27/02/2026 — BT250</a>
+
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 2 —  12/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 3 —  26/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 4 —  09/04/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 5 —  17/04/2026 — à venir</a>
     </div>
+
     <p class="muted">
       Le classement général est calculé par joueur (points + départages).
     </p>
@@ -75,7 +78,7 @@
     </div>
 
     <p class="muted">
-      Admin et JAT : accès sécurisé (email/mot de passe). L’email est mémorisé et la session reste active.
+      Admin et JAT : accès sécurisé. L’email est mémorisé et la session reste active.
     </p>
 
     <p class="muted" id="authHint" style="margin-top:8px;"></p>
@@ -91,28 +94,16 @@
   const scopeEl = document.getElementById("adminScope");
   const hintEl = document.getElementById("authHint");
 
-  function getScope(){
-    return scopeEl?.value || "general";
-  }
+  const getScope = () => scopeEl?.value || "general";
 
   document.getElementById("btnAdmin").onclick = async (e)=>{
     e.preventDefault();
-    try{
-      await autoLoginOrPrompt(getScope());
-    }catch(err){
-      console.error(err);
-      alert("Erreur de connexion ❌");
-    }
+    await autoLoginOrPrompt(getScope());
   };
 
   document.getElementById("btnJat").onclick = async (e)=>{
     e.preventDefault();
-    try{
-      await autoLoginOrPrompt(getScope());
-    }catch(err){
-      console.error(err);
-      alert("Erreur de connexion ❌");
-    }
+    await autoLoginOrPrompt(getScope());
   };
 
   document.getElementById("btnMobile").onclick = async (e)=>{
@@ -121,13 +112,8 @@
     alert("Retour mode mobile 📱");
   };
 
-  // Petit retour utilisateur (optionnel)
   onAuthStateChanged(auth, (user)=>{
-    if(user){
-      hintEl.textContent = "Connecté : " + user.email;
-    }else{
-      hintEl.textContent = "Non connecté.";
-    }
+    hintEl.textContent = user ? ("Connecté : " + user.email) : "Non connecté.";
   });
 </script>
 
