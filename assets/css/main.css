@@ -13,32 +13,33 @@
   --bg: #f6f7f8;
 
   /* ================================
-     Responsive auto (logos +)
-     iPhone → iPad → Desktop
+     LOGOS XXL (iPhone friendly)
   ================================= */
-  /* Logos plus visibles sur iPhone */
-  --logo-size: clamp(64px, 14vw, 100px);
 
-  /* Titre et nav */
-  --title-size: clamp(18px, 3.4vw, 26px);
-  --nav-font: clamp(13px, 2.4vw, 15px);
+  /* 🔥 Beaucoup plus gros */
+  --logo-size: clamp(90px, 18vw, 140px);
 
-  /* Détails “pro” */
-  --topbar-pad-y: 14px;
-  --topbar-gap: 14px;
+  /* Titre */
+  --title-size: clamp(18px, 3.6vw, 28px);
+
+  /* Nav */
+  --nav-font: clamp(13px, 2.6vw, 16px);
+
+  /* Bandeau */
+  --topbar-pad-y: 18px;
+  --topbar-gap: 18px;
   --topbar-shadow: 0 10px 24px rgba(0,0,0,.10);
+
   --pill-border: rgba(255,255,255,.26);
   --pill-bg: rgba(255,255,255,.10);
   --pill-bg-hover: rgba(255,255,255,.18);
 
-  /* Radius standard */
   --radius-card: 16px;
   --radius-btn: 14px;
   --radius-input: 12px;
 }
 
 *{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; }
 
 body{
   margin:0;
@@ -48,8 +49,6 @@ body{
   background:var(--bg);
 }
 
-a{ color:inherit; text-decoration:none; }
-
 .container{
   max-width:var(--max);
   margin:0 auto;
@@ -57,7 +56,7 @@ a{ color:inherit; text-decoration:none; }
 }
 
 /* ======================================
-   BANDEAU PRO (sticky + profondeur)
+   BANDEAU PRO
 ====================================== */
 
 .topbar{
@@ -87,22 +86,23 @@ a{ color:inherit; text-decoration:none; }
 .brand-logo{
   width:var(--logo-size);
   height:var(--logo-size);
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   overflow:hidden;
-  background:transparent;
-  border-radius:0;
 }
 
+/* 🔥 On remplit vraiment */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
 
-  /* Remplit mieux, “mange” les marges transparentes */
-  transform: scale(1.18);
+  /* Zoom plus agressif */
+  transform: scale(1.30);
 }
 
 /* Titre */
@@ -111,23 +111,13 @@ a{ color:inherit; text-decoration:none; }
   text-align:center;
   font-weight:900;
   font-size:var(--title-size);
-  letter-spacing:.3px;
-  line-height:1.1;
-  text-shadow: 0 1px 0 rgba(0,0,0,.14);
-}
-
-/* Optionnel si tu utilises un sous-titre en <span class="brand-subtitle"> */
-.brand-subtitle{
-  display:block;
-  font-size:0.9em;
-  font-weight:800;
-  opacity:.95;
-  margin-top:2px;
+  line-height:1.15;
+  text-shadow: 0 1px 0 rgba(0,0,0,.15);
 }
 
 /* Nav */
 .nav{
-  margin-top:12px;
+  margin-top:14px;
   display:flex;
   justify-content:center;
   gap:10px;
@@ -137,33 +127,21 @@ a{ color:inherit; text-decoration:none; }
 .nav a{
   color:#fff;
   font-size:var(--nav-font);
-  padding:9px 16px;
+  padding:10px 18px;
   border-radius:999px;
+
   border:1px solid var(--pill-border);
   background: var(--pill-bg);
 
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-
-  transition: .18s ease;
+  transition:.18s ease;
 }
 
 .nav a:hover{
   background: var(--pill-bg-hover);
-  transform: translateY(-1px);
-}
-
-.nav a:active{
-  transform: translateY(0);
-}
-
-.nav a[aria-current="page"]{
-  background: rgba(255,255,255,.22);
-  border-color: rgba(255,255,255,.35);
 }
 
 /* ======================================
-   CARTES / CONTENU
+   CARTES
 ====================================== */
 
 .card{
@@ -172,126 +150,28 @@ a{ color:inherit; text-decoration:none; }
   border-radius:var(--radius-card);
   padding:18px;
   margin:16px 0;
+
   box-shadow: 0 6px 16px rgba(0,0,0,.05);
 }
 
 .card h2{
-  margin:0 0 10px 0;
+  margin:0 0 10px;
   font-size:20px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  margin-top:12px;
-}
-
-.btn{
-  display:block;
-  padding:14px 16px;
-  border-radius:var(--radius-btn);
-  border:1px solid #ddd;
-  background:#fafafa;
-  font-weight:650;
-  transition:.18s ease;
-}
-
-.btn:hover{ background:#f0f0f0; }
-.btn:active{ transform: translateY(1px); }
-
-.btn.disabled,
-.btn[aria-disabled="true"]{
-  opacity:.55;
-  pointer-events:none;
-}
-
 .muted{
-  margin:10px 0 0;
   color:var(--muted);
   font-size:14px;
 }
 
 /* ======================================
-   FORMULAIRES
+   RESPONSIVE EXTRA
 ====================================== */
 
-.form{ display:grid; gap:12px; }
-.field{ display:grid; gap:6px; }
-
-label{ font-weight:650; }
-
-input, select, textarea{
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:var(--radius-input);
-  font:inherit;
-  background:#fff;
-}
-
-input:disabled, select:disabled, textarea:disabled{
-  background:#f3f3f3;
-  color:#777;
-}
-
-.sep{
-  border:0;
-  border-top:1px solid #eee;
-  margin:10px 0;
-}
-
-/* ======================================
-   TABLES (utile pour équipes)
-====================================== */
-
-.table-wrap{
-  overflow:auto;
-  border:1px solid #eee;
-  border-radius:14px;
-  background:#fff;
-}
-
-.teams-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  min-width:980px;
-}
-
-.teams-table thead th{
-  text-align:left;
-  font-size:13px;
-  color:#444;
-  background:#f7f7f7;
-  border-bottom:1px solid #eee;
-  padding:12px;
-  position:sticky;
-  top:0;
-  z-index:1;
-}
-
-.teams-table tbody td{
-  padding:12px;
-  border-bottom:1px solid #f0f0f0;
-  font-size:14px;
-  vertical-align:top;
-}
-
-.teams-table tbody tr:last-child td{ border-bottom:none; }
-
-/* ======================================
-   RESPONSIVE
-====================================== */
-
-@media (min-width: 780px){
-  .grid{ grid-template-columns: 1fr 1fr; }
-}
-
-/* Très petits écrans : éviter un bandeau trop haut */
+/* iPhone mini : on réduit un poil */
 @media (max-width: 360px){
   :root{
-    --logo-size: clamp(58px, 16vw, 88px);
-    --topbar-pad-y: 12px;
+    --logo-size: clamp(78px, 22vw, 120px);
+    --topbar-pad-y: 14px;
   }
-  .nav a{ padding:8px 14px; }
 }
