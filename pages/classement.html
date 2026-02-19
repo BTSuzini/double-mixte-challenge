@@ -7,16 +7,80 @@
   <link rel="stylesheet" href="../assets/css/main.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="container">
-      <a class="back" href="../index.html">← Accueil</a>
-      <h1 class="title">Classement général</h1>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Classement</h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
     </div>
-  </header>
-  <main class="container">
-    <section class="card">
-      <p class="muted">Bientôt : classement par joueur (points + départages).</p>
-    </section>
-  </main>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil</a>
+      <a href="classement.html" aria-current="page">Classement</a>
+      <a href="reglement.html">Règlement</a>
+      <a href="infos.html">Infos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>Choisir un classement</h2>
+
+    <div class="field">
+      <label for="rankScope">Affichage</label>
+      <select id="rankScope">
+        <option value="general" selected>Classement général</option>
+        <option value="etape1">Classement — Étape 1</option>
+        <option value="etape2" disabled>Classement — Étape 2 (à venir)</option>
+        <option value="etape3" disabled>Classement — Étape 3 (à venir)</option>
+        <option value="etape4" disabled>Classement — Étape 4 (à venir)</option>
+        <option value="etape5" disabled>Classement — Étape 5 (à venir)</option>
+      </select>
+    </div>
+
+    <p class="muted" id="rankHint" style="margin-top:10px;">
+      Le classement sera affiché ici.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 id="rankTitle">Classement général</h2>
+    <p class="muted">À connecter au calcul (Firebase) ensuite.</p>
+  </section>
+
+</main>
+
+<script>
+  const sel = document.getElementById("rankScope");
+  const title = document.getElementById("rankTitle");
+  const hint = document.getElementById("rankHint");
+
+  function update(){
+    const v = sel.value;
+    if(v === "general"){
+      title.textContent = "Classement général";
+      hint.textContent = "Affichage du classement général (toutes étapes).";
+    } else if(v === "etape1"){
+      title.textContent = "Classement — Étape 1";
+      hint.textContent = "Affichage du classement de l’étape 1.";
+    } else {
+      title.textContent = "Classement";
+      hint.textContent = "À venir.";
+    }
+  }
+  sel.addEventListener("change", update);
+  update();
+</script>
+
 </body>
 </html>
