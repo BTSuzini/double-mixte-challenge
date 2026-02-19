@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Étape 1 — BT250</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <title>Suzini BT — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="assets/css/main.css?v=20260218a" />
 </head>
 <body>
 
@@ -12,24 +12,20 @@
   <div class="container">
     <div class="topbar-row">
       <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+        <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        Étape 1 - 27 février 2026
-        <span class="brand-subtitle">BT250</span>
-      </h1>
+      <h1 class="brand-title">Suzini BT — Double Mixte Challenge</h1>
 
       <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+        <img src="assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil</a>
-      <a href="#">Programmation</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="equipes.html">Équipes</a>
+      <a href="pages/classement.html">Classement</a>
+      <a href="pages/reglement.html">Règlement</a>
+      <a href="pages/infos.html">Infos</a>
     </nav>
   </div>
 </header>
@@ -37,13 +33,103 @@
 <main class="container">
 
   <section class="card">
-    <h2>Bienvenue sur l’étape 1</h2>
+    <h2>Les étapes</h2>
+    <div class="grid">
+      <a class="btn" href="etape1/index.html">Étape 1 — BT250 (27/02/2026)</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 2 — bientôt</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 3 — bientôt</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 4 — bientôt</a>
+      <a class="btn disabled" href="#" aria-disabled="true">Étape 5 — bientôt</a>
+    </div>
     <p class="muted">
-      Retrouvez ici la programmation, le module d’inscription et la liste des équipes inscrites.
+      Le classement général est calculé par joueur (points + départages).
     </p>
   </section>
 
+  <section class="card">
+    <h2>Accès rapide</h2>
+    <div class="grid">
+      <a class="btn" href="pages/classement.html">Voir le classement général</a>
+      <a class="btn" href="pages/reglement.html">Lire le règlement</a>
+      <a class="btn" href="pages/infos.html">Fil d’infos</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔐 Accès organisateurs</h2>
+
+    <div class="field" style="margin-bottom:10px;">
+      <label for="adminScope">Zone</label>
+      <select id="adminScope">
+        <option value="general" selected>Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <a class="btn" href="#" id="btnMobile">📱 Mode Mobile</a>
+      <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
+      <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
+    </div>
+
+    <p class="muted">
+      Admin et JAT : accès sécurisé (email/mot de passe). L’email est mémorisé et la session reste active.
+    </p>
+
+    <p class="muted" id="authHint" style="margin-top:8px;"></p>
+  </section>
+
 </main>
+
+<script type="module">
+  import { auth } from "./assets/js/firebase.js";
+  import { autoLoginOrPrompt, logout } from "./assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  const scopeEl = document.getElementById("adminScope");
+  const hintEl = document.getElementById("authHint");
+
+  function getScope(){
+    return scopeEl?.value || "general";
+  }
+
+  document.getElementById("btnAdmin").onclick = async (e)=>{
+    e.preventDefault();
+    try{
+      await autoLoginOrPrompt(getScope());
+    }catch(err){
+      console.error(err);
+      alert("Erreur de connexion ❌");
+    }
+  };
+
+  document.getElementById("btnJat").onclick = async (e)=>{
+    e.preventDefault();
+    try{
+      await autoLoginOrPrompt(getScope());
+    }catch(err){
+      console.error(err);
+      alert("Erreur de connexion ❌");
+    }
+  };
+
+  document.getElementById("btnMobile").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    alert("Retour mode mobile 📱");
+  };
+
+  // Petit retour utilisateur (optionnel)
+  onAuthStateChanged(auth, (user)=>{
+    if(user){
+      hintEl.textContent = "Connecté : " + user.email;
+    }else{
+      hintEl.textContent = "Non connecté.";
+    }
+  });
+</script>
 
 </body>
 </html>
