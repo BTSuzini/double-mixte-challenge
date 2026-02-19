@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <nav class="nav" id="navAdmin">
+    <nav class="nav">
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
@@ -59,7 +59,6 @@
   <section class="card" id="panelGeneral" style="display:none;">
     <h2 style="margin:0 0 10px;">📰 Infos (admin)</h2>
 
-    <!-- Form add -->
     <form id="infoForm" class="form" autocomplete="off">
       <div class="field">
         <label for="infoTitle">Titre *</label>
@@ -82,14 +81,6 @@
     <div id="infosList" style="display:grid; gap:10px; margin-top:10px;"></div>
   </section>
 
-  <!-- Zone: Étape -->
-  <section class="card" id="panelEtape" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎾 Gestion de l’étape</h2>
-    <p class="muted" style="margin:0;">
-      Utilise les onglets ci-dessus (Équipes / Inscriptions / Résultats).
-    </p>
-  </section>
-
 </main>
 
 <script type="module">
@@ -103,7 +94,6 @@
     query, orderBy, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ✅ Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDAW66BD1V2Kr2w6ksM1_8bHGugeG6_cUI",
     authDomain: "suzini-double-mixte-challenge.firebaseapp.com",
@@ -119,18 +109,15 @@
 
   const COL_INFOS = "infos";
 
-  // DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
   const scopeEl = document.getElementById("scope");
-  const tabsEl = document.getElementById("tabs");
-  const hintEl = document.getElementById("hint");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
 
   const panelGeneral = document.getElementById("panelGeneral");
-  const panelEtape = document.getElementById("panelEtape");
 
-  // Infos admin
   const infoForm = document.getElementById("infoForm");
   const publishBtn = document.getElementById("publishBtn");
   const adminStatus = document.getElementById("adminStatus");
@@ -139,20 +126,18 @@
 
   let unsubscribeInfos = null;
 
-  function escapeHTML(str){
+  function esc(str){
     return (str || "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
+
   function fmtDate(ts){
     try{
       const d = ts?.toDate ? ts.toDate() : null;
       if(!d) return "—";
       return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
-    } catch { return "—"; }
+    }catch{ return "—"; }
   }
 
   async function getRoleByEmail(email){
@@ -161,69 +146,23 @@
     return s.data().role || null;
   }
 
-  function showPanel(which){
-    panelGeneral.style.display = which === "general" ? "block" : "none";
-    panelEtape.style.display = which === "etape" ? "block" : "none";
-  }
-
-  function setTabsForScope(scope){
-    tabsEl.innerHTML = "";
-
-    if(scope === "general"){
-      showPanel("general");
-      hintEl.textContent = "Zone Général : gestion des infos (publication / modification / suppression).";
-
-      // 1 seul onglet “Infos”
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = "#";
-      a.textContent = "📰 Infos";
-      a.onclick = (e)=>{ e.preventDefault(); showPanel("general"); };
-      tabsEl.appendChild(a);
-
-      startInfosStream();
-      return;
-    }
-
-    // Étapes
-    showPanel("etape");
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
-
-    // Arrêts stream infos
-    stopInfosStream();
-
-    const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🏁 Résultats", "resultats.html"]
-    ];
-
-    links.forEach(([label, url])=>{
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = url + "?scope=" + encodeURIComponent(scope);
-      a.textContent = label;
-      tabsEl.appendChild(a);
-    });
-  }
-
-  function stopInfosStream(){
+  function stopInfos(){
     if(unsubscribeInfos){
       unsubscribeInfos();
       unsubscribeInfos = null;
     }
   }
 
-  function startInfosStream(){
+  function startInfos(){
     if(unsubscribeInfos) return;
 
     infosCount.textContent = "Chargement…";
     infosList.innerHTML = "";
 
-    const q = query(collection(db, COL_INFOS), orderBy("createdAt", "desc"));
+    const q = query(collection(db, COL_INFOS), orderBy("createdAt","desc"));
     unsubscribeInfos = onSnapshot(q, (snap)=>{
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      infosCount.textContent = `📌 ${items.length} info${items.length > 1 ? "s" : ""}`;
+      const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      infosCount.textContent = `📌 ${items.length} info${items.length>1?"s":""}`;
       infosList.innerHTML = "";
 
       if(items.length === 0){
@@ -232,14 +171,13 @@
       }
 
       for(const it of items){
-        const title = escapeHTML(it.title);
-        const text = escapeHTML(it.text).replaceAll("\n","<br>");
+        const title = esc(it.title);
+        const text = esc(it.text).replaceAll("\n","<br>");
         const date = fmtDate(it.createdAt);
 
         const card = document.createElement("div");
         card.className = "card";
         card.style.margin = "0";
-
         card.innerHTML = `
           <div style="display:flex; gap:12px; justify-content:space-between; align-items:flex-start;">
             <div style="min-width:0;">
@@ -247,55 +185,40 @@
               <div class="muted" style="margin-top:6px;">🗓️ ${date}</div>
               <div style="margin-top:8px; line-height:1.45;">${text}</div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px; flex:0 0 auto;">
               <button class="btn" data-edit="${it.id}" style="font-weight:800; color:#111;">✏️ Modifier</button>
               <button class="btn" data-del="${it.id}" style="font-weight:800; color:#111;">🗑️ Supprimer</button>
             </div>
           </div>
         `;
-
         infosList.appendChild(card);
       }
 
-      // Delete
+      // delete
       infosList.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async ()=>{
-          const id = btn.getAttribute("data-del");
+          const id = btn.dataset.del;
           const ok = confirm("Supprimer cette info ?\n\n⚠️ Action irréversible.");
           if(!ok) return;
-          try{
-            await deleteDoc(doc(db, COL_INFOS, id));
-            alert("Info supprimée ✅");
-          }catch(e){
-            console.error(e);
-            alert("Erreur suppression ❌");
-          }
+          await deleteDoc(doc(db, COL_INFOS, id));
         };
       });
 
-      // Edit (simple via prompt)
+      // edit via prompt (simple pour démarrer)
       infosList.querySelectorAll("button[data-edit]").forEach(btn=>{
         btn.onclick = async ()=>{
-          const id = btn.getAttribute("data-edit");
+          const id = btn.dataset.edit;
           const ref = doc(db, COL_INFOS, id);
-          try{
-            const snap = await getDoc(ref);
-            if(!snap.exists()) return;
+          const s = await getDoc(ref);
+          if(!s.exists()) return;
+          const cur = s.data();
 
-            const cur = snap.data();
-            const newTitle = prompt("Modifier le titre :", cur.title || "");
-            if(newTitle === null) return;
+          const newTitle = prompt("Modifier le titre :", cur.title || "");
+          if(newTitle === null) return;
+          const newText = prompt("Modifier le texte :", cur.text || "");
+          if(newText === null) return;
 
-            const newText = prompt("Modifier le texte :", cur.text || "");
-            if(newText === null) return;
-
-            await updateDoc(ref, { title: newTitle.trim(), text: newText.trim() });
-            alert("Info modifiée ✅");
-          }catch(e){
-            console.error(e);
-            alert("Erreur modification ❌");
-          }
+          await updateDoc(ref, { title: newTitle.trim(), text: newText.trim() });
         };
       });
     }, (err)=>{
@@ -304,23 +227,55 @@
     });
   }
 
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+    panelGeneral.style.display = "none";
+    stopInfos();
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : gestion des infos (publication / modification / suppression).";
+      panelGeneral.style.display = "block";
+
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "#";
+      a.textContent = "📰 Infos";
+      a.onclick = (e)=>{ e.preventDefault(); };
+      tabsEl.appendChild(a);
+
+      startInfos();
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
+
+    const links = [
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ["🏁 Résultats", "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      tabsEl.appendChild(a);
+    }
+  }
+
   // Publish
   infoForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
     publishBtn.disabled = true;
     publishBtn.classList.add("disabled");
     adminStatus.textContent = "Publication…";
-
     try{
       const title = (infoForm.infoTitle.value || "").trim();
-      const text = (infoForm.infoText.value || "").trim();
+      const text  = (infoForm.infoText.value || "").trim();
       if(!title || !text) throw new Error("Titre et texte obligatoires.");
 
-      await addDoc(collection(db, COL_INFOS), {
-        title, text,
-        createdAt: serverTimestamp()
-      });
-
+      await addDoc(collection(db, COL_INFOS), { title, text, createdAt: serverTimestamp() });
       infoForm.reset();
       adminStatus.textContent = "✅ Publié !";
     }catch(err){
@@ -339,31 +294,21 @@
     window.location.href = "../index.html";
   };
 
-  // Auth guard
+  // Guard
   onAuthStateChanged(auth, async (user)=>{
     accessDenied.style.display = "none";
     adminUI.style.display = "none";
-    stopInfosStream();
+    panelGeneral.style.display = "none";
+    stopInfos();
 
-    if(!user){
-      accessDenied.style.display = "block";
-      return;
-    }
+    if(!user){ accessDenied.style.display="block"; return; }
 
-    const r = await getRoleByEmail(user.email);
-    if(r !== "admin"){
-      accessDenied.style.display = "block";
-      return;
-    }
+    const role = await getRoleByEmail(user.email);
+    if(role !== "admin"){ accessDenied.style.display="block"; return; }
 
     adminUI.style.display = "block";
-
-    // init
-    setTabsForScope(scopeEl.value);
-
-    scopeEl.onchange = ()=>{
-      setTabsForScope(scopeEl.value);
-    };
+    setTabs(scopeEl.value);
+    scopeEl.onchange = ()=> setTabs(scopeEl.value);
   });
 </script>
 
