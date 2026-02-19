@@ -33,18 +33,25 @@
 
 <main class="container">
 
+  <!-- Compteurs -->
   <section class="card">
     <h2 style="margin-bottom:6px;">👥 Équipes inscrites</h2>
+
     <p class="muted" style="margin-top:0;">
-      Total : <strong><span id="totalCount">0</span></strong> équipe(s)
+      Total : <strong><span id="totalCount">0</span></strong>
+      — Principale : <strong><span id="mainCount">0</span></strong>/8
+      — Attente : <strong><span id="waitCount">0</span></strong>
+      — STBY : <strong><span id="stbyCount">0</span></strong>
     </p>
+
     <p class="muted" id="status" style="margin-top:8px;">Chargement…</p>
   </section>
 
+  <!-- Liste principale -->
   <section class="card">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
       <span>✅ Liste principale</span>
-      <span class="muted" style="font-weight:700;"><span id="mainCount">0</span>/8</span>
+      <span class="muted" style="font-weight:700;"><span id="mainCount2">0</span>/8</span>
     </h2>
 
     <div class="table-wrap">
@@ -55,21 +62,19 @@
             <th>Équipe</th>
             <th>Joueuse</th>
             <th>Joueur</th>
+            <th style="width:90px;">Statut</th>
           </tr>
         </thead>
         <tbody id="mainBody"></tbody>
       </table>
     </div>
-
-    <p class="muted" style="margin-top:10px;">
-      Les 8 premières équipes inscrites sont en liste principale.
-    </p>
   </section>
 
+  <!-- Liste d'attente -->
   <section class="card">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
       <span>⏳ Liste d’attente</span>
-      <span class="muted" style="font-weight:700;"><span id="waitCount">0</span></span>
+      <span class="muted" style="font-weight:700;"><span id="waitCount2">0</span></span>
     </h2>
 
     <div class="table-wrap">
@@ -80,15 +85,12 @@
             <th>Équipe</th>
             <th>Joueuse</th>
             <th>Joueur</th>
+            <th style="width:90px;">Statut</th>
           </tr>
         </thead>
         <tbody id="waitBody"></tbody>
       </table>
     </div>
-
-    <p class="muted" style="margin-top:10px;">
-      Les équipes au-delà des 8 premières sont en liste d’attente.
-    </p>
   </section>
 
 </main>
@@ -104,7 +106,7 @@
     width:100%;
     border-collapse:separate;
     border-spacing:0;
-    min-width: 520px;
+    min-width: 620px;
   }
   .teams-table thead th{
     text-align:left;
@@ -136,6 +138,10 @@
     color:#333;
     white-space:nowrap;
   }
+  .pill.stby{
+    border-color:#ffd37a;
+    background:#fff7e6;
+  }
   .num{
     color:#666;
     font-variant-numeric: tabular-nums;
@@ -144,12 +150,12 @@
   .team{ font-weight:800; }
 
   @media (max-width: 520px){
-    .teams-table{ min-width: 480px; }
+    .teams-table{ min-width: 600px; }
   }
 </style>
 
 <script type="module">
-  import { db } from "../shared/firebase.js";
+  import { db } from "../assets/js/firebase.js";
   import { collection, getDocs, query, orderBy }
     from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -157,9 +163,14 @@
   const COL_PUBLIC = "equipes_etape1_public";
 
   const statusEl = document.getElementById("status");
+
   const totalCountEl = document.getElementById("totalCount");
   const mainCountEl = document.getElementById("mainCount");
   const waitCountEl = document.getElementById("waitCount");
+  const stbyCountEl = document.getElementById("stbyCount");
+
+  const mainCount2El = document.getElementById("mainCount2");
+  const waitCount2El = document.getElementById("waitCount2");
 
   const mainBody = document.getElementById("mainBody");
   const waitBody = document.getElementById("waitBody");
@@ -171,6 +182,10 @@
       .replaceAll(">","&gt;");
   }
 
+  function statusPill(r){
+    return r.stby ? `<span class="pill stby">STBY</span>` : `<span class="pill">OK</span>`;
+  }
+
   function rowHtml(idx, r){
     return `
       <tr>
@@ -178,6 +193,7 @@
         <td class="team">${esc(r.teamName)}</td>
         <td><span class="pill">${esc(r.p1FirstName)}</span></td>
         <td><span class="pill">${esc(r.p2FirstName)}</span></td>
+        <td>${statusPill(r)}</td>
       </tr>
     `;
   }
@@ -196,31 +212,61 @@
     snap.forEach(doc => {
       const d = doc.data() || {};
       rows.push({
+        id: doc.id,
         teamName: d.teamName || "",
         p1FirstName: d.p1FirstName || "",
         p2FirstName: d.p2FirstName || "",
-        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0
+        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
+        list: d.list || null, // "main" | "wait" | null
+        stby: d.stby === true
       });
     });
 
+    // ordre inscription
     rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
-    const total = rows.length;
-    totalCountEl.textContent = total;
+    const forcedMain = rows.filter(r => r.list === "main");
+    const forcedWait = rows.filter(r => r.list === "wait");
+    const auto = rows.filter(r => !r.list);
 
-    const main = rows.slice(0, MAX_MAIN);
-    const wait = rows.slice(MAX_MAIN);
+    // construit principale: forcedMain + auto jusqu’à 8
+    const main = [];
+    const used = new Set();
 
+    for(const r of forcedMain){
+      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
+    }
+    for(const r of auto){
+      if(main.length >= MAX_MAIN) break;
+      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
+    }
+
+    // attente: forcedWait + le reste (auto non pris + tout non utilisé)
+    const wait = [];
+    for(const r of forcedWait){
+      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+    }
+    for(const r of rows){
+      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+    }
+
+    // Compteurs
+    totalCountEl.textContent = rows.length;
     mainCountEl.textContent = main.length;
     waitCountEl.textContent = wait.length;
+    stbyCountEl.textContent = rows.filter(r => r.stby).length;
 
+    mainCount2El.textContent = main.length;
+    waitCount2El.textContent = wait.length;
+
+    // Rendu
     mainBody.innerHTML = main.length
       ? main.map((r,i) => rowHtml(i+1, r)).join("")
-      : `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
+      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
 
     waitBody.innerHTML = wait.length
-      ? wait.map((r,i) => rowHtml(MAX_MAIN + i + 1, r)).join("")
-      : `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
+      ? wait.map((r,i) => rowHtml(main.length + i + 1, r)).join("")
+      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
 
     statusEl.textContent = "✅ Mise à jour OK.";
   }
