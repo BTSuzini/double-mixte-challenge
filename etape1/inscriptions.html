@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inscriptions — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
 </head>
 <body>
 
@@ -15,7 +15,10 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">Étape 1 — 27 février 2026<br><span style="opacity:.95;font-weight:800;">BT250</span></h1>
+      <h1 class="brand-title">
+        Étape 1 — 27 février 2026<br>
+        <span style="opacity:.95;font-weight:800;">BT250</span>
+      </h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -111,13 +114,14 @@
   import { db } from "../assets/js/firebase.js";
   import {
     doc,
-    getDoc,
+    onSnapshot,
     collection,
     addDoc,
     setDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+  // ✅ Aligné avec tes rules
   const COL_PRIVATE = "inscriptions_etape1_private";
   const COL_PUBLIC  = "equipes_etape1_public";
 
@@ -126,6 +130,8 @@
   const gateMsgEl = document.getElementById("gateMsg");
   const submitBtn = document.getElementById("submitBtn");
 
+  let gateState = "not_open"; // not_open | open | suspended | closed
+
   const setStatus = (msg) => { statusEl.textContent = msg; };
 
   function setInputsDisabled(disabled){
@@ -133,86 +139,90 @@
     fields.forEach(el => el.disabled = disabled);
   }
 
-  function lockForm(msg){
-    gateMsgEl.textContent = msg;
+  function applyGate(state){
+    gateState = state || "not_open";
+
+    if(gateState === "open"){
+      gateMsgEl.textContent = "✅ Inscriptions ouvertes. Tu peux t’inscrire ci-dessous.";
+      setInputsDisabled(false);
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("disabled");
+      return;
+    }
+
+    // sinon: bloqué
     setInputsDisabled(true);
     submitBtn.disabled = true;
     submitBtn.classList.add("disabled");
-  }
 
-  function unlockForm(msg){
-    gateMsgEl.textContent = msg;
-    setInputsDisabled(false);
-    submitBtn.disabled = false;
-    submitBtn.classList.remove("disabled");
-  }
-
-  function label(state){
-    if(state === "open") return "✅ Inscriptions ouvertes.";
-    if(state === "paused") return "⏸️ Inscriptions temporairement suspendues.";
-    if(state === "closed") return "🔒 Inscriptions clôturées.";
-    return "⏳ Inscriptions pas encore ouvertes.";
-  }
-
-  async function loadGate(){
-    try{
-      const snap = await getDoc(doc(db, "config", "etape1"));
-      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
-
-      if(state === "open") unlockForm(label(state));
-      else lockForm(label(state));
-
-      return state;
-    }catch(err){
-      console.error(err);
-      lockForm("❌ Impossible de vérifier l’état des inscriptions. Réessaie plus tard.");
-      return "error";
+    if(gateState === "suspended"){
+      gateMsgEl.textContent = "⏸️ Inscriptions temporairement suspendues. Réessaie un peu plus tard.";
+      return;
     }
+    if(gateState === "closed"){
+      gateMsgEl.textContent = "🔒 Inscriptions clôturées.";
+      return;
+    }
+    gateMsgEl.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
   }
 
-  // Au chargement : on verrouille/déverrouille selon état
-  await loadGate();
+  // 🔄 Live gate (si l’admin change l’état, le public voit immédiatement)
+  const cfgRef = doc(db, "config", "etape1");
+  onSnapshot(cfgRef, (snap)=>{
+    const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
+    applyGate(state);
+  }, (err)=>{
+    console.error(err);
+    applyGate("not_open");
+    gateMsgEl.textContent = "❌ Impossible de vérifier l’état des inscriptions. Réessaie plus tard.";
+  });
+
+  function readFormData(){
+    return {
+      createdAt: serverTimestamp(),
+      teamName: (form.teamName.value || "").trim(),
+
+      p1FirstName: (form.p1FirstName.value || "").trim(),
+      p1LastName:  (form.p1LastName.value || "").trim(),
+      p1Licence:   (form.p1Licence.value || "").trim(),
+      p1Phone:     (form.p1Phone.value || "").trim(),
+
+      p2FirstName: (form.p2FirstName.value || "").trim(),
+      p2LastName:  (form.p2LastName.value || "").trim(),
+      p2Licence:   (form.p2Licence.value || "").trim(),
+      p2Phone:     (form.p2Phone.value || "").trim(),
+    };
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if(submitBtn.disabled) return;
+    // sécurité UI
+    if(gateState !== "open"){
+      setStatus("⛔ Inscriptions non ouvertes.");
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.classList.add("disabled");
-    setStatus("Envoi en cours...");
+    setStatus("Envoi en cours…");
 
     try {
-      const data = {
-        createdAt: serverTimestamp(),
-        teamName: (form.teamName.value || "").trim(),
-
-        p1FirstName: (form.p1FirstName.value || "").trim(),
-        p1LastName:  (form.p1LastName.value || "").trim(),
-        p1Licence:   (form.p1Licence.value || "").trim(),
-        p1Phone:     (form.p1Phone.value || "").trim(),
-
-        p2FirstName: (form.p2FirstName.value || "").trim(),
-        p2LastName:  (form.p2LastName.value || "").trim(),
-        p2Licence:   (form.p2Licence.value || "").trim(),
-        p2Phone:     (form.p2Phone.value || "").trim(),
-      };
+      const data = readFormData();
 
       if (!data.teamName || !data.p1FirstName || !data.p1LastName || !data.p2FirstName || !data.p2LastName) {
         throw new Error("Merci de compléter tous les champs obligatoires.");
       }
 
-      // 1) PRIVÉ : crée le doc et récupère l'ID
+      // 1) PRIVÉ (doc auto-id)
       const ref = await addDoc(collection(db, COL_PRIVATE), data);
 
-      // 2) PUBLIC : même ID (cohérence admin)
+      // 2) PUBLIC (même ID -> cohérence admin)
       await setDoc(doc(db, COL_PUBLIC, ref.id), {
         createdAt: serverTimestamp(),
         teamName: data.teamName,
         p1FirstName: data.p1FirstName,
         p2FirstName: data.p2FirstName,
-
-        // utiles admin (optionnels)
         list: "main",
         stby: false
       });
@@ -223,10 +233,10 @@
       console.error(err);
       setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
     } finally {
-      // On recharge l’état (au cas où l’admin a fermé pendant que tu étais dessus)
-      await loadGate();
-      if(!submitBtn.disabled){
-        // si ouvert, on laisse actif
+      // On remet le bouton selon l’état actuel
+      if(gateState === "open"){
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("disabled");
       }
     }
   });
