@@ -51,32 +51,44 @@
     <div class="grid" style="margin-top:12px;">
       <button class="btn" id="btnNotOpen" style="font-weight:800; color:#111;">💤 Pas encore ouvertes</button>
       <button class="btn" id="btnOpen" style="font-weight:800; color:#111;">✅ Ouvrir</button>
-      <button class="btn" id="btnPause" style="font-weight:800; color:#111;">⏸️ Suspendre</button>
+      <button class="btn" id="btnSuspend" style="font-weight:800; color:#111;">⏸️ Suspendre</button>
       <button class="btn" id="btnClose" style="font-weight:800; color:#111;">🔒 Clôturer</button>
     </div>
 
     <p class="muted" style="margin-top:12px;">
-      ⚠️ Le public voit l’état en direct (ouvertes / suspendues / clôturées / pas encore ouvertes).<br>
-      Les rules Firestore bloquent aussi l’écriture tant que ce n’est pas “open”.
+      ⚠️ Le public voit l’état (ouvertes / suspendues / clôturées / pas encore ouvertes).<br>
+      Les règles Firestore bloquent aussi l’écriture si ce n’est pas “open”.
     </p>
   </section>
 
-</main>
+  <!-- ✅ MAINTENANCE : RAZ -->
+  <section class="card" id="maintenanceUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧹 Maintenance</h2>
 
-<style>
-  /* Simple feedback visuel sur l'état courant */
-  .btn.active{
-    border-color:#cfcfcf !important;
-    background:#fff !important;
-    box-shadow: 0 6px 14px rgba(0,0,0,.06);
-  }
-</style>
+    <p class="muted" style="margin:0;">
+      Cette action supprime <b>toutes</b> les inscriptions de l’étape (privé + public) et remet le statut à <b>Pas encore ouvertes</b>.
+      <br>⚠️ <b>Irréversible</b>.
+    </p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnRAZ" style="font-weight:900; color:#111; border-color:#f1b2b2;">
+        🧨 RAZ — Supprimer toutes les inscriptions de l’étape
+      </button>
+    </div>
+
+    <p class="muted" id="razStatus" style="margin-top:10px;"></p>
+  </section>
+
+</main>
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import {
+    doc, setDoc, onSnapshot, serverTimestamp,
+    collection, getDocs, writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ---- scope
   const params = new URLSearchParams(location.search);
@@ -85,7 +97,7 @@
   const stepLabel = `Étape ${stepNum}`;
 
   // ---- UI title
-  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`; // tu ajusteras par étape plus tard
+  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`; // ajustable plus tard
 
   // ---- nav keep scope
   document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
@@ -102,32 +114,31 @@
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
+  const maintenanceUI = document.getElementById("maintenanceUI");
 
   const currentStateEl = document.getElementById("currentState");
   const statusMsgEl = document.getElementById("statusMsg");
 
   const btnNotOpen = document.getElementById("btnNotOpen");
   const btnOpen = document.getElementById("btnOpen");
-  const btnPause = document.getElementById("btnPause");
+  const btnSuspend = document.getElementById("btnSuspend");
   const btnClose = document.getElementById("btnClose");
+
+  const btnRAZ = document.getElementById("btnRAZ");
+  const razStatus = document.getElementById("razStatus");
+
+  // ---- collections
+  const COL_PRIVATE = `inscriptions_${scope}_private`;
+  const COL_PUBLIC  = `equipes_${scope}_public`;
 
   // ---- config doc
   const cfgRef = doc(db, "config", scope); // ex: config/etape1
-
-  // 🔑 états utilisés partout
-  // - rules: open | paused | closed
-  // - "pas encore ouvertes": on stocke "not_open" (et côté public c'est traité comme non-open => formulaire bloqué)
-  function normalizeState(state){
-    // compat ancienne valeur "suspended"
-    if(state === "suspended") return "paused";
-    return state || "not_open";
-  }
 
   function labelFor(state){
     switch(state){
       case "not_open": return "💤 Pas encore ouvertes";
       case "open": return "✅ Ouvertes";
-      case "paused": return "⏸️ Suspendues";
+      case "suspended": return "⏸️ Suspendues";
       case "closed": return "🔒 Clôturées";
       default: return "—";
     }
@@ -137,13 +148,13 @@
     switch(state){
       case "not_open": return "Le public voit : “Les inscriptions ne sont pas encore ouvertes.”";
       case "open": return "Le public voit : “Inscriptions ouvertes ✅” (formulaire actif).";
-      case "paused": return "Le public voit : “Inscriptions temporairement suspendues ⏸️” (formulaire bloqué).";
+      case "suspended": return "Le public voit : “Inscriptions suspendues ⏸️” (formulaire bloqué).";
       case "closed": return "Le public voit : “Inscriptions clôturées 🔒” (formulaire bloqué).";
       default: return "";
     }
   }
 
-  let currentState = "not_open";
+  let currentState = null;
 
   async function ensureAdmin(){
     const u = auth.currentUser;
@@ -153,33 +164,18 @@
   }
 
   function setButtonsDisabled(disabled){
-    [btnNotOpen, btnOpen, btnPause, btnClose].forEach(b=>{
+    [btnNotOpen, btnOpen, btnSuspend, btnClose, btnRAZ].forEach(b=>{
       b.disabled = disabled;
       b.classList.toggle("disabled", disabled);
     });
   }
 
-  function setActiveButton(state){
-    [btnNotOpen, btnOpen, btnPause, btnClose].forEach(b=> b.classList.remove("active"));
-
-    if(state === "not_open") btnNotOpen.classList.add("active");
-    else if(state === "open") btnOpen.classList.add("active");
-    else if(state === "paused") btnPause.classList.add("active");
-    else if(state === "closed") btnClose.classList.add("active");
-
-    // libellé du bouton pause = suspendre / réactiver
-    btnPause.textContent = (state === "paused") ? "▶️ Réactiver" : "⏸️ Suspendre";
-  }
-
   async function setState(next){
-    const target = normalizeState(next);
-
-    // confirmations utiles (pas trop intrusives)
-    if(target === "closed"){
+    if(next === "closed"){
       const ok = confirm("Clôturer les inscriptions ?\n\nLe public verra “clôturées” et ne pourra plus s’inscrire.");
       if(!ok) return;
     }
-    if(target === "not_open"){
+    if(next === "not_open"){
       const ok = confirm("Mettre “pas encore ouvertes” ?\n\nLe public verra que ce n’est pas ouvert, formulaire bloqué.");
       if(!ok) return;
     }
@@ -189,7 +185,7 @@
 
     try{
       await setDoc(cfgRef, {
-        inscriptionsState: target,
+        inscriptionsState: next,
         updatedAt: serverTimestamp()
       }, { merge:true });
 
@@ -206,13 +202,72 @@
   btnNotOpen.onclick = ()=> setState("not_open");
   btnOpen.onclick = ()=> setState("open");
 
-  btnPause.onclick = ()=>{
-    // toggle suspend/resume depending on current state
-    if(currentState === "paused") setState("open");
-    else setState("paused");
+  btnSuspend.onclick = ()=>{
+    if(currentState === "suspended") setState("open");
+    else setState("suspended");
   };
 
   btnClose.onclick = ()=> setState("closed");
+
+  // ---- RAZ helper: delete a collection in batches
+  async function deleteCollectionInBatches(colName, batchSize=450){
+    // 450 pour rester safe (limite batch=500)
+    let deleted = 0;
+
+    while(true){
+      const snap = await getDocs(collection(db, colName));
+      if(snap.empty) break;
+
+      const docs = snap.docs.slice(0, batchSize);
+      const batch = writeBatch(db);
+      docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+
+      deleted += docs.length;
+
+      // si on a moins que batchSize, on a fini
+      if(docs.length < batchSize) break;
+    }
+
+    return deleted;
+  }
+
+  async function doRAZ(){
+    // Double confirmation + saisie RAZ
+    const ok1 = confirm(
+      "⚠️ RAZ INSCRIPTIONS\n\nCette action supprime TOUTES les inscriptions (privé + public) pour " + stepLabel + ".\n\nContinuer ?"
+    );
+    if(!ok1) return;
+
+    const typed = prompt('Tape exactement : RAZ\n\n(pour confirmer la suppression complète)');
+    if(typed !== "RAZ"){
+      alert("Annulé.");
+      return;
+    }
+
+    setButtonsDisabled(true);
+    razStatus.textContent = "Suppression en cours…";
+
+    try{
+      // 1) fermer (not_open) avant nettoyage (optionnel mais safe)
+      await setDoc(cfgRef, { inscriptionsState: "not_open", updatedAt: serverTimestamp() }, { merge:true });
+
+      // 2) delete public + private (dans les deux sens, peu importe l’état)
+      const delPublic  = await deleteCollectionInBatches(COL_PUBLIC);
+      const delPrivate = await deleteCollectionInBatches(COL_PRIVATE);
+
+      razStatus.textContent = `✅ RAZ OK — supprimés : public=${delPublic}, privé=${delPrivate}. Statut remis à “Pas encore ouvertes”.`;
+      alert(`RAZ terminé ✅\n\nSupprimés :\n- Public: ${delPublic}\n- Privé: ${delPrivate}\n\nStatut : pas encore ouvertes`);
+    }catch(e){
+      console.error(e);
+      razStatus.textContent = "❌ Erreur pendant le RAZ. Voir console.";
+      alert("Erreur pendant le RAZ ❌\n\nOuvre la console pour le détail.");
+    }finally{
+      setButtonsDisabled(false);
+    }
+  }
+
+  btnRAZ.onclick = doRAZ;
 
   // logout
   document.getElementById("btnLogout").onclick = async (e)=>{
@@ -225,6 +280,7 @@
   onAuthStateChanged(auth, async (user)=>{
     accessDenied.style.display = "none";
     adminUI.style.display = "none";
+    maintenanceUI.style.display = "none";
 
     if(!user){
       accessDenied.style.display = "block";
@@ -238,15 +294,16 @@
     }
 
     adminUI.style.display = "block";
+    maintenanceUI.style.display = "block";
 
-    // live update
     onSnapshot(cfgRef, (snap)=>{
-      const state = normalizeState(snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open");
+      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
       currentState = state;
 
       currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
       statusMsgEl.textContent = publicMessage(state);
-      setActiveButton(state);
+
+      btnSuspend.textContent = (state === "suspended") ? "▶️ Réactiver" : "⏸️ Suspendre";
     }, (err)=>{
       console.error(err);
       currentStateEl.textContent = "❌ Impossible de lire le statut.";
