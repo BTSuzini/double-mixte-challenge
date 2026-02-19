@@ -33,7 +33,7 @@
 
 <main class="container">
 
-  <!-- Compteurs -->
+  <!-- Compteurs + sous-onglets -->
   <section class="card">
     <h2 style="margin-bottom:6px;">👥 Équipes inscrites</h2>
 
@@ -44,54 +44,109 @@
       — STBY : <strong><span id="stbyCount">0</span></strong>
     </p>
 
-    <p class="muted" id="status" style="margin-top:8px;">Connexion…</p>
-  </section>
-
-  <!-- Liste principale -->
-  <section class="card">
-    <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
-      <span>✅ Liste principale</span>
-      <span class="muted" style="font-weight:700;"><span id="mainCount2">0</span>/8</span>
-    </h2>
-
-    <div class="table-wrap">
-      <table class="teams-table" aria-label="Liste principale">
-        <thead>
-          <tr>
-            <th style="width:44px;">#</th>
-            <th>Équipe</th>
-            <th>Joueuse</th>
-            <th>Joueur</th>
-            <th style="width:90px;">Statut</th>
-          </tr>
-        </thead>
-        <tbody id="mainBody"></tbody>
-      </table>
+    <div class="subtabs" role="tablist" aria-label="Affichage équipes">
+      <button class="subtab" id="tabInscrits" type="button" role="tab" aria-selected="true">
+        ✅ Inscrits
+      </button>
+      <button class="subtab" id="tabClassees" type="button" role="tab" aria-selected="false">
+        🏷️ Classées
+      </button>
     </div>
+
+    <p class="muted" id="status" style="margin-top:10px;">Connexion…</p>
   </section>
 
-  <!-- Liste d'attente -->
-  <section class="card">
-    <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
-      <span>⏳ Liste d’attente</span>
-      <span class="muted" style="font-weight:700;"><span id="waitCount2">0</span></span>
-    </h2>
+  <!-- =========================
+       VUE 1 : INSCRITS (actuel)
+  ========================== -->
+  <div id="panelInscrits" role="tabpanel" aria-labelledby="tabInscrits">
 
-    <div class="table-wrap">
-      <table class="teams-table" aria-label="Liste d’attente">
-        <thead>
-          <tr>
-            <th style="width:44px;">#</th>
-            <th>Équipe</th>
-            <th>Joueuse</th>
-            <th>Joueur</th>
-            <th style="width:90px;">Statut</th>
-          </tr>
-        </thead>
-        <tbody id="waitBody"></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- Liste principale -->
+    <section class="card">
+      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+        <span>✅ Liste principale</span>
+        <span class="muted" style="font-weight:700;"><span id="mainCount2">0</span>/8</span>
+      </h2>
+
+      <div class="table-wrap">
+        <table class="teams-table" aria-label="Liste principale">
+          <thead>
+            <tr>
+              <th style="width:44px;">#</th>
+              <th>Équipe</th>
+              <th>Joueuse</th>
+              <th>Joueur</th>
+              <th style="width:90px;">Statut</th>
+            </tr>
+          </thead>
+          <tbody id="mainBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Liste d'attente -->
+    <section class="card">
+      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+        <span>⏳ Liste d’attente</span>
+        <span class="muted" style="font-weight:700;"><span id="waitCount2">0</span></span>
+      </h2>
+
+      <div class="table-wrap">
+        <table class="teams-table" aria-label="Liste d’attente">
+          <thead>
+            <tr>
+              <th style="width:44px;">#</th>
+              <th>Équipe</th>
+              <th>Joueuse</th>
+              <th>Joueur</th>
+              <th style="width:90px;">Statut</th>
+            </tr>
+          </thead>
+          <tbody id="waitBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- =========================
+       VUE 2 : CLASSÉES
+       - seulement liste principale
+       - tri par (p1Rank+p2Rank) croissant
+  ========================== -->
+  <div id="panelClassees" style="display:none;" role="tabpanel" aria-labelledby="tabClassees">
+
+    <section class="card">
+      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+        <span>🏷️ Équipes classées (liste principale)</span>
+        <span class="muted" style="font-weight:700;"><span id="rankedCount">0</span> équipe(s)</span>
+      </h2>
+
+      <p class="muted" style="margin-top:0;">
+        Tri : <b>classement équipe croissant</b> (Joueuse + Joueur). Le plus petit est en haut.
+      </p>
+
+      <div class="table-wrap">
+        <table class="teams-table" aria-label="Équipes classées">
+          <thead>
+            <tr>
+              <th style="width:44px;">#</th>
+              <th>Équipe</th>
+              <th>Joueuse</th>
+              <th>Joueur</th>
+              <th style="width:90px;">Statut</th>
+            </tr>
+          </thead>
+          <tbody id="rankedBody"></tbody>
+        </table>
+      </div>
+
+      <p class="muted" style="margin:10px 0 0;">
+        ⚠️ Si le classement d’un joueur n’est pas encore renseigné par l’admin, l’équipe apparaît en bas avec “—”.
+      </p>
+    </section>
+
+  </div>
 
 </main>
 
@@ -142,12 +197,40 @@
     border-color:#ffd37a;
     background:#fff7e6;
   }
+  .pill.rank{
+    border-color:#d9e6ff;
+    background:#f3f7ff;
+    font-weight:800;
+  }
+
   .num{
     color:#666;
     font-variant-numeric: tabular-nums;
     white-space:nowrap;
   }
   .team{ font-weight:800; }
+
+  /* Sous-onglets */
+  .subtabs{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .subtab{
+    appearance:none;
+    border:1px solid #ddd;
+    background:#fafafa;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .subtab[aria-selected="true"]{
+    background:#fff;
+    border-color:#cfcfcf;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  }
 
   @media (max-width: 520px){
     .teams-table{ min-width: 600px; }
@@ -176,14 +259,34 @@
   const mainCount2El = document.getElementById("mainCount2");
   const waitCount2El = document.getElementById("waitCount2");
 
+  const rankedCountEl = document.getElementById("rankedCount");
+
   const mainBody = document.getElementById("mainBody");
   const waitBody = document.getElementById("waitBody");
+  const rankedBody = document.getElementById("rankedBody");
+
+  // Tabs
+  const tabInscrits = document.getElementById("tabInscrits");
+  const tabClassees = document.getElementById("tabClassees");
+  const panelInscrits = document.getElementById("panelInscrits");
+  const panelClassees = document.getElementById("panelClassees");
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;");
+  }
+
+  function toNum(v){
+    // accepte number ou string numérique
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtRank(n){
+    return (n === null || n === undefined) ? "—" : String(n);
   }
 
   function statusPill(r){
@@ -197,6 +300,37 @@
         <td class="team">${esc(r.teamName)}</td>
         <td><span class="pill">${esc(r.p1FirstName)}</span></td>
         <td><span class="pill">${esc(r.p2FirstName)}</span></td>
+        <td>${statusPill(r)}</td>
+      </tr>
+    `;
+  }
+
+  function rowRankedHtml(idx, r){
+    const p1 = toNum(r.p1Rank);
+    const p2 = toNum(r.p2Rank);
+    const teamRank = (p1 !== null && p2 !== null) ? (p1 + p2) : null;
+
+    return `
+      <tr>
+        <td class="num">#${idx}</td>
+        <td class="team">
+          ${esc(r.teamName)}
+          <div style="margin-top:6px;">
+            <span class="pill rank">🏷️ Équipe : ${esc(fmtRank(teamRank))}</span>
+          </div>
+        </td>
+        <td>
+          <span class="pill">${esc(r.p1FirstName)}</span>
+          <div style="margin-top:6px;">
+            <span class="pill rank">BT : ${esc(fmtRank(p1))}</span>
+          </div>
+        </td>
+        <td>
+          <span class="pill">${esc(r.p2FirstName)}</span>
+          <div style="margin-top:6px;">
+            <span class="pill rank">BT : ${esc(fmtRank(p2))}</span>
+          </div>
+        </td>
         <td>${statusPill(r)}</td>
       </tr>
     `;
@@ -243,6 +377,7 @@
     mainCount2El.textContent = main.length;
     waitCount2El.textContent = wait.length;
 
+    // INSCRITS
     mainBody.innerHTML = main.length
       ? main.map((r,i) => rowHtml(i+1, r)).join("")
       : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
@@ -250,6 +385,52 @@
     waitBody.innerHTML = wait.length
       ? wait.map((r,i) => rowHtml(main.length + i + 1, r)).join("")
       : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
+
+    // CLASSÉES (seulement main, tri par teamRank asc)
+    const ranked = [...main];
+    ranked.sort((a,b)=>{
+      const a1 = toNum(a.p1Rank), a2 = toNum(a.p2Rank);
+      const b1 = toNum(b.p1Rank), b2 = toNum(b.p2Rank);
+      const at = (a1 !== null && a2 !== null) ? (a1+a2) : Number.POSITIVE_INFINITY;
+      const bt = (b1 !== null && b2 !== null) ? (b1+b2) : Number.POSITIVE_INFINITY;
+      if(at !== bt) return at - bt;
+
+      // si égalité : on garde l'ordre d'inscription
+      return (a.createdAtMs||0) - (b.createdAtMs||0);
+    });
+
+    rankedCountEl.textContent = ranked.length;
+
+    rankedBody.innerHTML = ranked.length
+      ? ranked.map((r,i) => rowRankedHtml(i+1, r)).join("")
+      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe sur la liste principale.</td></tr>`;
+  }
+
+  // Tabs behavior
+  function showInscrits(){
+    tabInscrits.setAttribute("aria-selected", "true");
+    tabClassees.setAttribute("aria-selected", "false");
+    panelInscrits.style.display = "block";
+    panelClassees.style.display = "none";
+    try{ localStorage.setItem("etape1_equipes_view", "inscrits"); }catch(e){}
+  }
+  function showClassees(){
+    tabInscrits.setAttribute("aria-selected", "false");
+    tabClassees.setAttribute("aria-selected", "true");
+    panelInscrits.style.display = "none";
+    panelClassees.style.display = "block";
+    try{ localStorage.setItem("etape1_equipes_view", "classees"); }catch(e){}
+  }
+
+  tabInscrits.addEventListener("click", showInscrits);
+  tabClassees.addEventListener("click", showClassees);
+
+  // restore last view
+  try{
+    const saved = localStorage.getItem("etape1_equipes_view");
+    if(saved === "classees") showClassees(); else showInscrits();
+  }catch(e){
+    showInscrits();
   }
 
   // 🔴 SNAPSHOT (temps réel)
@@ -266,7 +447,11 @@
         p2FirstName: d.p2FirstName || "",
         createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
         list: d.list || null,
-        stby: d.stby === true
+        stby: d.stby === true,
+
+        // ✅ nouveaux champs (admin les remplira)
+        p1Rank: d.p1Rank ?? null,
+        p2Rank: d.p2Rank ?? null
       });
     });
 
