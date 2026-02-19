@@ -30,6 +30,8 @@
       <a href="programmation.html">Programmation</a>
       <a href="equipes.html">Équipes</a>
       <a href="inscriptions.html" aria-current="page">Inscriptions</a>
+      <a href="repas.html">Repas</a>
+      <a href="tirage.html">Tirage au sort</a>
     </nav>
   </div>
 </header>
@@ -121,7 +123,6 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ✅ Aligné avec tes rules
   const COL_PRIVATE = "inscriptions_etape1_private";
   const COL_PUBLIC  = "equipes_etape1_public";
 
@@ -130,7 +131,8 @@
   const gateMsgEl = document.getElementById("gateMsg");
   const submitBtn = document.getElementById("submitBtn");
 
-  let gateState = "not_open"; // not_open | open | suspended | closed
+  // tes rules: open | paused | closed (sinon => pas encore ouvert)
+  let gateState = "not_open";
 
   const setStatus = (msg) => { statusEl.textContent = msg; };
 
@@ -139,8 +141,14 @@
     fields.forEach(el => el.disabled = disabled);
   }
 
-  function applyGate(state){
-    gateState = state || "not_open";
+  function normalizeState(state){
+    // compat: certains messages/anciens tests utilisaient "suspended"
+    if(state === "suspended") return "paused";
+    return state || "not_open";
+  }
+
+  function applyGate(stateRaw){
+    gateState = normalizeState(stateRaw);
 
     if(gateState === "open"){
       gateMsgEl.textContent = "✅ Inscriptions ouvertes. Tu peux t’inscrire ci-dessous.";
@@ -155,7 +163,7 @@
     submitBtn.disabled = true;
     submitBtn.classList.add("disabled");
 
-    if(gateState === "suspended"){
+    if(gateState === "paused"){
       gateMsgEl.textContent = "⏸️ Inscriptions temporairement suspendues. Réessaie un peu plus tard.";
       return;
     }
@@ -166,7 +174,7 @@
     gateMsgEl.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
   }
 
-  // 🔄 Live gate (si l’admin change l’état, le public voit immédiatement)
+  // 🔄 Live gate
   const cfgRef = doc(db, "config", "etape1");
   onSnapshot(cfgRef, (snap)=>{
     const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
@@ -197,7 +205,6 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // sécurité UI
     if(gateState !== "open"){
       setStatus("⛔ Inscriptions non ouvertes.");
       return;
@@ -214,10 +221,10 @@
         throw new Error("Merci de compléter tous les champs obligatoires.");
       }
 
-      // 1) PRIVÉ (doc auto-id)
+      // 1) PRIVÉ
       const ref = await addDoc(collection(db, COL_PRIVATE), data);
 
-      // 2) PUBLIC (même ID -> cohérence admin)
+      // 2) PUBLIC (même ID)
       await setDoc(doc(db, COL_PUBLIC, ref.id), {
         createdAt: serverTimestamp(),
         teamName: data.teamName,
@@ -233,7 +240,6 @@
       console.error(err);
       setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
     } finally {
-      // On remet le bouton selon l’état actuel
       if(gateState === "open"){
         submitBtn.disabled = false;
         submitBtn.classList.remove("disabled");
