@@ -70,29 +70,26 @@
 </section>
 
 <script type="module">
-  import { login, logout } from "./assets/js/session.js";
+  import { loginAndRedirect, logout } from "./assets/js/session.js";
 
-  async function promptLogin(){
-    const email = prompt("Email :");
-    if (!email) return;
-    const password = prompt("Mot de passe :");
-    if (!password) return;
-    try {
-      await login(email, password);
-      alert("Connexion réussie ✅");
-    } catch(e){
+  document.getElementById("btnAdmin").onclick = async (e)=>{
+    e.preventDefault();
+    try{
+      await loginAndRedirect();
+    }catch(err){
+      console.error(err);
       alert("Erreur de connexion ❌");
     }
-  }
-
-  document.getElementById("btnAdmin").onclick = (e)=>{
-    e.preventDefault();
-    promptLogin();
   };
 
-  document.getElementById("btnJat").onclick = (e)=>{
+  document.getElementById("btnJat").onclick = async (e)=>{
     e.preventDefault();
-    promptLogin();
+    try{
+      await loginAndRedirect();
+    }catch(err){
+      console.error(err);
+      alert("Erreur de connexion ❌");
+    }
   };
 
   document.getElementById("btnMobile").onclick = async (e)=>{
@@ -101,7 +98,6 @@
     alert("Retour mode mobile 📱");
   };
 </script>
-
 
 
 
