@@ -110,15 +110,15 @@
   const params = new URLSearchParams(location.search);
   const scope = params.get("scope") || "etape1"; // default
 
-  const stepNum = scope.replace("etape",""); // "1"...
+  const stepNum = scope.replace("etape","");
   const stepLabel = `Étape ${stepNum}`;
 
   // 🔧 Collections selon scope
-  const COL_PRIVATE = `inscriptions_${scope}_private`; // ex: inscriptions_etape1_private
-  const COL_PUBLIC  = `equipes_${scope}_public`;       // ex: equipes_etape1_public
+  const COL_PRIVATE = `inscriptions_${scope}_private`;
+  const COL_PUBLIC  = `equipes_${scope}_public`;
 
   // UI title
-  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`; // tu ajusteras BT250 par étape plus tard
+  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`;
 
   // Nav links keep scope
   document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
@@ -145,6 +145,7 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
+  // Accepte "12", "12.5", "12,5"
   function toNum(v){
     if(v === null || v === undefined || v === "") return null;
     const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
@@ -187,6 +188,7 @@
     privSnap.forEach(d=>{
       const data = d.data() || {};
       const pub = pubById.get(d.id) || {};
+
       rows.push({
         id: d.id,
         createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0,
@@ -195,7 +197,7 @@
         list: pub.list || null,
         stby: pub.stby === true,
 
-        // ✅ nouveaux champs classement (côté public)
+        // ✅ classements (stockés côté public)
         p1Rank: pub.p1Rank ?? null,
         p2Rank: pub.p2Rank ?? null
       });
@@ -205,7 +207,7 @@
     return rows;
   }
 
-  async function setPublicFlags(id, patch){
+  async function setPublicPatch(id, patch){
     await setDoc(
       doc(db, COL_PUBLIC, id),
       { ...patch, updatedAt: serverTimestamp() },
@@ -214,11 +216,11 @@
   }
 
   async function moveList(id, to){
-    await setPublicFlags(id, { list: to });
+    await setPublicPatch(id, { list: to });
   }
 
   async function toggleStby(id, current){
-    await setPublicFlags(id, { stby: !current });
+    await setPublicPatch(id, { stby: !current });
   }
 
   async function removeTeam(id){
@@ -281,16 +283,16 @@
     const p2 = prompt("Classement BT Joueur (nombre) :", cur2 === "—" ? "" : cur2);
     if(p2 === null) return;
 
-    const p1n = (p1.trim() === "") ? null : toNum(p1);
-    const p2n = (p2.trim() === "") ? null : toNum(p2);
+    const p1t = p1.trim();
+    const p2t = p2.trim();
 
-    if(p1.trim() !== "" && p1n === null) { alert("Classement Joueuse invalide."); return; }
-    if(p2.trim() !== "" && p2n === null) { alert("Classement Joueur invalide."); return; }
+    const p1n = (p1t === "") ? null : toNum(p1t);
+    const p2n = (p2t === "") ? null : toNum(p2t);
 
-    await setPublicFlags(row.id, {
-      p1Rank: p1n,
-      p2Rank: p2n
-    });
+    if(p1t !== "" && p1n === null) { alert("Classement Joueuse invalide."); return; }
+    if(p2t !== "" && p2n === null) { alert("Classement Joueur invalide."); return; }
+
+    await setPublicPatch(row.id, { p1Rank: p1n, p2Rank: p2n });
   }
 
   function render(rows){
@@ -306,6 +308,7 @@
 
     body.innerHTML = rows.map((r, idx) => {
       const tr = teamRank(r.p1Rank, r.p2Rank);
+
       return `
         <tr>
           <td>#${idx+1}</td>
@@ -315,6 +318,7 @@
             ${r.stby ? '<span class="pill">STBY</span>' : ''}
             ${tr !== null ? `<span class="pill rank">🏷️ Équipe: ${esc(String(tr))}</span>` : ''}
           </td>
+
           <td>${esc(r.p1FirstName)} ${esc(r.p1LastName)}</td>
           <td>${esc(r.p2FirstName)} ${esc(r.p2LastName)}</td>
 
