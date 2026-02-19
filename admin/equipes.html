@@ -59,11 +59,13 @@
             <th>Équipe</th>
             <th>Joueuse</th>
             <th>Joueur</th>
+            <th style="width:110px;">BT Joueuse</th>
+            <th style="width:110px;">BT Joueur</th>
             <th>Tél. Joueuse</th>
             <th>Tél. Joueur</th>
             <th>Licence Joueuse</th>
             <th>Licence Joueur</th>
-            <th style="width:220px;">Actions</th>
+            <th style="width:260px;">Actions</th>
           </tr>
         </thead>
         <tbody id="body"></tbody>
@@ -75,14 +77,20 @@
 
 <style>
   .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:1100px; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:1350px; }
   .teams-table thead th{
     text-align:left; font-size:13px; color:#444; background:#f7f7f7;
     border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+    white-space:nowrap;
   }
   .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
   .teams-table tbody tr:last-child td{ border-bottom:none; }
-  .pill{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid #eee; background:#fafafa; }
+
+  .pill{
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
+    border:1px solid #eee; background:#fafafa; white-space:nowrap;
+  }
+  .pill.rank{ border-color:#d9e6ff; background:#f3f7ff; font-weight:900; }
   .actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .btnx{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:700; }
   .btnx:hover{ background:#f5f5f5; }
@@ -95,7 +103,7 @@
   import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
+    collection, getDocs, doc, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ---- scope helpers
@@ -117,7 +125,7 @@
   document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
   document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
 
-  // Vue publique (pour etape1 -> ../etape1/equipes.html)
+  // Vue publique
   document.getElementById("btnPublic").onclick = (e)=>{
     e.preventDefault();
     if(scope === "etape1") window.location.href = "../etape1/equipes.html";
@@ -137,6 +145,23 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtRank(v){
+    const n = toNum(v);
+    return n === null ? "—" : String(n);
+  }
+
+  function teamRank(p1, p2){
+    const a = toNum(p1), b = toNum(p2);
+    if(a === null || b === null) return null;
+    return a + b;
+  }
+
   async function ensureAdmin(){
     const u = auth.currentUser;
     if(!u) return false;
@@ -153,7 +178,6 @@
       getDocs(collection(db, COL_PUBLIC)),
     ]);
 
-    // map public by id
     const pubById = new Map();
     pubSnap.forEach(d=>{
       pubById.set(d.id, d.data() || {});
@@ -167,8 +191,13 @@
         id: d.id,
         createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0,
         ...data,
+
         list: pub.list || null,
-        stby: pub.stby === true
+        stby: pub.stby === true,
+
+        // ✅ nouveaux champs classement (côté public)
+        p1Rank: pub.p1Rank ?? null,
+        p2Rank: pub.p2Rank ?? null
       });
     });
 
@@ -177,7 +206,11 @@
   }
 
   async function setPublicFlags(id, patch){
-    await setDoc(doc(db, COL_PUBLIC, id), { ...patch, updatedAt: serverTimestamp() }, { merge:true });
+    await setDoc(
+      doc(db, COL_PUBLIC, id),
+      { ...patch, updatedAt: serverTimestamp() },
+      { merge:true }
+    );
   }
 
   async function moveList(id, to){
@@ -223,17 +256,41 @@
     const p2Licence = prompt("Licence Joueur :", row.p2Licence || "");
     if(p2Licence === null) return;
 
+    // privé
     await updateDoc(doc(db, COL_PRIVATE, row.id), {
       teamName,
       p1FirstName, p1LastName, p1Phone, p1Licence,
       p2FirstName, p2LastName, p2Phone, p2Licence
     });
 
+    // public (sans toucher aux ranks)
     await setDoc(doc(db, COL_PUBLIC, row.id), {
       teamName,
       p1FirstName,
       p2FirstName
     }, { merge:true });
+  }
+
+  async function editRanks(row){
+    const cur1 = fmtRank(row.p1Rank);
+    const cur2 = fmtRank(row.p2Rank);
+
+    const p1 = prompt("Classement BT Joueuse (nombre) :", cur1 === "—" ? "" : cur1);
+    if(p1 === null) return;
+
+    const p2 = prompt("Classement BT Joueur (nombre) :", cur2 === "—" ? "" : cur2);
+    if(p2 === null) return;
+
+    const p1n = (p1.trim() === "") ? null : toNum(p1);
+    const p2n = (p2.trim() === "") ? null : toNum(p2);
+
+    if(p1.trim() !== "" && p1n === null) { alert("Classement Joueuse invalide."); return; }
+    if(p2.trim() !== "" && p2n === null) { alert("Classement Joueur invalide."); return; }
+
+    await setPublicFlags(row.id, {
+      p1Rank: p1n,
+      p2Rank: p2n
+    });
   }
 
   function render(rows){
@@ -247,31 +304,41 @@
     waitEl.textContent  = wait;
     stbyEl.textContent  = stby;
 
-    body.innerHTML = rows.map((r, idx) => `
-      <tr>
-        <td>#${idx+1}</td>
-        <td>
-          <strong>${esc(r.teamName)}</strong><br>
-          <span class="pill">list: ${esc(r.list || "auto")}</span>
-          ${r.stby ? '<span class="pill">STBY</span>' : ''}
-        </td>
-        <td>${esc(r.p1FirstName)} ${esc(r.p1LastName)}</td>
-        <td>${esc(r.p2FirstName)} ${esc(r.p2LastName)}</td>
-        <td>${esc(r.p1Phone)}</td>
-        <td>${esc(r.p2Phone)}</td>
-        <td>${esc(r.p1Licence)}</td>
-        <td>${esc(r.p2Licence)}</td>
-        <td>
-          <div class="actions">
-            <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Modifier</button>
-            <button class="btnx" data-act="main" data-id="${esc(r.id)}">⬆️ Principale</button>
-            <button class="btnx" data-act="wait" data-id="${esc(r.id)}">⬇️ Attente</button>
-            <button class="btnx" data-act="stby" data-id="${esc(r.id)}">${r.stby ? "✅ Activer" : "⏸️ STBY"}</button>
-            <button class="btnx danger" data-act="del" data-id="${esc(r.id)}">🗑️ Supprimer</button>
-          </div>
-        </td>
-      </tr>
-    `).join("");
+    body.innerHTML = rows.map((r, idx) => {
+      const tr = teamRank(r.p1Rank, r.p2Rank);
+      return `
+        <tr>
+          <td>#${idx+1}</td>
+          <td>
+            <strong>${esc(r.teamName)}</strong><br>
+            <span class="pill">list: ${esc(r.list || "auto")}</span>
+            ${r.stby ? '<span class="pill">STBY</span>' : ''}
+            ${tr !== null ? `<span class="pill rank">🏷️ Équipe: ${esc(String(tr))}</span>` : ''}
+          </td>
+          <td>${esc(r.p1FirstName)} ${esc(r.p1LastName)}</td>
+          <td>${esc(r.p2FirstName)} ${esc(r.p2LastName)}</td>
+
+          <td><span class="pill rank">${esc(fmtRank(r.p1Rank))}</span></td>
+          <td><span class="pill rank">${esc(fmtRank(r.p2Rank))}</span></td>
+
+          <td>${esc(r.p1Phone)}</td>
+          <td>${esc(r.p2Phone)}</td>
+          <td>${esc(r.p1Licence)}</td>
+          <td>${esc(r.p2Licence)}</td>
+
+          <td>
+            <div class="actions">
+              <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Modifier</button>
+              <button class="btnx" data-act="ranks" data-id="${esc(r.id)}">🏷️ Classements</button>
+              <button class="btnx" data-act="main" data-id="${esc(r.id)}">⬆️ Principale</button>
+              <button class="btnx" data-act="wait" data-id="${esc(r.id)}">⬇️ Attente</button>
+              <button class="btnx" data-act="stby" data-id="${esc(r.id)}">${r.stby ? "✅ Activer" : "⏸️ STBY"}</button>
+              <button class="btnx danger" data-act="del" data-id="${esc(r.id)}">🗑️ Supprimer</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
   }
 
   async function refresh(){
@@ -302,11 +369,12 @@
     statusEl.textContent = "Traitement…";
 
     try{
-      if(act === "edit") await editTeam(row);
-      if(act === "main") await moveList(id, "main");
-      if(act === "wait") await moveList(id, "wait");
-      if(act === "stby") await toggleStby(id, row.stby);
-      if(act === "del")  await removeTeam(id);
+      if(act === "edit")  await editTeam(row);
+      if(act === "ranks") await editRanks(row);
+      if(act === "main")  await moveList(id, "main");
+      if(act === "wait")  await moveList(id, "wait");
+      if(act === "stby")  await toggleStby(id, row.stby);
+      if(act === "del")   await removeTeam(id);
 
       await refresh();
     }catch(err){
