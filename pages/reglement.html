@@ -1,11 +1,100 @@
-<section class="card">
-  <h2>📄 Règlement officiel</h2>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Règlement — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
 
-  <p>
-    Retrouvez ici le règlement complet du Suzini BT Double Mixte Challenge.
-  </p>
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
 
-  <a class="btn" href="../assets/docs/reglement-double-mixte.pdf" target="_blank">
-    Télécharger le règlement PDF
-  </a>
-</section>
+      <h1 class="brand-title">Règlement</h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil</a>
+      <a href="classement.html">Classement</a>
+      <a href="reglement.html" aria-current="page">Règlement</a>
+      <a href="infos.html">Infos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>📄 Règlement officiel</h2>
+
+    <div class="grid">
+      <a class="btn" href="../assets/docs/reglement-double-mixte.pdf" target="_blank" rel="noopener">
+        Télécharger le règlement PDF
+      </a>
+
+      <button class="btn" id="btnLang" type="button" style="font-weight:800; color:#111;">
+        🇵🇹 Ver em Português
+      </button>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Résumé (la version PDF fait foi).
+    </p>
+  </section>
+
+  <section class="card" id="resumeFR">
+    <h2>Résumé — Français</h2>
+    <ul>
+      <li><strong>Principe</strong> : challenge multi-étapes, indépendant des autres événements.</li>
+      <li><strong>Classement</strong> : établi par joueur (les joueurs peuvent changer d’équipe selon les étapes).</li>
+      <li><strong>Départage</strong> en cas d’ex æquo : (1) matchs gagnés sur le challenge, (2) manches gagnées, (3) jeux gagnés. Si besoin, ex æquo maintenu.</li>
+      <li><strong>Inscriptions</strong> : modalités et calendrier indiqués dans le règlement (certaines dates/horaires peuvent être indicatifs).</li>
+      <li><strong>Organisation</strong> : programme, horaires, tirages et informations pratiques publiés au fil de l’eau.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="resumePT" style="display:none;">
+    <h2>Resumo — Português</h2>
+    <ul>
+      <li><strong>Princípio</strong> : desafio em várias etapas, independente de outros eventos.</li>
+      <li><strong>Classificação</strong> : feita por jogador (os jogadores podem mudar de dupla entre etapas).</li>
+      <li><strong>Desempate</strong> em caso de igualdade: (1) jogos/partidas vencidas no desafio, (2) sets vencidos, (3) games vencidos. Se necessário, mantém-se o empate.</li>
+      <li><strong>Inscrições</strong> : regras e calendário no regulamento (algumas datas/horários podem ser indicativos).</li>
+      <li><strong>Organização</strong> : programação, horários, sorteios e infos práticas serão publicados conforme necessário.</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+  const btn = document.getElementById("btnLang");
+  const fr = document.getElementById("resumeFR");
+  const pt = document.getElementById("resumePT");
+  let lang = "fr";
+
+  btn.addEventListener("click", ()=>{
+    if(lang === "fr"){
+      fr.style.display = "none";
+      pt.style.display = "block";
+      btn.textContent = "🇫🇷 Voir en Français";
+      lang = "pt";
+    }else{
+      pt.style.display = "none";
+      fr.style.display = "block";
+      btn.textContent = "🇵🇹 Ver em Português";
+      lang = "fr";
+    }
+  });
+</script>
+
+</body>
+</html>
