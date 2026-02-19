@@ -51,25 +51,32 @@
     <div class="grid" style="margin-top:12px;">
       <button class="btn" id="btnNotOpen" style="font-weight:800; color:#111;">💤 Pas encore ouvertes</button>
       <button class="btn" id="btnOpen" style="font-weight:800; color:#111;">✅ Ouvrir</button>
-      <button class="btn" id="btnSuspend" style="font-weight:800; color:#111;">⏸️ Suspendre</button>
+      <button class="btn" id="btnPause" style="font-weight:800; color:#111;">⏸️ Suspendre</button>
       <button class="btn" id="btnClose" style="font-weight:800; color:#111;">🔒 Clôturer</button>
     </div>
 
     <p class="muted" style="margin-top:12px;">
-      ⚠️ Le public voit l’état (ouvertes / suspendues / clôturées / pas encore ouvertes).<br>
-      Les règles Firestore bloquent aussi l’écriture si ce n’est pas “open”.
+      ⚠️ Le public voit l’état en direct (ouvertes / suspendues / clôturées / pas encore ouvertes).<br>
+      Les rules Firestore bloquent aussi l’écriture tant que ce n’est pas “open”.
     </p>
   </section>
 
 </main>
 
+<style>
+  /* Simple feedback visuel sur l'état courant */
+  .btn.active{
+    border-color:#cfcfcf !important;
+    background:#fff !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  }
+</style>
+
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc, getDoc, setDoc, onSnapshot, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ---- scope
   const params = new URLSearchParams(location.search);
@@ -101,17 +108,26 @@
 
   const btnNotOpen = document.getElementById("btnNotOpen");
   const btnOpen = document.getElementById("btnOpen");
-  const btnSuspend = document.getElementById("btnSuspend");
+  const btnPause = document.getElementById("btnPause");
   const btnClose = document.getElementById("btnClose");
 
   // ---- config doc
   const cfgRef = doc(db, "config", scope); // ex: config/etape1
 
+  // 🔑 états utilisés partout
+  // - rules: open | paused | closed
+  // - "pas encore ouvertes": on stocke "not_open" (et côté public c'est traité comme non-open => formulaire bloqué)
+  function normalizeState(state){
+    // compat ancienne valeur "suspended"
+    if(state === "suspended") return "paused";
+    return state || "not_open";
+  }
+
   function labelFor(state){
     switch(state){
       case "not_open": return "💤 Pas encore ouvertes";
       case "open": return "✅ Ouvertes";
-      case "suspended": return "⏸️ Suspendues";
+      case "paused": return "⏸️ Suspendues";
       case "closed": return "🔒 Clôturées";
       default: return "—";
     }
@@ -121,13 +137,13 @@
     switch(state){
       case "not_open": return "Le public voit : “Les inscriptions ne sont pas encore ouvertes.”";
       case "open": return "Le public voit : “Inscriptions ouvertes ✅” (formulaire actif).";
-      case "suspended": return "Le public voit : “Inscriptions suspendues ⏸️” (formulaire bloqué).";
+      case "paused": return "Le public voit : “Inscriptions temporairement suspendues ⏸️” (formulaire bloqué).";
       case "closed": return "Le public voit : “Inscriptions clôturées 🔒” (formulaire bloqué).";
       default: return "";
     }
   }
 
-  let currentState = null;
+  let currentState = "not_open";
 
   async function ensureAdmin(){
     const u = auth.currentUser;
@@ -137,19 +153,33 @@
   }
 
   function setButtonsDisabled(disabled){
-    [btnNotOpen, btnOpen, btnSuspend, btnClose].forEach(b=>{
+    [btnNotOpen, btnOpen, btnPause, btnClose].forEach(b=>{
       b.disabled = disabled;
       b.classList.toggle("disabled", disabled);
     });
   }
 
+  function setActiveButton(state){
+    [btnNotOpen, btnOpen, btnPause, btnClose].forEach(b=> b.classList.remove("active"));
+
+    if(state === "not_open") btnNotOpen.classList.add("active");
+    else if(state === "open") btnOpen.classList.add("active");
+    else if(state === "paused") btnPause.classList.add("active");
+    else if(state === "closed") btnClose.classList.add("active");
+
+    // libellé du bouton pause = suspendre / réactiver
+    btnPause.textContent = (state === "paused") ? "▶️ Réactiver" : "⏸️ Suspendre";
+  }
+
   async function setState(next){
-    // confirmations “safe”
-    if(next === "closed"){
+    const target = normalizeState(next);
+
+    // confirmations utiles (pas trop intrusives)
+    if(target === "closed"){
       const ok = confirm("Clôturer les inscriptions ?\n\nLe public verra “clôturées” et ne pourra plus s’inscrire.");
       if(!ok) return;
     }
-    if(next === "not_open"){
+    if(target === "not_open"){
       const ok = confirm("Mettre “pas encore ouvertes” ?\n\nLe public verra que ce n’est pas ouvert, formulaire bloqué.");
       if(!ok) return;
     }
@@ -159,7 +189,7 @@
 
     try{
       await setDoc(cfgRef, {
-        inscriptionsState: next,
+        inscriptionsState: target,
         updatedAt: serverTimestamp()
       }, { merge:true });
 
@@ -176,13 +206,10 @@
   btnNotOpen.onclick = ()=> setState("not_open");
   btnOpen.onclick = ()=> setState("open");
 
-  btnSuspend.onclick = ()=>{
+  btnPause.onclick = ()=>{
     // toggle suspend/resume depending on current state
-    if(currentState === "suspended"){
-      setState("open"); // réactiver
-    }else{
-      setState("suspended"); // suspendre (même si currently open/not_open)
-    }
+    if(currentState === "paused") setState("open");
+    else setState("paused");
   };
 
   btnClose.onclick = ()=> setState("closed");
@@ -212,16 +239,14 @@
 
     adminUI.style.display = "block";
 
-    // live update (si tu changes depuis un autre device)
+    // live update
     onSnapshot(cfgRef, (snap)=>{
-      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
+      const state = normalizeState(snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open");
       currentState = state;
 
       currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
       statusMsgEl.textContent = publicMessage(state);
-
-      // bouton suspend = suspendre ou réactiver
-      btnSuspend.textContent = (state === "suspended") ? "▶️ Réactiver" : "⏸️ Suspendre";
+      setActiveButton(state);
     }, (err)=>{
       console.error(err);
       currentStateEl.textContent = "❌ Impossible de lire le statut.";
