@@ -39,20 +39,21 @@
     <form id="infoForm" class="form" autocomplete="off">
       <div class="field">
         <label for="infoTitle">Titre *</label>
-        <input id="infoTitle" name="infoTitle" type="text" required maxlength="80" placeholder="Ex : Inscriptions ouvertes ✅">
+        <input id="infoTitle" name="infoTitle" type="text" required maxlength="80"
+               placeholder="Ex : Inscriptions ouvertes ✅">
       </div>
 
       <div class="field">
         <label for="infoText">Texte *</label>
         <textarea id="infoText" name="infoText" rows="5" required maxlength="2000"
-          placeholder="Écris ici le message (emojis ok 😄)"></textarea>
+                  placeholder="Écris ici le message (emojis ok 😄)"></textarea>
       </div>
 
       <button id="publishBtn" class="btn" type="submit" style="font-weight:800; color:#111;">
         📣 Publier
       </button>
 
-      <p id="adminStatus" class="muted" role="status" aria-live="polite"></p>
+      <p id="adminStatus" class="muted" role="status" aria-live="polite" style="margin:8px 0 0;"></p>
     </form>
 
     <p class="muted" style="margin-top:10px;">
@@ -67,7 +68,7 @@
       Retrouvez ici les dernières annonces de l’organisation.
     </p>
 
-    <!-- Compteur -->
+    <!-- Compteur / statut -->
     <p class="muted" id="infosCount" style="margin:10px 0 0;">Chargement…</p>
 
     <!-- Liste -->
@@ -84,6 +85,7 @@
     getFirestore,
     collection,
     addDoc,
+    deleteDoc,
     serverTimestamp,
     query,
     orderBy,
@@ -106,28 +108,19 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // 🔧 Collection des infos (publique en lecture)
-  // -> Côté rules: allow read: if true; allow create: seulement admin
+  // 🔧 Collection des infos
   const COL_INFOS = "infos";
 
-  // Elements DOM
-  const infosList = document.getElementById("infosList");
+  // DOM
+  const infosList  = document.getElementById("infosList");
   const infosCount = document.getElementById("infosCount");
 
-  const adminBox = document.getElementById("adminBox");
-  const infoForm = document.getElementById("infoForm");
-  const publishBtn = document.getElementById("publishBtn");
+  const adminBox    = document.getElementById("adminBox");
+  const infoForm    = document.getElementById("infoForm");
+  const publishBtn  = document.getElementById("publishBtn");
   const adminStatus = document.getElementById("adminStatus");
 
-  const fmtDate = (ts) => {
-    try{
-      const d = ts?.toDate ? ts.toDate() : null;
-      if(!d) return "";
-      return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
-    } catch {
-      return "";
-    }
-  };
+  let isAdmin = false;
 
   function escapeHTML(str){
     return (str || "")
@@ -138,46 +131,19 @@
       .replaceAll("'","&#039;");
   }
 
-  function renderInfos(docs){
-    infosList.innerHTML = "";
-
-    infosCount.textContent = `📌 ${docs.length} info${docs.length > 1 ? "s" : ""}`;
-
-    if(docs.length === 0){
-      infosList.innerHTML = `<p class="muted" style="margin:0;">Aucune info pour le moment.</p>`;
-      return;
-    }
-
-    for(const it of docs){
-      const title = escapeHTML(it.title);
-      const text = escapeHTML(it.text).replaceAll("\n","<br>");
-      const date = fmtDate(it.createdAt);
-
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.margin = "0";
-      card.innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:6px;">
-          <div style="font-weight:900;">${title}</div>
-          <div class="muted" style="margin:0;">🗓️ ${date || "—"}</div>
-          <div style="margin-top:2px; line-height:1.45;">${text}</div>
-        </div>
-      `;
-      infosList.appendChild(card);
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", {
+        year:"numeric", month:"long", day:"numeric",
+        hour:"2-digit", minute:"2-digit"
+      });
+    } catch {
+      return "—";
     }
   }
 
-  // 🔄 Flux live (plus récent en haut)
-  const q = query(collection(db, COL_INFOS), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snap) => {
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderInfos(docs);
-  }, (err) => {
-    console.error(err);
-    infosCount.textContent = "❌ Impossible de charger les infos.";
-  });
-
-  // 🔐 Afficher le bloc admin uniquement si rôle = admin
   async function getRoleByEmail(email){
     const ref = doc(db, "roles", email);
     const s = await getDoc(ref);
@@ -185,20 +151,98 @@
     return s.data().role || null;
   }
 
+  function renderInfos(items){
+    infosList.innerHTML = "";
+
+    infosCount.textContent = `📌 ${items.length} info${items.length > 1 ? "s" : ""}`;
+
+    if(items.length === 0){
+      infosList.innerHTML = `<p class="muted" style="margin:0;">Aucune info pour le moment.</p>`;
+      return;
+    }
+
+    for(const it of items){
+      const title = escapeHTML(it.title);
+      const text  = escapeHTML(it.text).replaceAll("\n","<br>");
+      const date  = fmtDate(it.createdAt);
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.margin = "0";
+
+      // Bouton supprimer uniquement si admin
+      const adminActions = isAdmin ? `
+        <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+          <button class="btn" data-del="${it.id}" style="font-weight:800; color:#111;">
+            🗑️ Supprimer
+          </button>
+        </div>
+      ` : "";
+
+      card.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div style="font-weight:900;">${title}</div>
+          <div class="muted" style="margin:0;">🗓️ ${date}</div>
+          <div style="margin-top:2px; line-height:1.45;">${text}</div>
+          ${adminActions}
+        </div>
+      `;
+
+      infosList.appendChild(card);
+    }
+
+    // Bind delete (admin only)
+    if(isAdmin){
+      infosList.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-del");
+          const ok = confirm("Supprimer cette info ?\n\n⚠️ Action irréversible.");
+          if(!ok) return;
+
+          try{
+            await deleteDoc(doc(db, COL_INFOS, id));
+            alert("Info supprimée ✅");
+          } catch(e){
+            console.error(e);
+            alert("Erreur suppression ❌");
+          }
+        });
+      });
+    }
+  }
+
+  // 🔐 Détection admin
   onAuthStateChanged(auth, async (user) => {
     adminBox.style.display = "none";
-    adminStatus.textContent = "";
+    isAdmin = false;
 
-    if(!user) return;
+    if(!user){
+      // Re-render pour enlever les boutons delete si la personne se déconnecte
+      // (le flux snapshot continuera)
+      return;
+    }
 
     try{
       const role = await getRoleByEmail(user.email);
       if(role === "admin"){
+        isAdmin = true;
         adminBox.style.display = "block";
       }
     } catch(e){
       console.warn("Role lookup failed:", e);
     }
+  });
+
+  // 🔄 Flux live (plus récent en haut)
+  infosCount.textContent = "Chargement…";
+  const q = query(collection(db, COL_INFOS), orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snap) => {
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderInfos(items);
+  }, (err) => {
+    console.error(err);
+    infosCount.textContent = "❌ Impossible de charger les infos.";
   });
 
   // 🛠️ Publication (admin)
