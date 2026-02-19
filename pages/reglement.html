@@ -5,70 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Règlement — Double Mixte Challenge</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
-
-  <!-- Styles spécifiques à cette page (résumé aéré) -->
   <style>
-    .actions-row{
+    /* Petits compléments de mise en page (sans casser ton main.css) */
+    .actions-bar{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:space-between;
     }
-    .actions-left, .actions-right{
+    .actions-left{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .actions-right{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+    .lang-label{
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
       align-items:center;
+      gap:8px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid #ddd;
+      background:#fafafa;
+      font-weight:800;
     }
 
-    /* Résumé aéré */
-    .rules-grid{
+    .summary-grid{
       display:grid;
+      grid-template-columns:1fr;
       gap:12px;
       margin-top:12px;
     }
-    .rule-box{
+
+    .mini-card{
       border:1px solid #eee;
-      background:#fff;
       border-radius:14px;
       padding:14px;
+      background:#fff;
     }
-    .rule-box h3{
+
+    .mini-card h3{
       margin:0 0 8px 0;
-      font-size:16px;
-      line-height:1.2;
+      font-size:18px;
+      line-height:1.15;
     }
-    .rule-box p{
-      margin:0;
-      line-height:1.55;
-    }
-    .rule-list{
+
+    .mini-card ul{
       margin:0;
       padding-left:18px;
-      display:grid;
-      gap:8px;
-    }
-    .rule-note{
-      margin:0;
-      color:var(--muted);
       line-height:1.55;
     }
-    .lang-pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #eee;
-      background:#fafafa;
-      font-weight:800;
-      font-size:13px;
-      color:#111;
-    }
-    /* Desktop: 2 colonnes */
-    @media (min-width: 780px){
-      .rules-grid{ grid-template-columns: 1fr 1fr; }
+    .mini-card li{ margin:6px 0; }
+
+    /* Un peu plus aéré sur mobile */
+    @media (max-width: 480px){
+      .mini-card{ padding:14px; }
+      .mini-card h3{ font-size:17px; }
     }
   </style>
 </head>
@@ -100,221 +90,195 @@
 
   <!-- Barre d'actions : Télécharger + Langue -->
   <section class="card" style="margin-bottom:14px;">
-    <div class="actions-row">
+    <div class="actions-bar">
+
       <div class="actions-left">
-        <!-- ✅ Mets ici le chemin réel de ton PDF dans le repo -->
-        <a class="btn" href="../assets/docs/reglement-double-mixte-challenge.pdf" download style="font-weight:800;">
-          📄 Télécharger le règlement complet
+        <!-- FR PDF -->
+        <a class="btn" id="dlFR" href="../assets/docs/reglement-double-mixte-challenge-fr.pdf" download style="font-weight:800; color:#111;">
+          📄 Télécharger le règlement complet (FR)
+        </a>
+
+        <!-- PT PDF -->
+        <a class="btn" id="dlPT" href="../assets/docs/regulamento-double-mixte-challenge-ptbr.pdf" download style="font-weight:800; color:#111;">
+          📄 Baixar o regulamento completo (PT-BR)
         </a>
       </div>
 
       <div class="actions-right">
-        <span class="lang-pill">🌍 Langue</span>
-
-        <button class="btn" type="button" id="btnFR" aria-label="Français" title="Français" style="font-weight:800;">
-          🇫🇷
-        </button>
-        <button class="btn" type="button" id="btnPT" aria-label="Português (Brasil)" title="Português (Brasil)" style="font-weight:800;">
-          🇧🇷
-        </button>
+        <div class="lang-label">🌍 Langue</div>
+        <button class="btn" type="button" id="btnFR" aria-label="Français" title="Français" style="font-weight:800; color:#111;">🇫🇷</button>
+        <button class="btn" type="button" id="btnPT" aria-label="Português (Brasil)" title="Português (Brasil)" style="font-weight:800; color:#111;">🇧🇷</button>
       </div>
+
     </div>
   </section>
 
   <!-- Résumé du règlement -->
   <section class="card" id="reglement-resume">
-    <h2 style="margin:0;">📘 Règlement — Résumé </h2>
-    <p class="muted" style="margin:10px 0 0;">
-      Version simplifiée pour lecture mobile 📱 — se référer au règlement complet pour tous les détails.
-    </p>
+    <!-- FR -->
+    <div id="langFR">
+      <h2 style="margin:0;">📘 Règlement — Résumé (mobile)</h2>
+      <p class="muted" style="margin:8px 0 0;">
+        Version simplifiée pour lecture mobile 📱 — se référer au règlement complet pour tous les détails.
+      </p>
 
-    <!-- ===================== FR ===================== -->
-    <div id="langFR" style="margin-top:12px;">
+      <div class="summary-grid">
 
-      <div class="rules-grid">
-
-        <div class="rule-box">
+        <div class="mini-card">
           <h3>🎾 Format du challenge</h3>
-          <p>
-            Challenge en <strong>double mixte</strong>, organisé en <strong>plusieurs étapes</strong>.
-            Chaque étape = un tournoi indépendant, avec un classement de l’étape
-            + un <strong>classement général</strong> cumulé.
-          </p>
-        </div>
-
-        <div class="rule-box">
-          <h3>✅ Conditions</h3>
-          <ul class="rule-list">
-            <li><strong>Licence FFT Beach Tennis / Multi-raquettes (année en cours)</strong> obligatoire 🪪</li>
-            <li><strong>Seniors</strong>, ouvert dès <strong>U16</strong> (U12 possible sur dérogation + certificat &lt; 6 mois) 👶</li>
+          <ul>
+            <li>Challenge en <b>double mixte</b>, composé de <b>plusieurs étapes</b>.</li>
+            <li>Chaque étape = <b>tournoi indépendant</b> + points pour le <b>classement général</b>.</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>⚖️ Catégories & plafonds</h3>
-          <ul class="rule-list">
-            <li><strong>BT250</strong> : poids équipe ≤ <strong>120</strong> (somme des classements) ⚖️</li>
-            <li><strong>BT100</strong> : hommes ≤ <strong>200 FFT</strong> / femmes ≤ <strong>150 FFT</strong> 📊</li>
+        <div class="mini-card">
+          <h3>✅ Conditions & inscription</h3>
+          <ul>
+            <li>Licence FFT <b>Beach tennis / multi-raquettes 2026</b> obligatoire 🪪</li>
+            <li>Seniors, ouvert dès <b>U16</b> (U12 possible avec dérogation + certificat &lt; 6 mois) 👶</li>
+            <li><b>Inscription par équipe</b> uniquement (pas d’inscription individuelle) 👥</li>
+            <li><b>20€ / équipe</b> par étape 💶</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>👥 Inscriptions</h3>
-          <ul class="rule-list">
-            <li>Inscription <strong>par équipe</strong> (pas d’inscription individuelle) 👥</li>
-            <li><strong>20€ / équipe</strong> par étape 💶</li>
-            <li>Places limitées : <strong>liste principale</strong> + <strong>liste d’attente</strong> ⏳</li>
+        <div class="mini-card">
+          <h3>⚖️ Plafonds (classements)</h3>
+          <ul>
+            <li>BT250 : <b>poids équipe ≤ 120</b> (somme des classements) ⚖️</li>
+            <li>BT100 : hommes ≤ <b>200 FFT</b> / femmes ≤ <b>150 FFT</b> 📊</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🗂️ Listes & remplacements</h3>
-          <ul class="rule-list">
-            <li>Liste établie par <strong>ordre d’inscription</strong> 🧾</li>
-            <li>Remplacement possible <strong>jusqu’à validation définitive / tirage</strong> ✅</li>
-            <li>Après tirage : <strong>aucun remplacement</strong> ❌</li>
+        <div class="mini-card">
+          <h3>📋 Listes & remplacements</h3>
+          <ul>
+            <li>Liste principale : <b>8 équipes max</b> + <b>liste d’attente</b> ⏳</li>
+            <li>Ordre basé sur l’<b>ordre d’inscription</b> 🧾</li>
+            <li>Changements possibles <b>avant validation finale / tirage</b>; après tirage : <b>pas de remplacement</b> ❌</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🔁 Format des matchs</h3>
-          <ul class="rule-list">
-            <li>Format : <strong>TMC</strong> à 8 équipes (chaque équipe joue plusieurs matchs) 🔁</li>
-            <li><strong>Format 3</strong> : 2 sets de 4 jeux (point décisif) + super TB si besoin 🧠</li>
-            <li>Repos indicatif entre matchs : <strong>30 min</strong> (ajustable par décision du JAT) ⏸️</li>
+        <div class="mini-card">
+          <h3>🏁 Format des matchs</h3>
+          <ul>
+            <li>Format <b>TMC</b> (8 équipes) : chaque équipe joue <b>3 matchs</b> minimum 🔁</li>
+            <li><b>Format 3</b> : 2 sets de 4 jeux (no-ad), TB à 4-4 ; 3e set = super TB à 10 🧠</li>
+            <li>Repos cible : <b>30 min</b> entre matchs ⏸️</li>
           </ul>
         </div>
 
-        <div class="rule-box">
+        <div class="mini-card">
           <h3>⏰ Présence / retards / WO</h3>
-          <ul class="rule-list">
-            <li>Respect des convocations et horaires 🏁</li>
-            <li>Retards : pénalités possibles jusqu’au <strong>WO</strong> (décision JAT) ⚠️</li>
-            <li>Les matchs de classement sont en principe <strong>obligatoires</strong> ✅</li>
+          <ul>
+            <li>Convocation à partir de <b>17h45</b> (début 18h00) 🏁</li>
+            <li>Retard : <b>5 min = 1 jeu</b> • <b>10 min = 2 jeux</b> • <b>15 min = WO</b> ⚠️</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🏆 Classement & lots</h3>
-          <ul class="rule-list">
-            <li>Points d’étape + addition dans le <strong>classement général</strong> 📈</li>
-            <li><strong>Pas de prize money</strong> 💸❌, mais des <strong>lots</strong> 🎁</li>
+        <div class="mini-card">
+          <h3>🏆 Points & classement</h3>
+          <ul>
+            <li>Points du challenge = <b>mêmes points que FFT</b> 📈</li>
+            <li>Classement général : <b>somme des points</b> sur l’ensemble des étapes 🧮</li>
+            <li>Pas de prize money 💸❌ — mais <b>lots</b> pour les meilleures équipes 🎁</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🧑‍⚖️ Organisation & fair-play</h3>
-          <ul class="rule-list">
-            <li>Décisions JAT / organisation : référence en cas de litige 🧑‍⚖️</li>
+        <div class="mini-card">
+          <h3>🧑‍⚖️ Organisation & règles de vie</h3>
+          <ul>
             <li>Respect & fair-play : sanctions possibles jusqu’à disqualification 🟨🟥</li>
-            <li>Droit à l’image : photos/vidéos possibles pour la communication 📸</li>
+            <li>Météo / force majeure : adaptation, suspension ou annulation possible 🌧️</li>
+            <li>Droit à l’image : photos/vidéos possibles pour la communication du club 📸</li>
           </ul>
-        </div>
-
-        <div class="rule-box">
-          <h3>📎 À retenir</h3>
-          <p class="rule-note">
-            Ce résumé simplifie volontairement. Pour les départages, détails sportifs, cas particuliers, etc. :
-            <strong>utilise le PDF complet</strong> 📄
-          </p>
         </div>
 
       </div>
     </div>
 
-    <!-- ===================== PT-BR ===================== -->
-    <div id="langPT" style="margin-top:12px; display:none;">
+    <!-- PT -->
+    <div id="langPT" style="display:none;">
+      <h2 style="margin:0;">📘 Regulamento — Resumo (mobile)</h2>
+      <p class="muted" style="margin:8px 0 0;">
+        Versão simplificada para leitura no celular 📱 — consulte o regulamento completo para todos os detalhes.
+      </p>
 
-      <div class="rules-grid">
+      <div class="summary-grid">
 
-        <div class="rule-box">
+        <div class="mini-card">
           <h3>🎾 Formato do challenge</h3>
-          <p>
-            Challenge em <strong>dupla mista</strong>, com <strong>várias etapas</strong>.
-            Cada etapa = um torneio independente, com ranking da etapa
-            + <strong>ranking geral</strong> acumulado.
-          </p>
-        </div>
-
-        <div class="rule-box">
-          <h3>✅ Condições</h3>
-          <ul class="rule-list">
-            <li><strong>Licença FFT Beach Tennis / Multi-raquetes (ano vigente)</strong> obrigatória 🪪</li>
-            <li><strong>Sênior</strong>, aberto a partir de <strong>U16</strong> (U12 com autorização + atestado &lt; 6 meses) 👶</li>
+          <ul>
+            <li>Challenge em <b>dupla mista</b>, com <b>várias etapas</b>.</li>
+            <li>Cada etapa = <b>torneio independente</b> + pontos para o <b>ranking geral</b>.</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>⚖️ Categorias & limites</h3>
-          <ul class="rule-list">
-            <li><strong>BT250</strong>: peso da dupla ≤ <strong>120</strong> (soma das classificações) ⚖️</li>
-            <li><strong>BT100</strong>: homens ≤ <strong>200 FFT</strong> / mulheres ≤ <strong>150 FFT</strong> 📊</li>
+        <div class="mini-card">
+          <h3>✅ Condições & inscrição</h3>
+          <ul>
+            <li>Licença FFT <b>Beach tennis / multi-raquetes 2026</b> obrigatória 🪪</li>
+            <li>Sênior, aberto a partir de <b>U16</b> (U12 com autorização + atestado &lt; 6 meses) 👶</li>
+            <li><b>Inscrição somente por dupla</b> (não individual) 👥</li>
+            <li><b>20€ por dupla</b> em cada etapa 💶</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>👥 Inscrições</h3>
-          <ul class="rule-list">
-            <li>Inscrição <strong>somente por dupla</strong> (não individual) 👥</li>
-            <li><strong>20€ por dupla</strong> em cada etapa 💶</li>
-            <li>Vagas limitadas: <strong>lista principal</strong> + <strong>lista de espera</strong> ⏳</li>
+        <div class="mini-card">
+          <h3>⚖️ Limites (rankings)</h3>
+          <ul>
+            <li>BT250: <b>peso da dupla ≤ 120</b> (soma das classificações) ⚖️</li>
+            <li>BT100: homens ≤ <b>200 FFT</b> / mulheres ≤ <b>150 FFT</b> 📊</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🗂️ Listas & substituições</h3>
-          <ul class="rule-list">
-            <li>Ordem por <strong>data/hora de inscrição</strong> 🧾</li>
-            <li>Substituição possível <strong>até validação final / sorteio</strong> ✅</li>
-            <li>Após o sorteio: <strong>sem substituições</strong> ❌</li>
+        <div class="mini-card">
+          <h3>📋 Listas & substituições</h3>
+          <ul>
+            <li>Lista principal: <b>máx. 8 duplas</b> + <b>lista de espera</b> ⏳</li>
+            <li>Ordem por <b>ordem de inscrição</b> 🧾</li>
+            <li>Trocas possíveis <b>antes da validação final / sorteio</b>; após o sorteio: <b>sem substituições</b> ❌</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🔁 Formato dos jogos</h3>
-          <ul class="rule-list">
-            <li>Formato: <strong>TMC</strong> com 8 duplas (cada dupla joga vários jogos) 🔁</li>
-            <li><strong>Formato 3</strong>: 2 sets de 4 games (ponto decisivo) + super TB se necessário 🧠</li>
-            <li>Descanso indicativo: <strong>30 min</strong> (ajustável por decisão do árbitro) ⏸️</li>
+        <div class="mini-card">
+          <h3>🏁 Formato dos jogos</h3>
+          <ul>
+            <li>Formato <b>TMC</b> (8 duplas): cada dupla joga <b>3 partidas</b> no mínimo 🔁</li>
+            <li><b>Formato 3</b>: 2 sets de 4 games (ponto decisivo), tie-break em 4-4; 3º set = super TB a 10 🧠</li>
+            <li>Descanso alvo: <b>30 min</b> entre jogos ⏸️</li>
           </ul>
         </div>
 
-        <div class="rule-box">
+        <div class="mini-card">
           <h3>⏰ Presença / atrasos / WO</h3>
-          <ul class="rule-list">
-            <li>Respeitar convocação e horários 🏁</li>
-            <li>Atrasos: penalidades até <strong>WO</strong> (decisão do árbitro) ⚠️</li>
-            <li>Jogos de classificação em princípio <strong>obrigatórios</strong> ✅</li>
+          <ul>
+            <li>Chegada a partir de <b>17h45</b> (início 18h00) 🏁</li>
+            <li>Atraso: <b>5 min = 1 game</b> • <b>10 min = 2 games</b> • <b>15 min = WO</b> ⚠️</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🏆 Ranking & prêmios</h3>
-          <ul class="rule-list">
-            <li>Pontos da etapa + soma no <strong>ranking geral</strong> 📈</li>
-            <li><strong>Sem prize money</strong> 💸❌, mas <strong>brindes</strong> 🎁</li>
+        <div class="mini-card">
+          <h3>🏆 Pontos & ranking</h3>
+          <ul>
+            <li>Pontos do challenge = <b>mesmos pontos FFT</b> 📈</li>
+            <li>Ranking geral: <b>soma dos pontos</b> ao longo das etapas 🧮</li>
+            <li>Sem prize money 💸❌ — mas <b>brindes</b> para as melhores duplas 🎁</li>
           </ul>
         </div>
 
-        <div class="rule-box">
-          <h3>🧑‍⚖️ Organização & fair-play</h3>
-          <ul class="rule-list">
-            <li>Decisões do árbitro/organização: referência em caso de disputa 🧑‍⚖️</li>
-            <li>Respeito & fair-play: sanções até desclassificação 🟨🟥</li>
-            <li>Direito de imagem: fotos/vídeos podem ser usados na comunicação 📸</li>
+        <div class="mini-card">
+          <h3>🧑‍⚖️ Organização & convivência</h3>
+          <ul>
+            <li>Respeito & fair-play: sanções possíveis até desclassificação 🟨🟥</li>
+            <li>Clima / força maior: adaptação, suspensão ou cancelamento 🌧️</li>
+            <li>Direito de imagem: fotos/vídeos podem ser usados na comunicação do clube 📸</li>
           </ul>
-        </div>
-
-        <div class="rule-box">
-          <h3>📎 Importante</h3>
-          <p class="rule-note">
-            Este resumo é simplificado. Para desempates, detalhes esportivos e casos especiais:
-            <strong>consulte o PDF completo</strong> 📄
-          </p>
         </div>
 
       </div>
     </div>
+
   </section>
 
 </main>
@@ -330,18 +294,22 @@
       fr.style.display = 'block';
       pt.style.display = 'none';
       document.documentElement.lang = 'fr';
+      try{ localStorage.setItem("reglement_lang", "fr"); }catch(e){}
     }
     function showPT(){
       fr.style.display = 'none';
       pt.style.display = 'block';
       document.documentElement.lang = 'pt-BR';
+      try{ localStorage.setItem("reglement_lang", "pt"); }catch(e){}
     }
 
     btnFR.addEventListener('click', showFR);
     btnPT.addEventListener('click', showPT);
 
-    // Par défaut : FR
-    showFR();
+    // Restore
+    let saved = "fr";
+    try{ saved = localStorage.getItem("reglement_lang") || "fr"; }catch(e){}
+    if(saved === "pt") showPT(); else showFR();
   })();
 </script>
 
