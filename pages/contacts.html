@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260219" />
+  <style>
+    .contact-card{
+      border:1px solid #eee;
+      border-radius:18px;
+      padding:18px;
+      background:#fff;
+    }
+    .contact-card h2{
+      margin:0 0 8px 0;
+      font-size:28px;
+      line-height:1.1;
+    }
+    .contact-card p{
+      margin:0 0 14px 0;
+      line-height:1.5;
+    }
+    .contact-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:8px;
+    }
+    .contact-item{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      font-size:20px;
+      line-height:1.2;
+      flex-wrap:wrap;
+    }
+    .contact-item .label{
+      font-weight:900;
+      color:#111;
+      min-width:90px;
+    }
+    .contact-item a{
+      color:#1f7a3a; /* vert Suzini */
+      font-weight:900;
+      text-decoration:none;
+      word-break:break-word;
+    }
+    .contact-item a:hover{ text-decoration:underline; }
+
+    @media (max-width: 480px){
+      .contact-item{ font-size:18px; }
+      .contact-card h2{ font-size:26px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Suzini BT — Double Mixte Challenge</h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil</a>
+      <a href="classement.html">Classement</a>
+      <a href="reglement.html">Règlement</a>
+      <a href="infos.html">Infos</a>
+      <a href="boutique.html">Boutique</a>
+      <a href="contact.html" aria-current="page">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <div class="contact-card">
+      <h2>📞 Contact</h2>
+
+      <p style="font-size:22px;">
+        Pour toute question ou information complémentaire, n’hésitez pas à contacter la
+        <b>commission Beach Tennis</b>.
+      </p>
+
+      <div class="contact-list">
+        <div class="contact-item">
+          <span>📧</span>
+          <a href="mailto:tcsuzini.beachtennis@gmail.com">tcsuzini.beachtennis@gmail.com</a>
+        </div>
+
+        <div class="contact-item">
+          <span>📱</span>
+          <span class="label">Jules :</span>
+          <a href="tel:+594694406099">+594 694 40 60 99</a>
+        </div>
+
+        <div class="contact-item">
+          <span>📱</span>
+          <span class="label">Quentin :</span>
+          <a href="tel:+33660063692">+33 6 60 06 36 92</a>
+        </div>
+
+        <div class="contact-item">
+          <span>📱</span>
+          <span class="label">Mélanie :</span>
+          <a href="tel:+33613255475">+33 6 13 25 54 75</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
