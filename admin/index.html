@@ -38,10 +38,16 @@
     <p class="muted">État actuel : <strong><span id="stateLabel">…</span></strong></p>
 
     <div class="grid">
+      <button class="btn" id="btnNotOpen" style="font-weight:800;">⏳ Pas encore ouvertes</button>
       <button class="btn" id="btnOpen" style="font-weight:800;">✅ Ouvrir</button>
       <button class="btn" id="btnPause" style="font-weight:800;">⏸️ Suspendre</button>
       <button class="btn" id="btnClose" style="font-weight:800;">🔒 Clôturer</button>
     </div>
+
+    <p class="muted" style="margin-top:10px;">
+      ℹ️ “Pas encore ouvertes” et “Suspendre” bloquent le formulaire public (champs désactivés).
+      “Clôturer” affiche inscriptions clôturées (sans mention de réouverture possible).
+    </p>
 
     <p id="status" class="muted" style="margin-top:10px;"></p>
   </section>
@@ -58,10 +64,10 @@
   const statusEl = document.getElementById("status");
 
   function label(state){
-    if(state === "open") return "OUVERTES";
-    if(state === "paused") return "SUSPENDUES";
-    if(state === "closed") return "CLÔTURÉES";
-    return "PAS ENCORE OUVERTES";
+    if(state === "open") return "OUVERTES ✅";
+    if(state === "paused") return "SUSPENDUES ⏸️";
+    if(state === "closed") return "CLÔTURÉES 🔒";
+    return "PAS ENCORE OUVERTES ⏳";
   }
 
   async function ensureAdmin(){
@@ -73,8 +79,9 @@
 
   async function loadState(){
     const snap = await getDoc(doc(db,"config","etape1"));
-    const state = snap.exists() ? snap.data().inscriptionsState : "not_open";
+    const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
     stateLabel.textContent = label(state);
+    return state;
   }
 
   async function setState(state){
@@ -99,11 +106,13 @@
       return;
     }
     await loadState();
+    statusEl.textContent = "";
   });
 
-  document.getElementById("btnOpen").onclick  = ()=> setState("open");
-  document.getElementById("btnPause").onclick = ()=> setState("paused");
-  document.getElementById("btnClose").onclick = ()=> setState("closed");
+  document.getElementById("btnNotOpen").onclick = ()=> setState("not_open");
+  document.getElementById("btnOpen").onclick    = ()=> setState("open");
+  document.getElementById("btnPause").onclick   = ()=> setState("paused");
+  document.getElementById("btnClose").onclick   = ()=> setState("closed");
 
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
