@@ -15,10 +15,7 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        Étape 1 - 27 février 2026
-        <span class="brand-subtitle">BT250</span>
-      </h1>
+      <h1 class="brand-title">Étape 1 — 27 février 2026<br><span style="opacity:.95;font-weight:800;">BT250</span></h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -27,41 +24,151 @@
 
     <nav class="nav">
       <a href="../index.html">Accueil</a>
-      <a href="index.html">Étape 1</a>
+      <a href="programmation.html">Programmation</a>
+      <a href="equipes.html" aria-current="page">Équipes</a>
       <a href="inscriptions.html">Inscriptions</a>
-      <a href="equipes.html">Équipes</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
 
+  <!-- Compteur général -->
   <section class="card">
-    <h2>👥 Équipes inscrites</h2>
-    <p class="muted">Liste affichée dans l’ordre d’inscription.</p>
+    <h2 style="margin-bottom:6px;">👥 Équipes inscrites</h2>
+    <p class="muted" style="margin-top:0;">
+      Total : <strong><span id="totalCount">0</span></strong> équipe(s)
+    </p>
+    <p class="muted" id="status" style="margin-top:8px;">Chargement…</p>
+  </section>
 
-    <div id="status" class="muted">Chargement…</div>
-    <div id="teams" class="teams"></div>
+  <!-- Liste principale -->
+  <section class="card">
+    <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+      <span>✅ Liste principale</span>
+      <span class="muted" style="font-weight:700;">
+        <span id="mainCount">0</span>/8
+      </span>
+    </h2>
+
+    <div class="table-wrap">
+      <table class="teams-table" aria-label="Liste principale">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Équipe</th>
+            <th>Joueuse</th>
+            <th>Joueur</th>
+            <th style="width:90px;">Heure</th>
+          </tr>
+        </thead>
+        <tbody id="mainBody">
+          <!-- rempli en JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Les 8 premières équipes inscrites sont en liste principale.
+    </p>
+  </section>
+
+  <!-- Liste d'attente -->
+  <section class="card">
+    <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+      <span>⏳ Liste d’attente</span>
+      <span class="muted" style="font-weight:700;">
+        <span id="waitCount">0</span>
+      </span>
+    </h2>
+
+    <div class="table-wrap">
+      <table class="teams-table" aria-label="Liste d’attente">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Équipe</th>
+            <th>Joueuse</th>
+            <th>Joueur</th>
+            <th style="width:90px;">Heure</th>
+          </tr>
+        </thead>
+        <tbody id="waitBody">
+          <!-- rempli en JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Les équipes au-delà des 8 premières sont en liste d’attente.
+    </p>
   </section>
 
 </main>
 
 <style>
-  .teams{ display:grid; gap:10px; margin-top:12px; }
-  .team-row{
+  .table-wrap{
+    overflow:auto;
     border:1px solid #eee;
     border-radius:14px;
-    padding:12px 14px;
     background:#fff;
-    display:flex;
-    gap:10px;
-    align-items:baseline;
-    justify-content:space-between;
   }
-  .team-left{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
-  .team-name{ font-weight:800; }
-  .team-players{ color:#444; }
-  .team-index{ color:#888; font-size:13px; min-width:2.5ch; text-align:right; }
+
+  .teams-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width: 620px; /* permet scroll horizontal mobile sans casser */
+  }
+
+  .teams-table thead th{
+    text-align:left;
+    font-size:13px;
+    letter-spacing:.2px;
+    color:#444;
+    background:#f7f7f7;
+    border-bottom:1px solid #eee;
+    padding:12px 12px;
+    position:sticky;
+    top:0;
+    z-index:1;
+  }
+
+  .teams-table tbody td{
+    padding:12px 12px;
+    border-bottom:1px solid #f0f0f0;
+    vertical-align:top;
+    font-size:14px;
+  }
+
+  .teams-table tbody tr:last-child td{
+    border-bottom:none;
+  }
+
+  .pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    border:1px solid #eee;
+    background:#fafafa;
+    color:#333;
+    white-space:nowrap;
+  }
+
+  .num{
+    color:#666;
+    font-variant-numeric: tabular-nums;
+    white-space:nowrap;
+  }
+
+  .team{
+    font-weight:800;
+  }
+
+  @media (max-width: 520px){
+    .teams-table{ min-width: 560px; }
+  }
 </style>
 
 <script type="module">
@@ -69,8 +176,16 @@
   import { collection, getDocs, query, orderBy }
     from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+  const MAX_MAIN = 8;
+  const COL_PUBLIC = "inscriptions_etape1_public"; // <- ta collection publique
+
   const statusEl = document.getElementById("status");
-  const teamsEl = document.getElementById("teams");
+  const totalCountEl = document.getElementById("totalCount");
+  const mainCountEl = document.getElementById("mainCount");
+  const waitCountEl = document.getElementById("waitCount");
+
+  const mainBody = document.getElementById("mainBody");
+  const waitBody = document.getElementById("waitBody");
 
   function esc(s){
     return (s ?? "").toString()
@@ -79,14 +194,35 @@
       .replaceAll(">","&gt;");
   }
 
-  async function loadTeams(){
+  function fmtTime(tsMillis){
+    if(!tsMillis) return "";
+    const d = new Date(tsMillis);
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm}`;
+  }
+
+  function rowHtml(idx, r){
+    return `
+      <tr>
+        <td class="num">#${idx}</td>
+        <td class="team">${esc(r.teamName)}</td>
+        <td><span class="pill">${esc(r.p1FirstName)}</span></td>
+        <td><span class="pill">${esc(r.p2FirstName)}</span></td>
+        <td class="num">${esc(fmtTime(r.createdAtMs))}</td>
+      </tr>
+    `;
+  }
+
+  async function load(){
     statusEl.textContent = "Chargement…";
 
     let snap;
     try{
-      snap = await getDocs(query(collection(db, "equipes_etape1_public"), orderBy("createdAt", "asc")));
+      snap = await getDocs(query(collection(db, COL_PUBLIC), orderBy("createdAt","asc")));
     }catch(e){
-      snap = await getDocs(query(collection(db, "equipes_etape1_public")));
+      // fallback si orderBy échoue
+      snap = await getDocs(query(collection(db, COL_PUBLIC)));
     }
 
     const rows = [];
@@ -96,32 +232,33 @@
         teamName: d.teamName || "",
         p1FirstName: d.p1FirstName || "",
         p2FirstName: d.p2FirstName || "",
-        createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0
+        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0
       });
     });
 
-    rows.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+    rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
-    if(rows.length === 0){
-      statusEl.textContent = "Aucune équipe inscrite pour le moment.";
-      teamsEl.innerHTML = "";
-      return;
-    }
+    const total = rows.length;
+    totalCountEl.textContent = total;
 
-    statusEl.textContent = `${rows.length} équipe(s) inscrite(s).`;
+    const main = rows.slice(0, MAX_MAIN);
+    const wait = rows.slice(MAX_MAIN);
 
-    teamsEl.innerHTML = rows.map((r, idx) => `
-      <div class="team-row">
-        <div class="team-left">
-          <span class="team-name">${esc(r.teamName)}</span>
-          <span class="team-players">— ${esc(r.p1FirstName)} / ${esc(r.p2FirstName)}</span>
-        </div>
-        <div class="team-index">#${idx+1}</div>
-      </div>
-    `).join("");
+    mainCountEl.textContent = main.length;
+    waitCountEl.textContent = wait.length;
+
+    mainBody.innerHTML = main.length
+      ? main.map((r,i) => rowHtml(i+1, r)).join("")
+      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
+
+    waitBody.innerHTML = wait.length
+      ? wait.map((r,i) => rowHtml(MAX_MAIN + i + 1, r)).join("")
+      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
+
+    statusEl.textContent = "✅ Mise à jour OK.";
   }
 
-  loadTeams();
+  load();
 </script>
 
 </body>
