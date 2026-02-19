@@ -12,18 +12,15 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  /* ================================
-     Logos plus grands (iPhone OK)
-  ================================= */
-  --logo-size: clamp(82px, 16vw, 125px);
+  /* Logos plus grands (iPhone -> desktop) */
+  --logo-size: clamp(86px, 17vw, 130px);
 
   /* Bandeau un peu plus discret */
-  --title-size: clamp(16px, 3.2vw, 22px);
+  --title-size: clamp(16px, 3.0vw, 22px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
   --topbar-pad-y: 14px;
   --topbar-gap: 16px;
-
   --topbar-shadow: 0 8px 18px rgba(0,0,0,.10);
 
   --pill-border: rgba(255,255,255,.25);
@@ -44,8 +41,8 @@ body{
   background:var(--bg);
 }
 
-/* IMPORTANT : plus jamais de liens bleus */
-a{
+/* ✅ Anti “liens bleus iOS” (blindé) */
+a, a:visited, a:hover, a:active{
   color:inherit;
   text-decoration:none;
 }
@@ -64,10 +61,8 @@ a{
   position: sticky;
   top: 0;
   z-index: 50;
-
   background: linear-gradient(180deg, var(--green), var(--green-dark));
   color:#fff;
-
   box-shadow: var(--topbar-shadow);
 }
 
@@ -75,7 +70,6 @@ a{
   padding: var(--topbar-pad-y) 16px;
 }
 
-/* Ligne : logo | titre | logo */
 .topbar-row{
   display:grid;
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
@@ -83,36 +77,31 @@ a{
   gap: var(--topbar-gap);
 }
 
-/* Logos */
 .brand-logo{
   width:var(--logo-size);
   height:var(--logo-size);
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   overflow:hidden;
 }
 
-/* On remplit mieux */
+/* remplit davantage les logos (réduit la marge “vide” des PNG) */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
-
-  transform: scale(1.25);
+  transform: scale(1.30);
 }
 
-/* Titre bandeau */
 .brand-title{
   margin:0;
   text-align:center;
   font-weight:900;
   font-size:var(--title-size);
   line-height:1.15;
-
+  letter-spacing:.2px;
   text-shadow: 0 1px 0 rgba(0,0,0,.15);
 }
 
@@ -129,15 +118,12 @@ a{
 }
 
 .nav a{
-  color:#fff !important;
+  color:#fff;
   font-size:var(--nav-font);
-
   padding:9px 16px;
   border-radius:999px;
-
   border:1px solid var(--pill-border);
   background: var(--pill-bg);
-
   transition:.18s ease;
 }
 
@@ -146,7 +132,7 @@ a{
 }
 
 /* ======================================
-   CARTES
+   CARTES / BOUTONS
 ====================================== */
 
 .card{
@@ -155,7 +141,6 @@ a{
   border-radius:var(--radius-card);
   padding:18px;
   margin:16px 0;
-
   box-shadow: 0 6px 16px rgba(0,0,0,.05);
 }
 
@@ -164,7 +149,6 @@ a{
   font-size:20px;
 }
 
-/* Grille des boutons (étapes, accès rapide) */
 .grid{
   display:grid;
   grid-template-columns:1fr;
@@ -172,15 +156,13 @@ a{
   margin-top:12px;
 }
 
-/* Boutons propres */
-.btn{
+/* ✅ Boutons : imposer style “bouton”, pas lien */
+.btn, a.btn, a.btn:visited{
   display:block;
   padding:14px 16px;
-
   border-radius:var(--radius-btn);
   border:1px solid #ddd;
   background:#fafafa;
-
   font-weight:700;
 
   color:var(--text) !important;
@@ -189,7 +171,7 @@ a{
   transition:.18s ease;
 }
 
-.btn:hover{
+.btn:hover, a.btn:hover{
   background:#f0f0f0;
 }
 
@@ -198,7 +180,6 @@ a{
   pointer-events:none;
 }
 
-/* Texte gris */
 .muted{
   color:var(--muted);
   font-size:14px;
@@ -206,19 +187,39 @@ a{
 }
 
 /* ======================================
-   Responsive Desktop
+   FORMULAIRES
+====================================== */
+
+.form{ display:grid; gap:12px; }
+.field{ display:grid; gap:6px; }
+
+input, select, textarea{
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font:inherit;
+  background:#fff;
+}
+
+.sep{
+  border:0;
+  border-top:1px solid #eee;
+  margin:10px 0;
+}
+
+/* ======================================
+   RESPONSIVE
 ====================================== */
 
 @media (min-width: 780px){
-  .grid{
-    grid-template-columns: 1fr 1fr;
-  }
+  .grid{ grid-template-columns: 1fr 1fr; }
 }
 
-/* Petit iPhone */
+/* très petits écrans */
 @media (max-width: 360px){
   :root{
-    --logo-size: clamp(74px, 18vw, 110px);
-    --title-size: clamp(15px, 4vw, 20px);
+    --logo-size: clamp(78px, 18vw, 118px);
+    --title-size: clamp(15px, 3.8vw, 20px);
   }
+  .nav a{ padding:8px 14px; }
 }
