@@ -35,7 +35,9 @@
 
   <section class="card">
     <h2>Formulaire d’inscription</h2>
-    <p class="muted">Tous les champs marqués d’un * sont obligatoires.</p>
+
+    <!-- Message statut inscriptions -->
+    <p id="gateMsg" class="muted">Chargement…</p>
 
     <form id="signupForm" class="form" autocomplete="on">
 
@@ -106,38 +108,76 @@
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { db } from "../assets/js/firebase.js";
   import {
-    getFirestore,
+    doc,
+    getDoc,
     collection,
     addDoc,
+    setDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDAW66BD1V2Kr2w6ksM1_8bHGugeG6_cUI",
-    authDomain: "suzini-double-mixte-challenge.firebaseapp.com",
-    projectId: "suzini-double-mixte-challenge",
-    storageBucket: "suzini-double-mixte-challenge.firebasestorage.app",
-    messagingSenderId: "148641893645",
-    appId: "1:148641893645:web:d73cb1727a7b96af3ff444"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // ✅ Aligné avec tes rules
   const COL_PRIVATE = "inscriptions_etape1_private";
   const COL_PUBLIC  = "equipes_etape1_public";
 
   const form = document.getElementById("signupForm");
   const statusEl = document.getElementById("status");
+  const gateMsgEl = document.getElementById("gateMsg");
   const submitBtn = document.getElementById("submitBtn");
 
   const setStatus = (msg) => { statusEl.textContent = msg; };
 
+  function setInputsDisabled(disabled){
+    const fields = form.querySelectorAll("input, select, textarea");
+    fields.forEach(el => el.disabled = disabled);
+  }
+
+  function lockForm(msg){
+    gateMsgEl.textContent = msg;
+    setInputsDisabled(true);
+    submitBtn.disabled = true;
+    submitBtn.classList.add("disabled");
+  }
+
+  function unlockForm(msg){
+    gateMsgEl.textContent = msg;
+    setInputsDisabled(false);
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("disabled");
+  }
+
+  function label(state){
+    if(state === "open") return "✅ Inscriptions ouvertes.";
+    if(state === "paused") return "⏸️ Inscriptions temporairement suspendues.";
+    if(state === "closed") return "🔒 Inscriptions clôturées.";
+    return "⏳ Inscriptions pas encore ouvertes.";
+  }
+
+  async function loadGate(){
+    try{
+      const snap = await getDoc(doc(db, "config", "etape1"));
+      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
+
+      if(state === "open") unlockForm(label(state));
+      else lockForm(label(state));
+
+      return state;
+    }catch(err){
+      console.error(err);
+      lockForm("❌ Impossible de vérifier l’état des inscriptions. Réessaie plus tard.");
+      return "error";
+    }
+  }
+
+  // Au chargement : on verrouille/déverrouille selon état
+  await loadGate();
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    if(submitBtn.disabled) return;
+
     submitBtn.disabled = true;
     submitBtn.classList.add("disabled");
     setStatus("Envoi en cours...");
@@ -162,15 +202,19 @@
         throw new Error("Merci de compléter tous les champs obligatoires.");
       }
 
-      // 1) Privé : tout
-      await addDoc(collection(db, COL_PRIVATE), data);
+      // 1) PRIVÉ : crée le doc et récupère l'ID
+      const ref = await addDoc(collection(db, COL_PRIVATE), data);
 
-      // 2) Public : seulement équipe + prénoms + timestamp
-      await addDoc(collection(db, COL_PUBLIC), {
+      // 2) PUBLIC : même ID (cohérence admin)
+      await setDoc(doc(db, COL_PUBLIC, ref.id), {
         createdAt: serverTimestamp(),
         teamName: data.teamName,
         p1FirstName: data.p1FirstName,
-        p2FirstName: data.p2FirstName
+        p2FirstName: data.p2FirstName,
+
+        // utiles admin (optionnels)
+        list: "main",
+        stby: false
       });
 
       form.reset();
@@ -179,8 +223,11 @@
       console.error(err);
       setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.classList.remove("disabled");
+      // On recharge l’état (au cas où l’admin a fermé pendant que tu étais dessus)
+      await loadGate();
+      if(!submitBtn.disabled){
+        // si ouvert, on laisse actif
+      }
     }
   });
 </script>
