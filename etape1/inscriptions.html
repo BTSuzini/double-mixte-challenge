@@ -68,8 +68,6 @@
         <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
       </div>
 
-
-
       <hr class="sep" />
 
       <h3 style="margin:0;">Joueur 👨</h3>
@@ -94,8 +92,6 @@
         <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
       </div>
 
-  
-
       <hr class="sep" />
 
       <button id="submitBtn" class="btn" type="submit" style="font-weight:800; color:#111;">
@@ -109,7 +105,6 @@
 
 </main>
 
-<!-- Firebase + Firestore (module) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
@@ -119,7 +114,6 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ✅ Ta config
   const firebaseConfig = {
     apiKey: "AIzaSyDAW66BD1V2Kr2w6ksM1_8bHGugeG6_cUI",
     authDomain: "suzini-double-mixte-challenge.firebaseapp.com",
@@ -132,9 +126,9 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 🔧 Collections (si tu veux d’autres noms, dis-moi)
-  const COL_PRIVATE = "inscriptions_etape1";
-  const COL_PUBLIC  = "inscriptions_etape1_public";
+  // ✅ Aligné avec tes rules
+  const COL_PRIVATE = "inscriptions_etape1_private";
+  const COL_PUBLIC  = "equipes_etape1_public";
 
   const form = document.getElementById("signupForm");
   const statusEl = document.getElementById("status");
@@ -157,16 +151,13 @@
         p1LastName:  (form.p1LastName.value || "").trim(),
         p1Licence:   (form.p1Licence.value || "").trim(),
         p1Phone:     (form.p1Phone.value || "").trim(),
-        p1Email:     (form.p1Email.value || "").trim(),
 
         p2FirstName: (form.p2FirstName.value || "").trim(),
         p2LastName:  (form.p2LastName.value || "").trim(),
         p2Licence:   (form.p2Licence.value || "").trim(),
         p2Phone:     (form.p2Phone.value || "").trim(),
-        p2Email:     (form.p2Email.value || "").trim(),
       };
 
-      // Petite validation “humaine”
       if (!data.teamName || !data.p1FirstName || !data.p1LastName || !data.p2FirstName || !data.p2LastName) {
         throw new Error("Merci de compléter tous les champs obligatoires.");
       }
