@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Équipes Étape 1</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">Équipes (admin)<br><span style="opacity:.95;font-weight:800;">Étape 1 — BT250</span></h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html">Inscriptions (admin)</a>
+      <a href="../etape1/equipes.html">Vue publique</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>📌 Résumé</h2>
+    <p class="muted">
+      Total: <strong id="total">0</strong> —
+      Principale: <strong id="main">0</strong> —
+      Attente: <strong id="wait">0</strong> —
+      STBY: <strong id="stby">0</strong>
+    </p>
+    <p class="muted" id="status">Chargement…</p>
+  </section>
+
+  <section class="card">
+    <h2>🗂️ Liste admin</h2>
+
+    <div class="table-wrap">
+      <table class="teams-table">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Équipe</th>
+            <th>Joueuse</th>
+            <th>Joueur</th>
+            <th>Tél. Joueuse</th>
+            <th>Tél. Joueur</th>
+            <th>Licence Joueuse</th>
+            <th>Licence Joueur</th>
+            <th style="width:220px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<style>
+  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:1100px; }
+  .teams-table thead th{
+    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
+    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+  }
+  .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
+  .pill{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid #eee; background:#fafafa; }
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btnx{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:700; }
+  .btnx:hover{ background:#f5f5f5; }
+  .danger{ border-color:#f1b2b2; }
+  .danger:hover{ background:#ffecec; }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const COL_PRIVATE = "inscriptions_etape1_private";
+  const COL_PUBLIC  = "equipes_etape1_public";
+
+  const body = document.getElementById("body");
+  const statusEl = document.getElementById("status");
+
+  const totalEl = document.getElementById("total");
+  const mainEl = document.getElementById("main");
+  const waitEl = document.getElementById("wait");
+  const stbyEl = document.getElementById("stby");
+
+  function esc(s){
+    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  async function ensureAdmin(){
+    const u = auth.currentUser;
+    if(!u) return false;
+    const r = await getRoleByEmail(u.email);
+    return r === "admin";
+  }
+
+  async function fetchAll(){
+    statusEl.textContent = "Chargement…";
+
+    const privSnap = await getDocs(collection(db, COL_PRIVATE));
+
+    const rows = [];
+    privSnap.forEach(d => {
+      const data = d.data() || {};
+      rows.push({
+        id: d.id,
+        createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0,
+        ...data
+      });
+    });
+
+    rows.sort((a,b)=> (a.createdAtMs||0) - (b.createdAtMs||0));
+
+    // récupère en plus les flags publics (list/stby) pour l’affichage admin
+    for (const r of rows) {
+      const pub = await getDoc(doc(db, COL_PUBLIC, r.id));
+      const pd = pub.exists() ? pub.data() : {};
+      r.list = pd.list || null;      // "main" | "wait" | null
+      r.stby = pd.stby === true;     // bool
+    }
+
+    return rows;
+  }
+
+  async function setPublicFlags(id, patch){
+    await setDoc(doc(db, COL_PUBLIC, id), {
+      ...patch,
+      updatedAt: serverTimestamp()
+    }, { merge:true });
+  }
+
+  async function moveList(id, to){
+    await setPublicFlags(id, { list: to });
+  }
+
+  async function toggleStby(id, current){
+    await setPublicFlags(id, { stby: !current });
+  }
+
+  async function removeTeam(id){
+    // confirmation obligatoire
+    const ok = confirm("Supprimer cette équipe ? (action irréversible)");
+    if(!ok) return;
+
+    await deleteDoc(doc(db, COL_PRIVATE, id));
+    await deleteDoc(doc(db, COL_PUBLIC, id));
+  }
+
+  async function editTeam(row){
+    // simple & efficace : prompts (on fera un vrai modal plus tard)
+    const teamName = prompt("Nom équipe :", row.teamName || "");
+    if(teamName === null) return;
+
+    const p1FirstName = prompt("Prénom Joueuse :", row.p1FirstName || "");
+    if(p1FirstName === null) return;
+
+    const p1LastName = prompt("Nom Joueuse :", row.p1LastName || "");
+    if(p1LastName === null) return;
+
+    const p1Phone = prompt("Téléphone Joueuse :", row.p1Phone || "");
+    if(p1Phone === null) return;
+
+    const p1Licence = prompt("Licence Joueuse :", row.p1Licence || "");
+    if(p1Licence === null) return;
+
+    const p2FirstName = prompt("Prénom Joueur :", row.p2FirstName || "");
+    if(p2FirstName === null) return;
+
+    const p2LastName = prompt("Nom Joueur :", row.p2LastName || "");
+    if(p2LastName === null) return;
+
+    const p2Phone = prompt("Téléphone Joueur :", row.p2Phone || "");
+    if(p2Phone === null) return;
+
+    const p2Licence = prompt("Licence Joueur :", row.p2Licence || "");
+    if(p2Licence === null) return;
+
+    // update privé
+    await updateDoc(doc(db, COL_PRIVATE, row.id), {
+      teamName,
+      p1FirstName, p1LastName, p1Phone, p1Licence,
+      p2FirstName, p2LastName, p2Phone, p2Licence
+    });
+
+    // update public (juste ce qui est public)
+    await setDoc(doc(db, COL_PUBLIC, row.id), {
+      teamName,
+      p1FirstName,
+      p2FirstName
+    }, { merge:true });
+  }
+
+  function render(rows){
+    const total = rows.length;
+    const main = rows.filter(r => r.list === "main" && !r.stby).length;
+    const wait = rows.filter(r => r.list === "wait" && !r.stby).length;
+    const stby = rows.filter(r => r.stby).length;
+
+    totalEl.textContent = total;
+    mainEl.textContent = main;
+    waitEl.textContent = wait;
+    stbyEl.textContent = stby;
+
+    body.innerHTML = rows.map((r, idx) => `
+      <tr>
+        <td class="num">#${idx+1}</td>
+        <td><strong>${esc(r.teamName)}</strong><br><span class="pill">list: ${esc(r.list || "auto")}</span> ${r.stby ? '<span class="pill">STBY</span>' : ''}</td>
+        <td>${esc(r.p1FirstName)} ${esc(r.p1LastName)}</td>
+        <td>${esc(r.p2FirstName)} ${esc(r.p2LastName)}</td>
+        <td>${esc(r.p1Phone)}</td>
+        <td>${esc(r.p2Phone)}</td>
+        <td>${esc(r.p1Licence)}</td>
+        <td>${esc(r.p2Licence)}</td>
+        <td>
+          <div class="actions">
+            <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Modifier</button>
+            <button class="btnx" data-act="main" data-id="${esc(r.id)}">⬆️ Principale</button>
+            <button class="btnx" data-act="wait" data-id="${esc(r.id)}">⬇️ Attente</button>
+            <button class="btnx" data-act="stby" data-id="${esc(r.id)}">${r.stby ? "✅ Activer" : "⏸️ STBY"}</button>
+            <button class="btnx danger" data-act="del" data-id="${esc(r.id)}">🗑️ Supprimer</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  async function refresh(){
+    const rows = await fetchAll();
+    render(rows);
+    statusEl.textContent = "✅ OK";
+    return rows;
+  }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ window.location.href = "../index.html"; return; }
+    const ok = await ensureAdmin();
+    if(!ok){ alert("Accès refusé (admin)."); window.location.href = "../index.html"; return; }
+    await refresh();
+  });
+
+  body.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act]");
+    if(!btn) return;
+
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+
+    const rows = await fetchAll();
+    const row = rows.find(x => x.id === id);
+    if(!row) return;
+
+    statusEl.textContent = "Traitement…";
+
+    try{
+      if(act === "edit") await editTeam(row);
+      if(act === "main") await moveList(id, "main");
+      if(act === "wait") await moveList(id, "wait");
+      if(act === "stby") await toggleStby(id, row.stby);
+      if(act === "del") await removeTeam(id);
+
+      await refresh();
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "❌ Erreur";
+    }
+  });
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+</script>
+
+</body>
+</html>
