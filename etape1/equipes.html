@@ -33,7 +33,6 @@
 
 <main class="container">
 
-  <!-- Compteur général -->
   <section class="card">
     <h2 style="margin-bottom:6px;">👥 Équipes inscrites</h2>
     <p class="muted" style="margin-top:0;">
@@ -42,13 +41,10 @@
     <p class="muted" id="status" style="margin-top:8px;">Chargement…</p>
   </section>
 
-  <!-- Liste principale -->
   <section class="card">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
       <span>✅ Liste principale</span>
-      <span class="muted" style="font-weight:700;">
-        <span id="mainCount">0</span>/8
-      </span>
+      <span class="muted" style="font-weight:700;"><span id="mainCount">0</span>/8</span>
     </h2>
 
     <div class="table-wrap">
@@ -59,12 +55,9 @@
             <th>Équipe</th>
             <th>Joueuse</th>
             <th>Joueur</th>
-            <th style="width:90px;">Heure</th>
           </tr>
         </thead>
-        <tbody id="mainBody">
-          <!-- rempli en JS -->
-        </tbody>
+        <tbody id="mainBody"></tbody>
       </table>
     </div>
 
@@ -73,13 +66,10 @@
     </p>
   </section>
 
-  <!-- Liste d'attente -->
   <section class="card">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
       <span>⏳ Liste d’attente</span>
-      <span class="muted" style="font-weight:700;">
-        <span id="waitCount">0</span>
-      </span>
+      <span class="muted" style="font-weight:700;"><span id="waitCount">0</span></span>
     </h2>
 
     <div class="table-wrap">
@@ -90,12 +80,9 @@
             <th>Équipe</th>
             <th>Joueuse</th>
             <th>Joueur</th>
-            <th style="width:90px;">Heure</th>
           </tr>
         </thead>
-        <tbody id="waitBody">
-          <!-- rempli en JS -->
-        </tbody>
+        <tbody id="waitBody"></tbody>
       </table>
     </div>
 
@@ -113,14 +100,12 @@
     border-radius:14px;
     background:#fff;
   }
-
   .teams-table{
     width:100%;
     border-collapse:separate;
     border-spacing:0;
-    min-width: 620px; /* permet scroll horizontal mobile sans casser */
+    min-width: 520px;
   }
-
   .teams-table thead th{
     text-align:left;
     font-size:13px;
@@ -133,17 +118,13 @@
     top:0;
     z-index:1;
   }
-
   .teams-table tbody td{
     padding:12px 12px;
     border-bottom:1px solid #f0f0f0;
     vertical-align:top;
     font-size:14px;
   }
-
-  .teams-table tbody tr:last-child td{
-    border-bottom:none;
-  }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
 
   .pill{
     display:inline-block;
@@ -155,19 +136,15 @@
     color:#333;
     white-space:nowrap;
   }
-
   .num{
     color:#666;
     font-variant-numeric: tabular-nums;
     white-space:nowrap;
   }
-
-  .team{
-    font-weight:800;
-  }
+  .team{ font-weight:800; }
 
   @media (max-width: 520px){
-    .teams-table{ min-width: 560px; }
+    .teams-table{ min-width: 480px; }
   }
 </style>
 
@@ -177,7 +154,7 @@
     from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const MAX_MAIN = 8;
-  const COL_PUBLIC = "inscriptions_etape1_public"; // <- ta collection publique
+  const COL_PUBLIC = "equipes_etape1_public";
 
   const statusEl = document.getElementById("status");
   const totalCountEl = document.getElementById("totalCount");
@@ -194,14 +171,6 @@
       .replaceAll(">","&gt;");
   }
 
-  function fmtTime(tsMillis){
-    if(!tsMillis) return "";
-    const d = new Date(tsMillis);
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mm = String(d.getMinutes()).padStart(2,"0");
-    return `${hh}:${mm}`;
-  }
-
   function rowHtml(idx, r){
     return `
       <tr>
@@ -209,7 +178,6 @@
         <td class="team">${esc(r.teamName)}</td>
         <td><span class="pill">${esc(r.p1FirstName)}</span></td>
         <td><span class="pill">${esc(r.p2FirstName)}</span></td>
-        <td class="num">${esc(fmtTime(r.createdAtMs))}</td>
       </tr>
     `;
   }
@@ -221,7 +189,6 @@
     try{
       snap = await getDocs(query(collection(db, COL_PUBLIC), orderBy("createdAt","asc")));
     }catch(e){
-      // fallback si orderBy échoue
       snap = await getDocs(query(collection(db, COL_PUBLIC)));
     }
 
@@ -249,11 +216,11 @@
 
     mainBody.innerHTML = main.length
       ? main.map((r,i) => rowHtml(i+1, r)).join("")
-      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
+      : `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
 
     waitBody.innerHTML = wait.length
       ? wait.map((r,i) => rowHtml(MAX_MAIN + i + 1, r)).join("")
-      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
+      : `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
 
     statusEl.textContent = "✅ Mise à jour OK.";
   }
