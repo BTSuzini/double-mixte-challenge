@@ -44,7 +44,7 @@
       — STBY : <strong><span id="stbyCount">0</span></strong>
     </p>
 
-    <p class="muted" id="status" style="margin-top:8px;">Chargement…</p>
+    <p class="muted" id="status" style="margin-top:8px;">Connexion…</p>
   </section>
 
   <!-- Liste principale -->
@@ -156,8 +156,12 @@
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
-  import { collection, getDocs, query, orderBy }
-    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import {
+    collection,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const MAX_MAIN = 8;
   const COL_PUBLIC = "equipes_etape1_public";
@@ -198,30 +202,7 @@
     `;
   }
 
-  async function load(){
-    statusEl.textContent = "Chargement…";
-
-    let snap;
-    try{
-      snap = await getDocs(query(collection(db, COL_PUBLIC), orderBy("createdAt","asc")));
-    }catch(e){
-      snap = await getDocs(query(collection(db, COL_PUBLIC)));
-    }
-
-    const rows = [];
-    snap.forEach(doc => {
-      const d = doc.data() || {};
-      rows.push({
-        id: doc.id,
-        teamName: d.teamName || "",
-        p1FirstName: d.p1FirstName || "",
-        p2FirstName: d.p2FirstName || "",
-        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
-        list: d.list || null, // "main" | "wait" | null
-        stby: d.stby === true
-      });
-    });
-
+  function computeLists(rows){
     // ordre inscription
     rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
@@ -229,7 +210,6 @@
     const forcedWait = rows.filter(r => r.list === "wait");
     const auto = rows.filter(r => !r.list);
 
-    // construit principale: forcedMain + auto jusqu’à 8
     const main = [];
     const used = new Set();
 
@@ -241,7 +221,6 @@
       if(!used.has(r.id)){ main.push(r); used.add(r.id); }
     }
 
-    // attente: forcedWait + le reste (auto non pris + tout non utilisé)
     const wait = [];
     for(const r of forcedWait){
       if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
@@ -250,7 +229,12 @@
       if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
     }
 
-    // Compteurs
+    return { main, wait };
+  }
+
+  function render(rows){
+    const { main, wait } = computeLists(rows);
+
     totalCountEl.textContent = rows.length;
     mainCountEl.textContent = main.length;
     waitCountEl.textContent = wait.length;
@@ -259,7 +243,6 @@
     mainCount2El.textContent = main.length;
     waitCount2El.textContent = wait.length;
 
-    // Rendu
     mainBody.innerHTML = main.length
       ? main.map((r,i) => rowHtml(i+1, r)).join("")
       : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
@@ -267,11 +250,32 @@
     waitBody.innerHTML = wait.length
       ? wait.map((r,i) => rowHtml(main.length + i + 1, r)).join("")
       : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
-
-    statusEl.textContent = "✅ Mise à jour OK.";
   }
 
-  load();
+  // 🔴 SNAPSHOT (temps réel)
+  const q = query(collection(db, COL_PUBLIC), orderBy("createdAt", "asc"));
+
+  onSnapshot(q, (snap) => {
+    const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data() || {};
+      rows.push({
+        id: doc.id,
+        teamName: d.teamName || "",
+        p1FirstName: d.p1FirstName || "",
+        p2FirstName: d.p2FirstName || "",
+        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
+        list: d.list || null,
+        stby: d.stby === true
+      });
+    });
+
+    render(rows);
+    statusEl.textContent = "🟢 En direct";
+  }, (err) => {
+    console.error(err);
+    statusEl.textContent = "🔴 Erreur de connexion";
+  });
 </script>
 
 </body>
