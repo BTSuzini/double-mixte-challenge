@@ -5,6 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Règlement — Double Mixte Challenge</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+
+  <!-- Styles spécifiques à cette page (résumé aéré) -->
+  <style>
+    .actions-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .actions-left, .actions-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    /* Résumé aéré */
+    .rules-grid{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+    .rule-box{
+      border:1px solid #eee;
+      background:#fff;
+      border-radius:14px;
+      padding:14px;
+    }
+    .rule-box h3{
+      margin:0 0 8px 0;
+      font-size:16px;
+      line-height:1.2;
+    }
+    .rule-box p{
+      margin:0;
+      line-height:1.55;
+    }
+    .rule-list{
+      margin:0;
+      padding-left:18px;
+      display:grid;
+      gap:8px;
+    }
+    .rule-note{
+      margin:0;
+      color:var(--muted);
+      line-height:1.55;
+    }
+    .lang-pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fafafa;
+      font-weight:800;
+      font-size:13px;
+      color:#111;
+    }
+    /* Desktop: 2 colonnes */
+    @media (min-width: 780px){
+      .rules-grid{ grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
 
@@ -34,15 +100,17 @@
 
   <!-- Barre d'actions : Télécharger + Langue -->
   <section class="card" style="margin-bottom:14px;">
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
-      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+    <div class="actions-row">
+      <div class="actions-left">
         <!-- ✅ Mets ici le chemin réel de ton PDF dans le repo -->
         <a class="btn" href="../assets/docs/reglement-double-mixte-challenge.pdf" download style="font-weight:800;">
           📄 Télécharger le règlement complet
         </a>
       </div>
 
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <div class="actions-right">
+        <span class="lang-pill">🌍 Langue</span>
+
         <button class="btn" type="button" id="btnFR" aria-label="Français" title="Français" style="font-weight:800;">
           🇫🇷
         </button>
@@ -51,153 +119,201 @@
         </button>
       </div>
     </div>
-
-    <p class="muted" style="margin:10px 0 0;">
-      Résumé court (≈ 1 page) — version FR/PT.
-    </p>
   </section>
 
   <!-- Résumé du règlement -->
   <section class="card" id="reglement-resume">
-    <h2 style="margin:0;">📘 Règlement — Résumé (1 page)</h2>
+    <h2 style="margin:0;">📘 Règlement — Résumé (court)</h2>
+    <p class="muted" style="margin:10px 0 0;">
+      Version simplifiée pour lecture mobile 📱 — se référer au règlement complet pour tous les détails.
+    </p>
 
-    <!-- FR -->
+    <!-- ===================== FR ===================== -->
     <div id="langFR" style="margin-top:12px;">
-      <p class="muted" style="margin-top:0;">
-        Suzini BT — Double Mixte Challenge (février → avril 2026) 🎾
-      </p>
 
-      <h3 style="margin:12px 0 6px;">🗓️ Les 5 étapes (Arena de Suzini, 18h00–23h30)</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Étape 1 : <b>BT250 Mixte</b> — <b>ven. 27/02/2026</b></li>
-        <li>Étape 2 : <b>BT100 Mixte</b> — <b>jeu. 12/03/2026</b></li>
-        <li>Étape 3 : <b>BT100 Mixte</b> — <b>jeu. 26/03/2026</b></li>
-        <li>Étape 4 : <b>BT100 Mixte</b> — <b>jeu. 09/04/2026</b></li>
-        <li>Étape 5 : <b>BT250 Mixte</b> — <b>ven. 17/04/2026</b></li>
-      </ul>
+      <div class="rules-grid">
 
-      <h3 style="margin:12px 0 6px;">✅ Conditions & inscription</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Licence FFT <b>Beach tennis / multi-raquettes 2026</b> obligatoire 🪪</li>
-        <li>Seniors, ouvert dès <b>U16</b> (U12 possible avec dérogation + certificat sport &lt; 6 mois) 👶</li>
-        <li>BT250 : <b>poids équipe ≤ 120</b> (somme des classements) ⚖️</li>
-        <li>BT100 : hommes ≤ <b>200 FFT</b> / femmes ≤ <b>150 FFT</b> 📊</li>
-        <li>Inscription <b>par équipe uniquement</b> (pas d’inscription individuelle) 👥</li>
-        <li><b>20€ / équipe</b> par étape 💶</li>
-        <li>Inscriptions via le mini-site du challenge 🌐</li>
-        <li>Ouverture : <b>lundi 12h00</b> après l’étape précédente (dérogation étape 1 : <b>ven. 20/02 12h00</b>) ⏱️</li>
-        <li>Clôture : <b>au plus tard 7 jours</b> avant (dérogation étape 1 : <b>mer. 25/02</b>) 🔒</li>
-      </ul>
+        <div class="rule-box">
+          <h3>🎾 Format du challenge</h3>
+          <p>
+            Challenge en <strong>double mixte</strong>, organisé en <strong>plusieurs étapes</strong>.
+            Chaque étape = un tournoi indépendant, avec un classement de l’étape
+            + un <strong>classement général</strong> cumulé.
+          </p>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">📋 Listes (8 équipes max) + liste d’attente</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Liste établie <b>par ordre d’inscription</b> et publiée après clôture 🧾</li>
-        <li>Si 8 équipes atteintes : création d’une <b>liste d’attente</b> ⏳</li>
-        <li>Remplacements possibles <b>jusqu’à validation définitive & tirage</b> ; après tirage : <b>aucun remplacement</b> ❌</li>
-      </ul>
+        <div class="rule-box">
+          <h3>✅ Conditions</h3>
+          <ul class="rule-list">
+            <li><strong>Licence FFT Beach Tennis / Multi-raquettes (année en cours)</strong> obligatoire 🪪</li>
+            <li><strong>Seniors</strong>, ouvert dès <strong>U16</strong> (U12 possible sur dérogation + certificat &lt; 6 mois) 👶</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🎾 Format sportif & règles</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>2 terrains homologués <b>16m x 8m</b> ; filet <b>1,70m</b> ; zone d’exclusion service <b>3m</b> 📏</li>
-        <li>Format : <b>TMC</b> à 8 équipes → chaque équipe joue <b>3 matchs</b> (matchs de classement obligatoires) 🔁</li>
-        <li><b>Format 3</b> : 2 sets de 4 jeux (point décisif), TB à 4-4 ; 3e set = super TB à 10 🧠</li>
-        <li>Repos <b>30 min</b> entre matchs (réductible par décision du JAT avec accord des 2 équipes) ⏸️</li>
-        <li>Balles : 3 balles / terrain ; en BT250 : balles neuves en <b>demi-finales & finale</b> 🟡</li>
-      </ul>
+        <div class="rule-box">
+          <h3>⚖️ Catégories & plafonds</h3>
+          <ul class="rule-list">
+            <li><strong>BT250</strong> : poids équipe ≤ <strong>120</strong> (somme des classements) ⚖️</li>
+            <li><strong>BT100</strong> : hommes ≤ <strong>200 FFT</strong> / femmes ≤ <strong>150 FFT</strong> 📊</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🎲 Tirage au sort</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>La veille, entre <b>12h00 et 13h00</b> 🕛</li>
-        <li>2 têtes de série (TS1, TS2) selon le classement de référence ; TS1 ligne 1, TS2 ligne 8 🧩</li>
-      </ul>
+        <div class="rule-box">
+          <h3>👥 Inscriptions</h3>
+          <ul class="rule-list">
+            <li>Inscription <strong>par équipe</strong> (pas d’inscription individuelle) 👥</li>
+            <li><strong>20€ / équipe</strong> par étape 💶</li>
+            <li>Places limitées : <strong>liste principale</strong> + <strong>liste d’attente</strong> ⏳</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">⏰ Présence / retards / WO</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Convocation à partir de <b>17h45</b> (début matchs <b>18h00</b>) 🏁</li>
-        <li>Retard : <b>5 min = 1 jeu</b>, <b>10 min = 2 jeux</b>, <b>15 min = WO</b> (décision JAT) ⚠️</li>
-        <li>Obligation de disputer toutes les parties prévues (sauf décision JAT / cas justifié) ✅</li>
-      </ul>
+        <div class="rule-box">
+          <h3>🗂️ Listes & remplacements</h3>
+          <ul class="rule-list">
+            <li>Liste établie par <strong>ordre d’inscription</strong> 🧾</li>
+            <li>Remplacement possible <strong>jusqu’à validation définitive / tirage</strong> ✅</li>
+            <li>Après tirage : <strong>aucun remplacement</strong> ❌</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🏆 Classements & lots</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Points FFT selon classement (BT100/BT250) ; points du challenge = <b>mêmes points que FFT</b> 📈</li>
-        <li>Classement final : addition des points sur l’ensemble des étapes (un joueur apparaît dès sa 1ère participation) 🧮</li>
-        <li>Pas de prize money 💸❌, mais <b>lots</b> pour les meilleures équipes 🎁</li>
-      </ul>
+        <div class="rule-box">
+          <h3>🔁 Format des matchs</h3>
+          <ul class="rule-list">
+            <li>Format : <strong>TMC</strong> à 8 équipes (chaque équipe joue plusieurs matchs) 🔁</li>
+            <li><strong>Format 3</strong> : 2 sets de 4 jeux (point décisif) + super TB si besoin 🧠</li>
+            <li>Repos indicatif entre matchs : <strong>30 min</strong> (ajustable par décision du JAT) ⏸️</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🧑‍⚖️ Organisation & règles de vie</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Comité : Jules PARISIS, Quentin SAVOYEN, Mélanie FREITAS 👥</li>
-        <li>Juge-arbitre référent : <b>Maïté SIRE</b> 🎾</li>
-        <li>Météo / force majeure : adaptation, suspension ou annulation possible ; <b>remboursement</b> si annulation 🌧️</li>
-        <li>Droit à l’image : photos/vidéos possibles pour la communication du club 📸</li>
-        <li>Respect & fair-play : sanctions possibles jusqu’à disqualification 🟨🟥</li>
-      </ul>
+        <div class="rule-box">
+          <h3>⏰ Présence / retards / WO</h3>
+          <ul class="rule-list">
+            <li>Respect des convocations et horaires 🏁</li>
+            <li>Retards : pénalités possibles jusqu’au <strong>WO</strong> (décision JAT) ⚠️</li>
+            <li>Les matchs de classement sont en principe <strong>obligatoires</strong> ✅</li>
+          </ul>
+        </div>
 
-      <p class="muted" style="margin:10px 0 0;">
-        📄 Version courte — se référer au règlement complet pour tous les détails.
-      </p>
+        <div class="rule-box">
+          <h3>🏆 Classement & lots</h3>
+          <ul class="rule-list">
+            <li>Points d’étape + addition dans le <strong>classement général</strong> 📈</li>
+            <li><strong>Pas de prize money</strong> 💸❌, mais des <strong>lots</strong> 🎁</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>🧑‍⚖️ Organisation & fair-play</h3>
+          <ul class="rule-list">
+            <li>Décisions JAT / organisation : référence en cas de litige 🧑‍⚖️</li>
+            <li>Respect & fair-play : sanctions possibles jusqu’à disqualification 🟨🟥</li>
+            <li>Droit à l’image : photos/vidéos possibles pour la communication 📸</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>📎 À retenir</h3>
+          <p class="rule-note">
+            Ce résumé simplifie volontairement. Pour les départages, détails sportifs, cas particuliers, etc. :
+            <strong>utilise le PDF complet</strong> 📄
+          </p>
+        </div>
+
+      </div>
     </div>
 
-    <!-- PT -->
+    <!-- ===================== PT-BR ===================== -->
     <div id="langPT" style="margin-top:12px; display:none;">
-      <p class="muted" style="margin-top:0;">
-        Suzini BT — Double Mixte Challenge (fevereiro → abril 2026) 🎾
-      </p>
 
-      <h3 style="margin:12px 0 6px;">🗓️ 5 etapas (Arena de Suzini, 18h00–23h30)</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Etapa 1: <b>BT250 Misto</b> — <b>sex. 27/02/2026</b></li>
-        <li>Etapa 2: <b>BT100 Misto</b> — <b>qui. 12/03/2026</b></li>
-        <li>Etapa 3: <b>BT100 Misto</b> — <b>qui. 26/03/2026</b></li>
-        <li>Etapa 4: <b>BT100 Misto</b> — <b>qui. 09/04/2026</b></li>
-        <li>Etapa 5: <b>BT250 Misto</b> — <b>sex. 17/04/2026</b></li>
-      </ul>
+      <div class="rules-grid">
 
-      <h3 style="margin:12px 0 6px;">✅ Condições & inscrição</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Licença FFT <b>Beach tennis / multi-raquetes 2026</b> obrigatória 🪪</li>
-        <li>Sênior, aberto a partir de <b>U16</b> (U12 com autorização + atestado médico &lt; 6 meses) 👶</li>
-        <li>BT250: <b>peso da dupla ≤ 120</b> (soma das classificações) ⚖️</li>
-        <li>BT100: homens ≤ <b>200 FFT</b> / mulheres ≤ <b>150 FFT</b> 📊</li>
-        <li>Inscrição <b>somente por dupla</b> (não individual) 👥</li>
-        <li><b>20€ por dupla</b> em cada etapa 💶</li>
-        <li>Inscrições pelo mini-site do challenge 🌐</li>
-        <li>Abertura: <b>segunda 12h00</b> após a etapa anterior (exceção etapa 1: <b>sex. 20/02 12h00</b>) ⏱️</li>
-        <li>Encerramento: no máximo <b>7 dias antes</b> (exceção etapa 1: <b>qua. 25/02</b>) 🔒</li>
-      </ul>
+        <div class="rule-box">
+          <h3>🎾 Formato do challenge</h3>
+          <p>
+            Challenge em <strong>dupla mista</strong>, com <strong>várias etapas</strong>.
+            Cada etapa = um torneio independente, com ranking da etapa
+            + <strong>ranking geral</strong> acumulado.
+          </p>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">📋 Lista principal (máx. 8) + lista de espera</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Ordem por <b>data/hora de inscrição</b> 🧾</li>
-        <li>Ao atingir 8 duplas: <b>lista de espera</b> ⏳</li>
-        <li>Trocas possíveis <b>até validação final & sorteio</b>; após o sorteio: <b>sem substituições</b> ❌</li>
-      </ul>
+        <div class="rule-box">
+          <h3>✅ Condições</h3>
+          <ul class="rule-list">
+            <li><strong>Licença FFT Beach Tennis / Multi-raquetes (ano vigente)</strong> obrigatória 🪪</li>
+            <li><strong>Sênior</strong>, aberto a partir de <strong>U16</strong> (U12 com autorização + atestado &lt; 6 meses) 👶</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🎾 Formato & regras</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>2 quadras homologadas <b>16m x 8m</b>; rede <b>1,70m</b>; zona de exclusão no saque <b>3m</b> 📏</li>
-        <li><b>TMC</b> com 8 duplas → cada dupla joga <b>3 jogos</b> (jogos de classificação obrigatórios) 🔁</li>
-        <li><b>Formato 3</b>: 2 sets de 4 games (ponto decisivo), tie-break em 4-4; 3º set = super TB a 10 🧠</li>
-        <li>Descanso <b>30 min</b> entre jogos (pode reduzir com decisão do árbitro e acordo das duplas) ⏸️</li>
-        <li>Bolas: 3 bolas/quadra; no BT250: bolas novas nas <b>semifinais e final</b> 🟡</li>
-      </ul>
+        <div class="rule-box">
+          <h3>⚖️ Categorias & limites</h3>
+          <ul class="rule-list">
+            <li><strong>BT250</strong>: peso da dupla ≤ <strong>120</strong> (soma das classificações) ⚖️</li>
+            <li><strong>BT100</strong>: homens ≤ <strong>200 FFT</strong> / mulheres ≤ <strong>150 FFT</strong> 📊</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">⏰ Presença / atrasos / WO</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Chegada a partir de <b>17h45</b> (início <b>18h00</b>) 🏁</li>
-        <li>Atraso: <b>5 min = 1 game</b>, <b>10 min = 2 games</b>, <b>15 min = WO</b> ⚠️</li>
-      </ul>
+        <div class="rule-box">
+          <h3>👥 Inscrições</h3>
+          <ul class="rule-list">
+            <li>Inscrição <strong>somente por dupla</strong> (não individual) 👥</li>
+            <li><strong>20€ por dupla</strong> em cada etapa 💶</li>
+            <li>Vagas limitadas: <strong>lista principal</strong> + <strong>lista de espera</strong> ⏳</li>
+          </ul>
+        </div>
 
-      <h3 style="margin:12px 0 6px;">🏆 Pontos & prêmios</h3>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Pontos do challenge = <b>mesmos pontos FFT</b>; ranking final = soma das etapas 🧮</li>
-        <li>Sem prize money 💸❌, mas <b>brindes</b> para as melhores duplas 🎁</li>
-      </ul>
+        <div class="rule-box">
+          <h3>🗂️ Listas & substituições</h3>
+          <ul class="rule-list">
+            <li>Ordem por <strong>data/hora de inscrição</strong> 🧾</li>
+            <li>Substituição possível <strong>até validação final / sorteio</strong> ✅</li>
+            <li>Após o sorteio: <strong>sem substituições</strong> ❌</li>
+          </ul>
+        </div>
 
-      <p class="muted" style="margin:10px 0 0;">
-        📄 Resumo — consultar o regulamento completo para detalhes.
-      </p>
+        <div class="rule-box">
+          <h3>🔁 Formato dos jogos</h3>
+          <ul class="rule-list">
+            <li>Formato: <strong>TMC</strong> com 8 duplas (cada dupla joga vários jogos) 🔁</li>
+            <li><strong>Formato 3</strong>: 2 sets de 4 games (ponto decisivo) + super TB se necessário 🧠</li>
+            <li>Descanso indicativo: <strong>30 min</strong> (ajustável por decisão do árbitro) ⏸️</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>⏰ Presença / atrasos / WO</h3>
+          <ul class="rule-list">
+            <li>Respeitar convocação e horários 🏁</li>
+            <li>Atrasos: penalidades até <strong>WO</strong> (decisão do árbitro) ⚠️</li>
+            <li>Jogos de classificação em princípio <strong>obrigatórios</strong> ✅</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>🏆 Ranking & prêmios</h3>
+          <ul class="rule-list">
+            <li>Pontos da etapa + soma no <strong>ranking geral</strong> 📈</li>
+            <li><strong>Sem prize money</strong> 💸❌, mas <strong>brindes</strong> 🎁</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>🧑‍⚖️ Organização & fair-play</h3>
+          <ul class="rule-list">
+            <li>Decisões do árbitro/organização: referência em caso de disputa 🧑‍⚖️</li>
+            <li>Respeito & fair-play: sanções até desclassificação 🟨🟥</li>
+            <li>Direito de imagem: fotos/vídeos podem ser usados na comunicação 📸</li>
+          </ul>
+        </div>
+
+        <div class="rule-box">
+          <h3>📎 Importante</h3>
+          <p class="rule-note">
+            Este resumo é simplificado. Para desempates, detalhes esportivos e casos especiais:
+            <strong>consulte o PDF completo</strong> 📄
+          </p>
+        </div>
+
+      </div>
     </div>
   </section>
 
