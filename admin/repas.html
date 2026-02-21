@@ -5,81 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Repas</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
-
-  <style>
-    .pdf-banner{
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.08);
-      margin-bottom:14px;
-      background: linear-gradient(135deg, #1f7a3a, #165b2b);
-      color:#fff;
-      box-shadow:0 10px 25px rgba(0,0,0,.10);
-    }
-    .pdf-banner .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 14px;
-    }
-    .pdf-banner .logo{
-      width:54px;
-      height:54px;
-      border-radius:14px;
-      background: rgba(255,255,255,.14);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .pdf-banner img{
-      max-width:42px;
-      max-height:42px;
-    }
-
-    .table-wrap{
-      overflow:auto;
-      border:1px solid #eee;
-      border-radius:14px;
-      background:#fff;
-    }
-    table.repas{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
-      min-width: 780px;
-    }
-    table.repas thead th{
-      text-align:left;
-      font-size:13px;
-      background:#f7f7f7;
-      border-bottom:1px solid #eee;
-      padding:12px;
-      position:sticky;
-      top:0;
-    }
-    table.repas tbody td{
-      padding:12px;
-      border-bottom:1px solid #f0f0f0;
-      font-size:14px;
-    }
-
-    .pill{
-      display:inline-block;
-      padding:4px 10px;
-      border-radius:999px;
-      font-size:12px;
-      border:1px solid #eee;
-      background:#fafafa;
-    }
-
-    @media print{
-      .topbar, .no-print { display:none !important; }
-      body{ background:#fff !important; }
-      .card{ box-shadow:none !important; }
-      .pdf-banner{ box-shadow:none !important; }
-    }
-  </style>
 </head>
 <body>
 
@@ -90,9 +15,8 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        🛠️ Admin — Repas<br>
-        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      <h1 class="brand-title" id="pageTitle">
+        Repas (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
       </h1>
 
       <div class="brand-logo">
@@ -101,107 +25,176 @@
     </div>
 
     <nav class="nav">
+      <a href="#" id="tabEquipes">👥 Équipes</a>
+      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
+      <a href="#" id="tabRepas" aria-current="page">🍽️ Repas</a>
+      <a href="#" id="tabResultats">🏁 Résultats</a>
+      <a href="#" id="btnPublic">Vue publique</a>
       <a href="../index.html">Accueil public</a>
-      <a href="index.html">Admin</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
   </div>
 </header>
 
+<!-- Bandeau imprimable (PDF) -->
+<section class="print-header only-print">
+  <div class="print-header-inner">
+    <img src="../assets/img/logo-suzini.png" alt="Logo Suzini" class="ph-logo">
+    <div class="ph-title">
+      <div class="ph-h1">Double Mixte Challenge</div>
+      <div class="ph-h2" id="printSub">Repas — Étape 1</div>
+    </div>
+    <img src="../assets/img/logo-challenge.png" alt="Logo Challenge" class="ph-logo">
+  </div>
+</section>
+
 <main class="container">
 
-  <!-- Bandeau export -->
-  <section class="pdf-banner">
-    <div class="row">
-      <div class="logo">
-        <img src="../assets/img/logo-suzini.png">
-      </div>
-
-      <div style="text-align:center;">
-        <h2 style="margin:0;" id="pdfTitle">Double Mixte Challenge — Repas</h2>
-        <p style="margin:6px 0 0;">Offre : 3 arancini = 10€</p>
-      </div>
-
-      <div class="logo">
-        <img src="../assets/img/logo-challenge.png">
-      </div>
-    </div>
-  </section>
-
   <section class="card" id="accessDenied" style="display:none;">
-    ⛔ Accès refusé
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
   <section class="card" id="adminUI" style="display:none;">
-    <p class="muted" id="status">Chargement…</p>
+    <h2 style="margin:0 0 10px;">🍽️ Commandes repas — récap</h2>
 
-    <div class="grid no-print" style="margin-top:10px;">
-      <button class="btn" id="btnPrint">🖨️ Exporter PDF</button>
-      <button class="btn" id="btnRefresh">🔄 Actualiser</button>
-    </div>
-
-    <hr class="sep" />
-
-    <h2>🧾 Totaux</h2>
-    <p>
-      Total lignes : <strong id="lineCount">0</strong><br>
-      Total repas : <strong id="totalQty">0</strong><br>
-      Total € : <strong id="totalAmount">0</strong> €
+    <p class="muted" style="margin:0;">
+      Prix : <b>10€</b> par pack (3 arancini). — 1 ligne par beacheur (cumul).
     </p>
 
-    <hr class="sep" />
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnPrint" style="font-weight:900; color:#111;">🖨️ Exporter PDF</button>
+      <button class="btn" id="btnRefresh" style="font-weight:900; color:#111;">🔄 Actualiser</button>
+    </div>
 
-    <h2>📋 Liste</h2>
+    <p class="muted" id="status" style="margin-top:10px;">Chargement…</p>
+  </section>
+
+  <section class="card" id="panelTable" style="display:none;">
+    <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px;">
+      <span>📋 Liste complète</span>
+      <span class="muted" style="font-weight:900;">
+        Total général : <span id="grandTotal">0</span> €
+      </span>
+    </h2>
 
     <div class="table-wrap">
-      <table class="repas">
+      <table class="orders-table" aria-label="Commandes repas">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Équipe</th>
+            <th style="width:44px;">#</th>
             <th>Beacheur</th>
-            <th>Nb repas</th>
-            <th>Montant</th>
+            <th>Équipe</th>
+            <th style="width:120px;">Qté (packs)</th>
+            <th style="width:140px;">Montant</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
+
+    <p class="muted" style="margin:10px 0 0;">
+      ⚠️ Export PDF : clique “Exporter PDF”, puis “Enregistrer en PDF”.
+    </p>
   </section>
 
 </main>
 
+<style>
+  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
+  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 760px; }
+  .orders-table thead th{
+    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
+    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+    white-space:nowrap;
+  }
+  .orders-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
+  .orders-table tbody tr:last-child td{ border-bottom:none; }
+
+  /* Print */
+  .only-print{ display:none; }
+  @media print{
+    .no-print{ display:none !important; }
+    .only-print{ display:block !important; }
+    .container{ max-width: 100% !important; }
+    body{ background:#fff !important; }
+    .card{ box-shadow:none !important; border:1px solid #eee !important; }
+    .table-wrap{ border:1px solid #ddd !important; }
+  }
+
+  .print-header{
+    background:#1f7a3a;
+    color:#fff;
+    padding:18px 18px;
+  }
+  .print-header-inner{
+    max-width: 980px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .ph-logo{
+    width:74px; height:74px; object-fit:contain;
+    background:rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:8px;
+  }
+  .ph-title{ text-align:center; flex:1; }
+  .ph-h1{ font-size:20px; font-weight:1000; letter-spacing:.2px; }
+  .ph-h2{ font-size:16px; font-weight:900; opacity:.95; margin-top:4px; }
+</style>
+
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail, ensurePersistence } from "../assets/js/session.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import {
+    collection, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const PRICE = 10;
-
-  // -------- Scope dynamique --------
+  // ---- scope (par défaut etape1)
   const params = new URLSearchParams(location.search);
   const scope = params.get("scope") || "etape1";
-  const COL = `repas_${scope}`;
-
   const stepNum = scope.replace("etape","");
   const stepLabel = `Étape ${stepNum}`;
 
-  document.getElementById("pageSub").textContent = stepLabel;
-  document.getElementById("pdfTitle").textContent =
-    `Double Mixte Challenge — ${stepLabel} — Repas`;
+  // ---- UI title
+  document.getElementById("pageSub").textContent = `${stepLabel} — Repas`;
+  document.getElementById("printSub").textContent = `Repas — ${stepLabel}`;
 
+  // ---- nav keep scope
+  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabRepas").href = `repas.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
+
+  // Vue publique (ici : etape1/repas.html)
+  document.getElementById("btnPublic").onclick = (e)=>{
+    e.preventDefault();
+    if(scope === "etape1") window.location.href = "../etape1/repas.html";
+    else alert("Vue publique non prête pour " + stepLabel);
+  };
+
+  // ---- dom
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
+  const panelTable = document.getElementById("panelTable");
 
   const statusEl = document.getElementById("status");
   const tbody = document.getElementById("tbody");
-  const lineCountEl = document.getElementById("lineCount");
-  const totalQtyEl = document.getElementById("totalQty");
-  const totalAmountEl = document.getElementById("totalAmount");
+  const grandTotalEl = document.getElementById("grandTotal");
 
-  function money(n){
-    return (n || 0).toLocaleString("fr-FR");
+  // ---- collection commandes
+  // (pour l’instant : uniquement étape 1)
+  const COL_ORDERS = (scope === "etape1") ? "repas_etape1" : `repas_${scope}`;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   async function ensureAdmin(){
@@ -211,70 +204,96 @@
     return r === "admin";
   }
 
-  async function loadData(){
+  async function loadOrders(){
     statusEl.textContent = "Chargement…";
+    tbody.innerHTML = "";
+    grandTotalEl.textContent = "0";
 
-    const snap = await getDocs(query(collection(db, COL), orderBy("teamName","asc")));
+    try{
+      const q = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+      const snap = await getDocs(q);
 
-    let rows = [];
-    snap.forEach(d=>{
-      const x = d.data() || {};
-      rows.push({
-        teamName: x.teamName || "",
-        playerFirstName: x.playerFirstName || "",
-        qty: x.qty || 0
+      const rows = [];
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        rows.push({
+          beacheurName: x.beacheurName || "",
+          teamName: x.teamName || "",
+          qty: Number.isFinite(x.qty) ? x.qty : (x.qty || 0),
+          total: Number.isFinite(x.total) ? x.total : (x.total || 0)
+        });
       });
-    });
 
-    rows.sort((a,b)=>{
-      if(a.teamName !== b.teamName)
-        return a.teamName.localeCompare(b.teamName);
-      return a.playerFirstName.localeCompare(b.playerFirstName);
-    });
+      if(rows.length === 0){
+        tbody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
+        statusEl.textContent = "🟢 OK — 0 commande";
+        grandTotalEl.textContent = "0";
+        return;
+      }
 
-    let totalQty = 0;
-    let totalAmount = 0;
+      let grand = 0;
+      tbody.innerHTML = rows.map((r,i)=>{
+        grand += (r.total || 0);
+        return `
+          <tr>
+            <td>#${i+1}</td>
+            <td><b>${esc(r.beacheurName)}</b></td>
+            <td>${esc(r.teamName)}</td>
+            <td>${esc(String(r.qty))}</td>
+            <td><b>${esc(String(r.total))} €</b></td>
+          </tr>
+        `;
+      }).join("");
 
-    tbody.innerHTML = rows.map((r,i)=>{
-      const amount = r.qty * PRICE;
-      totalQty += r.qty;
-      totalAmount += amount;
+      grandTotalEl.textContent = String(grand);
+      statusEl.textContent = `🟢 OK — ${rows.length} ligne(s)`;
 
-      return `
-        <tr>
-          <td>#${i+1}</td>
-          <td><strong>${r.teamName}</strong></td>
-          <td>${r.playerFirstName}</td>
-          <td><span class="pill">${r.qty}</span></td>
-          <td><span class="pill">${money(amount)} €</span></td>
-        </tr>
-      `;
-    }).join("");
-
-    lineCountEl.textContent = rows.length;
-    totalQtyEl.textContent = totalQty;
-    totalAmountEl.textContent = money(totalAmount);
-
-    statusEl.textContent = "✅ OK";
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "🔴 Erreur : impossible de charger les commandes.";
+      tbody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
+      grandTotalEl.textContent = "0";
+    }
   }
 
-  document.getElementById("btnPrint").onclick = ()=> window.print();
-  document.getElementById("btnRefresh").onclick = loadData;
+  // Export PDF = print
+  document.getElementById("btnPrint").onclick = (e)=>{
+    e.preventDefault();
+    window.print();
+  };
 
-  document.getElementById("btnLogout").onclick = async ()=>{
+  document.getElementById("btnRefresh").onclick = async (e)=>{
+    e.preventDefault();
+    await loadOrders();
+  };
+
+  // logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
     await logout();
     window.location.href = "../index.html";
   };
 
-  await ensurePersistence();
-
+  // Guard
   onAuthStateChanged(auth, async (user)=>{
-    if(!user){ accessDenied.style.display="block"; return; }
-    const ok = await ensureAdmin();
-    if(!ok){ accessDenied.style.display="block"; return; }
+    accessDenied.style.display = "none";
+    adminUI.style.display = "none";
+    panelTable.style.display = "none";
 
-    adminUI.style.display="block";
-    await loadData();
+    if(!user){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    const ok = await ensureAdmin();
+    if(!ok){
+      accessDenied.style.display = "block";
+      return;
+    }
+
+    adminUI.style.display = "block";
+    panelTable.style.display = "block";
+    await loadOrders();
   });
 </script>
 
