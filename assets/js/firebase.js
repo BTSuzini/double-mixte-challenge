@@ -1,10 +1,6 @@
 // assets/js/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -16,12 +12,13 @@ const firebaseConfig = {
   appId: "1:148641893645:web:d73cb1727a7b96af3ff444"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// ✅ Persistance "rester connecté" sur le même appareil
-// (si iOS / navigateur bloque, on retombe sur le comportement par défaut)
+// ✅ reste connecté sur le même appareil
 setPersistence(auth, browserLocalPersistence).catch((e) => {
   console.warn("Auth persistence fallback:", e);
 });
+
+export { app, auth, db };
