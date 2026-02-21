@@ -44,9 +44,9 @@
     <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
 
     <div class="subtabs" role="tablist">
-      <button class="subtab" id="tabFlyer" aria-selected="true">📄 Flyer</button>
-      <button class="subtab" id="tabCommander" aria-selected="false">🛒 Commander</button>
-      <button class="subtab" id="tabCommandes" aria-selected="false">📦 Commandes effectuées</button>
+      <button class="subtab" id="tabFlyer" aria-selected="true" type="button">📄 Flyer</button>
+      <button class="subtab" id="tabCommander" aria-selected="false" type="button">🛒 Commander</button>
+      <button class="subtab" id="tabCommandes" aria-selected="false" type="button">📦 Commandes effectuées</button>
     </div>
   </section>
 
@@ -69,21 +69,56 @@
   <section class="card" id="panelCommander" style="display:none;">
     <h2>🛒 Commander</h2>
 
-    <div style="margin-top:15px; line-height:1.6;">
-      <p style="font-size:18px; font-weight:800;">
+    <div style="margin-top:12px; line-height:1.6;">
+      <p style="font-size:18px; font-weight:900; margin:0;">
         🎾 Offre spéciale pour les beacheurs !
       </p>
 
-      <p>
+      <p style="margin:8px 0 0;">
         Profitez d’un <strong>prix exclusif tournoi</strong> :
         <br><strong>3 arancini pour 10€</strong> 🇮🇹🔥
       </p>
 
-      <p class="muted" style="margin-top:12px;">
-        Les commandes seront très prochainement ouvertes directement sur cette page.
-        Restez connectés 😉
+      <p class="muted" style="margin:10px 0 0; font-weight:800;">
+        ⏳ Réservations possibles jusqu’au <b>25/08</b>
       </p>
     </div>
+
+    <hr class="sep" />
+
+    <form id="orderForm" class="form" autocomplete="off" style="margin-top:6px;">
+      <div class="field">
+        <label for="playerSelect">Beacheur *</label>
+        <select id="playerSelect" name="playerSelect" required>
+          <option value="">Chargement…</option>
+        </select>
+        <p class="muted" style="margin:8px 0 0;">
+          Sélection = <b>Prénom</b> + (<b>équipe</b>)
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="qty">Nombre de repas (packs “3 arancini”) *</label>
+        <select id="qty" name="qty" required>
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+
+      <button id="btnOrder" class="btn" type="submit" style="font-weight:900; color:#111;">
+        ✅ Valider la commande
+      </button>
+
+      <p id="orderStatus" class="muted" role="status" aria-live="polite" style="margin:10px 0 0;"></p>
+    </form>
   </section>
 
   <!-- ======================
@@ -92,9 +127,29 @@
   <section class="card" id="panelCommandes" style="display:none;">
     <h2>📦 Commandes effectuées</h2>
 
-    <p class="muted" style="margin-top:10px;">
-      Cette section permettra de consulter les commandes validées.
-      <br>Fonctionnalité en préparation.
+    <p class="muted" style="margin-top:8px;">
+      1 ligne par beacheur (les commandes se <b>cumulent</b> automatiquement).
+    </p>
+
+    <p class="muted" id="ordersCount" style="margin:10px 0 0;">Chargement…</p>
+
+    <div class="table-wrap" style="margin-top:10px;">
+      <table class="teams-table" aria-label="Commandes repas">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Beacheur</th>
+            <th>Équipe</th>
+            <th style="width:140px;">Quantité</th>
+            <th style="width:220px;">Dernière maj</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin:10px 0 0;">
+      💡 La quantité correspond au nombre de <b>packs</b> “3 arancini”.
     </p>
   </section>
 
@@ -107,7 +162,6 @@
     flex-wrap:wrap;
     margin-top:10px;
   }
-
   .subtab{
     appearance:none;
     border:1px solid #ddd;
@@ -117,15 +171,45 @@
     font-weight:900;
     cursor:pointer;
   }
-
   .subtab[aria-selected="true"]{
     background:#fff;
     border-color:#cfcfcf;
     box-shadow: 0 6px 14px rgba(0,0,0,.06);
   }
+
+  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:820px; }
+  .teams-table thead th{
+    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
+    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+    white-space:nowrap;
+  }
+  .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
+
+  .pill{
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
+    border:1px solid #eee; background:#fafafa; white-space:nowrap;
+  }
 </style>
 
-<script>
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection, doc, setDoc,
+    query, orderBy, onSnapshot,
+    serverTimestamp, increment
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // =========================
+  // CONFIG
+  // =========================
+  const COL_TEAMS_PUBLIC = "equipes_etape1_public"; // public challenge
+  const COL_ORDERS = "repas_etape1";               // 👈 nouvelle collection (1 doc / beacheur)
+
+  // =========================
+  // TABS UI
+  // =========================
   const tabFlyer = document.getElementById("tabFlyer");
   const tabCommander = document.getElementById("tabCommander");
   const tabCommandes = document.getElementById("tabCommandes");
@@ -149,17 +233,237 @@
   tabFlyer.onclick = ()=>{
     show(panelFlyer);
     tabFlyer.setAttribute("aria-selected","true");
+    localStorage.setItem("challenge_repas_tab", "flyer");
   };
-
   tabCommander.onclick = ()=>{
     show(panelCommander);
     tabCommander.setAttribute("aria-selected","true");
+    localStorage.setItem("challenge_repas_tab", "commander");
   };
-
   tabCommandes.onclick = ()=>{
     show(panelCommandes);
     tabCommandes.setAttribute("aria-selected","true");
+    localStorage.setItem("challenge_repas_tab", "commandes");
   };
+
+  // restore
+  const savedTab = localStorage.getItem("challenge_repas_tab") || "flyer";
+  if(savedTab === "commander") tabCommander.click();
+  else if(savedTab === "commandes") tabCommandes.click();
+  else tabFlyer.click();
+
+  // =========================
+  // HELPERS
+  // =========================
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", {
+        year:"numeric", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit"
+      });
+    }catch{ return "—"; }
+  }
+
+  // =========================
+  // COMMANDER UI
+  // =========================
+  const orderForm = document.getElementById("orderForm");
+  const playerSelect = document.getElementById("playerSelect");
+  const qtyEl = document.getElementById("qty");
+  const btnOrder = document.getElementById("btnOrder");
+  const orderStatus = document.getElementById("orderStatus");
+
+  // On stocke les players en mémoire (clé => infos)
+  // playerKey = `${teamDocId}__p1` ou `${teamDocId}__p2`
+  const playersByKey = new Map();
+
+  function rebuildPlayerSelect(){
+    const keys = Array.from(playersByKey.keys());
+
+    // tri: équipe puis prénom
+    keys.sort((a,b)=>{
+      const A = playersByKey.get(a), B = playersByKey.get(b);
+      const at = (A?.teamName || "").toLowerCase();
+      const bt = (B?.teamName || "").toLowerCase();
+      if(at !== bt) return at.localeCompare(bt);
+      const ap = (A?.playerFirstName || "").toLowerCase();
+      const bp = (B?.playerFirstName || "").toLowerCase();
+      return ap.localeCompare(bp);
+    });
+
+    playerSelect.innerHTML = `<option value="">— Choisir un beacheur —</option>` +
+      keys.map(k=>{
+        const p = playersByKey.get(k);
+        const label = `${p.playerFirstName} (${p.teamName})`;
+        return `<option value="${esc(k)}">${esc(label)}</option>`;
+      }).join("");
+  }
+
+  // charge players depuis équipes public
+  const qTeams = query(collection(db, COL_TEAMS_PUBLIC), orderBy("createdAt","asc"));
+  onSnapshot(qTeams, (snap)=>{
+    playersByKey.clear();
+
+    snap.forEach(d=>{
+      const data = d.data() || {};
+      const teamId = d.id;
+      const teamName = data.teamName || "";
+
+      // p1
+      if((data.p1FirstName || "").trim()){
+        const key = `${teamId}__p1`;
+        playersByKey.set(key, {
+          playerKey: key,
+          teamId,
+          teamName,
+          playerFirstName: (data.p1FirstName || "").trim(),
+          playerSlot: "p1"
+        });
+      }
+
+      // p2
+      if((data.p2FirstName || "").trim()){
+        const key = `${teamId}__p2`;
+        playersByKey.set(key, {
+          playerKey: key,
+          teamId,
+          teamName,
+          playerFirstName: (data.p2FirstName || "").trim(),
+          playerSlot: "p2"
+        });
+      }
+    });
+
+    rebuildPlayerSelect();
+    orderStatus.textContent = "";
+  }, (err)=>{
+    console.error(err);
+    playerSelect.innerHTML = `<option value="">❌ Impossible de charger les joueurs</option>`;
+    orderStatus.textContent = "❌ Erreur : impossible de charger la liste des beacheurs.";
+  });
+
+  orderForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    orderStatus.textContent = "";
+
+    const key = (playerSelect.value || "").trim();
+    const qty = Number(qtyEl.value || "0");
+
+    if(!key || !playersByKey.has(key)){
+      orderStatus.textContent = "⚠️ Choisis un beacheur.";
+      return;
+    }
+    if(!Number.isFinite(qty) || qty <= 0){
+      orderStatus.textContent = "⚠️ Quantité invalide.";
+      return;
+    }
+
+    const p = playersByKey.get(key);
+    const label = `${p.playerFirstName} (${p.teamName})`;
+
+    const ok = confirm(
+      `Confirmer la commande ?\n\nBeacheur : ${label}\nQuantité : ${qty} repas (packs)\n\n✅ Les commandes se cumulent automatiquement.`
+    );
+    if(!ok) return;
+
+    btnOrder.disabled = true;
+    btnOrder.classList.add("disabled");
+    playerSelect.disabled = true;
+    qtyEl.disabled = true;
+    orderStatus.textContent = "Enregistrement…";
+
+    try{
+      const ref = doc(db, COL_ORDERS, key);
+
+      // 1 doc par beacheur => cumul via increment
+      await setDoc(ref, {
+        playerKey: key,
+        teamId: p.teamId,
+        teamName: p.teamName,
+        playerFirstName: p.playerFirstName,
+        playerSlot: p.playerSlot,
+
+        qty: increment(qty),
+        updatedAt: serverTimestamp(),
+        // créé si absent (merge + champ)
+        createdAt: serverTimestamp(),
+      }, { merge:true });
+
+      alert("✅ Commande enregistrée (cumulée si déjà existante).");
+
+      // reset UI
+      orderForm.reset();
+      orderStatus.textContent = "✅ Commande enregistrée.";
+    }catch(err){
+      console.error(err);
+      orderStatus.textContent = "❌ Erreur : impossible d’enregistrer la commande.";
+      playerSelect.disabled = false;
+      qtyEl.disabled = false;
+    }finally{
+      btnOrder.disabled = false;
+      btnOrder.classList.remove("disabled");
+      playerSelect.disabled = false;
+      qtyEl.disabled = false;
+    }
+  });
+
+  // =========================
+  // COMMANDES EFFECTUÉES
+  // =========================
+  const ordersCount = document.getElementById("ordersCount");
+  const ordersBody  = document.getElementById("ordersBody");
+
+  const qOrders = query(collection(db, COL_ORDERS), orderBy("updatedAt","desc"));
+  onSnapshot(qOrders, (snap)=>{
+    const rows = [];
+    snap.forEach(d=>{
+      const data = d.data() || {};
+      rows.push({
+        id: d.id,
+        playerFirstName: data.playerFirstName || "",
+        teamName: data.teamName || "",
+        qty: (typeof data.qty === "number") ? data.qty : (data.qty?.toString ? data.qty : data.qty),
+        updatedAt: data.updatedAt || null
+      });
+    });
+
+    ordersCount.textContent = `📌 ${rows.length} commande${rows.length>1?"s":""}`;
+
+    if(rows.length === 0){
+      ordersBody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
+      return;
+    }
+
+    ordersBody.innerHTML = rows.map((r, i)=>{
+      const labelPlayer = r.playerFirstName || "—";
+      const qty = (r.qty === null || r.qty === undefined) ? "—" : String(r.qty);
+
+      return `
+        <tr>
+          <td>#${i+1}</td>
+          <td><strong>${esc(labelPlayer)}</strong></td>
+          <td>${esc(r.teamName || "—")}</td>
+          <td><span class="pill"><b>${esc(qty)}</b> pack(s)</span></td>
+          <td class="muted">${esc(fmtDate(r.updatedAt))}</td>
+        </tr>
+      `;
+    }).join("");
+  }, (err)=>{
+    console.error(err);
+    ordersCount.textContent = "❌ Impossible de charger les commandes.";
+    ordersBody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
+  });
 </script>
 
 </body>
