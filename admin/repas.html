@@ -87,6 +87,7 @@
             <th>Équipe</th>
             <th style="width:120px;">Qté (packs)</th>
             <th style="width:140px;">Montant</th>
+            <th class="no-print" style="width:140px;">Action</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -102,7 +103,7 @@
 
 <style>
   .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 760px; }
+  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 900px; }
   .orders-table thead th{
     text-align:left; font-size:13px; color:#444; background:#f7f7f7;
     border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
@@ -110,6 +111,16 @@
   }
   .orders-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
   .orders-table tbody tr:last-child td{ border-bottom:none; }
+
+  .btnx{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:#fff;
+    cursor:pointer;
+    font-weight:900;
+  }
+  .btnx:hover{ background:#f5f5f5; }
 
   /* Print */
   .only-print{ display:none; }
@@ -151,7 +162,8 @@
   import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    collection, getDocs, query, orderBy
+    collection, getDocs, query, orderBy,
+    doc, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ---- scope (par défaut etape1)
@@ -159,6 +171,9 @@
   const scope = params.get("scope") || "etape1";
   const stepNum = scope.replace("etape","");
   const stepLabel = `Étape ${stepNum}`;
+
+  // ✅ Repas pour toutes les étapes
+  const COL_ORDERS = `repas_${scope}`;
 
   // ---- UI title
   document.getElementById("pageSub").textContent = `${stepLabel} — Repas`;
@@ -170,7 +185,7 @@
   document.getElementById("tabRepas").href = `repas.html?scope=${encodeURIComponent(scope)}`;
   document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
 
-  // Vue publique (ici : etape1/repas.html)
+  // Vue publique (prévu : etapeX/repas.html si tu le fais plus tard)
   document.getElementById("btnPublic").onclick = (e)=>{
     e.preventDefault();
     if(scope === "etape1") window.location.href = "../etape1/repas.html";
@@ -186,9 +201,7 @@
   const tbody = document.getElementById("tbody");
   const grandTotalEl = document.getElementById("grandTotal");
 
-  // ---- collection commandes
-  // (pour l’instant : uniquement étape 1)
-  const COL_ORDERS = (scope === "etape1") ? "repas_etape1" : `repas_${scope}`;
+  const PRICE = 10; // € par pack
 
   function esc(s){
     return (s ?? "").toString()
@@ -216,16 +229,19 @@
       const rows = [];
       snap.forEach(d=>{
         const x = d.data() || {};
+        const qty = Number(x.qty || 0);
+        const total = Number(x.total || (qty * PRICE));
         rows.push({
+          id: d.id,
           beacheurName: x.beacheurName || "",
           teamName: x.teamName || "",
-          qty: Number.isFinite(x.qty) ? x.qty : (x.qty || 0),
-          total: Number.isFinite(x.total) ? x.total : (x.total || 0)
+          qty,
+          total
         });
       });
 
       if(rows.length === 0){
-        tbody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
         statusEl.textContent = "🟢 OK — 0 commande";
         grandTotalEl.textContent = "0";
         return;
@@ -241,6 +257,9 @@
             <td>${esc(r.teamName)}</td>
             <td>${esc(String(r.qty))}</td>
             <td><b>${esc(String(r.total))} €</b></td>
+            <td class="no-print">
+              <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Corriger</button>
+            </td>
           </tr>
         `;
       }).join("");
@@ -251,9 +270,32 @@
     }catch(err){
       console.error(err);
       statusEl.textContent = "🔴 Erreur : impossible de charger les commandes.";
-      tbody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
       grandTotalEl.textContent = "0";
     }
+  }
+
+  async function editLine(docId){
+    // On relit la ligne via dataset affiché ? -> plus sûr: on demande la quantité directement.
+    const typed = prompt("Nouvelle quantité (packs “3 arancini”) :", "1");
+    if(typed === null) return;
+
+    const q = Number(String(typed).trim());
+    if(!Number.isFinite(q) || q < 0){
+      alert("Quantité invalide.");
+      return;
+    }
+
+    const total = q * PRICE;
+
+    // merge, on ne touche pas au reste
+    await setDoc(doc(db, COL_ORDERS, docId), {
+      qty: q,
+      total: total,
+      updatedAt: serverTimestamp()
+    }, { merge:true });
+
+    alert("✅ Ligne corrigée.");
   }
 
   // Export PDF = print
@@ -266,6 +308,25 @@
     e.preventDefault();
     await loadOrders();
   };
+
+  // click actions
+  tbody.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act]");
+    if(!btn) return;
+
+    const act = btn.dataset.act;
+    const id  = btn.dataset.id;
+
+    statusEl.textContent = "Traitement…";
+    try{
+      if(act === "edit") await editLine(id);
+      await loadOrders();
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "❌ Erreur";
+      alert("Erreur ❌ (voir console)");
+    }
+  });
 
   // logout
   document.getElementById("btnLogout").onclick = async (e)=>{
