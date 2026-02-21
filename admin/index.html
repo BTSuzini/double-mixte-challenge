@@ -236,12 +236,14 @@
     }
 
     hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
-
-    const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🏁 Résultats", "resultats.html"],
-    ];
+    
+const links = [
+  ["👥 Équipes", "equipes.html"],
+  ["📝 Inscriptions", "inscriptions.html"],
+  ["🍽️ Repas", "repas.html"],          // ✅ AJOUT
+  ["🏁 Résultats", "resultats.html"],
+];
+   
 
     for(const [label, url] of links){
       const a = document.createElement("a");
