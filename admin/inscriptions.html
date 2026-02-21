@@ -15,8 +15,9 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title" id="pageTitle">
-        Inscriptions (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      <h1 class="brand-title">
+        📝 Inscriptions (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
       </h1>
 
       <div class="brand-logo">
@@ -24,11 +25,8 @@
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="#" id="tabEquipes">👥 Équipes</a>
-      <a href="#" id="tabInscriptions" aria-current="page">📝 Inscriptions</a>
-      <a href="#" id="tabResultats">🏁 Résultats</a>
-      <a href="#" id="btnPublic">Vue publique</a>
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
@@ -42,7 +40,39 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
+  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
   <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- =========================
+       CONTENU PAGE (après Zone)
+       => uniquement Statut + RAZ
+  ========================== -->
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer le statut des inscriptions et faire une RAZ.
+    </p>
+  </section>
+
+  <section class="card" id="panelInscriptions" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Statut des inscriptions</h2>
 
     <p class="muted" id="currentState" style="margin:0;">Chargement…</p>
@@ -61,13 +91,13 @@
     </p>
   </section>
 
-  <!-- ✅ MAINTENANCE : RAZ -->
-  <section class="card" id="maintenanceUI" style="display:none;">
+  <section class="card" id="panelRAZ" style="display:none;">
     <h2 style="margin:0 0 10px;">🧹 Maintenance</h2>
 
     <p class="muted" style="margin:0;">
-      Cette action supprime <b>toutes</b> les inscriptions de l’étape (privé + public) et remet le statut à <b>Pas encore ouvertes</b>.
-      <br>⚠️ <b>Irréversible</b>.
+      Cette action supprime <b>toutes</b> les inscriptions de l’étape (privé + public) et remet le statut à
+      <b>Pas encore ouvertes</b>.<br>
+      ⚠️ <b>Irréversible</b>.
     </p>
 
     <div class="grid" style="margin-top:12px;">
@@ -83,38 +113,30 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, setDoc, onSnapshot, serverTimestamp,
     collection, getDocs, writeBatch
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope
+  // ---- scope (URL ?scope=etape1)
   const params = new URLSearchParams(location.search);
-  const scope = params.get("scope") || "etape1"; // default etape1
-  const stepNum = scope.replace("etape","");
-  const stepLabel = `Étape ${stepNum}`;
-
-  // ---- UI title
-  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`; // ajustable plus tard
-
-  // ---- nav keep scope
-  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
-
-  // Vue publique
-  document.getElementById("btnPublic").onclick = (e)=>{
-    e.preventDefault();
-    if(scope === "etape1") window.location.href = "../etape1/inscriptions.html";
-    else alert("Vue publique non encore prête pour " + stepLabel);
-  };
+  const scopeFromUrl = params.get("scope") || "etape1";
 
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
-  const maintenanceUI = document.getElementById("maintenanceUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelInscriptions = document.getElementById("panelInscriptions");
+  const panelRAZ = document.getElementById("panelRAZ");
 
   const currentStateEl = document.getElementById("currentState");
   const statusMsgEl = document.getElementById("statusMsg");
@@ -127,12 +149,16 @@
   const btnRAZ = document.getElementById("btnRAZ");
   const razStatus = document.getElementById("razStatus");
 
-  // ---- collections
-  const COL_PRIVATE = `inscriptions_${scope}_private`;
-  const COL_PUBLIC  = `equipes_${scope}_public`;
+  // ---- state
+  let currentScope = scopeFromUrl;
+  let currentState = null;
+  let unsubGate = null;
 
-  // ---- config doc
-  const cfgRef = doc(db, "config", scope); // ex: config/etape1
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    const n = scope.replace("etape","");
+    return `Étape ${n}`;
+  }
 
   function labelFor(state){
     switch(state){
@@ -154,15 +180,6 @@
     }
   }
 
-  let currentState = null;
-
-  async function ensureAdmin(){
-    const u = auth.currentUser;
-    if(!u) return false;
-    const r = await getRoleByEmail(u.email);
-    return r === "admin";
-  }
-
   function setButtonsDisabled(disabled){
     [btnNotOpen, btnOpen, btnSuspend, btnClose, btnRAZ].forEach(b=>{
       b.disabled = disabled;
@@ -170,7 +187,92 @@
     });
   }
 
+  function stopGateListener(){
+    if(unsubGate){
+      unsubGate();
+      unsubGate = null;
+    }
+  }
+
+  function showPanelsForScope(scope){
+    // titre
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    // panels
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelInscriptions.style.display = "none";
+      panelRAZ.style.display = "none";
+      stopGateListener();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelInscriptions.style.display = "block";
+    panelRAZ.style.display = "block";
+
+    // listener gate
+    stopGateListener();
+
+    const cfgRef = doc(db, "config", scope); // ex: config/etape1
+
+    unsubGate = onSnapshot(cfgRef, (snap)=>{
+      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
+      currentState = state;
+
+      currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
+      statusMsgEl.textContent = publicMessage(state);
+
+      btnSuspend.textContent = (state === "suspended") ? "▶️ Réactiver" : "⏸️ Suspendre";
+    }, (err)=>{
+      console.error(err);
+      currentStateEl.textContent = "❌ Impossible de lire le statut.";
+      statusMsgEl.textContent = "";
+    });
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
+
+    const links = [
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ["🏁 Résultats", "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      // petit “active” simple
+      if(url === "inscriptions.html"){
+        a.style.fontWeight = "900";
+      }
+
+      tabsEl.appendChild(a);
+    }
+  }
+
   async function setState(next){
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
     if(next === "closed"){
       const ok = confirm("Clôturer les inscriptions ?\n\nLe public verra “clôturées” et ne pourra plus s’inscrire.");
       if(!ok) return;
@@ -179,6 +281,8 @@
       const ok = confirm("Mettre “pas encore ouvertes” ?\n\nLe public verra que ce n’est pas ouvert, formulaire bloqué.");
       if(!ok) return;
     }
+
+    const cfgRef = doc(db, "config", currentScope);
 
     setButtonsDisabled(true);
     statusMsgEl.textContent = "Mise à jour…";
@@ -211,7 +315,6 @@
 
   // ---- RAZ helper: delete a collection in batches
   async function deleteCollectionInBatches(colName, batchSize=450){
-    // 450 pour rester safe (limite batch=500)
     let deleted = 0;
 
     while(true){
@@ -224,8 +327,6 @@
       await batch.commit();
 
       deleted += docs.length;
-
-      // si on a moins que batchSize, on a fini
       if(docs.length < batchSize) break;
     }
 
@@ -233,9 +334,15 @@
   }
 
   async function doRAZ(){
-    // Double confirmation + saisie RAZ
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
+    const stepLbl = stepLabel(currentScope);
+
     const ok1 = confirm(
-      "⚠️ RAZ INSCRIPTIONS\n\nCette action supprime TOUTES les inscriptions (privé + public) pour " + stepLabel + ".\n\nContinuer ?"
+      "⚠️ RAZ INSCRIPTIONS\n\nCette action supprime TOUTES les inscriptions (privé + public) pour " + stepLbl + ".\n\nContinuer ?"
     );
     if(!ok1) return;
 
@@ -245,14 +352,16 @@
       return;
     }
 
+    const COL_PRIVATE = `inscriptions_${currentScope}_private`;
+    const COL_PUBLIC  = `equipes_${currentScope}_public`;
+    const cfgRef = doc(db, "config", currentScope);
+
     setButtonsDisabled(true);
     razStatus.textContent = "Suppression en cours…";
 
     try{
-      // 1) fermer (not_open) avant nettoyage (optionnel mais safe)
       await setDoc(cfgRef, { inscriptionsState: "not_open", updatedAt: serverTimestamp() }, { merge:true });
 
-      // 2) delete public + private (dans les deux sens, peu importe l’état)
       const delPublic  = await deleteCollectionInBatches(COL_PUBLIC);
       const delPrivate = await deleteCollectionInBatches(COL_PRIVATE);
 
@@ -276,39 +385,45 @@
     window.location.href = "../index.html";
   };
 
-  // guard + live state
-  onAuthStateChanged(auth, async (user)=>{
-    accessDenied.style.display = "none";
+  function showDenied(){
+    accessDenied.style.display = "block";
     adminUI.style.display = "none";
-    maintenanceUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelInscriptions.style.display = "none";
+    panelRAZ.style.display = "none";
+    stopGateListener();
+  }
 
-    if(!user){
-      accessDenied.style.display = "block";
-      return;
-    }
-
-    const ok = await ensureAdmin();
-    if(!ok){
-      accessDenied.style.display = "block";
-      return;
-    }
-
+  function showAdmin(){
+    accessDenied.style.display = "none";
     adminUI.style.display = "block";
-    maintenanceUI.style.display = "block";
 
-    onSnapshot(cfgRef, (snap)=>{
-      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
-      currentState = state;
+    // select
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
 
-      currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
-      statusMsgEl.textContent = publicMessage(state);
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
 
-      btnSuspend.textContent = (state === "suspended") ? "▶️ Réactiver" : "⏸️ Suspendre";
-    }, (err)=>{
-      console.error(err);
-      currentStateEl.textContent = "❌ Impossible de lire le statut.";
-      statusMsgEl.textContent = "";
-    });
+  // 1) guard au chargement (avec persistance via session.js)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+  }
+
+  // 2) robuste si session change
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
+    // déjà affiché => rien
   });
 </script>
 
