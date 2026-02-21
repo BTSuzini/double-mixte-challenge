@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Repas — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <title>Repas — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
 </head>
 <body>
 
@@ -16,8 +16,8 @@
       </div>
 
       <h1 class="brand-title">
-        Étape 1 — 27 février 2026<br>
-        <span style="opacity:.95;font-weight:800;">BT250</span>
+        Double Mixte Challenge<br>
+        <span style="opacity:.95;font-weight:800;">Repas & Arancini 🇮🇹</span>
       </h1>
 
       <div class="brand-logo">
@@ -25,6 +25,7 @@
       </div>
     </div>
 
+    <!-- NAV PUBLIQUE -->
     <nav class="nav">
       <a href="../index.html">Accueil</a>
       <a href="programmation.html">Programmation</a>
@@ -38,14 +39,128 @@
 
 <main class="container">
 
+  <!-- Sous-onglets -->
   <section class="card">
-    <h2>🍽️ Repas</h2>
-    <p class="muted" style="margin-top:0;">
-      À venir. Cette page servira à gérer les options repas / réservations (si proposées sur l’étape).
+    <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
+
+    <div class="subtabs" role="tablist">
+      <button class="subtab" id="tabFlyer" aria-selected="true">📄 Flyer</button>
+      <button class="subtab" id="tabCommander" aria-selected="false">🛒 Commander</button>
+      <button class="subtab" id="tabCommandes" aria-selected="false">📦 Commandes effectuées</button>
+    </div>
+  </section>
+
+  <!-- ======================
+        FLYER
+  ======================= -->
+  <section class="card" id="panelFlyer">
+    <h2>📄 Flyer officiel</h2>
+
+    <div style="text-align:center; margin-top:15px;">
+      <img src="../assets/img/flyer.jpeg"
+           alt="Flyer soirée italienne"
+           style="max-width:100%; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.08);">
+    </div>
+  </section>
+
+  <!-- ======================
+        COMMANDER
+  ======================= -->
+  <section class="card" id="panelCommander" style="display:none;">
+    <h2>🛒 Commander</h2>
+
+    <div style="margin-top:15px; line-height:1.6;">
+      <p style="font-size:18px; font-weight:800;">
+        🎾 Offre spéciale pour les beacheurs !
+      </p>
+
+      <p>
+        Profitez d’un <strong>prix exclusif tournoi</strong> :
+        <br><strong>3 arancini pour 10€</strong> 🇮🇹🔥
+      </p>
+
+      <p class="muted" style="margin-top:12px;">
+        Les commandes seront très prochainement ouvertes directement sur cette page.
+        Restez connectés 😉
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================
+        COMMANDES EFFECTUÉES
+  ======================= -->
+  <section class="card" id="panelCommandes" style="display:none;">
+    <h2>📦 Commandes effectuées</h2>
+
+    <p class="muted" style="margin-top:10px;">
+      Cette section permettra de consulter les commandes validées.
+      <br>Fonctionnalité en préparation.
     </p>
   </section>
 
 </main>
+
+<style>
+  .subtabs{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  .subtab{
+    appearance:none;
+    border:1px solid #ddd;
+    background:#fafafa;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:900;
+    cursor:pointer;
+  }
+
+  .subtab[aria-selected="true"]{
+    background:#fff;
+    border-color:#cfcfcf;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  }
+</style>
+
+<script>
+  const tabFlyer = document.getElementById("tabFlyer");
+  const tabCommander = document.getElementById("tabCommander");
+  const tabCommandes = document.getElementById("tabCommandes");
+
+  const panelFlyer = document.getElementById("panelFlyer");
+  const panelCommander = document.getElementById("panelCommander");
+  const panelCommandes = document.getElementById("panelCommandes");
+
+  function show(panel){
+    panelFlyer.style.display = "none";
+    panelCommander.style.display = "none";
+    panelCommandes.style.display = "none";
+
+    tabFlyer.setAttribute("aria-selected","false");
+    tabCommander.setAttribute("aria-selected","false");
+    tabCommandes.setAttribute("aria-selected","false");
+
+    panel.style.display = "block";
+  }
+
+  tabFlyer.onclick = ()=>{
+    show(panelFlyer);
+    tabFlyer.setAttribute("aria-selected","true");
+  };
+
+  tabCommander.onclick = ()=>{
+    show(panelCommander);
+    tabCommander.setAttribute("aria-selected","true");
+  };
+
+  tabCommandes.onclick = ()=>{
+    show(panelCommandes);
+    tabCommandes.setAttribute("aria-selected","true");
+  };
+</script>
 
 </body>
 </html>
