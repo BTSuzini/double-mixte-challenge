@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boutique — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260219" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
   <style>
     .note{
       border:1px solid #eee;
@@ -33,12 +33,12 @@
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil</a>
-      <a href="classement.html">Classement</a>
-      <a href="reglement.html">Règlement</a>
-      <a href="infos.html">Infos</a>
-      <a href="boutique.html" aria-current="page">Boutique</a>
-      <a href="contact.html">Contact</a>
+      <a href="../index.html">🏠 Accueil</a>
+      <a href="classement.html">🏆 Classement</a>
+      <a href="reglement.html">📘 Règlement</a>
+      <a href="infos.html">📰 Infos</a>
+      <a href="boutique.html" aria-current="page">🛍️ Boutique</a>
+      <a href="contact.html">📩 Contact</a>
     </nav>
   </div>
 </header>
@@ -50,21 +50,29 @@
 
     <div class="note">
       <p style="margin:0 0 10px;">
-        👉 Vous allez être redirigé vers <b>SumUp</b> pour effectuer le paiement.
+        Paiement via <b>SumUp</b> (ouverture via le bouton ci-dessous).
       </p>
       <ul style="margin:0 0 10px 18px;">
         <li>Paiement possible <b>par équipe : 20€</b></li>
         <li>ou <b>par personne : 10€</b></li>
       </ul>
       <p class="muted small" style="margin:0;">
-        (Le paiement s’ouvre sur la boutique SumUp dans un nouvel onglet.)
+        Astuce : si votre téléphone bloque l’ouverture d’un nouvel onglet, réessayez ou changez de navigateur.
       </p>
     </div>
 
     <div class="grid" style="margin-top:12px;">
-      <a class="btn" id="btnGo" href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a" target="_blank" rel="noopener" style="font-weight:900; color:#111;">
+      <a
+        class="btn"
+        id="btnGo"
+        href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a"
+        target="_blank"
+        rel="noopener"
+        style="font-weight:900; color:#111;"
+      >
         🔗 Ouvrir la boutique SumUp
       </a>
+
       <a class="btn" href="../index.html" style="font-weight:900; color:#111;">⬅️ Retour</a>
     </div>
 
@@ -75,20 +83,6 @@
 
 </main>
 
-<script>
-  // Redirection douce (sans forcer) : on laisse 1,2s puis on ouvre dans un nouvel onglet.
-  // Sur iOS, l'ouverture auto peut être bloquée : le bouton reste la méthode fiable.
-  setTimeout(() => {
-    try {
-      // ouvre dans un nouvel onglet (peut être bloqué par le navigateur)
-      window.open(
-        "https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a",
-        "_blank",
-        "noopener"
-      );
-    } catch(e) {}
-  }, 1200);
-</script>
-
+<!-- ✅ plus de redirection automatique -->
 </body>
 </html>
