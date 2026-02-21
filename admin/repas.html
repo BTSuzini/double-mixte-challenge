@@ -15,21 +15,15 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title" id="pageTitle">
-        Repas (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
-      </h1>
+      <h1 class="brand-title">🛠️ Admin — Gestion</h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout : uniquement ces 2 liens -->
     <nav class="nav">
-      <a href="#" id="tabEquipes">👥 Équipes</a>
-      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
-      <a href="#" id="tabRepas" aria-current="page">🍽️ Repas</a>
-      <a href="#" id="tabResultats">🏁 Résultats</a>
-      <a href="#" id="btnPublic">Vue publique</a>
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
@@ -55,6 +49,27 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
+  <!-- ✅ Encart ZONE (identique à admin/index) -->
+  <section class="card" id="zoneUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- ✅ Contenu de la page (affiché après l’encart Zone) -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🍽️ Commandes repas — récap</h2>
 
@@ -72,7 +87,7 @@
 
   <section class="card" id="panelTable" style="display:none;">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px;">
-      <span>📋 Liste complète</span>
+      <span>📋 Commandes (uniquement les joueurs ayant commandé)</span>
       <span class="muted" style="font-weight:900;">
         Total général : <span id="grandTotal">0</span> €
       </span>
@@ -83,9 +98,9 @@
         <thead>
           <tr>
             <th style="width:44px;">#</th>
-            <th>Beacheur</th>
-            <th>Équipe</th>
-            <th style="width:120px;">Qté (packs)</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th style="width:140px;">Qté (packs)</th>
             <th style="width:140px;">Montant</th>
             <th class="no-print" style="width:140px;">Action</th>
           </tr>
@@ -94,7 +109,7 @@
       </table>
     </div>
 
-    <p class="muted" style="margin:10px 0 0;">
+    <p class="muted no-print" style="margin:10px 0 0;">
       ⚠️ Export PDF : clique “Exporter PDF”, puis “Enregistrer en PDF”.
     </p>
   </section>
@@ -103,7 +118,7 @@
 
 <style>
   .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 900px; }
+  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 820px; }
   .orders-table thead th{
     text-align:left; font-size:13px; color:#444; background:#f7f7f7;
     border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
@@ -159,12 +174,14 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, getRoleByEmail, ensurePersistence } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     collection, getDocs, query, orderBy,
     doc, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  await ensurePersistence();
 
   // ---- scope (par défaut etape1)
   const params = new URLSearchParams(location.search);
@@ -175,33 +192,24 @@
   // ✅ Repas pour toutes les étapes
   const COL_ORDERS = `repas_${scope}`;
 
-  // ---- UI title
-  document.getElementById("pageSub").textContent = `${stepLabel} — Repas`;
-  document.getElementById("printSub").textContent = `Repas — ${stepLabel}`;
-
-  // ---- nav keep scope
-  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabRepas").href = `repas.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
-
-  // Vue publique (prévu : etapeX/repas.html si tu le fais plus tard)
-  document.getElementById("btnPublic").onclick = (e)=>{
-    e.preventDefault();
-    if(scope === "etape1") window.location.href = "../etape1/repas.html";
-    else alert("Vue publique non prête pour " + stepLabel);
-  };
-
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
+  const zoneUI = document.getElementById("zoneUI");
   const adminUI = document.getElementById("adminUI");
   const panelTable = document.getElementById("panelTable");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
 
   const statusEl = document.getElementById("status");
   const tbody = document.getElementById("tbody");
   const grandTotalEl = document.getElementById("grandTotal");
 
-  const PRICE = 10; // € par pack
+  const PRICE = 10; // € / pack
+
+  // ---- print title
+  document.getElementById("printSub").textContent = `Repas — ${stepLabel}`;
 
   function esc(s){
     return (s ?? "").toString()
@@ -217,26 +225,81 @@
     return r === "admin";
   }
 
+  // ✅ Encart Zone (menu + onglets)
+  function setTabs(currentScope){
+    tabsEl.innerHTML = "";
+
+    if(currentScope === "general"){
+      hintEl.textContent = "Zone Général : gestion des infos.";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html"; // admin landing
+      a.textContent = "📰 Infos";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / repas / résultats.";
+    const links = [
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ["🍽️ Repas", "repas.html"],
+      ["🏁 Résultats", "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(currentScope)}`;
+      a.textContent = label;
+
+      // petit “highlight” sur l’onglet actif
+      if(url === "repas.html"){
+        a.setAttribute("aria-current", "page");
+      }
+
+      tabsEl.appendChild(a);
+    }
+  }
+
+  // scope select init + behavior
+  scopeEl.value = scope;
+  setTabs(scope);
+
+  scopeEl.onchange = ()=>{
+    const v = scopeEl.value;
+    if(v === "general"){
+      window.location.href = "index.html";
+      return;
+    }
+    // rester sur la page repas mais changer de scope
+    window.location.href = `repas.html?scope=${encodeURIComponent(v)}`;
+  };
+
   async function loadOrders(){
     statusEl.textContent = "Chargement…";
     tbody.innerHTML = "";
     grandTotalEl.textContent = "0";
 
     try{
-      const q = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+      // tri par nom/prénom (si tes champs existent)
+      const q = query(collection(db, COL_ORDERS), orderBy("lastName","asc"), orderBy("firstName","asc"));
       const snap = await getDocs(q);
 
+      // ✅ uniquement ceux qui ont commandé
       const rows = [];
       snap.forEach(d=>{
         const x = d.data() || {};
         const qty = Number(x.qty || 0);
-        const total = Number(x.total || (qty * PRICE));
+        if(!Number.isFinite(qty) || qty <= 0) return;
+
+        const total = Number(x.total ?? (qty * PRICE));
         rows.push({
           id: d.id,
-          beacheurName: x.beacheurName || "",
-          teamName: x.teamName || "",
+          firstName: x.firstName || "",
+          lastName: x.lastName || "",
           qty,
-          total
+          total: Number.isFinite(total) ? total : (qty * PRICE)
         });
       });
 
@@ -253,8 +316,8 @@
         return `
           <tr>
             <td>#${i+1}</td>
-            <td><b>${esc(r.beacheurName)}</b></td>
-            <td>${esc(r.teamName)}</td>
+            <td><b>${esc(r.lastName)}</b></td>
+            <td>${esc(r.firstName)}</td>
             <td>${esc(String(r.qty))}</td>
             <td><b>${esc(String(r.total))} €</b></td>
             <td class="no-print">
@@ -276,7 +339,6 @@
   }
 
   async function editLine(docId){
-    // On relit la ligne via dataset affiché ? -> plus sûr: on demande la quantité directement.
     const typed = prompt("Nouvelle quantité (packs “3 arancini”) :", "1");
     if(typed === null) return;
 
@@ -288,7 +350,6 @@
 
     const total = q * PRICE;
 
-    // merge, on ne touche pas au reste
     await setDoc(doc(db, COL_ORDERS, docId), {
       qty: q,
       total: total,
@@ -309,7 +370,6 @@
     await loadOrders();
   };
 
-  // click actions
   tbody.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
@@ -328,7 +388,6 @@
     }
   });
 
-  // logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -338,6 +397,7 @@
   // Guard
   onAuthStateChanged(auth, async (user)=>{
     accessDenied.style.display = "none";
+    zoneUI.style.display = "none";
     adminUI.style.display = "none";
     panelTable.style.display = "none";
 
@@ -352,8 +412,10 @@
       return;
     }
 
+    zoneUI.style.display = "block";
     adminUI.style.display = "block";
     panelTable.style.display = "block";
+
     await loadOrders();
   });
 </script>
