@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260219" />
+  <link rel="stylesheet" href="assets/css/main.css?v=20260221" />
 </head>
 <body>
 
@@ -23,11 +23,11 @@
     </div>
 
     <nav class="nav">
-      <a href="pages/classement.html">Classement</a>
-      <a href="pages/reglement.html">Règlement</a>
-      <a href="pages/infos.html">Infos</a>
-      <a href="pages/boutique.html">Boutique</a>
-      <a href="pages/contact.html">Contact</a>
+      <a href="pages/classement.html">🏆 Classement</a>
+      <a href="pages/reglement.html">📘 Règlement</a>
+      <a href="pages/infos.html">📰 Infos</a>
+      <a href="pages/boutique.html">🛍️ Boutique</a>
+      <a href="pages/contact.html">📩 Contact</a>
     </nav>
   </div>
 </header>
@@ -35,25 +35,25 @@
 <main class="container">
 
   <section class="card">
-    <h2>Les étapes</h2>
+    <h2>🗓️ Les étapes</h2>
     <div class="grid">
-      <a class="btn" href="etape1/equipes.html">Étape 1 — 27/02/2026 — BT250</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 2 — 12/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 3 — 26/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 4 — 09/04/2026 — à venir</a>
-      <a class="btn disabled" href="#" aria-disabled="true">Étape 5 — 17/04/2026 — à venir</a>
+      <a class="btn" href="etape1/equipes.html">🎾 Étape 1 — 27/02/2026 — BT250</a>
+      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 2 — 12/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 3 — 26/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 4 — 09/04/2026 — à venir</a>
+      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 5 — 17/04/2026 — à venir</a>
     </div>
-    <p class="muted">Le classement général est calculé par joueur (points + départages).</p>
+    <p class="muted">📌 Le classement général est calculé par joueur (points + départages).</p>
   </section>
 
   <section class="card">
-    <h2>Accès rapide</h2>
+    <h2>⚡ Accès rapide</h2>
     <div class="grid">
-      <a class="btn" href="pages/classement.html">Voir le classement général</a>
-      <a class="btn" href="pages/reglement.html">Lire le règlement</a>
-      <a class="btn" href="pages/infos.html">Fil d’infos</a>
-      <a class="btn" href="pages/boutique.html">Boutique / Paiement</a>
-      <a class="btn" href="pages/contact.html">Contact</a>
+      <a class="btn" href="pages/classement.html">🏆 Voir le classement général</a>
+      <a class="btn" href="pages/reglement.html">📘 Lire le règlement</a>
+      <a class="btn" href="pages/infos.html">📰 Fil d’infos</a>
+      <a class="btn" href="pages/boutique.html">🛍️ Boutique / Paiement</a>
+      <a class="btn" href="pages/contact.html">📩 Contact</a>
     </div>
   </section>
 
@@ -61,9 +61,9 @@
     <h2>🔐 Accès organisateurs</h2>
 
     <div class="grid">
-      <a class="btn" href="#" id="btnMobile">📱 Mode Mobile</a>
       <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
       <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
+      <a class="btn" href="#" id="btnLogout">🚪 Déconnexion</a>
     </div>
 
     <p class="muted">Accès sécurisé (email / mot de passe).</p>
@@ -74,27 +74,32 @@
 
 <script type="module">
   import { auth } from "./assets/js/firebase.js";
-  import { loginAndRedirect, logout } from "./assets/js/session.js";
+  import { autoLoginOrPrompt, logout, ensurePersistence } from "./assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  // ✅ persistance (reste connecté sur le même appareil)
+  await ensurePersistence();
 
   document.getElementById("btnAdmin").onclick = async (e)=>{
     e.preventDefault();
-    await loginAndRedirect();
+    // Si déjà connecté => redirige direct. Sinon => prompt.
+    await autoLoginOrPrompt("general");
   };
 
   document.getElementById("btnJat").onclick = async (e)=>{
     e.preventDefault();
-    await loginAndRedirect();
+    await autoLoginOrPrompt("general");
   };
 
-  document.getElementById("btnMobile").onclick = async (e)=>{
+  document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
-    alert("Retour mode mobile 📱");
+    alert("Déconnecté ✅");
   };
 
   onAuthStateChanged(auth, (user)=>{
-    document.getElementById("authHint").textContent = user ? ("Connecté : " + user.email) : "Non connecté.";
+    document.getElementById("authHint").textContent =
+      user ? ("Connecté : " + user.email) : "Non connecté.";
   });
 </script>
 
