@@ -22,6 +22,7 @@
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout (comme demandé) -->
     <nav class="nav">
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
@@ -36,6 +37,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
+  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
@@ -84,28 +86,17 @@
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  // ✅ On réutilise tes modules (moins de risque)
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    getFirestore,
     doc, getDoc,
     collection, addDoc, deleteDoc, updateDoc,
     serverTimestamp,
     query, orderBy, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDAW66BD1V2Kr2w6ksM1_8bHGugeG6_cUI",
-    authDomain: "suzini-double-mixte-challenge.firebaseapp.com",
-    projectId: "suzini-double-mixte-challenge",
-    storageBucket: "suzini-double-mixte-challenge.firebasestorage.app",
-    messagingSenderId: "148641893645",
-    appId: "1:148641893645:web:d73cb1727a7b96af3ff444"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
 
   const COL_INFOS = "infos";
 
@@ -136,14 +127,11 @@
     try{
       const d = ts?.toDate ? ts.toDate() : null;
       if(!d) return "—";
-      return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
+      return d.toLocaleString("fr-FR", {
+        year:"numeric", month:"long", day:"numeric",
+        hour:"2-digit", minute:"2-digit"
+      });
     }catch{ return "—"; }
-  }
-
-  async function getRoleByEmail(email){
-    const s = await getDoc(doc(db, "roles", email));
-    if(!s.exists()) return null;
-    return s.data().role || null;
   }
 
   function stopInfos(){
@@ -160,7 +148,7 @@
     infosList.innerHTML = "";
 
     const q = query(collection(db, COL_INFOS), orderBy("createdAt","desc"));
-    unsubscribeInfos = onSnapshot(q, (snap)=>{
+    unsubscribeInfos = onSnapshot(q, async (snap)=>{
       const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       infosCount.textContent = `📌 ${items.length} info${items.length>1?"s":""}`;
       infosList.innerHTML = "";
@@ -204,7 +192,7 @@
         };
       });
 
-      // edit via prompt (simple pour démarrer)
+      // edit via prompt (simple)
       infosList.querySelectorAll("button[data-edit]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.edit;
@@ -290,25 +278,36 @@
   // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
-    await signOut(auth);
+    await logout();
     window.location.href = "../index.html";
   };
 
-  // Guard
-  onAuthStateChanged(auth, async (user)=>{
-    accessDenied.style.display = "none";
+  // Guard (admin only) + UI
+  async function showDenied(){
+    accessDenied.style.display = "block";
     adminUI.style.display = "none";
     panelGeneral.style.display = "none";
     stopInfos();
+  }
 
-    if(!user){ accessDenied.style.display="block"; return; }
-
-    const role = await getRoleByEmail(user.email);
-    if(role !== "admin"){ accessDenied.style.display="block"; return; }
-
+  async function showAdmin(){
+    accessDenied.style.display = "none";
     adminUI.style.display = "block";
     setTabs(scopeEl.value);
     scopeEl.onchange = ()=> setTabs(scopeEl.value);
+  }
+
+  // 1) check au chargement (avec persistance)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){ await showDenied(); }
+  else { await showAdmin(); }
+
+  // 2) robuste si session change (logout ailleurs)
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ await showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ await showDenied(); return; }
+    // déjà affiché => rien
   });
 </script>
 
