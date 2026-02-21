@@ -15,8 +15,9 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title" id="pageTitle">
-        Équipes (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      <h1 class="brand-title">
+        👥 Équipes (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
       </h1>
 
       <div class="brand-logo">
@@ -24,11 +25,8 @@
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="#" id="tabEquipes" aria-current="page">👥 Équipes</a>
-      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
-      <a href="#" id="tabResultats">🏁 Résultats</a>
-      <a href="#" id="btnPublic">Vue publique</a>
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
@@ -37,7 +35,45 @@
 
 <main class="container">
 
-  <section class="card">
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- =========================
+       CONTENU PAGE (après Zone)
+       => liste équipes admin
+  ========================== -->
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer les équipes.
+      (Le Général se gère depuis <b>admin/index.html</b>.)
+    </p>
+  </section>
+
+  <section class="card" id="panelTeams" style="display:none;">
     <h2>📌 Résumé</h2>
     <p class="muted">
       Total: <strong id="total">0</strong> —
@@ -48,7 +84,7 @@
     <p class="muted" id="status">Chargement…</p>
   </section>
 
-  <section class="card">
+  <section class="card" id="panelTeamsTable" style="display:none;">
     <h2>🗂️ Liste admin</h2>
 
     <div class="table-wrap">
@@ -100,37 +136,29 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     collection, getDocs, doc, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope helpers
+  // ---- scope (URL ?scope=etape1)
   const params = new URLSearchParams(location.search);
-  const scope = params.get("scope") || "etape1"; // default
+  const scopeFromUrl = params.get("scope") || "etape1";
 
-  const stepNum = scope.replace("etape","");
-  const stepLabel = `Étape ${stepNum}`;
+  // ---- dom
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
 
-  // 🔧 Collections selon scope
-  const COL_PRIVATE = `inscriptions_${scope}_private`;
-  const COL_PUBLIC  = `equipes_${scope}_public`;
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
 
-  // UI title
-  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`;
+  const pageSub = document.getElementById("pageSub");
 
-  // Nav links keep scope
-  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
-
-  // Vue publique
-  document.getElementById("btnPublic").onclick = (e)=>{
-    e.preventDefault();
-    if(scope === "etape1") window.location.href = "../etape1/equipes.html";
-    else alert("Vue publique non encore prête pour " + stepLabel);
-  };
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelTeams = document.getElementById("panelTeams");
+  const panelTeamsTable = document.getElementById("panelTeamsTable");
 
   const body = document.getElementById("body");
   const statusEl = document.getElementById("status");
@@ -139,6 +167,19 @@
   const mainEl  = document.getElementById("main");
   const waitEl  = document.getElementById("wait");
   const stbyEl  = document.getElementById("stby");
+
+  // ---- state
+  let currentScope = scopeFromUrl;
+
+  // collections (dynamiques selon scope)
+  let COL_PRIVATE = `inscriptions_${currentScope}_private`;
+  let COL_PUBLIC  = `equipes_${currentScope}_public`;
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    const n = scope.replace("etape","");
+    return `Étape ${n}`;
+  }
 
   function esc(s){
     return (s ?? "").toString()
@@ -163,11 +204,59 @@
     return a + b;
   }
 
-  async function ensureAdmin(){
-    const u = auth.currentUser;
-    if(!u) return false;
-    const r = await getRoleByEmail(u.email);
-    return r === "admin";
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
+
+    const links = [
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ["🏁 Résultats", "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      // simple highlight de l'onglet courant
+      if(url === "equipes.html"){
+        a.style.fontWeight = "900";
+      }
+
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelTeams.style.display = "none";
+      panelTeamsTable.style.display = "none";
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelTeams.style.display = "block";
+    panelTeamsTable.style.display = "block";
+
+    // update collections
+    COL_PRIVATE = `inscriptions_${scope}_private`;
+    COL_PUBLIC  = `equipes_${scope}_public`;
   }
 
   // ⚡ perf: 1 lecture privée + 1 lecture publique, puis merge en mémoire
@@ -346,33 +435,81 @@
   }
 
   async function refresh(){
+    if(currentScope === "general"){
+      statusEl.textContent = "—";
+      body.innerHTML = "";
+      totalEl.textContent = "0";
+      mainEl.textContent = "0";
+      waitEl.textContent = "0";
+      stbyEl.textContent = "0";
+      return;
+    }
+
     const rows = await fetchAll();
     render(rows);
     statusEl.textContent = "✅ OK";
-    return rows;
   }
 
-  onAuthStateChanged(auth, async (user)=>{
-    if(!user){ window.location.href = "../index.html"; return; }
-    const ok = await ensureAdmin();
-    if(!ok){ alert("Accès refusé (admin)."); window.location.href = "../index.html"; return; }
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelTeams.style.display = "none";
+    panelTeamsTable.style.display = "none";
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = async ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+      await refresh();
+    };
+  }
+
+  // Guard (avec persistance via session.js)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
     await refresh();
+  }
+
+  // robuste si session change
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
   });
 
+  // Actions table
   body.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
 
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
     const act = btn.dataset.act;
     const id  = btn.dataset.id;
-
-    const rows = await fetchAll();
-    const row = rows.find(x => x.id === id);
-    if(!row) return;
 
     statusEl.textContent = "Traitement…";
 
     try{
+      const rows = await fetchAll();
+      const row = rows.find(x => x.id === id);
+      if(!row) { statusEl.textContent = "❌ Introuvable"; return; }
+
       if(act === "edit")  await editTeam(row);
       if(act === "ranks") await editRanks(row);
       if(act === "main")  await moveList(id, "main");
@@ -387,6 +524,7 @@
     }
   });
 
+  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
