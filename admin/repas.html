@@ -3,11 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Repas — Double Mixte Challenge</title>
+  <title>Admin — Repas</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
 
   <style>
-    /* Bandeau "export PDF" (affiché aussi à l'écran, et imprimé) */
     .pdf-banner{
       border-radius:18px;
       overflow:hidden;
@@ -32,30 +31,12 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      flex:0 0 auto;
     }
-    .pdf-banner .logo img{
+    .pdf-banner img{
       max-width:42px;
       max-height:42px;
-      display:block;
-    }
-    .pdf-banner .title{
-      text-align:center;
-      min-width:0;
-    }
-    .pdf-banner .title h2{
-      margin:0;
-      font-size:18px;
-      font-weight:900;
-      line-height:1.15;
-    }
-    .pdf-banner .title p{
-      margin:6px 0 0;
-      opacity:.95;
-      font-weight:700;
     }
 
-    /* Table */
     .table-wrap{
       overflow:auto;
       border:1px solid #eee;
@@ -71,26 +52,18 @@
     table.repas thead th{
       text-align:left;
       font-size:13px;
-      color:#444;
       background:#f7f7f7;
       border-bottom:1px solid #eee;
-      padding:12px 12px;
+      padding:12px;
       position:sticky;
       top:0;
-      z-index:1;
-      white-space:nowrap;
     }
     table.repas tbody td{
-      padding:12px 12px;
+      padding:12px;
       border-bottom:1px solid #f0f0f0;
-      vertical-align:top;
       font-size:14px;
     }
-    table.repas tbody tr:last-child td{ border-bottom:none; }
 
-    .muted2{ opacity:.9; }
-    .num{ font-variant-numeric: tabular-nums; white-space:nowrap; }
-    .team{ font-weight:900; }
     .pill{
       display:inline-block;
       padding:4px 10px;
@@ -98,20 +71,13 @@
       font-size:12px;
       border:1px solid #eee;
       background:#fafafa;
-      color:#333;
-      white-space:nowrap;
     }
 
-    /* Print / PDF */
     @media print{
-      .topbar, .footer, .no-print { display:none !important; }
-      body { background:#fff !important; }
-      .container{ max-width: 100% !important; }
-      .card{ box-shadow:none !important; border:1px solid #eee !important; }
+      .topbar, .no-print { display:none !important; }
+      body{ background:#fff !important; }
+      .card{ box-shadow:none !important; }
       .pdf-banner{ box-shadow:none !important; }
-      .table-wrap{ border:1px solid #ddd !important; }
-      table.repas{ min-width: 0 !important; }
-      table.repas thead th{ position:static !important; }
     }
   </style>
 </head>
@@ -124,7 +90,10 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">🛠️ Admin — Repas</h1>
+      <h1 class="brand-title">
+        🛠️ Admin — Repas<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -141,77 +110,63 @@
 
 <main class="container">
 
-  <!-- Bandeau imprimable -->
+  <!-- Bandeau export -->
   <section class="pdf-banner">
     <div class="row">
       <div class="logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+        <img src="../assets/img/logo-suzini.png">
       </div>
 
-      <div class="title">
-        <h2>Double Mixte Challenge — Repas</h2>
-        <p>Export commandes • Offre : 3 arancini = 10€</p>
+      <div style="text-align:center;">
+        <h2 style="margin:0;" id="pdfTitle">Double Mixte Challenge — Repas</h2>
+        <p style="margin:6px 0 0;">Offre : 3 arancini = 10€</p>
       </div>
 
       <div class="logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+        <img src="../assets/img/logo-challenge.png">
       </div>
     </div>
   </section>
 
   <section class="card" id="accessDenied" style="display:none;">
-    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
-    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+    ⛔ Accès refusé
   </section>
 
   <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">📦 Récapitulatif des commandes</h2>
+    <p class="muted" id="status">Chargement…</p>
 
-    <p class="muted" id="status" style="margin:0;">Chargement…</p>
-
-    <div class="grid no-print" style="margin-top:12px;">
-      <button class="btn" id="btnPrint" style="font-weight:900; color:#111;">
-        🖨️ Exporter en PDF
-      </button>
-      <button class="btn" id="btnRefresh" style="font-weight:900; color:#111;">
-        🔄 Actualiser
-      </button>
+    <div class="grid no-print" style="margin-top:10px;">
+      <button class="btn" id="btnPrint">🖨️ Exporter PDF</button>
+      <button class="btn" id="btnRefresh">🔄 Actualiser</button>
     </div>
 
     <hr class="sep" />
 
-    <section class="card" style="margin:0;">
-      <h2 style="margin:0 0 8px;">🧾 Totaux</h2>
-      <p class="muted" style="margin:0; line-height:1.6;">
-        Total lignes : <strong><span id="lineCount">0</span></strong><br>
-        Total repas : <strong><span id="totalQty">0</span></strong><br>
-        Total € : <strong><span id="totalAmount">0</span> €</strong>
-      </p>
-      <p class="muted" style="margin:10px 0 0;">
-        💡 “1 repas” = 10€ (offre 3 arancini). Le cumul est géré par doc unique par beacheur.
-      </p>
-    </section>
+    <h2>🧾 Totaux</h2>
+    <p>
+      Total lignes : <strong id="lineCount">0</strong><br>
+      Total repas : <strong id="totalQty">0</strong><br>
+      Total € : <strong id="totalAmount">0</strong> €
+    </p>
 
     <hr class="sep" />
 
-    <h2 style="margin:0 0 10px;">📋 Liste</h2>
+    <h2>📋 Liste</h2>
 
     <div class="table-wrap">
-      <table class="repas" aria-label="Commandes repas">
+      <table class="repas">
         <thead>
           <tr>
-            <th style="width:44px;">#</th>
+            <th>#</th>
             <th>Équipe</th>
             <th>Beacheur</th>
-            <th style="width:120px;">Nb repas</th>
-            <th style="width:120px;">Montant</th>
-            <th style="width:160px;">Clé</th>
+            <th>Nb repas</th>
+            <th>Montant</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
-
   </section>
 
 </main>
@@ -220,38 +175,33 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, getRoleByEmail, ensurePersistence } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    collection,
-    getDocs,
-    query,
-    orderBy
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const PRICE_PER_REPAS = 10; // 3 arancini = 10€ -> "repas" = 10€
+  const PRICE = 10;
+
+  // -------- Scope dynamique --------
+  const params = new URLSearchParams(location.search);
+  const scope = params.get("scope") || "etape1";
+  const COL = `repas_${scope}`;
+
+  const stepNum = scope.replace("etape","");
+  const stepLabel = `Étape ${stepNum}`;
+
+  document.getElementById("pageSub").textContent = stepLabel;
+  document.getElementById("pdfTitle").textContent =
+    `Double Mixte Challenge — ${stepLabel} — Repas`;
 
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
-  const statusEl = document.getElementById("status");
 
+  const statusEl = document.getElementById("status");
+  const tbody = document.getElementById("tbody");
   const lineCountEl = document.getElementById("lineCount");
   const totalQtyEl = document.getElementById("totalQty");
   const totalAmountEl = document.getElementById("totalAmount");
 
-  const tbody = document.getElementById("tbody");
-
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-
   function money(n){
-    try{
-      return (n || 0).toLocaleString("fr-FR", { maximumFractionDigits: 0 });
-    }catch{
-      return String(n || 0);
-    }
+    return (n || 0).toLocaleString("fr-FR");
   }
 
   async function ensureAdmin(){
@@ -261,115 +211,70 @@
     return r === "admin";
   }
 
-  async function loadRepas(){
+  async function loadData(){
     statusEl.textContent = "Chargement…";
-    tbody.innerHTML = "";
 
-    // On trie par teamName puis prénom (pour un PDF lisible)
-    // (Firestore: multi-orderBy ok si index auto -> sinon on simplifie)
-    let snap;
-    try{
-      const q = query(
-        collection(db, "repas_etape1"),
-        orderBy("teamName", "asc"),
-        orderBy("playerFirstName", "asc")
-      );
-      snap = await getDocs(q);
-    }catch(e){
-      // fallback sans index composite
-      const q = query(collection(db, "repas_etape1"), orderBy("updatedAt", "desc"));
-      snap = await getDocs(q);
-    }
+    const snap = await getDocs(query(collection(db, COL), orderBy("teamName","asc")));
 
-    const rows = [];
+    let rows = [];
     snap.forEach(d=>{
       const x = d.data() || {};
       rows.push({
-        id: d.id,
         teamName: x.teamName || "",
         playerFirstName: x.playerFirstName || "",
-        qty: (typeof x.qty === "number") ? x.qty : 0,
-        playerKey: x.playerKey || d.id
+        qty: x.qty || 0
       });
     });
 
-    // fallback tri côté client si besoin
     rows.sort((a,b)=>{
-      const ta = (a.teamName || "").localeCompare(b.teamName || "", "fr", { sensitivity:"base" });
-      if(ta !== 0) return ta;
-      return (a.playerFirstName || "").localeCompare(b.playerFirstName || "", "fr", { sensitivity:"base" });
+      if(a.teamName !== b.teamName)
+        return a.teamName.localeCompare(b.teamName);
+      return a.playerFirstName.localeCompare(b.playerFirstName);
     });
 
     let totalQty = 0;
     let totalAmount = 0;
 
-    tbody.innerHTML = rows.length ? rows.map((r, i)=>{
-      const amount = (r.qty || 0) * PRICE_PER_REPAS;
-      totalQty += (r.qty || 0);
+    tbody.innerHTML = rows.map((r,i)=>{
+      const amount = r.qty * PRICE;
+      totalQty += r.qty;
       totalAmount += amount;
 
       return `
         <tr>
-          <td class="num">#${i+1}</td>
-          <td class="team">${esc(r.teamName)}</td>
-          <td>${esc(r.playerFirstName)}</td>
-          <td class="num"><span class="pill">${esc(String(r.qty || 0))}</span></td>
-          <td class="num"><span class="pill">${esc(money(amount))} €</span></td>
-          <td class="muted2">${esc(r.playerKey || r.id)}</td>
+          <td>#${i+1}</td>
+          <td><strong>${r.teamName}</strong></td>
+          <td>${r.playerFirstName}</td>
+          <td><span class="pill">${r.qty}</span></td>
+          <td><span class="pill">${money(amount)} €</span></td>
         </tr>
       `;
-    }).join("") : `
-      <tr>
-        <td colspan="6" class="muted" style="padding:14px;">
-          Aucune commande pour le moment.
-        </td>
-      </tr>
-    `;
+    }).join("");
 
-    lineCountEl.textContent = String(rows.length);
-    totalQtyEl.textContent = String(totalQty);
+    lineCountEl.textContent = rows.length;
+    totalQtyEl.textContent = totalQty;
     totalAmountEl.textContent = money(totalAmount);
 
     statusEl.textContent = "✅ OK";
   }
 
-  // Export PDF (print)
-  document.getElementById("btnPrint").onclick = (e)=>{
-    e.preventDefault();
-    window.print();
-  };
+  document.getElementById("btnPrint").onclick = ()=> window.print();
+  document.getElementById("btnRefresh").onclick = loadData;
 
-  document.getElementById("btnRefresh").onclick = async (e)=>{
-    e.preventDefault();
-    await loadRepas();
-  };
-
-  document.getElementById("btnLogout").onclick = async (e)=>{
-    e.preventDefault();
+  document.getElementById("btnLogout").onclick = async ()=>{
     await logout();
     window.location.href = "../index.html";
   };
 
-  // Guard
   await ensurePersistence();
 
   onAuthStateChanged(auth, async (user)=>{
-    accessDenied.style.display = "none";
-    adminUI.style.display = "none";
-
-    if(!user){
-      accessDenied.style.display = "block";
-      return;
-    }
-
+    if(!user){ accessDenied.style.display="block"; return; }
     const ok = await ensureAdmin();
-    if(!ok){
-      accessDenied.style.display = "block";
-      return;
-    }
+    if(!ok){ accessDenied.style.display="block"; return; }
 
-    adminUI.style.display = "block";
-    await loadRepas();
+    adminUI.style.display="block";
+    await loadData();
   });
 </script>
 
