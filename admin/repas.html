@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<!-- ✅ Bandeau admin uniforme -->
 <header class="topbar no-print">
   <div class="container">
     <div class="topbar-row">
@@ -22,7 +23,6 @@
       </div>
     </div>
 
-    <!-- ✅ Bandeau identique partout : uniquement ces 2 liens -->
     <nav class="nav">
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
@@ -30,7 +30,7 @@
   </div>
 </header>
 
-<!-- Bandeau imprimable (PDF) -->
+<!-- ✅ Bandeau imprimable (PDF) -->
 <section class="print-header only-print">
   <div class="print-header-inner">
     <img src="../assets/img/logo-suzini.png" alt="Logo Suzini" class="ph-logo">
@@ -49,7 +49,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart ZONE (identique à admin/index) -->
+  <!-- ✅ Zone (menu déroulant) présente partout -->
   <section class="card" id="zoneUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
@@ -69,12 +69,12 @@
     <p class="muted" id="hint" style="margin-top:10px;"></p>
   </section>
 
-  <!-- ✅ Contenu de la page (affiché après l’encart Zone) -->
+  <!-- ✅ Contenu Repas -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🍽️ Commandes repas — récap</h2>
 
     <p class="muted" style="margin:0;">
-      Prix : <b>10€</b> par pack (3 arancini). — 1 ligne par beacheur (cumul).
+      Prix : <b>10€</b> par pack (3 arancini). — <b>1 ligne par beacheur</b> (cumul).
     </p>
 
     <div class="grid" style="margin-top:12px;">
@@ -100,7 +100,7 @@
             <th style="width:44px;">#</th>
             <th>Nom</th>
             <th>Prénom</th>
-            <th style="width:140px;">Qté (packs)</th>
+            <th style="width:160px;">Qté (packs)</th>
             <th style="width:140px;">Montant</th>
             <th class="no-print" style="width:140px;">Action</th>
           </tr>
@@ -109,7 +109,7 @@
       </table>
     </div>
 
-    <p class="muted no-print" style="margin:10px 0 0;">
+    <p class="muted" style="margin:10px 0 0;">
       ⚠️ Export PDF : clique “Exporter PDF”, puis “Enregistrer en PDF”.
     </p>
   </section>
@@ -118,7 +118,7 @@
 
 <style>
   .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 820px; }
+  .orders-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 860px; }
   .orders-table thead th{
     text-align:left; font-size:13px; color:#444; background:#f7f7f7;
     border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
@@ -174,23 +174,27 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail, ensurePersistence } from "../assets/js/session.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    collection, getDocs, query, orderBy,
+    collection, getDocs,
     doc, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  await ensurePersistence();
-
   // ---- scope (par défaut etape1)
   const params = new URLSearchParams(location.search);
-  const scope = params.get("scope") || "etape1";
-  const stepNum = scope.replace("etape","");
-  const stepLabel = `Étape ${stepNum}`;
+  const scopeParam = params.get("scope") || "etape1";
+
+  // ---- UI Zone
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
 
   // ✅ Repas pour toutes les étapes
-  const COL_ORDERS = `repas_${scope}`;
+  let scope = scopeParam;
+  let COL_ORDERS = `repas_${scope}`;
+
+  const PRICE = 10; // € par pack
 
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
@@ -198,24 +202,27 @@
   const adminUI = document.getElementById("adminUI");
   const panelTable = document.getElementById("panelTable");
 
-  const scopeEl = document.getElementById("scope");
-  const tabsEl  = document.getElementById("tabs");
-  const hintEl  = document.getElementById("hint");
-
   const statusEl = document.getElementById("status");
   const tbody = document.getElementById("tbody");
   const grandTotalEl = document.getElementById("grandTotal");
-
-  const PRICE = 10; // € / pack
-
-  // ---- print title
-  document.getElementById("printSub").textContent = `Repas — ${stepLabel}`;
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function isFiniteNonNegInt(n){
+    return Number.isFinite(n) && n >= 0 && Math.floor(n) === n;
+  }
+
+  function stepLabelFromScope(sc){
+    if(sc === "general") return "Général";
+    const num = sc.replace("etape","");
+    return `Étape ${num}`;
   }
 
   async function ensureAdmin(){
@@ -225,21 +232,21 @@
     return r === "admin";
   }
 
-  // ✅ Encart Zone (menu + onglets)
-  function setTabs(currentScope){
+  function setTabs(sc){
     tabsEl.innerHTML = "";
 
-    if(currentScope === "general"){
-      hintEl.textContent = "Zone Général : gestion des infos.";
+    if(sc === "general"){
+      hintEl.textContent = "Zone Général : pages globales (infos, etc.).";
       const a = document.createElement("a");
       a.className = "btn";
-      a.href = "index.html"; // admin landing
-      a.textContent = "📰 Infos";
+      a.href = "index.html";
+      a.textContent = "🏠 Retour Admin (général)";
       tabsEl.appendChild(a);
       return;
     }
 
     hintEl.textContent = "Zone Étape : équipes / inscriptions / repas / résultats.";
+
     const links = [
       ["👥 Équipes", "equipes.html"],
       ["📝 Inscriptions", "inscriptions.html"],
@@ -250,31 +257,61 @@
     for(const [label, url] of links){
       const a = document.createElement("a");
       a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(currentScope)}`;
+      a.href = `${url}?scope=${encodeURIComponent(sc)}`;
+
+      // petit highlight logique pour la page actuelle
+      if(url === "repas.html") a.style.fontWeight = "1000";
+
       a.textContent = label;
-
-      // petit “highlight” sur l’onglet actif
-      if(url === "repas.html"){
-        a.setAttribute("aria-current", "page");
-      }
-
       tabsEl.appendChild(a);
     }
   }
 
-  // scope select init + behavior
-  scopeEl.value = scope;
-  setTabs(scope);
+  function applyScope(sc){
+    scope = sc;
+    COL_ORDERS = `repas_${scope}`;
 
-  scopeEl.onchange = ()=>{
-    const v = scopeEl.value;
-    if(v === "general"){
-      window.location.href = "index.html";
+    // Print subtitle
+    const printSub = document.getElementById("printSub");
+    printSub.textContent = `Repas — ${stepLabelFromScope(scope)}`;
+
+    setTabs(scope);
+
+    // si on est sur "general", on masque la table repas (logique)
+    if(scope === "general"){
+      adminUI.style.display = "none";
+      panelTable.style.display = "none";
+      statusEl.textContent = "";
       return;
     }
-    // rester sur la page repas mais changer de scope
-    window.location.href = `repas.html?scope=${encodeURIComponent(v)}`;
-  };
+
+    adminUI.style.display = "block";
+    panelTable.style.display = "block";
+    loadOrders();
+  }
+
+  function parseNameFallback(x){
+    // Supporte plusieurs schémas :
+    // - x.lastName / x.firstName
+    // - x.beacheurName (ex: "Jules")
+    // - x.beacheur (ex: "Jules (Les Lobstars)") -> on garde juste avant "("
+    const lastName = (x.lastName || "").trim();
+    const firstName = (x.firstName || "").trim();
+    if(lastName || firstName) return { lastName, firstName };
+
+    let raw = (x.beacheurName || x.beacheur || "").trim();
+    if(!raw) return { lastName:"", firstName:"" };
+
+    // retire "(...)" si présent
+    raw = raw.split("(")[0].trim();
+
+    // si "Prenom Nom" -> split simple (dernier mot = nom)
+    const parts = raw.split(/\s+/).filter(Boolean);
+    if(parts.length >= 2){
+      return { firstName: parts.slice(0, -1).join(" "), lastName: parts.slice(-1).join(" ") };
+    }
+    return { firstName: raw, lastName: "" };
+  }
 
   async function loadOrders(){
     statusEl.textContent = "Chargement…";
@@ -282,28 +319,43 @@
     grandTotalEl.textContent = "0";
 
     try{
-      // tri par nom/prénom (si tes champs existent)
-      const q = query(collection(db, COL_ORDERS), orderBy("lastName","asc"), orderBy("firstName","asc"));
-      const snap = await getDocs(q);
+      // ✅ zéro orderBy Firestore => zéro index requis
+      const snap = await getDocs(collection(db, COL_ORDERS));
 
-      // ✅ uniquement ceux qui ont commandé
       const rows = [];
       snap.forEach(d=>{
         const x = d.data() || {};
         const qty = Number(x.qty || 0);
-        if(!Number.isFinite(qty) || qty <= 0) return;
+        const total = Number(x.total || (qty * PRICE));
 
-        const total = Number(x.total ?? (qty * PRICE));
+        const name = parseNameFallback(x);
+
         rows.push({
           id: d.id,
-          firstName: x.firstName || "",
-          lastName: x.lastName || "",
-          qty,
-          total: Number.isFinite(total) ? total : (qty * PRICE)
+          lastName: (name.lastName || "").trim(),
+          firstName: (name.firstName || "").trim(),
+          qty: Number.isFinite(qty) ? qty : 0,
+          total: Number.isFinite(total) ? total : 0
         });
       });
 
-      if(rows.length === 0){
+      // ✅ uniquement ceux qui ont commandé
+      const filtered = rows.filter(r => (Number(r.qty) || 0) > 0);
+
+      // ✅ tri JS (Nom puis Prénom)
+      filtered.sort((a,b)=>{
+        const al = (a.lastName || "").toLowerCase();
+        const bl = (b.lastName || "").toLowerCase();
+        if(al !== bl) return al < bl ? -1 : 1;
+
+        const af = (a.firstName || "").toLowerCase();
+        const bf = (b.firstName || "").toLowerCase();
+        if(af !== bf) return af < bf ? -1 : 1;
+
+        return 0;
+      });
+
+      if(filtered.length === 0){
         tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
         statusEl.textContent = "🟢 OK — 0 commande";
         grandTotalEl.textContent = "0";
@@ -311,15 +363,18 @@
       }
 
       let grand = 0;
-      tbody.innerHTML = rows.map((r,i)=>{
-        grand += (r.total || 0);
+
+      tbody.innerHTML = filtered.map((r,i)=>{
+        const t = Number(r.total || (r.qty * PRICE)) || 0;
+        grand += t;
+
         return `
           <tr>
             <td>#${i+1}</td>
-            <td><b>${esc(r.lastName)}</b></td>
-            <td>${esc(r.firstName)}</td>
+            <td><b>${esc(r.lastName || "—")}</b></td>
+            <td><b>${esc(r.firstName || "—")}</b></td>
             <td>${esc(String(r.qty))}</td>
-            <td><b>${esc(String(r.total))} €</b></td>
+            <td><b>${esc(String(t))} €</b></td>
             <td class="no-print">
               <button class="btnx" data-act="edit" data-id="${esc(r.id)}">✏️ Corriger</button>
             </td>
@@ -328,10 +383,10 @@
       }).join("");
 
       grandTotalEl.textContent = String(grand);
-      statusEl.textContent = `🟢 OK — ${rows.length} ligne(s)`;
+      statusEl.textContent = `🟢 OK — ${filtered.length} ligne(s)`;
 
     }catch(err){
-      console.error(err);
+      console.error("LOAD_ORDERS_ERR", err?.code, err?.message, err);
       statusEl.textContent = "🔴 Erreur : impossible de charger les commandes.";
       tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
       grandTotalEl.textContent = "0";
@@ -343,8 +398,8 @@
     if(typed === null) return;
 
     const q = Number(String(typed).trim());
-    if(!Number.isFinite(q) || q < 0){
-      alert("Quantité invalide.");
+    if(!isFiniteNonNegInt(q)){
+      alert("Quantité invalide (entier ≥ 0).");
       return;
     }
 
@@ -388,6 +443,7 @@
     }
   });
 
+  // logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -412,11 +468,23 @@
       return;
     }
 
+    // show zone
     zoneUI.style.display = "block";
-    adminUI.style.display = "block";
-    panelTable.style.display = "block";
 
-    await loadOrders();
+    // set dropdown
+    scopeEl.value = scopeParam || "etape1";
+    setTabs(scopeEl.value);
+
+    // apply initial
+    applyScope(scopeEl.value);
+
+    // change scope
+    scopeEl.onchange = ()=>{
+      const sc = scopeEl.value;
+      // on navigue vers la même page avec scope (pour garder une URL propre)
+      const url = `repas.html?scope=${encodeURIComponent(sc)}`;
+      window.location.href = url;
+    };
   });
 </script>
 
