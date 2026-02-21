@@ -15,32 +15,192 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">🛠️ Admin — Résultats</h1>
+      <h1 class="brand-title">
+        🏁 Résultats (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
       <a href="../index.html">Accueil public</a>
-      <a href="index.html">Admin</a>
-      <a href="#" id="btnBack">Retour</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
-  <section class="card">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <!-- ✅ Encart Zone (même partout) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- =========================
+       CONTENU PAGE (après Zone)
+  ========================== -->
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer les résultats.
+      (Le Général se gère depuis <b>admin/index.html</b>.)
+    </p>
+  </section>
+
+  <section class="card" id="panelResults" style="display:none;">
     <h2>🏁 Résultats</h2>
     <p class="muted">À venir.</p>
   </section>
+
 </main>
 
-<script>
-  document.getElementById("btnBack").onclick = (e)=>{
+<script type="module">
+  import { auth } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  // ---- scope (URL ?scope=etape1)
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape1";
+
+  // ---- dom
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelResults  = document.getElementById("panelResults");
+
+  // ---- state
+  let currentScope = scopeFromUrl;
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    const n = scope.replace("etape","");
+    return `Étape ${n}`;
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
+
+    const links = [
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ["🏁 Résultats", "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      // highlight onglet courant
+      if(url === "resultats.html"){
+        a.style.fontWeight = "900";
+      }
+
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelResults.style.display = "none";
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelResults.style.display = "block";
+  }
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelResults.style.display = "none";
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // Guard (persistance gérée via session.js)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+  }
+
+  // robuste si session change
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
-    history.back();
+    await logout();
+    window.location.href = "../index.html";
   };
 </script>
 
