@@ -93,11 +93,9 @@
       <table class="teams-table" aria-label="Programmation">
         <thead>
           <tr>
-            <th style="width:70px;">Slot</th>
-            <th style="width:90px;">Heure</th>
-            <th style="width:240px;">Terrain</th>
+            <th style="width:260px;">Créneau</th>
             <th>Rencontre</th>
-            <th style="width:140px;">Résultat</th>
+            <th style="width:160px;">Résultat</th>
             <th style="width:160px;">Actions</th>
           </tr>
         </thead>
@@ -106,7 +104,7 @@
     </div>
 
     <p class="muted" style="margin-top:10px;">
-      💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> (heure/terrain) entre matchs (simple et robuste sur iPad).
+      💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> entre matchs (simple et robuste sur iPad).
     </p>
   </section>
 
@@ -123,11 +121,6 @@
   .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
   .teams-table tbody tr:last-child td{ border-bottom:none; }
 
-  .pill{
-    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
-    border:1px solid #eee; background:#fafafa; white-space:nowrap;
-  }
-
   .btnx{
     padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff;
     cursor:pointer; font-weight:800;
@@ -135,7 +128,7 @@
   .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
-  /* --- Rencontre (style phone-friendly même en admin) --- */
+  /* --- cartes lisibles (même en admin) --- */
   .match-card{
     border-radius:14px;
     border:1px solid rgba(0,0,0,.06);
@@ -146,10 +139,34 @@
   .match-card.courtA{ background:rgba(255, 214, 0, .14); border-color:rgba(255, 214, 0, .35); }
   .match-card.courtB{ background:rgba(230, 57, 70, .10); border-color:rgba(230, 57, 70, .28); }
 
-  .court-title{
-    font-style:italic;
+  /* ligne unique : SLOT + HEURE + COURT (petit, non gras) */
+  .timecourt{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+  }
+  .slotpill{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:999px;
+    border:1px solid rgba(0,0,0,.10);
+    background:rgba(255,255,255,.65);
     font-weight:900;
-    margin-bottom:8px;
+    font-size:12px;
+  }
+  .time{
+    font-weight:1000;
+    font-size:15px;
+  }
+  .court{
+    font-style:italic;
+    font-weight:500;         /* ✅ pas gras */
+    font-size:12.5px;        /* ✅ plus petit */
+    opacity:.9;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
 
   .team-line{
@@ -163,12 +180,24 @@
     margin:6px 0;
   }
 
+  .badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    border:1px solid rgba(0,0,0,.10);
+    background:rgba(255,255,255,.65);
+  }
+  .badge.done{ }
+  .badge.todo{ opacity:.85; }
+
   .score-box{
     border-radius:12px;
     border:1px solid rgba(0,0,0,.08);
     background:rgba(255,255,255,.65);
     padding:8px 10px;
-    min-width:110px;
+    min-width:120px;
   }
   .score-top{ font-weight:1000; }
   .score-bot{ font-weight:1000; margin-top:8px; }
@@ -211,7 +240,7 @@
   let unsubProg = null;
   let unsubRes = null;
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreDisplay, updatedAt, ...}
+  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreDisplay, updatedAt}
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -327,8 +356,9 @@
     return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
   }
 
-  function courtMeta(prog, courtKey){
-    const name = (prog?.courts || {})[courtKey] || courtKey || "—";
+  function courtMeta(courtKey){
+    const c = currentProg?.courts || {};
+    const name = c[courtKey] || courtKey || "—";
     if(courtKey === "A") return { name, emoji:"🐝", cls:"courtA" };
     if(courtKey === "B") return { name, emoji:"🌶️", cls:"courtB" };
     return { name, emoji:"🎾", cls:"" };
@@ -371,19 +401,15 @@
     if(!res || !res.scoreDisplay){
       return { top:"—", bot:"—", raw:"" };
     }
-
-    // Attendu: "3/5 5/2 10/7" ou "5/3 5/4"
     const s = String(res.scoreDisplay || "").trim();
     const parts = s.split(/\s+/).filter(Boolean);
 
     let top = "—";
     let bot = "—";
-
     if(parts.length >= 1){
       const p = parts[0].split("/");
       if(p.length === 2){ top = p[0]; bot = p[1]; }
     }
-    // On met tout le score en tooltip (raw)
     return { top, bot, raw: s };
   }
 
@@ -461,7 +487,6 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=>{
       slotToMatch.set(Number(slotNum), mid);
@@ -479,15 +504,17 @@
       const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
       const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
 
-      const cm = courtMeta(currentProg, s.court);
+      const cm = courtMeta(s.court);
       const sc = scoreLinesForMatch(mid);
+
+      const res = resultsByMatch.get(mid);
+      const done = !!(res && (res.winnerSide === "A" || res.winnerSide === "B"));
+      const badge = done ? `<span class="badge done">✅ Terminé</span>` : `<span class="badge todo">⏳ À venir</span>`;
 
       rows.push({
         slot: s.slot,
         time: s.time,
-        courtKey: s.court,
-        courtName: cm.name,
-        emoji: cm.emoji,
+        courtName: `${cm.emoji} ${cm.name} ${cm.emoji}`,
         cls: cm.cls,
         note: s.note || "",
         matchId: mid,
@@ -495,20 +522,27 @@
         B: bTxt,
         scoreTop: sc.top,
         scoreBot: sc.bot,
-        scoreRaw: sc.raw
+        scoreRaw: sc.raw,
+        badge
       });
     }
 
     schedBody.innerHTML = rows.map(r => `
       <tr>
-        <td><span class="pill">#${esc(r.slot)}</span></td>
-        <td><b>${esc(r.time)}</b></td>
         <td>
           <div class="match-card ${esc(r.cls)}">
-            <div class="court-title">${esc(r.emoji)} <span>${esc(r.courtName)}</span> ${esc(r.emoji)}</div>
-            ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+              <div class="timecourt" title="${esc(r.time)} — ${esc(r.courtName)}">
+                <span class="slotpill">#${esc(r.slot)}</span>
+                <span class="time">${esc(r.time)}</span>
+                <span class="court">${esc(r.courtName)}</span>
+              </div>
+              <div>${r.badge}</div>
+            </div>
+            ${r.note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(r.note)}</div>` : ""}
           </div>
         </td>
+
         <td>
           <div class="match-card ${esc(r.cls)}">
             <div class="team-line">${esc(r.A)}</div>
@@ -516,12 +550,14 @@
             <div class="team-line">${esc(r.B)}</div>
           </div>
         </td>
+
         <td>
           <div class="score-box" title="${esc(r.scoreRaw || "")}">
             <div class="score-top">${esc(r.scoreTop)} <span class="score-muted">(A)</span></div>
             <div class="score-bot">${esc(r.scoreBot)} <span class="score-muted">(B)</span></div>
           </div>
         </td>
+
         <td>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btnx" data-act="up" data-slot="${esc(r.slot)}" ${r.slot<=1 ? "disabled":""}>↑</button>
@@ -562,7 +598,6 @@
     schedStatus.textContent = "Chargement…";
     schedBody.innerHTML = "";
 
-    // résultats
     unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
       resultsByMatch = new Map();
       snap.forEach(d=>{
@@ -576,7 +611,6 @@
       renderSchedule();
     });
 
-    // programmation
     unsubProg = onSnapshot(progRef(scope), (snap)=>{
       currentProg = snap.exists() ? (snap.data() || {}) : null;
 
