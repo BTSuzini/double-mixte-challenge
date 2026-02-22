@@ -25,7 +25,6 @@
       </div>
     </div>
 
-    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
       <a href="../index.html">Accueil public</a>
       <a href="#" id="btnLogout">Déconnexion</a>
@@ -40,7 +39,6 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (à recopier partout) -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
@@ -97,9 +95,9 @@
           <tr>
             <th style="width:70px;">Slot</th>
             <th style="width:90px;">Heure</th>
-            <th style="width:220px;">Terrain</th>
-            <th>Match</th>
-            <th>Rencontre (règlement)</th>
+            <th style="width:240px;">Terrain</th>
+            <th>Rencontre</th>
+            <th style="width:140px;">Résultat</th>
             <th style="width:160px;">Actions</th>
           </tr>
         </thead>
@@ -124,16 +122,57 @@
   }
   .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
   .teams-table tbody tr:last-child td{ border-bottom:none; }
+
   .pill{
     display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
     border:1px solid #eee; background:#fafafa; white-space:nowrap;
   }
+
   .btnx{
     padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff;
     cursor:pointer; font-weight:800;
   }
   .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
+
+  /* --- Rencontre (style phone-friendly même en admin) --- */
+  .match-card{
+    border-radius:14px;
+    border:1px solid rgba(0,0,0,.06);
+    padding:10px 12px;
+    line-height:1.2;
+    background:#fff;
+  }
+  .match-card.courtA{ background:rgba(255, 214, 0, .14); border-color:rgba(255, 214, 0, .35); }
+  .match-card.courtB{ background:rgba(230, 57, 70, .10); border-color:rgba(230, 57, 70, .28); }
+
+  .court-title{
+    font-style:italic;
+    font-weight:900;
+    margin-bottom:8px;
+  }
+
+  .team-line{
+    font-weight:900;
+    font-size:14px;
+  }
+  .vs-line{
+    text-align:center;
+    font-weight:900;
+    opacity:.55;
+    margin:6px 0;
+  }
+
+  .score-box{
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.65);
+    padding:8px 10px;
+    min-width:110px;
+  }
+  .score-top{ font-weight:1000; }
+  .score-bot{ font-weight:1000; margin-top:8px; }
+  .score-muted{ opacity:.65; font-weight:800; }
 </style>
 
 <script type="module">
@@ -143,14 +182,12 @@
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, getDoc, setDoc, updateDoc, onSnapshot,
-    serverTimestamp
+    serverTimestamp, collection
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape5)
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
 
-  // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -170,10 +207,11 @@
   const btnGenerate = document.getElementById("btnGenerate");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
-  // ---- state
   let currentScope = scopeFromUrl;
   let unsubProg = null;
+  let unsubRes = null;
   let currentProg = null;
+  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreDisplay, updatedAt, ...}
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -219,8 +257,9 @@
     }
   }
 
-  function stopProgListener(){
+  function stopListeners(){
     if(unsubProg){ unsubProg(); unsubProg = null; }
+    if(unsubRes){ unsubRes(); unsubRes = null; }
   }
 
   function showPanelsForScope(scope){
@@ -230,7 +269,7 @@
       panelNeedStep.style.display = "block";
       panelBuild.style.display = "none";
       panelSchedule.style.display = "none";
-      stopProgListener();
+      stopListeners();
       return;
     }
 
@@ -238,44 +277,34 @@
     panelBuild.style.display = "block";
     panelSchedule.style.display = "block";
 
-    startProgListener(scope);
+    startListeners(scope);
   }
 
-  // ---- Courts (fixes)
   function defaultCourts(){
-    return {
-      A: "court Manon Queen Bee",
-      B: "court Lisa de Los Pimentos"
-    };
+    return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
-  // ---- modèle "règlement" (matches fixes)
-  // mapping équipes :
-  // TS1, TS2, E3..E8 (E3=pick1 etc)
   function buildMatches(){
-    const matches = {
-      M1:  { id:"M1",  n:1,  label:"Match 1",  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"},  winLabel:"V1", loseLabel:"P1" },
-      M2:  { id:"M2",  n:2,  label:"Match 2",  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"},  winLabel:"V2", loseLabel:"P2" },
-      M3:  { id:"M3",  n:3,  label:"Match 3",  bracket:"main", round:"QF", A:{type:"team", key:"TS1"}, B:{type:"team", key:"E3"},  winLabel:"V3", loseLabel:"P3" },
-      M4:  { id:"M4",  n:4,  label:"Match 4",  bracket:"main", round:"QF", A:{type:"team", key:"TS2"}, B:{type:"team", key:"E8"},  winLabel:"V4", loseLabel:"P4" },
+    return {
+      M1:  { id:"M1",  n:1,  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"} },
+      M2:  { id:"M2",  n:2,  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"} },
+      M3:  { id:"M3",  n:3,  bracket:"main", round:"QF", A:{type:"team", key:"TS1"}, B:{type:"team", key:"E3"} },
+      M4:  { id:"M4",  n:4,  bracket:"main", round:"QF", A:{type:"team", key:"TS2"}, B:{type:"team", key:"E8"} },
 
-      M5:  { id:"M5",  n:5,  label:"Match 5",  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"}, winLabel:"V5", loseLabel:"P5" },
-      M6:  { id:"M6",  n:6,  label:"Match 6",  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"}, winLabel:"V6", loseLabel:"P6" },
+      M5:  { id:"M5",  n:5,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
+      M6:  { id:"M6",  n:6,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
 
-      M7:  { id:"M7",  n:7,  label:"Match 7",  bracket:"main", round:"SF", A:{type:"winner", matchId:"M1"}, B:{type:"winner", matchId:"M2"}, winLabel:"V7", loseLabel:"P7" },
-      M8:  { id:"M8",  n:8,  label:"Match 8",  bracket:"main", round:"SF", A:{type:"winner", matchId:"M3"}, B:{type:"winner", matchId:"M4"}, winLabel:"V8", loseLabel:"P8" },
+      M7:  { id:"M7",  n:7,  bracket:"main", round:"SF", A:{type:"winner", matchId:"M1"}, B:{type:"winner", matchId:"M2"} },
+      M8:  { id:"M8",  n:8,  bracket:"main", round:"SF", A:{type:"winner", matchId:"M3"}, B:{type:"winner", matchId:"M4"} },
 
-      M9:  { id:"M9",  n:9,  label:"Match 9",  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"}, winLabel:"7e", loseLabel:"8e" },
-      M10: { id:"M10", n:10, label:"Match 10", bracket:"5-8", round:"5th", A:{type:"winner", matchId:"M5"}, B:{type:"winner", matchId:"M6"}, winLabel:"5e", loseLabel:"6e" },
+      M9:  { id:"M9",  n:9,  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
+      M10: { id:"M10", n:10, bracket:"5-8", round:"5th", A:{type:"winner", matchId:"M5"}, B:{type:"winner", matchId:"M6"} },
 
-      M11: { id:"M11", n:11, label:"Match 11", bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"}, winLabel:"3e", loseLabel:"4e" },
-      M12: { id:"M12", n:12, label:"Match 12", bracket:"main", round:"F",   A:{type:"winner", matchId:"M7"}, B:{type:"winner", matchId:"M8"}, winLabel:"1er", loseLabel:"2e" },
+      M11: { id:"M11", n:11, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
+      M12: { id:"M12", n:12, bracket:"main", round:"F",   A:{type:"winner", matchId:"M7"}, B:{type:"winner", matchId:"M8"} },
     };
-
-    return matches;
   }
 
-  // Créneaux (heure/terrain) = ton tableau (par défaut)
   function defaultSlots(){
     return [
       { slot:1,  time:"18:00", court:"A" },
@@ -293,15 +322,74 @@
     ];
   }
 
-  function prettyMeet(m){
-    const a = (m.A?.type === "team") ? m.A.key : (m.A?.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`);
-    const b = (m.B?.type === "team") ? m.B.key : (m.B?.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`);
-    return `${a} vs ${b}`;
+  function teamLabel(t){
+    if(!t) return "—";
+    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
   }
 
-  // ---- Firestore refs
+  function courtMeta(prog, courtKey){
+    const name = (prog?.courts || {})[courtKey] || courtKey || "—";
+    if(courtKey === "A") return { name, emoji:"🐝", cls:"courtA" };
+    if(courtKey === "B") return { name, emoji:"🌶️", cls:"courtB" };
+    return { name, emoji:"🎾", cls:"" };
+  }
+
+  function resolveTeamRef(ref){
+    if(!currentProg) return null;
+
+    const teams = currentProg.teams || {};
+    const matches = currentProg.matches || {};
+
+    if(!ref) return null;
+
+    if(ref.type === "team"){
+      return teams[ref.key] || null;
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = resultsByMatch.get(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return ref.type === "winner" ? winner : loser;
+    }
+
+    return null;
+  }
+
+  function scoreLinesForMatch(matchId){
+    const res = resultsByMatch.get(matchId);
+    if(!res || !res.scoreDisplay){
+      return { top:"—", bot:"—", raw:"" };
+    }
+
+    // Attendu: "3/5 5/2 10/7" ou "5/3 5/4"
+    const s = String(res.scoreDisplay || "").trim();
+    const parts = s.split(/\s+/).filter(Boolean);
+
+    let top = "—";
+    let bot = "—";
+
+    if(parts.length >= 1){
+      const p = parts[0].split("/");
+      if(p.length === 2){ top = p[0]; bot = p[1]; }
+    }
+    // On met tout le score en tooltip (raw)
+    return { top, bot, raw: s };
+  }
+
   function progRef(scope){ return doc(db, "programmations", scope); }
   function drawRef(scope){ return doc(db, "tirages", scope); }
+  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
   async function generateFromValidatedDraw(scope){
     const dSnap = await getDoc(drawRef(scope));
@@ -309,7 +397,6 @@
     const draw = dSnap.data() || {};
     if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer la programmation.");
 
-    // mapping équipes (règlement)
     const order = draw.order || [];
     const pool = draw.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
@@ -340,25 +427,19 @@
     const slots = defaultSlots();
     const courts = defaultCourts();
 
-    // schedule: matchId -> slotNumber (défaut M1->1 ... M12->12)
     const schedule = {};
-    Object.keys(matches).forEach((mid)=>{
-      schedule[mid] = matches[mid].n;
-    });
+    Object.keys(matches).forEach((mid)=> schedule[mid] = matches[mid].n);
 
     const payload = {
       formatVersion: 2,
       scope,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-
-      courts, // ✅ noms courts A/B
-
+      courts,
       source: {
         drawValidatedAt: draw.validatedAt || null,
         drawDoc: "tirages/" + scope
       },
-
       teams,
       matches,
       slots,
@@ -369,16 +450,18 @@
     return payload;
   }
 
-  function courtLabel(prog, courtKey){
-    const c = prog?.courts || {};
-    return c[courtKey] || (courtKey || "—");
-  }
+  function renderSchedule(){
+    if(!currentProg){
+      schedBody.innerHTML = "";
+      schedStatus.textContent = "—";
+      return;
+    }
 
-  function renderSchedule(prog){
-    const matches = prog?.matches || {};
-    const slots = Array.isArray(prog?.slots) ? prog.slots : [];
-    const schedule = prog?.schedule || {};
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
 
+    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=>{
       slotToMatch.set(Number(slotNum), mid);
@@ -388,15 +471,31 @@
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot)) || null;
       const m = mid ? matches[mid] : null;
+      if(!m) continue;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
+      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
+
+      const cm = courtMeta(currentProg, s.court);
+      const sc = scoreLinesForMatch(mid);
+
       rows.push({
         slot: s.slot,
         time: s.time,
         courtKey: s.court,
-        courtName: courtLabel(prog, s.court),
+        courtName: cm.name,
+        emoji: cm.emoji,
+        cls: cm.cls,
         note: s.note || "",
         matchId: mid,
-        matchLabel: m ? m.label : "—",
-        meet: m ? prettyMeet(m) : "—"
+        A: aTxt,
+        B: bTxt,
+        scoreTop: sc.top,
+        scoreBot: sc.bot,
+        scoreRaw: sc.raw
       });
     }
 
@@ -405,11 +504,24 @@
         <td><span class="pill">#${esc(r.slot)}</span></td>
         <td><b>${esc(r.time)}</b></td>
         <td>
-          <div><span class="pill">${esc(r.courtName)}</span></div>
-          ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
+          <div class="match-card ${esc(r.cls)}">
+            <div class="court-title">${esc(r.emoji)} <span>${esc(r.courtName)}</span> ${esc(r.emoji)}</div>
+            ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
+          </div>
         </td>
-        <td>${r.matchId ? `<b>${esc(r.matchId)}</b> — ${esc(r.matchLabel)}` : "—"}</td>
-        <td>${esc(r.meet)}</td>
+        <td>
+          <div class="match-card ${esc(r.cls)}">
+            <div class="team-line">${esc(r.A)}</div>
+            <div class="vs-line">vs</div>
+            <div class="team-line">${esc(r.B)}</div>
+          </div>
+        </td>
+        <td>
+          <div class="score-box" title="${esc(r.scoreRaw || "")}">
+            <div class="score-top">${esc(r.scoreTop)} <span class="score-muted">(A)</span></div>
+            <div class="score-bot">${esc(r.scoreBot)} <span class="score-muted">(B)</span></div>
+          </div>
+        </td>
         <td>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btnx" data-act="up" data-slot="${esc(r.slot)}" ${r.slot<=1 ? "disabled":""}>↑</button>
@@ -443,14 +555,29 @@
     await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
   }
 
-  function startProgListener(scope){
-    stopProgListener();
+  function startListeners(scope){
+    stopListeners();
 
     buildStatus.textContent = "Chargement…";
     schedStatus.textContent = "Chargement…";
     schedBody.innerHTML = "";
 
-    unsubProg = onSnapshot(progRef(scope), async (snap)=>{
+    // résultats
+    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
+      resultsByMatch = new Map();
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        resultsByMatch.set(d.id, {
+          winnerSide: x.winnerSide || null,
+          scoreDisplay: x.scoreDisplay || "",
+          updatedAt: x.updatedAt || null
+        });
+      });
+      renderSchedule();
+    });
+
+    // programmation
+    unsubProg = onSnapshot(progRef(scope), (snap)=>{
       currentProg = snap.exists() ? (snap.data() || {}) : null;
 
       if(!currentProg){
@@ -461,7 +588,7 @@
       }
 
       buildStatus.textContent = "✅ Programmation présente (mise à jour auto en public).";
-      renderSchedule(currentProg);
+      renderSchedule();
     }, (err)=>{
       console.error(err);
       buildStatus.textContent = "❌ Erreur Firestore (programmation).";
@@ -469,7 +596,6 @@
     });
   }
 
-  // ---- Events
   btnGenerate.onclick = async (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -517,7 +643,6 @@
     }
   });
 
-  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -530,7 +655,7 @@
     panelNeedStep.style.display = "none";
     panelBuild.style.display = "none";
     panelSchedule.style.display = "none";
-    stopProgListener();
+    stopListeners();
   }
 
   function showAdmin(){
@@ -548,7 +673,6 @@
     };
   }
 
-  // Guard
   const g = await requireRole(["admin"]);
   if(!g.ok){ showDenied(); }
   else { showAdmin(); }
