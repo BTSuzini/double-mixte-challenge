@@ -110,27 +110,28 @@
   .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
   .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  /* Ligne 1 admin: slot + heure + court + (actions) */
   .match-head{
     display:flex;
-    align-items:baseline;
+    align-items:center;
     gap:10px;
     min-width:0;
   }
   .m-slot{
-    font-size:14px;
+    font-size:12px;
     font-weight:900;
     opacity:.7;
     white-space:nowrap;
   }
+  /* ✅ heure plus petite (standard mobile) */
   .m-time{
-    font-size:34px;
+    font-size:20px;
     font-weight:900;
     white-space:nowrap;
+    letter-spacing:.2px;
   }
   .m-court{
-    font-size:15px;
-    font-weight:600;
+    font-size:13px;
+    font-weight:700;
     font-style:italic;
     opacity:.95;
     white-space:nowrap;
@@ -160,12 +161,12 @@
   .score-head{
     margin-top:10px;
     display:grid;
-    grid-template-columns: 1fr 34px 34px 38px;
+    grid-template-columns: 1fr 30px 30px 34px;
     align-items:center;
     gap:8px;
     opacity:.65;
     font-weight:900;
-    font-size:12px;
+    font-size:11px;
     letter-spacing:.4px;
   }
   .score-head .sh{ text-align:right; }
@@ -173,14 +174,15 @@
   .team-row{
     margin-top:8px;
     display:grid;
-    grid-template-columns: 1fr 34px 34px 38px;
+    grid-template-columns: 1fr 30px 30px 34px;
     align-items:center;
     gap:8px;
   }
+  /* ✅ équipe standard */
   .team-name{
-    font-size:20px;
+    font-size:15px;
     font-weight:900;
-    line-height:1.15;
+    line-height:1.2;
     min-width:0;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -188,7 +190,7 @@
   }
   .sc{
     text-align:right;
-    font-size:18px;
+    font-size:15px;
     font-weight:900;
     white-space:nowrap;
   }
@@ -199,13 +201,13 @@
     font-weight:900;
     letter-spacing:2px;
     opacity:.55;
+    font-size:12px;
   }
 
   @media (max-width: 380px){
-    .m-time{ font-size:30px; }
-    .team-name{ font-size:18px; }
-    .sc{ font-size:17px; }
-    .score-head{ font-size:11px; }
+    .m-time{ font-size:19px; }
+    .team-name{ font-size:14px; }
+    .sc{ font-size:14px; }
   }
 </style>
 
@@ -382,23 +384,24 @@
     return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
 
-  function teamShort(t){
+  function teamDisplayFromTeam(t){
     if(!t) return "—";
-    return `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    const team = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${team} (${p1} / ${p2})`;
   }
 
   function teamRefLabel(prog, ref){
     if(!ref) return "—";
     if(ref.type === "team"){
       const t = prog?.teams?.[ref.key] || null;
-      return t ? teamShort(t) : ref.key;
+      return t ? teamDisplayFromTeam(t) : ref.key;
     }
     if(ref.type === "winner") return `V${ref.matchId.slice(1)}`;
     if(ref.type === "loser") return `P${ref.matchId.slice(1)}`;
     return "—";
   }
-
-  function fmt(x){ return (x === null || x === undefined) ? "—" : String(x); }
 
   function renderAdminCard({slot, time, courtKey, note, teamA, teamB}){
     return `
@@ -524,7 +527,6 @@
     });
   }
 
-  // UI panels
   function showPanelsForScope(scope){
     pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
 
@@ -542,7 +544,6 @@
     startProgListener(scope);
   }
 
-  // Events
   btnGenerate.onclick = async (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -586,7 +587,6 @@
     }
   });
 
-  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -617,10 +617,8 @@
     };
   }
 
-  // Guard
   const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
+  if(!g.ok){ showDenied(); } else { showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
