@@ -89,7 +89,7 @@
     <h2 style="margin:0 0 10px;">🗓️ Ordre chronologique</h2>
     <p class="muted" id="schedStatus" style="margin:0;">—</p>
 
-    <div id="schedCards" style="display:grid; gap:12px; margin-top:12px;"></div>
+    <div id="adminList" style="margin-top:12px;"></div>
 
     <p class="muted" style="margin-top:10px;">
       💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> (heure/terrain) entre matchs.
@@ -99,170 +99,135 @@
 </main>
 
 <style>
-  .pill{
-    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
-    border:1px solid #eee; background:#fafafa; white-space:nowrap;
-  }
+  .match-list{ display:flex; flex-direction:column; gap:14px; }
 
-  /* --- Match cards (responsive) --- */
   .match-card{
-    border-radius:16px;
-    border:1px solid rgba(0,0,0,.06);
-    overflow:hidden;
-    background:#fff;
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
   }
-  .match-card.yellow{ background:rgba(255, 221, 87, .22); border-color:rgba(255, 221, 87, .55); }
-  .match-card.red{ background:rgba(255, 77, 77, .12); border-color:rgba(255, 77, 77, .28); }
+  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  .match-inner{
-    padding:12px;
-    display:flex;
+  .match-grid{
+    display:grid;
+    grid-template-columns: 1fr 92px;
     gap:12px;
     align-items:stretch;
   }
 
-  .match-left{ flex:1 1 auto; min-width:0; }
+  .match-left{ min-width:0; }
 
   .match-topline{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    gap:10px;
-    flex-wrap:nowrap;
-  }
-
-  .when-line{
     display:flex;
     align-items:baseline;
     gap:10px;
     min-width:0;
-    flex-wrap:nowrap;
   }
 
-  .when-time{
-    font-weight:1000;
-    font-size:20px;
+  .match-slot{
+    font-size:16px;
+    font-weight:900;
+    opacity:.7;
+    white-space:nowrap;
+  }
+
+  .match-time{
+    font-size:34px;
+    font-weight:900;
     letter-spacing:.2px;
     white-space:nowrap;
   }
 
-  /* court small, non-bold, single line */
-  .when-court{
-    font-size:13px;
-    font-weight:600; /* pas gras “lourd” */
-    opacity:.92;
+  .match-court{
+    font-size:16px;
+    font-weight:600;
     font-style:italic;
+    opacity:.95;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    min-width:0;
+    flex:1;
   }
 
-  .status-emoji{
-    font-size:18px;
-    line-height:1;
-    white-space:nowrap;
+  .match-body{
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
   }
 
-  .teams{
-    margin-top:10px;
-    display:grid;
-    gap:8px;
-  }
-  .team-name{
-    font-weight:950;
-    font-size:18px;
+  .team-line{
+    font-size:22px;
+    font-weight:900;
     line-height:1.15;
-    word-break:break-word;
   }
-  .vsline{
+
+  .vs-line{
     text-align:center;
+    font-size:18px;
     font-weight:900;
     opacity:.55;
-    letter-spacing:.25em;
+    letter-spacing:2px;
   }
 
-  .match-right{
-    width:92px;
-    flex:0 0 auto;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    align-items:stretch;
-    justify-content:space-between;
-  }
-
-  .scorebox{
-    border:1px solid rgba(0,0,0,.08);
-    background:rgba(255,255,255,.70);
+  .score-box{
     border-radius:16px;
-    padding:10px 10px;
+    border:2px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.55);
     display:flex;
     flex-direction:column;
-    gap:10px;
     justify-content:center;
-  }
-  .scoreline{
-    display:flex;
-    justify-content:space-between;
     align-items:center;
-    gap:10px;
-    font-weight:1000;
+    padding:10px 10px;
+    height:100%;
   }
-  .scoreval{
+  .score-row{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-weight:900;
     font-size:18px;
-    line-height:1;
-    min-width:18px;
-    text-align:right;
+    padding:6px 0;
   }
+  .score-row + .score-row{ border-top:1px solid rgba(0,0,0,.08); }
+  .score-side{ font-size:14px; font-weight:900; opacity:.65; width:18px; text-align:left; }
+  .score-val{ font-size:22px; font-weight:900; width:36px; text-align:right; }
 
-  .actions{
+  .admin-actions{
+    margin-top:12px;
     display:flex;
     gap:8px;
+    flex-wrap:wrap;
     justify-content:flex-end;
   }
-
   .btnx{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(0,0,0,.12);
-    background:#fff;
-    cursor:pointer;
-    font-weight:900;
-    line-height:1;
+    padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff;
+    cursor:pointer; font-weight:900;
   }
-  .btnx:hover{ background:rgba(255,255,255,.7); }
+  .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
-  .muted-mini{
-    font-size:12px;
-    opacity:.7;
-  }
-
-  @media (max-width: 420px){
-    .match-inner{ padding:10px; gap:10px; }
-    .when-time{ font-size:18px; }
-    .team-name{ font-size:16px; }
-    .match-right{ width:86px; }
-    .scoreval{ font-size:16px; }
-    .btnx{ padding:10px 11px; }
+  @media (max-width: 380px){
+    .match-time{ font-size:30px; }
+    .team-line{ font-size:20px; }
+    .score-val{ font-size:20px; }
+    .match-grid{ grid-template-columns: 1fr 86px; }
   }
 </style>
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
-
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc, getDoc, setDoc, updateDoc, onSnapshot,
-    serverTimestamp, collection
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape5)
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
 
-  // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -277,19 +242,14 @@
 
   const buildStatus = document.getElementById("buildStatus");
   const schedStatus = document.getElementById("schedStatus");
-  const schedCards = document.getElementById("schedCards");
+  const adminList = document.getElementById("adminList");
 
   const btnGenerate = document.getElementById("btnGenerate");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
-  // ---- state
   let currentScope = scopeFromUrl;
   let unsubProg = null;
-  let unsubRes = null;
   let currentProg = null;
-
-  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreA, scoreB, score, updatedAt}
-  let scheduleRowCount = 12;
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -335,9 +295,8 @@
     }
   }
 
-  function stopListeners(){
+  function stopProgListener(){
     if(unsubProg){ unsubProg(); unsubProg = null; }
-    if(unsubRes){ unsubRes(); unsubRes = null; }
   }
 
   function showPanelsForScope(scope){
@@ -347,7 +306,7 @@
       panelNeedStep.style.display = "block";
       panelBuild.style.display = "none";
       panelSchedule.style.display = "none";
-      stopListeners();
+      stopProgListener();
       return;
     }
 
@@ -356,24 +315,18 @@
     panelSchedule.style.display = "block";
 
     startProgListener(scope);
-    startResultsListener(scope);
   }
 
-  // ---- Courts (fixes)
   function defaultCourts(){
-    return {
-      A: "court Manon Queen Bee",
-      B: "court Lisa de Los Pimentos"
-    };
+    return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
-  // ---- modèle "règlement" (matches fixes)
   function buildMatches(){
     return {
-      M1:  { id:"M1",  n:1,  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"}  },
-      M2:  { id:"M2",  n:2,  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"}  },
-      M3:  { id:"M3",  n:3,  bracket:"main", round:"QF", A:{type:"team", key:"TS1"}, B:{type:"team", key:"E3"}  },
-      M4:  { id:"M4",  n:4,  bracket:"main", round:"QF", A:{type:"team", key:"TS2"}, B:{type:"team", key:"E8"}  },
+      M1:  { id:"M1",  n:1,  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"} },
+      M2:  { id:"M2",  n:2,  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"} },
+      M3:  { id:"M3",  n:3,  bracket:"main", round:"QF", A:{type:"team", key:"TS1"}, B:{type:"team", key:"E3"} },
+      M4:  { id:"M4",  n:4,  bracket:"main", round:"QF", A:{type:"team", key:"TS2"}, B:{type:"team", key:"E8"} },
 
       M5:  { id:"M5",  n:5,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
       M6:  { id:"M6",  n:6,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
@@ -406,10 +359,8 @@
     ];
   }
 
-  // ---- Firestore refs
   function progRef(scope){ return doc(db, "programmations", scope); }
   function drawRef(scope){ return doc(db, "tirages", scope); }
-  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
   async function generateFromValidatedDraw(scope){
     const dSnap = await getDoc(drawRef(scope));
@@ -421,7 +372,6 @@
     const pool = draw.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
     const revealed = Number(draw.revealed || 0);
-
     if(revealed < 6) throw new Error("Il faut 6 équipes tirées (tirage complet) avant validation.");
 
     const picks = order.slice(0, 6).map(id => poolById.get(id)).filter(Boolean);
@@ -448,9 +398,7 @@
     const courts = defaultCourts();
 
     const schedule = {};
-    Object.keys(matches).forEach((mid)=>{
-      schedule[mid] = matches[mid].n;
-    });
+    Object.keys(matches).forEach((mid)=>{ schedule[mid] = matches[mid].n; });
 
     const payload = {
       formatVersion: 2,
@@ -458,159 +406,116 @@
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       courts,
-      source: {
-        drawValidatedAt: draw.validatedAt || null,
-        drawDoc: "tirages/" + scope
-      },
-      teams,
-      matches,
-      slots,
-      schedule
+      source: { drawValidatedAt: draw.validatedAt || null, drawDoc: "tirages/" + scope },
+      teams, matches, slots, schedule
     };
 
     await setDoc(progRef(scope), payload, { merge:true });
     return payload;
   }
 
-  function courtName(prog, courtKey){
-    const c = prog?.courts || {};
-    return c[courtKey] || (courtKey || "—");
+  function courtMeta(prog, courtKey){
+    if(courtKey === "A"){
+      return { cls:"courtA", emoji:"🐝", name: prog?.courts?.A || "court A" };
+    }
+    if(courtKey === "B"){
+      return { cls:"courtB", emoji:"🌶️", name: prog?.courts?.B || "court B" };
+    }
+    return { cls:"", emoji:"", name: courtKey || "—" };
   }
 
-  function courtDecor(courtKey){
-    if(courtKey === "A") return { cls:"yellow", emo:"🐝", label:"court Manon Queen Bee" };
-    if(courtKey === "B") return { cls:"red", emo:"🌶️", label:"court Lisa de Los Pimentos" };
-    return { cls:"", emo:"🎾", label:"Court" };
-  }
-
-  function teamLabel(t){
+  function teamShort(t){
     if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
   }
 
-  // Résolution des équipes (direct / winner / loser)
-  function resolveTeamRef(ref){
-    if(!currentProg) return null;
-
-    const teams = currentProg.teams || {};
-    const matches = currentProg.matches || {};
-
+  function resolveTeamRef(prog, results, ref){
+    if(!prog) return null;
+    const teams = prog.teams || {};
+    const matches = prog.matches || {};
     if(!ref) return null;
 
-    if(ref.type === "team"){
-      return teams[ref.key] || null;
-    }
+    if(ref.type === "team") return teams[ref.key] || null;
 
     if(ref.type === "winner" || ref.type === "loser"){
       const mid = ref.matchId;
       const m = matches[mid];
       if(!m) return null;
 
-      const res = resultsByMatch.get(mid);
+      const res = results.get(mid);
       if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
 
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
-
+      const teamA = resolveTeamRef(prog, results, m.A);
+      const teamB = resolveTeamRef(prog, results, m.B);
       const winner = (res.winnerSide === "A") ? teamA : teamB;
       const loser  = (res.winnerSide === "A") ? teamB : teamA;
-
       return ref.type === "winner" ? winner : loser;
     }
-
     return null;
   }
 
-  function parseHHMM(hhmm){
-    const m = String(hhmm || "").match(/^(\d{1,2}):(\d{2})$/);
-    if(!m) return null;
-    const H = Number(m[1]), M = Number(m[2]);
-    if(!Number.isFinite(H) || !Number.isFinite(M)) return null;
-    return { H, M };
-  }
-
-  function statusEmoji(slotTime, done){
-    if(done) return "✅";
-    const p = parseHHMM(slotTime);
-    if(!p) return "⏳";
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), p.H, p.M, 0, 0);
-    // Heuristique “en cours” si on a dépassé l'heure (sans résultat)
-    return now >= start ? "🟢" : "⏳";
-  }
-
-  function scoreForMatch(mid){
-    const r = resultsByMatch.get(mid);
-    if(!r) return { A:"—", B:"—", done:false };
-    const A = (r.scoreA ?? "—");
-    const B = (r.scoreB ?? "—");
-    const done = !!(r.winnerSide === "A" || r.winnerSide === "B");
-    return { A, B, done };
-  }
-
-  function renderSchedule(prog){
+  function renderAdminCards(prog){
     const matches = prog?.matches || {};
     const slots = Array.isArray(prog?.slots) ? prog.slots : [];
     const schedule = prog?.schedule || {};
 
-    scheduleRowCount = slots.length || 12;
-
-    // slot -> matchId
     const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, slotNum])=>{
-      slotToMatch.set(Number(slotNum), mid);
-    });
+    Object.entries(schedule).forEach(([mid, slotNum])=> slotToMatch.set(Number(slotNum), mid));
 
     const cards = [];
 
     for(const s of slots){
-      const mid = slotToMatch.get(Number(s.slot)) || null;
-      const m = mid ? matches[mid] : null;
-      if(!m || !mid) continue;
+      const mid = slotToMatch.get(Number(s.slot));
+      if(!mid) continue;
+      const m = matches[mid];
+      if(!m) continue;
 
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
+      const cm = courtMeta(prog, s.court);
 
-      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
-      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
+      // ⚠️ en admin: on affiche le match "réel" = résolu si possible, sinon placeholders
+      // (ici sans résultats en live pour admin/programmation : on reste sur clés, c’est OK)
+      const aTxt = (m.A?.type === "team") ? (prog.teams?.[m.A.key] ? teamShort(prog.teams[m.A.key]) : m.A.key) : (m.A?.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`);
+      const bTxt = (m.B?.type === "team") ? (prog.teams?.[m.B.key] ? teamShort(prog.teams[m.B.key]) : m.B.key) : (m.B?.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`);
 
-      const courtKey = s.court;
-      const court = courtDecor(courtKey);
-      const courtTxt = courtName(prog, courtKey);
-
-      const sc = scoreForMatch(mid);
-      const st = statusEmoji(s.time, sc.done);
+      // Score affichage admin = vide ici (les scores viennent de admin/resultats)
+      const scoreA = "—";
+      const scoreB = "—";
 
       cards.push(`
-        <div class="match-card ${esc(court.cls)}">
-          <div class="match-inner">
+        <div class="match-card ${esc(cm.cls)}">
+          <div class="match-grid">
             <div class="match-left">
               <div class="match-topline">
-                <div class="when-line">
-                  <div class="when-time">#${esc(s.slot)}&nbsp;${esc(s.time)}</div>
-                  <div class="when-court">${esc(court.emo)} ${esc(courtTxt)} ${esc(court.emo)}</div>
-                </div>
-                <div class="status-emoji" title="Statut">${esc(st)}</div>
+                <div class="match-slot">#${esc(s.slot)}</div>
+                <div class="match-time">${esc(s.time)}</div>
+                <div class="match-court">${esc(cm.emoji)} <span>${esc(cm.name)}</span> ${esc(cm.emoji)}</div>
               </div>
 
-              ${s.note ? `<div class="muted-mini" style="margin-top:6px;">⚠️ ${esc(s.note)}</div>` : ""}
+              ${s.note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(s.note)}</div>` : ""}
 
-              <div class="teams">
-                <div class="team-name">${esc(aTxt)}</div>
-                <div class="vsline">VS</div>
-                <div class="team-name">${esc(bTxt)}</div>
+              <div class="match-body">
+                <div class="team-line">${esc(aTxt)}</div>
+                <div class="vs-line">VS</div>
+                <div class="team-line">${esc(bTxt)}</div>
+              </div>
+
+              <div class="admin-actions">
+                <button class="btnx" data-act="up" data-slot="${esc(s.slot)}" ${s.slot<=1 ? "disabled":""}>↑</button>
+                <button class="btnx" data-act="down" data-slot="${esc(s.slot)}" ${s.slot>=12 ? "disabled":""}>↓</button>
               </div>
             </div>
 
-            <div class="match-right">
-              <div class="scorebox" aria-label="Score">
-                <div class="scoreline"><span class="muted-mini">A</span><span class="scoreval">${esc(sc.A)}</span></div>
-                <div class="scoreline"><span class="muted-mini">B</span><span class="scoreval">${esc(sc.B)}</span></div>
+            <div class="score-box" aria-label="Score">
+              <div class="score-row">
+                <span class="score-side">A</span>
+                <span class="score-val">${esc(scoreA)}</span>
               </div>
-
-              <div class="actions">
-                <button class="btnx" data-act="up" data-slot="${esc(s.slot)}" ${s.slot<=1 ? "disabled":""}>↑</button>
-                <button class="btnx" data-act="down" data-slot="${esc(s.slot)}" ${s.slot>=scheduleRowCount ? "disabled":""}>↓</button>
+              <div class="score-row">
+                <span class="score-side">B</span>
+                <span class="score-val">${esc(scoreB)}</span>
               </div>
             </div>
           </div>
@@ -618,7 +523,10 @@
       `);
     }
 
-    schedCards.innerHTML = cards.join("") || `<div class="muted">—</div>`;
+    adminList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match.</p>`;
+
     schedStatus.textContent = "✅ OK";
   }
 
@@ -630,7 +538,6 @@
     const prog = snap.data() || {};
     const schedule = prog.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, s]) => slotToMatch.set(Number(s), mid));
 
@@ -649,44 +556,24 @@
 
     buildStatus.textContent = "Chargement…";
     schedStatus.textContent = "Chargement…";
-    schedCards.innerHTML = "";
+    adminList.innerHTML = "";
 
     unsubProg = onSnapshot(progRef(scope), (snap)=>{
       currentProg = snap.exists() ? (snap.data() || {}) : null;
 
       if(!currentProg){
-        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée pour cette étape. Génère-la depuis le tirage validé.";
+        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée. Génère-la depuis le tirage validé.";
         schedStatus.textContent = "—";
-        schedCards.innerHTML = "";
+        adminList.innerHTML = "";
         return;
       }
 
-      buildStatus.textContent = "✅ Programmation présente (mise à jour auto en public).";
-      renderSchedule(currentProg);
+      buildStatus.textContent = "✅ Programmation présente.";
+      renderAdminCards(currentProg);
     }, (err)=>{
       console.error(err);
       buildStatus.textContent = "❌ Erreur Firestore (programmation).";
       schedStatus.textContent = "❌ Erreur";
-    });
-  }
-
-  function startResultsListener(scope){
-    if(unsubRes){ unsubRes(); unsubRes = null; }
-
-    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
-      resultsByMatch = new Map();
-      snap.forEach(d=>{
-        const x = d.data() || {};
-        resultsByMatch.set(d.id, {
-          winnerSide: x.winnerSide || null,
-          score: x.score || "",
-          // scoreA/scoreB : on les utilisera si tu les stockes dans resultats (recommandé).
-          scoreA: x.scoreA ?? null,
-          scoreB: x.scoreB ?? null,
-          updatedAt: x.updatedAt || null
-        });
-      });
-      if(currentProg) renderSchedule(currentProg);
     });
   }
 
@@ -696,7 +583,6 @@
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
 
     btnGenerate.disabled = true;
-    btnGenerate.classList.add("disabled");
     buildStatus.textContent = "Génération…";
 
     try{
@@ -708,7 +594,6 @@
       alert("Erreur ❌\n\n" + (err?.message || "Impossible de générer."));
     }finally{
       btnGenerate.disabled = false;
-      btnGenerate.classList.remove("disabled");
     }
   };
 
@@ -718,7 +603,7 @@
     window.location.href = `../${currentScope}/programmation.html`;
   };
 
-  schedCards.addEventListener("click", async (e)=>{
+  adminList.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -730,7 +615,7 @@
     try{
       schedStatus.textContent = "Traitement…";
       if(act === "up" && slot > 1) await swapSlots(currentScope, slot, slot-1);
-      if(act === "down" && slot < scheduleRowCount) await swapSlots(currentScope, slot, slot+1);
+      if(act === "down" && slot < 12) await swapSlots(currentScope, slot, slot+1);
     }catch(err){
       console.error(err);
       schedStatus.textContent = "❌ Erreur";
@@ -751,7 +636,7 @@
     panelNeedStep.style.display = "none";
     panelBuild.style.display = "none";
     panelSchedule.style.display = "none";
-    stopListeners();
+    if(unsubProg){ unsubProg(); unsubProg = null; }
   }
 
   function showAdmin(){
