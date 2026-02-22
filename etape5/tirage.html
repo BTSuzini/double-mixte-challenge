@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage au sort — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -69,14 +69,15 @@
       <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
     </div>
 
-    <div style="margin-top:12px;" id="urneBlock">
-      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (équipes restantes)</div>
-      <div id="urneList" style="display:grid; gap:8px;"></div>
-    </div>
-
+    <!-- ✅ ORDRE DEMANDÉ : révélés puis urne -->
     <div style="margin-top:12px;">
       <div style="font-weight:1000; margin-bottom:8px;">📌 Tirages révélés</div>
       <div id="revealedList" style="display:grid; gap:8px;"></div>
+    </div>
+
+    <div style="margin-top:12px;" id="urneBlock">
+      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (équipes restantes)</div>
+      <div id="urneList" style="display:grid; gap:8px;"></div>
     </div>
   </section>
 
@@ -164,9 +165,9 @@
 
   let currentDraw = null;
 
-  // LIVE reveal (affichage après animation)
+  // LIVE reveal
   let shownCount = 0;
-  let revealedShownIds = []; // ids déjà “révélés” visuellement
+  let revealedShownIds = [];
   let liveAnimating = false;
 
   // Replay
@@ -189,6 +190,10 @@
       if(!d) return "";
       return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
     }catch{ return ""; }
+  }
+
+  function drawHasUrn(draw){
+    return !!(draw && draw.seed1 && draw.seed2 && Array.isArray(draw.pool) && draw.pool.length === 6);
   }
 
   async function rouletteSpin(finalText, durationMs = 1300){
@@ -219,8 +224,12 @@
     const poolById = new Map(pool.map(x => [x.id, x]));
 
     const revealed = Number(draw?.revealed || 0);
+
+    // revealedIds uniquement si order existe
     const revealedIds = order.slice(0, revealed);
-    const remainingIds = order.slice(revealed);
+    const remainingIds = order.length
+      ? order.slice(revealed)
+      : pool.map(x => x.id); // idle => urne complète
 
     const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
     const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
@@ -229,9 +238,15 @@
   }
 
   function renderUrne(remainingTeams, draw){
-    // ✅ Urne visible si on a un pool, et si tirage pas terminé (revealed < 6)
+    if(!drawHasUrn(draw)){
+      urneBlock.style.display = "none";
+      urneList.innerHTML = "";
+      return;
+    }
+
     const revealed = Number(draw?.revealed || 0);
 
+    // ✅ Urne visible en idle + running, disparait à 6/6
     if(!remainingTeams.length || revealed >= 6){
       urneBlock.style.display = "none";
       urneList.innerHTML = "";
@@ -267,18 +282,12 @@
     const seed2 = draw?.seed2 || null;
     const { revealedTeams } = computeLists(draw);
 
-    // il faut 6 tirés pour avoir 4 matchs complets
     if(revealedTeams.length < 6){
       panelMatches.style.display = "none";
       matchBody.innerHTML = "";
       return;
     }
 
-    // Règle:
-    // pick1 vs TS1   (MAIS tu veux TS1 en équipe A => inversion ici)
-    // pick2 vs pick3
-    // pick4 vs pick5
-    // pick6 vs TS2
     const p1 = revealedTeams[0];
     const p2 = revealedTeams[1];
     const p3 = revealedTeams[2];
@@ -287,7 +296,7 @@
     const p6 = revealedTeams[5];
 
     const matches = [
-      { n: 1, A: seed1, B: p1 }, // ✅ inversion demandée
+      { n: 1, A: seed1, B: p1 },
       { n: 2, A: p2, B: p3 },
       { n: 3, A: p4, B: p5 },
       { n: 4, A: p6, B: seed2 }
@@ -306,7 +315,6 @@
 
   function updateHeader(draw){
     panelMain.style.display = "block";
-
     seed1El.textContent = draw?.seed1 ? teamLabel(draw.seed1) : "—";
     seed2El.textContent = draw?.seed2 ? teamLabel(draw.seed2) : "—";
   }
@@ -315,7 +323,7 @@
     const st = draw?.status || "idle";
     const revealed = Number(draw?.revealed || 0);
 
-    // mode badge
+    // ✅ badge direct/replay
     if(replayMode){
       modeBadge.textContent = "🎥 Mode REPLAY";
     } else if(st === "running"){
@@ -324,15 +332,19 @@
       modeBadge.textContent = "";
     }
 
-    // texte principal
     if(!draw){
       statusText.textContent = "⏳ Tirage non prêt.";
       validatedAtEl.textContent = "";
       return;
     }
 
+    // ✅ IDLE : seulement si urne chargée, sinon “pas prête”
     if(st === "idle"){
-      statusText.textContent = "📥 Urne prête. Tirage pas encore lancé.";
+      if(drawHasUrn(draw)){
+        statusText.textContent = "📥 Urne chargée. Tirage pas encore lancé.";
+      } else {
+        statusText.textContent = "⏳ Urne non prête (en attente du chargement côté admin).";
+      }
       validatedAtEl.textContent = "";
       return;
     }
@@ -364,16 +376,22 @@
     if(liveAnimating) return;
 
     const st = draw?.status || "idle";
-    if(st !== "running" && st !== "pending_validation" && st !== "validated") return;
+    if(st !== "running" && st !== "pending_validation" && st !== "validated"){
+      // idle : on affiche urne si dispo, révélés vide
+      const { remainingTeams } = computeLists(draw);
+      renderRevealedList([]);
+      renderUrne(remainingTeams, draw);
+      renderMatches(draw);
+      return;
+    }
 
     const { poolById, revealedIds, remainingTeams } = computeLists(draw);
 
-    // urne mise à jour tout le temps
+    // urne toujours à jour
     renderUrne(remainingTeams, draw);
 
-    // si revealed a augmenté : on anime chaque nouvelle révélation
+    // rien de nouveau
     if(revealedIds.length <= shownCount){
-      // rien de nouveau : juste garantir que la liste affichée est cohérente
       const shownTeams = revealedShownIds.map(id => poolById.get(id)).filter(Boolean);
       renderRevealedList(shownTeams);
       renderMatches(draw);
@@ -385,15 +403,19 @@
     while(shownCount < revealedIds.length){
       const id = revealedIds[shownCount];
       const t = poolById.get(id);
-      // ✅ animation d'abord, puis on “affiche” dans la liste
+
       await rouletteSpin(teamLabel(t), 1300);
+
       revealedShownIds.push(id);
       shownCount++;
 
       const shownTeams = revealedShownIds.map(x => poolById.get(x)).filter(Boolean);
       renderRevealedList(shownTeams);
       renderMatches(draw);
-      renderUrne(remainingTeams, draw); // recalcul ok, et masque si 6/6
+
+      // recalcul urne et masque si 6/6
+      const { remainingTeams: rem2 } = computeLists(currentDraw);
+      renderUrne(rem2, currentDraw);
     }
 
     liveAnimating = false;
@@ -421,13 +443,14 @@
     wheelSub.textContent = "Replay en cours…";
     renderRevealedList([]);
 
-    // urne cachée en replay (optionnel) — tu peux la laisser si tu veux
+    // urne cachée en replay
     urneBlock.style.display = "none";
 
     for(let i=0;i<revealedIds.length;i++){
       if(replayAbort) break;
       const id = revealedIds[i];
       const t = poolById.get(id);
+
       await rouletteSpin(teamLabel(t), 1300);
       revealedShownIds.push(id);
 
@@ -442,7 +465,6 @@
     replayMode = false;
     replayAbort = false;
 
-    // revenir à un état “normal”
     updateStatus(currentDraw);
     wheelSub.textContent = "✅ Replay terminé";
   }
@@ -471,7 +493,6 @@
       return;
     }
 
-    // afficher seeds/pool etc
     updateHeader(currentDraw);
     updateStatus(currentDraw);
 
@@ -483,7 +504,20 @@
       btnStopReplay.style.display = "none";
     }
 
-    // LIVE : animation + reveal (pas immédiat)
+    // idle : afficher urne si dispo, révélés vides
+    if(!replayMode && currentDraw.status === "idle"){
+      shownCount = 0;
+      revealedShownIds = [];
+      wheel.textContent = "—";
+      wheelSub.textContent = "—";
+      const { remainingTeams } = computeLists(currentDraw);
+      renderRevealedList([]);
+      renderUrne(remainingTeams, currentDraw);
+      renderMatches(currentDraw);
+      return;
+    }
+
+    // LIVE : animation + reveal
     if(!replayMode){
       await applyLiveRevealAnimation(currentDraw);
     }
