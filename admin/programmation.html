@@ -123,17 +123,18 @@
     white-space:nowrap;
   }
 
-  /* ✅ heure réduite */
+  /* ✅ heure = même taille que court */
   .m-time{
-    font-size:16px;
+    font-size:13px;
     font-weight:900;
     white-space:nowrap;
     letter-spacing:.2px;
   }
 
+  /* ✅ court pas en gras */
   .m-court{
     font-size:13px;
-    font-weight:700;
+    font-weight:400;
     font-style:italic;
     opacity:.95;
     white-space:nowrap;
@@ -160,31 +161,16 @@
   .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
-  .score-head{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns: 1fr 30px 30px 34px;
-    align-items:end;
-    gap:8px;
-    opacity:.65;
-    font-weight:900;
-    font-size:11px;
-    letter-spacing:.4px;
-  }
-  .score-head .sh{ text-align:right; }
-
+  /* ✅ plus de ligne d’en-tête S1/S2/TB */
   .team-row{
-    margin-top:8px;
+    margin-top:10px;
     display:grid;
     grid-template-columns: 1fr 30px 30px 34px;
     align-items:center;
     gap:8px;
   }
 
-  /* ✅ équipe sur 2 lignes */
-  .team-block{
-    min-width:0;
-  }
+  .team-block{ min-width:0; }
   .team-title{
     font-size:15px;
     font-weight:900;
@@ -220,7 +206,8 @@
   }
 
   @media (max-width: 380px){
-    .m-time{ font-size:15px; }
+    .m-time{ font-size:13px; }
+    .m-court{ font-size:13px; }
     .team-title{ font-size:14px; }
     .team-sub{ font-size:12px; }
     .sc{ font-size:14px; }
@@ -434,13 +421,6 @@
         </div>
 
         ${note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(note)}</div>` : ""}
-
-        <div class="score-head">
-          <div></div>
-          <div class="sh">S1</div>
-          <div class="sh">S2</div>
-          <div class="sh">TB</div>
-        </div>
 
         <div class="team-row">
           <div class="team-block">
