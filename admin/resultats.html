@@ -89,110 +89,122 @@
 </main>
 
 <style>
-  .pill{
-    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
-    border:1px solid #eee; background:#fafafa; white-space:nowrap;
-  }
+  .match-list{ display:flex; flex-direction:column; gap:14px; }
 
-  /* --- Match cards (responsive) --- */
+  /* === Encarts identiques à ADMIN/PROGRAMMATION === */
   .match-card{
-    border-radius:16px;
-    border:1px solid rgba(0,0,0,.06);
-    overflow:hidden;
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
     background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
   }
-  .match-card.yellow{ background:rgba(255, 221, 87, .22); border-color:rgba(255, 221, 87, .55); }
-  .match-card.red{ background:rgba(255, 77, 77, .12); border-color:rgba(255, 77, 77, .28); }
+  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  .match-inner{
-    padding:12px;
+  .match-head{
     display:flex;
-    gap:12px;
-    align-items:stretch;
-  }
-
-  .match-left{ flex:1 1 auto; min-width:0; }
-
-  .match-topline{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    gap:10px;
-  }
-
-  .when-line{
-    display:flex;
-    align-items:baseline;
+    align-items:center;
     gap:10px;
     min-width:0;
   }
 
-  .when-time{
-    font-weight:1000;
-    font-size:20px;
-    letter-spacing:.2px;
+  /* ✅ heure = même taille que court */
+  .m-time{
+    font-size:13px;
+    font-weight:900;
     white-space:nowrap;
+    letter-spacing:.2px;
   }
 
-  /* court small, non-bold, single line */
-  .when-court{
+  /* ✅ court pas en gras */
+  .m-court{
     font-size:13px;
-    font-weight:600;
-    opacity:.92;
+    font-weight:400;
     font-style:italic;
+    opacity:.95;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+    flex:1;
+  }
+
+  .m-status{
+    font-size:14px;
+    font-weight:900;
+    white-space:nowrap;
+    opacity:.85;
+  }
+
+  .team-row{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 22px 22px 24px;
+    align-items:center;
+    gap:6px;
+  }
+
+  .team-block{ min-width:0; }
+  .team-title{
+    font-size:15px;
+    font-weight:900;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .team-sub{
+    margin-top:2px;
+    font-size:13px;
+    font-weight:800;
+    opacity:.85;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
   }
 
-  .status-emoji{
-    font-size:18px;
-    line-height:1;
+  .sc{
+    text-align:right;
+    font-size:15px;
+    font-weight:900;
     white-space:nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
-  .teams{
-    margin-top:10px;
-    display:grid;
-    gap:8px;
-  }
-  .team-name{
-    font-weight:950;
-    font-size:18px;
-    line-height:1.15;
-    word-break:break-word;
-  }
-  .vsline{
+  .vs-line{
+    margin:10px 0 6px;
     text-align:center;
     font-weight:900;
+    letter-spacing:2px;
     opacity:.55;
-    letter-spacing:.25em;
+    font-size:12px;
   }
 
-  .match-right{
-    width:170px;
-    flex:0 0 auto;
+  /* === Résultats : zone saisie à droite (responsive) === */
+  .result-layout{
     display:flex;
-    flex-direction:column;
-    gap:10px;
+    gap:12px;
     align-items:stretch;
-    justify-content:space-between;
+  }
+  .result-left{ flex:1 1 auto; min-width:0; }
+  .result-right{
+    width:176px;
+    flex:0 0 auto;
   }
 
   .scorebox{
-    border:1px solid rgba(0,0,0,.08);
+    border:1px solid rgba(0,0,0,.10);
     background:rgba(255,255,255,.70);
     border-radius:16px;
-    padding:10px 10px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    justify-content:center;
+    padding:10px;
   }
 
-  .muted-mini{
+  .mini-h{
     font-size:12px;
-    opacity:.7;
+    font-weight:900;
+    opacity:.75;
+    margin:0 0 8px;
   }
 
   .score-grid{
@@ -201,15 +213,22 @@
     gap:8px;
   }
 
+  .side-label{
+    font-size:12px;
+    font-weight:900;
+    opacity:.75;
+    margin:0 0 6px;
+  }
+
   .score-row{
     display:flex;
+    gap:6px;
     justify-content:space-between;
     align-items:center;
-    gap:8px;
   }
 
   .ibox{
-    width:54px;
+    width:52px;
     height:40px;
     border-radius:12px;
     border:1px solid rgba(0,0,0,.12);
@@ -223,6 +242,7 @@
 
   .btnsave{
     width:100%;
+    margin-top:10px;
     padding:11px 12px;
     border-radius:14px;
     border:1px solid rgba(0,0,0,.12);
@@ -230,8 +250,15 @@
     cursor:pointer;
     font-weight:1000;
   }
-  .btnsave:hover{ background:rgba(255,255,255,.8); }
+  .btnsave:hover{ background:rgba(255,255,255,.85); }
   .btnsave:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .muted-mini{
+    margin-top:8px;
+    font-size:12px;
+    opacity:.75;
+    line-height:1.3;
+  }
 
   .errline{
     margin-top:8px;
@@ -241,12 +268,19 @@
     display:none;
   }
 
+  /* ✅ Mobile : scorebox passe dessous */
   @media (max-width: 420px){
-    .match-inner{ padding:10px; gap:10px; }
-    .when-time{ font-size:18px; }
-    .team-name{ font-size:16px; }
-    .match-right{ width:160px; }
-    .ibox{ width:50px; height:40px; }
+    .result-layout{ flex-direction:column; }
+    .result-right{ width:auto; }
+    .ibox{ width:50px; }
+  }
+
+  @media (max-width: 380px){
+    .m-time{ font-size:13px; }
+    .m-court{ font-size:13px; }
+    .team-title{ font-size:14px; }
+    .team-sub{ font-size:12px; }
+    .sc{ font-size:14px; }
   }
 </style>
 
@@ -256,7 +290,7 @@
 
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    doc, getDoc, onSnapshot, collection, setDoc,
+    doc, onSnapshot, collection, setDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -356,22 +390,6 @@
   function progRef(scope){ return doc(db, "programmations", scope); }
   function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
-  function courtName(courtKey){
-    const c = currentProg?.courts || {};
-    return c[courtKey] || (courtKey || "—");
-  }
-
-  function courtDecor(courtKey){
-    if(courtKey === "A") return { cls:"yellow", emo:"🐝" };
-    if(courtKey === "B") return { cls:"red", emo:"🌶️" };
-    return { cls:"", emo:"🎾" };
-  }
-
-  function teamLabel(t){
-    if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
-  }
-
   // Résolution des équipes (direct / winner / loser)
   function resolveTeamRef(ref){
     if(!currentProg) return null;
@@ -405,23 +423,6 @@
     return null;
   }
 
-  function parseHHMM(hhmm){
-    const m = String(hhmm || "").match(/^(\d{1,2}):(\d{2})$/);
-    if(!m) return null;
-    const H = Number(m[1]), M = Number(m[2]);
-    if(!Number.isFinite(H) || !Number.isFinite(M)) return null;
-    return { H, M };
-  }
-
-  function statusEmoji(slotTime, done){
-    if(done) return "✅";
-    const p = parseHHMM(slotTime);
-    if(!p) return "⏳";
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), p.H, p.M, 0, 0);
-    return now >= start ? "🟢" : "⏳";
-  }
-
   function toIntOrNull(v){
     if(v === "" || v === null || typeof v === "undefined") return null;
     const n = Number(v);
@@ -443,9 +444,6 @@
   }
 
   function computeOutcome(inputs){
-    // inputs:
-    // s1A,s1B,s2A,s2B in 0..5 (or null)
-    // s3A,s3B in 0..99 (or null)
     const s1A = clampRange(inputs.s1A, 0, 5);
     const s1B = clampRange(inputs.s1B, 0, 5);
     const s2A = clampRange(inputs.s2A, 0, 5);
@@ -455,7 +453,6 @@
 
     const errs = [];
 
-    // if one side filled, other must be filled
     function paired(a,b,label){
       const filledA = (a !== null);
       const filledB = (b !== null);
@@ -467,20 +464,17 @@
     paired(s2A,s2B,"Set 2");
     paired(s3A,s3B,"Set 3 (TB)");
 
-    // Validate set 1 & 2 if filled: must not be equal
     const w1 = setWinnerFromSetGames(s1A,s1B);
     if(s1A !== null && s1B !== null && !w1) errs.push("Set 1 : égalité impossible.");
     const w2 = setWinnerFromSetGames(s2A,s2B);
     if(s2A !== null && s2B !== null && !w2) errs.push("Set 2 : égalité impossible.");
 
-    // Determine if match is complete
     let setsA = 0, setsB = 0;
     if(w1 === "A") setsA++; else if(w1 === "B") setsB++;
     if(w2 === "A") setsA++; else if(w2 === "B") setsB++;
 
     const needTB = (w1 && w2 && setsA === 1 && setsB === 1);
 
-    // If match decided in 2 sets (2-0), TB must be empty
     if(w1 && w2 && (setsA === 2 || setsB === 2)){
       if(s3A !== null || s3B !== null) errs.push("Set 3 : à laisser vide (match gagné en 2 sets).");
     }
@@ -488,7 +482,7 @@
     let w3 = null;
     if(needTB){
       if(s3A === null || s3B === null){
-        // allow not complete yet (in progress), but no error
+        // in progress allowed
       } else {
         if(s3A === s3B) errs.push("Set 3 : égalité impossible.");
         w3 = (s3A > s3B) ? "A" : "B";
@@ -496,36 +490,27 @@
       }
     }
 
-    // if TB entered but sets not 1-1 => error already above; still compute safety
-
     const complete = (setsA === 2 || setsB === 2);
 
-    // Aggregate stats for later classement
     const gamesA = (s1A ?? 0) + (s2A ?? 0);
     const gamesB = (s1B ?? 0) + (s2B ?? 0);
 
     const tbA = (needTB && s3A !== null) ? s3A : 0;
     const tbB = (needTB && s3B !== null) ? s3B : 0;
 
-    // score lines (top A / bottom B)
     function fmtPart(x){ return (x === null) ? "—" : String(x); }
     const scoreA = `${fmtPart(s1A)} / ${fmtPart(s2A)}${needTB ? " / " + fmtPart(s3A) : ""}`;
     const scoreB = `${fmtPart(s1B)} / ${fmtPart(s2B)}${needTB ? " / " + fmtPart(s3B) : ""}`;
 
-    // compact score string
     let score = "";
     if(s1A !== null && s1B !== null) score += `${s1A}-${s1B}`;
     if(s2A !== null && s2B !== null) score += (score ? " " : "") + `${s2A}-${s2B}`;
     if(needTB && s3A !== null && s3B !== null) score += (score ? " " : "") + `${s3A}-${s3B}`;
 
-    // winnerSide only if complete
     const winnerSide = complete ? (setsA > setsB ? "A" : "B") : null;
 
-    // Additional validation: if set1+set2 not both filled, match can't be complete
     if(complete && !(w1 && w2)) errs.push("Impossible de valider : renseigner Set 1 et Set 2.");
 
-    // TB allowed only when needTB (already handled)
-    // ranges already handled by clampRange; if user typed out of range -> becomes null, then paired() will flag mismatch
     if(inputs.s1A !== null && s1A === null) errs.push("Set 1A : valeur invalide (0–5).");
     if(inputs.s1B !== null && s1B === null) errs.push("Set 1B : valeur invalide (0–5).");
     if(inputs.s2A !== null && s2A === null) errs.push("Set 2A : valeur invalide (0–5).");
@@ -548,137 +533,6 @@
     };
   }
 
-  function renderAll(){
-    if(!currentProg){
-      matchCards.innerHTML = "";
-      statusText.textContent = "⏳ Programmation non disponible (génère-la d’abord).";
-      return;
-    }
-
-    const matches = currentProg.matches || {};
-    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
-    const schedule = currentProg.schedule || {};
-
-    // slot -> matchId
-    const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, slotNum])=>{
-      slotToMatch.set(Number(slotNum), mid);
-    });
-
-    const cards = [];
-    for(const s of slots){
-      const mid = slotToMatch.get(Number(s.slot));
-      const m = mid ? matches[mid] : null;
-      if(!m) continue;
-
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
-
-      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
-      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
-
-      const deco = courtDecor(s.court);
-      const courtTxt = courtName(s.court);
-
-      const stored = resultsByMatch.get(mid) || {};
-      const done = (stored.winnerSide === "A" || stored.winnerSide === "B");
-      const st = statusEmoji(s.time, done);
-
-      // Pre-fill inputs
-      const v = {
-        s1A: stored.s1A ?? null,
-        s1B: stored.s1B ?? null,
-        s2A: stored.s2A ?? null,
-        s2B: stored.s2B ?? null,
-        s3A: stored.s3A ?? null,
-        s3B: stored.s3B ?? null
-      };
-
-      cards.push(`
-        <div class="match-card ${esc(deco.cls)}" data-mid="${esc(mid)}">
-          <div class="match-inner">
-            <div class="match-left">
-              <div class="match-topline">
-                <div class="when-line">
-                  <div class="when-time">${esc(s.time)}</div>
-                  <div class="when-court">${esc(deco.emo)} ${esc(courtTxt)} ${esc(deco.emo)}</div>
-                </div>
-                <div class="status-emoji" title="Statut">${esc(st)}</div>
-              </div>
-
-              ${s.note ? `<div class="muted-mini" style="margin-top:6px;">⚠️ ${esc(s.note)}</div>` : ""}
-
-              <div class="teams">
-                <div class="team-name">${esc(aTxt)}</div>
-                <div class="vsline">VS</div>
-                <div class="team-name">${esc(bTxt)}</div>
-              </div>
-
-              <div class="errline" id="err-${esc(mid)}"></div>
-            </div>
-
-            <div class="match-right">
-              <div class="scorebox">
-                <div class="muted-mini" style="font-weight:900;">S1 / S2 / TB</div>
-
-                <div class="score-grid">
-                  <div>
-                    <div class="muted-mini" style="font-weight:900; margin-bottom:6px;">A</div>
-                    <div class="score-row">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1A" value="${v.s1A ?? ""}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2A" value="${v.s2A ?? ""}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3A" value="${v.s3A ?? ""}">
-                    </div>
-                  </div>
-
-                  <div>
-                    <div class="muted-mini" style="font-weight:900; margin-bottom:6px;">B</div>
-                    <div class="score-row">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1B" value="${v.s1B ?? ""}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2B" value="${v.s2B ?? ""}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3B" value="${v.s3B ?? ""}">
-                    </div>
-                  </div>
-                </div>
-
-                <button class="btnsave" data-act="save" data-mid="${esc(mid)}">
-                  ${done ? "✅ Mettre à jour" : "💾 Enregistrer / Valider"}
-                </button>
-
-                <div class="muted-mini">
-                  <span style="font-weight:900;">Dernière maj :</span>
-                  ${stored.updatedAt?.toDate ? esc(stored.updatedAt.toDate().toLocaleString()) : "—"}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
-    }
-
-    matchCards.innerHTML = cards.join("") || `<div class="muted">Aucun match.</div>`;
-    statusText.textContent = "✅ OK (modif possible même après validation).";
-  }
-
-  function readInputsFor(mid){
-    const get = (k)=>{
-      const el = document.querySelector(`input[data-mid="${CSS.escape(mid)}"][data-k="${CSS.escape(k)}"]`);
-      return el ? el.value : "";
-    };
-
-    // raw -> int/null
-    const raw = {
-      s1A: toIntOrNull(get("s1A")),
-      s1B: toIntOrNull(get("s1B")),
-      s2A: toIntOrNull(get("s2A")),
-      s2B: toIntOrNull(get("s2B")),
-      s3A: toIntOrNull(get("s3A")),
-      s3B: toIntOrNull(get("s3B")),
-    };
-
-    return raw;
-  }
-
   function showErr(mid, msgs){
     const el = document.getElementById(`err-${mid}`);
     if(!el) return;
@@ -689,6 +543,25 @@
     }
     el.style.display = "block";
     el.textContent = "❌ " + msgs.join(" — ");
+  }
+
+  function readInputsFor(mid){
+    const card = matchCards.querySelector(`.match-card[data-mid="${CSS.escape(mid)}"]`);
+    if(!card) return { s1A:null,s1B:null,s2A:null,s2B:null,s3A:null,s3B:null };
+
+    const get = (k)=>{
+      const el = card.querySelector(`input.ibox[data-k="${CSS.escape(k)}"]`);
+      return el ? el.value : "";
+    };
+
+    return {
+      s1A: toIntOrNull(get("s1A")),
+      s1B: toIntOrNull(get("s1B")),
+      s2A: toIntOrNull(get("s2A")),
+      s2B: toIntOrNull(get("s2B")),
+      s3A: toIntOrNull(get("s3A")),
+      s3B: toIntOrNull(get("s3B")),
+    };
   }
 
   async function saveResult(mid){
@@ -703,16 +576,14 @@
 
     const userEmail = auth.currentUser?.email || null;
 
-    // Store: sets/games/tb + score lines + winnerSide
     const payload = {
       matchId: mid,
-      // raw sets
+
       s1A: out.s1A, s1B: out.s1B,
       s2A: out.s2A, s2B: out.s2B,
       s3A: out.needTB ? out.s3A : null,
       s3B: out.needTB ? out.s3B : null,
 
-      // computed
       setsA: out.setsA,
       setsB: out.setsB,
       gamesA: out.gamesA,
@@ -720,7 +591,7 @@
       tbA: out.tbA,
       tbB: out.tbB,
 
-      winnerSide: out.winnerSide, // null tant que pas complet
+      winnerSide: out.winnerSide,
       scoreA: out.scoreA,
       scoreB: out.scoreB,
       score: out.score,
@@ -732,9 +603,157 @@
     await setDoc(doc(db, `resultats_${currentScope}`, mid), payload, { merge:true });
   }
 
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    return {
+      title: t.teamName || "Équipe",
+      sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`
+    };
+  }
+
+  function teamRefPartsForMatchSide(sideRef){
+    const t = resolveTeamRef(sideRef);
+    if(t) return teamPartsFromTeam(t);
+
+    if(!sideRef) return { title:"—", sub:"" };
+    if(sideRef.type === "team") return { title: sideRef.key, sub:"" };
+    if(sideRef.type === "winner") return { title: `V${sideRef.matchId.slice(1)}`, sub:"" };
+    if(sideRef.type === "loser")  return { title: `P${sideRef.matchId.slice(1)}`, sub:"" };
+    return { title:"—", sub:"" };
+  }
+
+  function courtLabel(courtKey){
+    const c = currentProg?.courts || {};
+    const name = c[courtKey] || (courtKey || "—");
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name} ${emo}`;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+  }
+
+  function renderAll(){
+    if(!currentProg){
+      matchCards.innerHTML = "";
+      statusText.textContent = "⏳ Programmation non disponible (génère-la d’abord).";
+      return;
+    }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    const slotToMatch = new Map();
+    Object.entries(schedule).forEach(([mid, slotNum])=>{
+      slotToMatch.set(Number(slotNum), mid);
+    });
+
+    const cards = [];
+    for(const s of slots){
+      const mid = slotToMatch.get(Number(s.slot));
+      const m = mid ? matches[mid] : null;
+      if(!m) continue;
+
+      const a = teamRefPartsForMatchSide(m.A);
+      const b = teamRefPartsForMatchSide(m.B);
+
+      const stored = resultsByMatch.get(mid) || {};
+      const done = (stored.winnerSide === "A" || stored.winnerSide === "B");
+
+      const v = {
+        s1A: stored.s1A ?? "",
+        s1B: stored.s1B ?? "",
+        s2A: stored.s2A ?? "",
+        s2B: stored.s2B ?? "",
+        s3A: stored.s3A ?? "",
+        s3B: stored.s3B ?? "",
+      };
+
+      cards.push(`
+        <div class="match-card ${esc(courtClass(s.court))}" data-mid="${esc(mid)}">
+          <div class="result-layout">
+
+            <div class="result-left">
+              <div class="match-head">
+                <div class="m-time">${esc(s.time)}</div>
+                <div class="m-court">${esc(courtLabel(s.court))}</div>
+                <div class="m-status">${done ? "✅" : "⏳"}</div>
+              </div>
+
+              ${s.note ? `<div class="muted-mini">⚠️ ${esc(s.note)}</div>` : ""}
+
+              <div class="team-row">
+                <div class="team-block">
+                  <div class="team-title">${esc(a.title)}</div>
+                  ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
+                </div>
+                <div class="sc">${esc(stored.s1A ?? "—")}</div>
+                <div class="sc">${esc(stored.s2A ?? "—")}</div>
+                <div class="sc">${esc(stored.s3A ?? "—")}</div>
+              </div>
+
+              <div class="vs-line">VS</div>
+
+              <div class="team-row">
+                <div class="team-block">
+                  <div class="team-title">${esc(b.title)}</div>
+                  ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
+                </div>
+                <div class="sc">${esc(stored.s1B ?? "—")}</div>
+                <div class="sc">${esc(stored.s2B ?? "—")}</div>
+                <div class="sc">${esc(stored.s3B ?? "—")}</div>
+              </div>
+
+              <div class="errline" id="err-${esc(mid)}"></div>
+            </div>
+
+            <div class="result-right">
+              <div class="scorebox">
+                <div class="mini-h">S1 / S2 / TB</div>
+
+                <div class="score-grid">
+                  <div>
+                    <div class="side-label">A</div>
+                    <div class="score-row">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1A" value="${esc(v.s1A)}">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2A" value="${esc(v.s2A)}">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3A" value="${esc(v.s3A)}">
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="side-label">B</div>
+                    <div class="score-row">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1B" value="${esc(v.s1B)}">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2B" value="${esc(v.s2B)}">
+                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3B" value="${esc(v.s3B)}">
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btnsave" data-act="save" data-mid="${esc(mid)}">
+                  ${done ? "✅ Mettre à jour" : "💾 Enregistrer / Valider"}
+                </button>
+
+                <div class="muted-mini">
+                  <b>Dernière maj :</b>
+                  ${stored.updatedAt?.toDate ? esc(stored.updatedAt.toDate().toLocaleString()) : "—"}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `);
+    }
+
+    matchCards.innerHTML = cards.join("") || `<div class="muted">Aucun match.</div>`;
+    statusText.textContent = "✅ OK (modif possible même après validation).";
+  }
+
   function startProgListener(scope){
     if(unsubProg){ unsubProg(); unsubProg = null; }
-
     unsubProg = onSnapshot(progRef(scope), (snap)=>{
       currentProg = snap.exists() ? (snap.data() || {}) : null;
       renderAll();
@@ -746,7 +765,6 @@
 
   function startResultsListener(scope){
     if(unsubRes){ unsubRes(); unsubRes = null; }
-
     unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
       resultsByMatch = new Map();
       snap.forEach(d=>{
@@ -755,6 +773,73 @@
       renderAll();
     });
   }
+
+  // =========================
+  // ✅ OPTION 3 : auto-advance saisie (mobile friendly)
+  // - avance au champ suivant quand maxlength atteint
+  // - retour au champ précédent si Backspace sur champ vide
+  // =========================
+  const INPUT_ORDER = ["s1A","s2A","s3A","s1B","s2B","s3B"];
+
+  function focusNextInput(currentInput){
+    const card = currentInput.closest(".match-card");
+    if(!card) return;
+
+    const k = currentInput.dataset.k;
+    const idx = INPUT_ORDER.indexOf(k);
+    if(idx < 0) return;
+
+    const nextK = INPUT_ORDER[idx + 1];
+    if(!nextK) return;
+
+    const next = card.querySelector(`input.ibox[data-k="${CSS.escape(nextK)}"]`);
+    if(next){
+      next.focus();
+      next.select?.();
+    }
+  }
+
+  function focusPrevInput(currentInput){
+    const card = currentInput.closest(".match-card");
+    if(!card) return;
+
+    const k = currentInput.dataset.k;
+    const idx = INPUT_ORDER.indexOf(k);
+    if(idx <= 0) return;
+
+    const prevK = INPUT_ORDER[idx - 1];
+    const prev = card.querySelector(`input.ibox[data-k="${CSS.escape(prevK)}"]`);
+    if(prev){
+      prev.focus();
+      prev.select?.();
+    }
+  }
+
+  matchCards.addEventListener("input", (e)=>{
+    const el = e.target;
+    if(!(el instanceof HTMLInputElement)) return;
+    if(!el.classList.contains("ibox")) return;
+
+    // keep digits only (optional safety)
+    el.value = el.value.replace(/[^\d]/g, "");
+
+    const max = Number(el.getAttribute("maxlength") || "0");
+    if(max > 0 && el.value.length >= max){
+      focusNextInput(el);
+    }
+  });
+
+  matchCards.addEventListener("keydown", (e)=>{
+    const el = e.target;
+    if(!(el instanceof HTMLInputElement)) return;
+    if(!el.classList.contains("ibox")) return;
+
+    if(e.key === "Backspace" && (el.value === "" || el.value.length === 0)){
+      // go to previous field
+      e.preventDefault();
+      focusPrevInput(el);
+    }
+  });
 
   // ---- UI (scope)
   function showDenied(){
