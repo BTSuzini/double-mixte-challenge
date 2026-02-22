@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Équipes</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -27,8 +27,8 @@
 
     <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -40,19 +40,19 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
+  <!-- ✅ Encart Zone (identique partout) -->
   <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general">Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
@@ -60,16 +60,12 @@
     <p class="muted" id="hint" style="margin-top:10px;"></p>
   </section>
 
-  <!-- =========================
-       CONTENU PAGE (après Zone)
-       => liste équipes admin
-  ========================== -->
-
+  <!-- Si scope = general -->
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
       Sélectionne une <b>Étape</b> dans “Zone” pour gérer les équipes.
-      (Le Général se gère depuis <b>admin/index.html</b>.)
+      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
     </p>
   </section>
 
@@ -142,9 +138,20 @@
     collection, getDocs, doc, setDoc, updateDoc, deleteDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape1)
+  const LS_SCOPE_KEY = "admin_scope_last";
+
+  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
-  const scopeFromUrl = params.get("scope") || "etape1";
+  const scopeFromUrl = params.get("scope");
+
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape1";
+  }
 
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
@@ -169,7 +176,7 @@
   const stbyEl  = document.getElementById("stby");
 
   // ---- state
-  let currentScope = scopeFromUrl;
+  let currentScope = getInitialScope();
 
   // collections (dynamiques selon scope)
   let COL_PRIVATE = `inscriptions_${currentScope}_private`;
@@ -204,25 +211,43 @@
     return a + b;
   }
 
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
   function setTabs(scope){
     tabsEl.innerHTML = "";
 
     if(scope === "general"){
-      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
+      hintEl.textContent = "🌐 Zone Général : gestion des infos dans admin/index.html.";
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
-      a.textContent = "📰 Aller aux infos (Général)";
+      a.textContent = "📰 Aller à Admin — Gestion (infos)";
       tabsEl.appendChild(a);
       return;
     }
 
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+
+    // Repas pas pour étape 5 (test)
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
 
     const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🏁 Résultats", "resultats.html"],
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
     ];
 
     for(const [label, url] of links){
@@ -231,17 +256,17 @@
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
 
-      // simple highlight de l'onglet courant
       if(url === "equipes.html"){
         a.style.fontWeight = "900";
       }
-
       tabsEl.appendChild(a);
     }
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+    pageSub.textContent = (scope === "general")
+      ? "Général"
+      : `${stepLabel(scope)} — BT250`;
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
@@ -259,7 +284,11 @@
     COL_PUBLIC  = `equipes_${scope}_public`;
   }
 
-  // ⚡ perf: 1 lecture privée + 1 lecture publique, puis merge en mémoire
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
+
+  // ⚡ perf: 1 lecture privée + 1 lecture publique, puis merge
   async function fetchAll(){
     statusEl.textContent = "Chargement…";
 
@@ -286,7 +315,7 @@
         list: pub.list || null,
         stby: pub.stby === true,
 
-        // ✅ classements (stockés côté public)
+        // classements stockés côté public
         p1Rank: pub.p1Rank ?? null,
         p2Rank: pub.p2Rank ?? null
       });
@@ -347,14 +376,12 @@
     const p2Licence = prompt("Licence Joueur :", row.p2Licence || "");
     if(p2Licence === null) return;
 
-    // privé
     await updateDoc(doc(db, COL_PRIVATE, row.id), {
       teamName,
       p1FirstName, p1LastName, p1Phone, p1Licence,
       p2FirstName, p2LastName, p2Phone, p2Licence
     });
 
-    // public (sans toucher aux ranks)
     await setDoc(doc(db, COL_PUBLIC, row.id), {
       teamName,
       p1FirstName,
@@ -465,16 +492,18 @@
     scopeEl.value = currentScope;
     setTabs(currentScope);
     showPanelsForScope(currentScope);
+    persistScope(currentScope);
 
     scopeEl.onchange = async ()=>{
       currentScope = scopeEl.value || "general";
       setTabs(currentScope);
       showPanelsForScope(currentScope);
+      persistScope(currentScope);
       await refresh();
     };
   }
 
-  // Guard (avec persistance via session.js)
+  // Guard
   const g = await requireRole(["admin"]);
   if(!g.ok){
     showDenied();
@@ -521,6 +550,7 @@
     }catch(err){
       console.error(err);
       statusEl.textContent = "❌ Erreur";
+      alert("Erreur ❌ (voir console)");
     }
   });
 
