@@ -122,13 +122,15 @@
     opacity:.7;
     white-space:nowrap;
   }
-  /* ✅ heure plus petite (standard mobile) */
+
+  /* ✅ heure réduite */
   .m-time{
-    font-size:20px;
+    font-size:16px;
     font-weight:900;
     white-space:nowrap;
     letter-spacing:.2px;
   }
+
   .m-court{
     font-size:13px;
     font-weight:700;
@@ -162,7 +164,7 @@
     margin-top:10px;
     display:grid;
     grid-template-columns: 1fr 30px 30px 34px;
-    align-items:center;
+    align-items:end;
     gap:8px;
     opacity:.65;
     font-weight:900;
@@ -178,16 +180,29 @@
     align-items:center;
     gap:8px;
   }
-  /* ✅ équipe standard */
-  .team-name{
+
+  /* ✅ équipe sur 2 lignes */
+  .team-block{
+    min-width:0;
+  }
+  .team-title{
     font-size:15px;
     font-weight:900;
-    line-height:1.2;
-    min-width:0;
+    line-height:1.15;
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    white-space:nowrap;
   }
+  .team-sub{
+    margin-top:2px;
+    font-size:13px;
+    font-weight:800;
+    opacity:.85;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
   .sc{
     text-align:right;
     font-size:15px;
@@ -205,8 +220,9 @@
   }
 
   @media (max-width: 380px){
-    .m-time{ font-size:19px; }
-    .team-name{ font-size:14px; }
+    .m-time{ font-size:15px; }
+    .team-title{ font-size:14px; }
+    .team-sub{ font-size:12px; }
     .sc{ font-size:14px; }
   }
 </style>
@@ -384,23 +400,24 @@
     return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
 
-  function teamDisplayFromTeam(t){
-    if(!t) return "—";
-    const team = t.teamName || "Équipe";
-    const p1 = t.p1FirstName || "?";
-    const p2 = t.p2FirstName || "?";
-    return `${team} (${p1} / ${p2})`;
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
   }
 
-  function teamRefLabel(prog, ref){
-    if(!ref) return "—";
+  function teamRefParts(prog, ref){
+    if(!ref) return { title:"—", sub:"" };
+
     if(ref.type === "team"){
       const t = prog?.teams?.[ref.key] || null;
-      return t ? teamDisplayFromTeam(t) : ref.key;
+      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
     }
-    if(ref.type === "winner") return `V${ref.matchId.slice(1)}`;
-    if(ref.type === "loser") return `P${ref.matchId.slice(1)}`;
-    return "—";
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+
+    return { title:"—", sub:"" };
   }
 
   function renderAdminCard({slot, time, courtKey, note, teamA, teamB}){
@@ -426,7 +443,10 @@
         </div>
 
         <div class="team-row">
-          <div class="team-name">${esc(teamA)}</div>
+          <div class="team-block">
+            <div class="team-title">${esc(teamA.title)}</div>
+            ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ``}
+          </div>
           <div class="sc">—</div>
           <div class="sc">—</div>
           <div class="sc">—</div>
@@ -435,7 +455,10 @@
         <div class="vs-line">VS</div>
 
         <div class="team-row">
-          <div class="team-name">${esc(teamB)}</div>
+          <div class="team-block">
+            <div class="team-title">${esc(teamB.title)}</div>
+            ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ``}
+          </div>
           <div class="sc">—</div>
           <div class="sc">—</div>
           <div class="sc">—</div>
@@ -460,16 +483,16 @@
       const m = mid ? matches[mid] : null;
       if(!m) continue;
 
-      const aTxt = teamRefLabel(currentProg, m.A);
-      const bTxt = teamRefLabel(currentProg, m.B);
+      const a = teamRefParts(currentProg, m.A);
+      const b = teamRefParts(currentProg, m.B);
 
       cards.push(renderAdminCard({
         slot: s.slot,
         time: s.time,
         courtKey: s.court,
         note: s.note || "",
-        teamA: aTxt,
-        teamB: bTxt
+        teamA: a,
+        teamB: b
       }));
     }
 
