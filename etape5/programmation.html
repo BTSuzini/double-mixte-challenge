@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Programmation — Étape 5 (TEST)</title>
+  <title>Programmation — Étape 5</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
@@ -16,8 +16,8 @@
       </div>
 
       <h1 class="brand-title">
-        🧪 Étape 5 — TEST<br>
-        <span style="opacity:.95;font-weight:800;">Programmation</span>
+        Étape 5 — TEST<br>
+        <span style="opacity:.95;font-weight:800;">Programmation 📅</span>
       </h1>
 
       <div class="brand-logo">
@@ -39,37 +39,340 @@
 <main class="container">
 
   <section class="card">
-    <h2>🗓️ Programmation (TEST)</h2>
-    <p class="muted" style="margin-top:0;">
-      Cette étape sert de <b>terrain de test</b> (tirage + programmation) avant de déployer sur l’Étape 1.
-    </p>
-
-    <div class="note">
-      <p style="margin:0 0 8px;"><b>À venir :</b></p>
-      <ul style="margin:0 0 0 18px;">
-        <li>Affichage des matchs (heure / terrain / équipes)</li>
-        <li>Mode “live” si on veut</li>
-        <li>Validation admin + horodatage</li>
-      </ul>
-    </div>
+    <h2 style="margin:0 0 10px;">📅 Programmation</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
     <div class="grid" style="margin-top:12px;">
-      <a class="btn" href="tirage.html" style="font-weight:900; color:#111;">🎲 Aller au tirage (TEST)</a>
-      <a class="btn" href="equipes.html" style="font-weight:900; color:#111;">👥 Voir les équipes (TEST)</a>
+      <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chronologique</button>
+      <button class="btn" id="tabTableau" style="font-weight:900; color:#111;">🧩 Tableau</button>
     </div>
+
+    <p class="muted" id="subtitle" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- CHRONO -->
+  <section class="card" id="panelChrono" style="display:none;">
+    <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
+
+    <div class="table-wrap">
+      <table class="teams-table" aria-label="Planning">
+        <thead>
+          <tr>
+            <th style="width:90px;">Heure</th>
+            <th style="width:90px;">Terrain</th>
+            <th style="width:70px;">Match</th>
+            <th>Rencontre</th>
+            <th style="width:110px;">Statut</th>
+          </tr>
+        </thead>
+        <tbody id="chronoBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TABLEAU -->
+  <section class="card" id="panelTableau" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧩 Tableau</h2>
+
+    <div class="grid" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label for="selBracket">Tableau</label>
+        <select id="selBracket">
+          <option value="main">Tableau principal</option>
+          <option value="5-8">Tableau 5–8</option>
+        </select>
+      </div>
+
+      <div class="field" style="margin:0;">
+        <label for="selRound">Tour</label>
+        <select id="selRound"></select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="teams-table" aria-label="Tableau">
+        <thead>
+          <tr>
+            <th style="width:70px;">Match</th>
+            <th>Équipe A</th>
+            <th>Équipe B</th>
+            <th style="width:140px;">Résultat</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Les équipes se “placent” automatiquement dès qu’un résultat est validé.
+    </p>
   </section>
 
 </main>
 
 <style>
-  .note{
-    border:1px solid #eee;
-    border-radius:14px;
-    padding:14px;
-    background:#fff;
-    line-height:1.55;
+  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:820px; }
+  .teams-table thead th{
+    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
+    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+    white-space:nowrap;
+  }
+  .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
+  .pill{
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
+    border:1px solid #eee; background:#fafafa; white-space:nowrap;
   }
 </style>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    doc, onSnapshot, collection, onSnapshot as onSnapCol
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const scope = "etape5";
+
+  const statusText = document.getElementById("statusText");
+  const subtitle = document.getElementById("subtitle");
+
+  const tabChrono = document.getElementById("tabChrono");
+  const tabTableau = document.getElementById("tabTableau");
+
+  const panelChrono = document.getElementById("panelChrono");
+  const panelTableau = document.getElementById("panelTableau");
+
+  const chronoBody = document.getElementById("chronoBody");
+
+  const selBracket = document.getElementById("selBracket");
+  const selRound = document.getElementById("selRound");
+  const tableBody = document.getElementById("tableBody");
+
+  const PROG_REF = doc(db, "programmations", scope);
+  const RESULTS_COL = collection(db, `resultats_${scope}`);
+
+  let currentProg = null;
+  let resultsByMatch = new Map(); // matchId -> {winnerSide:"A"|"B", score, updatedAt}
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function teamLabel(t){
+    if(!t) return "—";
+    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+  }
+
+  function roundOptions(bracket){
+    if(bracket === "main"){
+      return [
+        ["QF", "Quarts de finale"],
+        ["SF", "Demi-finales"],
+        ["3rd", "Match 3e place"],
+        ["F", "Finale"]
+      ];
+    }
+    return [
+      ["SF", "Demi-finales (5–8)"],
+      ["7th", "Match 7e place"],
+      ["5th", "Match 5e place"]
+    ];
+  }
+
+  function setActiveTab(which){
+    const isChrono = which === "chrono";
+    panelChrono.style.display = isChrono ? "block" : "none";
+    panelTableau.style.display = isChrono ? "none" : "block";
+
+    tabChrono.style.fontWeight = isChrono ? "900" : "800";
+    tabTableau.style.fontWeight = isChrono ? "800" : "900";
+  }
+
+  // Résolution des équipes (direct / winner / loser)
+  function resolveTeamRef(ref){
+    if(!currentProg) return null;
+
+    const teams = currentProg.teams || {};
+    const matches = currentProg.matches || {};
+
+    if(!ref) return null;
+
+    if(ref.type === "team"){
+      return teams[ref.key] || null;
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = resultsByMatch.get(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return ref.type === "winner" ? winner : loser;
+    }
+
+    return null;
+  }
+
+  function renderChrono(){
+    if(!currentProg){
+      chronoBody.innerHTML = "";
+      return;
+    }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    // slot -> matchId
+    const slotToMatch = new Map();
+    Object.entries(schedule).forEach(([mid, slotNum])=>{
+      slotToMatch.set(Number(slotNum), mid);
+    });
+
+    const rows = [];
+    for(const s of slots){
+      const mid = slotToMatch.get(Number(s.slot));
+      const m = mid ? matches[mid] : null;
+
+      if(!m) continue;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const res = resultsByMatch.get(mid);
+      const done = !!(res && res.winnerSide);
+
+      rows.push({
+        time: s.time, court: s.court, matchId: mid,
+        A: teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`)),
+        B: teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`)),
+        status: done ? "✅ Terminé" : "⏳ À venir"
+      });
+    }
+
+    chronoBody.innerHTML = rows.map(r => `
+      <tr>
+        <td><b>${esc(r.time)}</b></td>
+        <td><span class="pill">${esc(r.court)}</span></td>
+        <td><b>${esc(r.matchId)}</b></td>
+        <td>${esc(r.A)} <span class="muted">vs</span> ${esc(r.B)}</td>
+        <td>${esc(r.status)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderTableau(){
+    if(!currentProg){
+      tableBody.innerHTML = "";
+      return;
+    }
+
+    const bracket = selBracket.value;
+    const round = selRound.value;
+
+    const matches = currentProg.matches || {};
+    const list = Object.values(matches)
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a,b)=> (a.n||0) - (b.n||0));
+
+    tableBody.innerHTML = list.map(m=>{
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
+      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
+
+      const res = resultsByMatch.get(m.id);
+      const score = res?.score ? res.score : "—";
+      const win = res?.winnerSide ? ("Gagnant: " + res.winnerSide) : "—";
+
+      return `
+        <tr>
+          <td><b>${esc(m.id)}</b></td>
+          <td>${esc(aTxt)}</td>
+          <td>${esc(bTxt)}</td>
+          <td>
+            <div class="muted">${esc(win)}</div>
+            <div><b>${esc(score)}</b></div>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="4" class="muted">Aucun match pour ce filtre.</td></tr>`;
+  }
+
+  function refreshRounds(){
+    const opts = roundOptions(selBracket.value);
+    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
+  }
+
+  function renderAll(){
+    renderChrono();
+    renderTableau();
+  }
+
+  // ---- Tabs UI
+  tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
+  tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
+
+  // ---- Filters
+  selBracket.onchange = ()=>{
+    refreshRounds();
+    renderTableau();
+  };
+  selRound.onchange = ()=> renderTableau();
+
+  // init UI
+  setActiveTab("chrono");
+  refreshRounds();
+  selRound.value = "QF";
+
+  // ---- Listen results (live)
+  onSnapCol(RESULTS_COL, (snap)=>{
+    resultsByMatch = new Map();
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      resultsByMatch.set(d.id, {
+        winnerSide: x.winnerSide || null,
+        score: x.score || "",
+        updatedAt: x.updatedAt || null
+      });
+    });
+    renderAll();
+  });
+
+  // ---- Listen programmation
+  onSnapshot(PROG_REF, (snap)=>{
+    currentProg = snap.exists() ? (snap.data() || {}) : null;
+
+    if(!currentProg){
+      statusText.textContent = "⏳ Programmation non disponible (pas encore générée).";
+      subtitle.textContent = "";
+      panelChrono.style.display = "none";
+      panelTableau.style.display = "none";
+      return;
+    }
+
+    statusText.textContent = "✅ Programmation disponible.";
+    subtitle.textContent = "🧩 Tableau + 🕒 Chronologique (mise à jour en direct).";
+
+    panelChrono.style.display = "block";
+    // panelTableau visible via onglet
+    renderAll();
+  }, (err)=>{
+    console.error(err);
+    statusText.textContent = "🔴 Erreur de connexion à la programmation.";
+  });
+</script>
 
 </body>
 </html>
