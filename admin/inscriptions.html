@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Inscriptions</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -27,8 +27,8 @@
 
     <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -40,19 +40,19 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
+  <!-- ✅ Encart Zone (identique partout) -->
   <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general">Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
@@ -62,13 +62,14 @@
 
   <!-- =========================
        CONTENU PAGE (après Zone)
-       => uniquement Statut + RAZ
+       => Statut + RAZ
   ========================== -->
 
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
       Sélectionne une <b>Étape</b> dans “Zone” pour gérer le statut des inscriptions et faire une RAZ.
+      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
     </p>
   </section>
 
@@ -120,9 +121,24 @@
     collection, getDocs, writeBatch
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape1)
+  const LS_SCOPE_KEY = "admin_scope_last";
+
+  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
-  const scopeFromUrl = params.get("scope") || "etape1";
+  const scopeFromUrl = params.get("scope");
+
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape1";
+  }
+
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
 
   // ---- dom
   const accessDenied = document.getElementById("accessDenied");
@@ -150,7 +166,7 @@
   const razStatus = document.getElementById("razStatus");
 
   // ---- state
-  let currentScope = scopeFromUrl;
+  let currentScope = getInitialScope();
   let currentState = null;
   let unsubGate = null;
 
@@ -160,7 +176,14 @@
     return `Étape ${n}`;
   }
 
-  function labelFor(state){
+  // Compat : certains écrans utilisaient paused, d'autres suspended
+  function normalizeState(state){
+    if(state === "paused") return "suspended";
+    return state || "not_open";
+  }
+
+  function labelFor(stateRaw){
+    const state = normalizeState(stateRaw);
     switch(state){
       case "not_open": return "💤 Pas encore ouvertes";
       case "open": return "✅ Ouvertes";
@@ -170,7 +193,8 @@
     }
   }
 
-  function publicMessage(state){
+  function publicMessage(stateRaw){
+    const state = normalizeState(stateRaw);
     switch(state){
       case "not_open": return "Le public voit : “Les inscriptions ne sont pas encore ouvertes.”";
       case "open": return "Le public voit : “Inscriptions ouvertes ✅” (formulaire actif).";
@@ -194,11 +218,62 @@
     }
   }
 
-  function showPanelsForScope(scope){
-    // titre
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
 
-    // panels
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "🌐 Zone Général : gestion des infos dans admin/index.html.";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller à Admin — Gestion (infos)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      if(url === "inscriptions.html"){
+        a.style.fontWeight = "900";
+      }
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = (scope === "general")
+      ? "Général"
+      : `${stepLabel(scope)} — BT250`;
+
     if(scope === "general"){
       panelNeedStep.style.display = "block";
       panelInscriptions.style.display = "none";
@@ -211,15 +286,14 @@
     panelInscriptions.style.display = "block";
     panelRAZ.style.display = "block";
 
-    // listener gate
     stopGateListener();
 
-    const cfgRef = doc(db, "config", scope); // ex: config/etape1
-
+    const cfgRef = doc(db, "config", scope); // ex: config/etape5
     unsubGate = onSnapshot(cfgRef, (snap)=>{
-      const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
-      currentState = state;
+      const raw = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
+      const state = normalizeState(raw);
 
+      currentState = state;
       currentStateEl.innerHTML = `Statut actuel : <strong>${labelFor(state)}</strong>`;
       statusMsgEl.textContent = publicMessage(state);
 
@@ -231,47 +305,13 @@
     });
   }
 
-  function setTabs(scope){
-    tabsEl.innerHTML = "";
-
-    if(scope === "general"){
-      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = "index.html";
-      a.textContent = "📰 Aller aux infos (Général)";
-      tabsEl.appendChild(a);
-      return;
-    }
-
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
-
-    const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🏁 Résultats", "resultats.html"],
-    ];
-
-    for(const [label, url] of links){
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
-      a.textContent = label;
-
-      // petit “active” simple
-      if(url === "inscriptions.html"){
-        a.style.fontWeight = "900";
-      }
-
-      tabsEl.appendChild(a);
-    }
-  }
-
-  async function setState(next){
+  async function setState(nextRaw){
     if(currentScope === "general"){
       alert("Choisis une étape.");
       return;
     }
+
+    const next = normalizeState(nextRaw);
 
     if(next === "closed"){
       const ok = confirm("Clôturer les inscriptions ?\n\nLe public verra “clôturées” et ne pourra plus s’inscrire.");
@@ -288,6 +328,7 @@
     statusMsgEl.textContent = "Mise à jour…";
 
     try{
+      // merge:true => crée le doc si absent
       await setDoc(cfgRef, {
         inscriptionsState: next,
         updatedAt: serverTimestamp()
@@ -398,19 +439,20 @@
     accessDenied.style.display = "none";
     adminUI.style.display = "block";
 
-    // select
     scopeEl.value = currentScope;
     setTabs(currentScope);
     showPanelsForScope(currentScope);
+    persistScope(currentScope);
 
     scopeEl.onchange = ()=>{
       currentScope = scopeEl.value || "general";
       setTabs(currentScope);
       showPanelsForScope(currentScope);
+      persistScope(currentScope);
     };
   }
 
-  // 1) guard au chargement (avec persistance via session.js)
+  // guard
   const g = await requireRole(["admin"]);
   if(!g.ok){
     showDenied();
@@ -418,12 +460,11 @@
     showAdmin();
   }
 
-  // 2) robuste si session change
+  // robuste si session change
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
     const g2 = await requireRole(["admin"]);
     if(!g2.ok){ showDenied(); return; }
-    // déjà affiché => rien
   });
 </script>
 
