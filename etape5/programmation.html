@@ -87,7 +87,6 @@
 <style>
   .match-list{ display:flex; flex-direction:column; gap:14px; }
 
-  /* Encarts couleur terrain */
   .match-card{
     border-radius:18px;
     border:2px solid rgba(0,0,0,.06);
@@ -98,20 +97,21 @@
   .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
   .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  /* Ligne 1: heure + court + statut */
   .match-head{
     display:flex;
     align-items:center;
     gap:10px;
     min-width:0;
   }
-  /* ✅ heure plus petite (standard mobile) */
+
+  /* ✅ heure réduite */
   .m-time{
-    font-size:20px;
+    font-size:16px;
     font-weight:900;
     white-space:nowrap;
     letter-spacing:.2px;
   }
+
   .m-court{
     font-size:13px;
     font-weight:700;
@@ -123,19 +123,12 @@
     min-width:0;
     flex:1;
   }
-  .m-status{
-    font-size:18px;
-    line-height:1;
-    white-space:nowrap;
-    margin-left:2px;
-  }
 
-  /* Mini tableau score (S1 S2 TB) */
   .score-head{
     margin-top:10px;
     display:grid;
     grid-template-columns: 1fr 30px 30px 34px;
-    align-items:center;
+    align-items:end;
     gap:8px;
     opacity:.65;
     font-weight:900;
@@ -151,16 +144,29 @@
     align-items:center;
     gap:8px;
   }
-  /* ✅ équipe: taille standard téléphone + gras */
-  .team-name{
+
+  /* ✅ équipe sur 2 lignes */
+  .team-block{
+    min-width:0;
+  }
+  .team-title{
     font-size:15px;
     font-weight:900;
-    line-height:1.2;
-    min-width:0;
+    line-height:1.15;
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    white-space:nowrap;
   }
+  .team-sub{
+    margin-top:2px;
+    font-size:13px;
+    font-weight:800;
+    opacity:.85;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
   .sc{
     text-align:right;
     font-size:15px;
@@ -178,8 +184,9 @@
   }
 
   @media (max-width: 380px){
-    .m-time{ font-size:19px; }
-    .team-name{ font-size:14px; }
+    .m-time{ font-size:15px; }
+    .team-title{ font-size:14px; }
+    .team-sub{ font-size:12px; }
     .sc{ font-size:14px; }
   }
 </style>
@@ -241,12 +248,11 @@
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
   }
 
-  function teamDisplay(t){
-    if(!t) return "—";
-    const team = t.teamName || "Équipe";
-    const p1 = t.p1FirstName || "?";
-    const p2 = t.p2FirstName || "?";
-    return `${team} (${p1} / ${p2})`;
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
   }
 
   function courtLabel(courtKey){
@@ -260,20 +266,10 @@
     return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
 
-  function statusEmoji(res){
-    if(res?.winnerSide === "A" || res?.winnerSide === "B") return "✅";
-    const hasAny =
-      (res?.s1A != null) || (res?.s1B != null) ||
-      (res?.s2A != null) || (res?.s2B != null) ||
-      (res?.s3A != null) || (res?.s3B != null);
-    return hasAny ? "🟢" : "⏳";
-  }
-
   function fmt(x){
     return (x === null || x === undefined) ? "—" : String(x);
   }
 
-  // Résolution des équipes (direct / winner / loser)
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -305,11 +301,9 @@
   }
 
   function renderMatchCard({ time, courtKey, teamA, teamB, res }){
-    const st = statusEmoji(res);
     const cls = courtClass(courtKey);
     const court = courtLabel(courtKey);
 
-    // Scores (A = équipe du haut / B = équipe du bas)
     const s1A = fmt(res?.s1A);
     const s2A = fmt(res?.s2A);
     const tbA = fmt(res?.s3A);
@@ -318,15 +312,14 @@
     const s2B = fmt(res?.s2B);
     const tbB = fmt(res?.s3B);
 
-    const nameA = teamDisplay(teamA);
-    const nameB = teamDisplay(teamB);
+    const a = teamPartsFromTeam(teamA);
+    const b = teamPartsFromTeam(teamB);
 
     return `
       <div class="match-card ${esc(cls)}">
         <div class="match-head">
           <div class="m-time">${esc(time)}</div>
           <div class="m-court">${esc(court)}</div>
-          <div class="m-status" title="Statut">${esc(st)}</div>
         </div>
 
         <div class="score-head">
@@ -337,7 +330,10 @@
         </div>
 
         <div class="team-row">
-          <div class="team-name">${esc(nameA)}</div>
+          <div class="team-block">
+            <div class="team-title">${esc(a.title)}</div>
+            ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
+          </div>
           <div class="sc">${esc(s1A)}</div>
           <div class="sc">${esc(s2A)}</div>
           <div class="sc">${esc(tbA)}</div>
@@ -346,7 +342,10 @@
         <div class="vs-line">VS</div>
 
         <div class="team-row">
-          <div class="team-name">${esc(nameB)}</div>
+          <div class="team-block">
+            <div class="team-title">${esc(b.title)}</div>
+            ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
+          </div>
           <div class="sc">${esc(s1B)}</div>
           <div class="sc">${esc(s2B)}</div>
           <div class="sc">${esc(tbB)}</div>
@@ -362,7 +361,6 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=>{
       slotToMatch.set(Number(slotNum), mid);
@@ -410,7 +408,6 @@
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(m.id) || null;
 
-      // on récupère court+heure depuis le slot du match (si dispo)
       let courtKey = "A";
       let time = "—";
       const slotNum = schedule[m.id];
