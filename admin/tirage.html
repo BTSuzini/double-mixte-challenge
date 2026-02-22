@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Tirage</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -15,8 +15,9 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title" id="pageTitle">
-        Tirage (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      <h1 class="brand-title">
+        🎲 Tirage (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
       </h1>
 
       <div class="brand-logo">
@@ -24,15 +25,10 @@
       </div>
     </div>
 
+    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="#" id="tabEquipes">👥 Équipes</a>
-      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
-      <a href="#" id="tabRepas">🍽️ Repas</a>
-      <a href="#" id="tabTirage" aria-current="page">🎲 Tirage</a>
-      <a href="#" id="tabResultats">🏁 Résultats</a>
-      <a href="#" id="btnPublic">Vue publique</a>
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -44,7 +40,37 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
+  <!-- ✅ Zone (identique partout) -->
   <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- si general -->
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer le tirage.
+      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
+    </p>
+  </section>
+
+  <!-- CONTENU TIRAGE -->
+  <section class="card" id="panelControl" style="display:none;">
     <h2 style="margin:0 0 10px;">🎲 Tirage au sort — contrôle admin</h2>
 
     <p class="muted" id="status" style="margin:0;">Chargement…</p>
@@ -63,7 +89,7 @@
     </p>
   </section>
 
-  <section class="card" id="panel" style="display:none;">
+  <section class="card" id="panelPreview" style="display:none;">
     <h2 style="margin:0 0 10px;">📌 Aperçu</h2>
 
     <div class="grid">
@@ -91,6 +117,11 @@
     <div style="margin-top:12px;">
       <div style="font-weight:1000; margin-bottom:8px;">📌 Tirages révélés</div>
       <div id="revealedList" style="display:grid; gap:8px;"></div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">🧾 Matchs (prévision)</div>
+      <div id="matchesBox" class="muted">—</div>
     </div>
   </section>
 
@@ -122,43 +153,50 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     collection, getDocs, query, orderBy,
     doc, getDoc, setDoc, updateDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope
+  const LS_SCOPE_KEY = "admin_scope_last";
+
+  // ---- scope (URL ?scope=...) + fallback LS
   const params = new URLSearchParams(location.search);
-  const scope = params.get("scope") || "etape5";
-  const stepNum = scope.replace("etape","");
-  const stepLabel = `Étape ${stepNum}`;
+  const scopeFromUrl = params.get("scope");
 
-  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`;
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape5"; // par défaut : test
+  }
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
 
-  // nav keep scope
-  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabRepas").href = `repas.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabTirage").href = `tirage.html?scope=${encodeURIComponent(scope)}`;
-  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
-
-  document.getElementById("btnPublic").onclick = (e)=>{
-    e.preventDefault();
-    window.location.href = `../${scope}/tirage.html`;
-  };
-
-  // ---- DOM
+  // ---- dom
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
-  const panel = document.getElementById("panel");
-  const statusEl = document.getElementById("status");
 
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelControl  = document.getElementById("panelControl");
+  const panelPreview  = document.getElementById("panelPreview");
+
+  const statusEl = document.getElementById("status");
   const seed1El = document.getElementById("seed1");
   const seed2El = document.getElementById("seed2");
   const poolList = document.getElementById("poolList");
   const revealedList = document.getElementById("revealedList");
+  const matchesBox = document.getElementById("matchesBox");
 
   const wheel = document.getElementById("wheel");
   const wheelSub = document.getElementById("wheelSub");
@@ -169,12 +207,83 @@
   const btnValidate = document.getElementById("btnValidate");
   const btnReset = document.getElementById("btnReset");
 
-  // ---- Data
-  const COL_PUBLIC = `equipes_${scope}_public`; // 8 équipes main attendues
-  const DRAW_REF = doc(db, "tirages", scope);
+  // ---- state
+  let currentScope = getInitialScope();
+  let cachedMainTeams = []; // 8 équipes main
+  let draw = null;
 
-  let cachedMainTeams = [];   // [{id, teamName, p1FirstName, p2FirstName, p1Rank, p2Rank, teamRank}]
-  let draw = null;            // doc tirage courant
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    const n = scope.replace("etape","");
+    return `Étape ${n}`;
+  }
+
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "🌐 Zone Général : admin/index.html";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller à Admin — Gestion (infos)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "tirage.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = (scope === "general")
+      ? "Général"
+      : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelControl.style.display = "none";
+      panelPreview.style.display = "none";
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelControl.style.display = "block";
+    panelPreview.style.display = "block";
+  }
+
+  function uiSet(msg){ statusEl.textContent = msg; }
 
   function esc(s){
     return (s ?? "").toString()
@@ -187,36 +296,115 @@
     return Number.isFinite(n) ? n : null;
   }
 
-  function teamRank(t){
+  function calcTeamRank(t){
     const a = toNum(t.p1Rank);
     const b = toNum(t.p2Rank);
-    if(a === null || b === null) return Number.POSITIVE_INFINITY; // non renseigné => “moins bien classé”
+    if(a === null || b === null) return Number.POSITIVE_INFINITY; // non renseigné => en bas
     return a + b;
   }
 
   function teamLabel(t){
     if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
   }
 
-  async function ensureAdmin(){
-    const u = auth.currentUser;
-    if(!u) return false;
-    const r = await getRoleByEmail(u.email);
-    return r === "admin";
+  function drawDocRef(){
+    return doc(db, "tirages", currentScope); // tirages/etape5
   }
 
-  function uiSet(msg){ statusEl.textContent = msg; }
+  function colPublicTeams(){
+    return `equipes_${currentScope}_public`; // equipes_etape5_public
+  }
+
+  async function readDraw(){
+    const s = await getDoc(drawDocRef());
+    draw = s.exists() ? (s.data() || {}) : null;
+    return draw;
+  }
+
+  function setButtons(){
+    const st = draw?.status || "idle";
+
+    const canOperate = (currentScope !== "general");
+    btnLoad.disabled = !canOperate;
+
+    btnStart.disabled = !canOperate || !(cachedMainTeams.length === 8) || (st === "running" || st === "pending_validation" || st === "validated");
+    btnNext.disabled  = !canOperate || !(st === "running") || (Number(draw?.revealed || 0) >= 6);
+    btnValidate.disabled = !canOperate || !(st === "pending_validation");
+    btnReset.disabled = !canOperate;
+  }
+
+  function renderPreviewFromData(ts1, ts2, pool, revealedIds){
+    seed1El.textContent = ts1 ? `${teamLabel(ts1)}${Number.isFinite(ts1.teamRank) ? ` — rank équipe: ${ts1.teamRank}` : ""}` : "—";
+    seed2El.textContent = ts2 ? `${teamLabel(ts2)}${Number.isFinite(ts2.teamRank) ? ` — rank équipe: ${ts2.teamRank}` : ""}` : "—";
+
+    poolList.innerHTML = pool?.length
+      ? pool.map(p=> `
+        <div class="card" style="margin:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <div><b>${esc(teamLabel(p))}</b></div>
+            <span class="pill">urne</span>
+          </div>
+        </div>
+      `).join("")
+      : `<div class="muted">—</div>`;
+
+    const shown = revealedIds || [];
+    revealedList.innerHTML = shown.length
+      ? shown.map((t, i)=> `
+        <div class="card" style="margin:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
+            <span class="pill">tirée</span>
+          </div>
+        </div>
+      `).join("")
+      : `<div class="muted">En attente…</div>`;
+
+    wheel.textContent = "—";
+    wheelSub.textContent = "—";
+  }
+
+  function computeMatches(seed1, seed2, picks){
+    // picks = [t1..t6] dans l’ordre
+    const m = [];
+    if(seed1 && picks[0]) m.push({ a: picks[0], b: seed1, label: "Match 1" });
+    if(picks[1] && picks[2]) m.push({ a: picks[1], b: picks[2], label: "Match 2" });
+    if(picks[3] && picks[4]) m.push({ a: picks[3], b: picks[4], label: "Match 3" });
+    if(seed2 && picks[5]) m.push({ a: picks[5], b: seed2, label: "Match 4" });
+    return m;
+  }
+
+  function renderMatches(seed1, seed2, poolById, order, revealedCount){
+    const ids = order.slice(0, Math.min(revealedCount, 6));
+    const picks = ids.map(id => poolById.get(id)).filter(Boolean);
+
+    const matches = computeMatches(seed1, seed2, picks);
+    if(matches.length === 0){
+      matchesBox.innerHTML = "—";
+      return;
+    }
+    matchesBox.innerHTML = matches.map(x => {
+      return `<div style="margin-bottom:6px;"><b>${esc(x.label)}</b> : ${esc(teamLabel(x.a))} <span class="muted">vs</span> ${esc(teamLabel(x.b))}</div>`;
+    }).join("");
+  }
 
   async function loadMainTeams(){
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
     uiSet("Chargement équipes…");
 
-    const snap = await getDocs(query(collection(db, COL_PUBLIC), orderBy("createdAt","asc")));
+    const snap = await getDocs(query(collection(db, colPublicTeams()), orderBy("createdAt","asc")));
 
     const rows = [];
     snap.forEach(d=>{
       const x = d.data() || {};
-      // on prend seulement la liste principale + pas STBY
       const isMain = (x.list === "main") && (x.stby !== true);
       if(!isMain) return;
 
@@ -228,51 +416,33 @@
         p1Rank: x.p1Rank ?? null,
         p2Rank: x.p2Rank ?? null
       };
-      t.teamRank = teamRank(t);
+      t.teamRank = calcTeamRank(t);
       rows.push(t);
     });
 
+    cachedMainTeams = rows;
+
     if(rows.length !== 8){
       uiSet(`⚠️ Liste principale détectée = ${rows.length} équipe(s). Il en faut 8 (list=main, stby=false).`);
-      cachedMainTeams = rows;
-      panel.style.display = "block";
-      renderPreview(null, null, []);
+      renderPreviewFromData(null, null, rows, []);
+      matchesBox.innerHTML = "—";
+      setButtons();
       return;
     }
 
-    // tri par teamRank asc => TS1 + TS2
     rows.sort((a,b)=> a.teamRank - b.teamRank);
 
-    cachedMainTeams = rows;
     const ts1 = rows[0];
     const ts2 = rows[1];
-    const pool = rows.slice(2); // 6
+    const pool = rows.slice(2);
 
-    uiSet("✅ Équipes chargées.");
-    panel.style.display = "block";
-    renderPreview(ts1, ts2, pool);
-  }
-
-  function renderPreview(ts1, ts2, pool){
-    seed1El.textContent = ts1 ? teamLabel(ts1) + (Number.isFinite(ts1.teamRank) ? ` — rank équipe: ${ts1.teamRank}` : "") : "—";
-    seed2El.textContent = ts2 ? teamLabel(ts2) + (Number.isFinite(ts2.teamRank) ? ` — rank équipe: ${ts2.teamRank}` : "") : "—";
-
-    poolList.innerHTML = pool.length
-      ? pool.map(p=> `<div class="card" style="margin:0;">
-          <div style="display:flex;justify-content:space-between;gap:10px;">
-            <div><b>${esc(teamLabel(p))}</b></div>
-            <span class="pill">urne</span>
-          </div>
-        </div>`).join("")
-      : `<div class="muted">—</div>`;
-
-    revealedList.innerHTML = `<div class="muted">—</div>`;
-    wheel.textContent = "—";
-    wheelSub.textContent = "—";
+    uiSet("✅ Équipes chargées. (TS1/TS2 auto + urne 6 équipes)");
+    renderPreviewFromData(ts1, ts2, pool, []);
+    matchesBox.innerHTML = "—";
+    setButtons();
   }
 
   function randomShuffle(arr){
-    // Fisher-Yates avec crypto si dispo
     const a = arr.slice();
     const rand = (n)=>{
       const u = new Uint32Array(1);
@@ -286,54 +456,52 @@
     return a;
   }
 
-  async function readDraw(){
-    const s = await getDoc(DRAW_REF);
-    draw = s.exists() ? (s.data() || {}) : null;
-    return draw;
-  }
-
-  function setButtons(){
-    const st = draw?.status || "idle";
-    btnStart.disabled = !(cachedMainTeams.length >= 8) || (st === "running" || st === "pending_validation");
-    btnNext.disabled = !(st === "running") || ((draw?.revealed || 0) >= 6);
-    btnValidate.disabled = !(st === "pending_validation");
-  }
-
   async function startDraw(){
-    if(cachedMainTeams.length < 8){
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
+    if(cachedMainTeams.length !== 8){
       alert("Charge d’abord les équipes (8 en liste principale).");
       return;
     }
-    // TS1 / TS2 / pool
-    const ts1 = cachedMainTeams[0];
-    const ts2 = cachedMainTeams[1];
-    const pool = cachedMainTeams.slice(2);
+
+    // TS1/TS2/pool
+    const rows = cachedMainTeams.slice().sort((a,b)=> calcTeamRank(a) - calcTeamRank(b));
+    const ts1 = rows[0];
+    const ts2 = rows[1];
+    const pool = rows.slice(2);
 
     const order = randomShuffle(pool.map(x => x.id)); // 6 ids
 
-    // payload minimal mais suffisant pour public + replay
     const payload = {
-      scope,
+      scope: currentScope,
       status: "running",
-      seed1: { id: ts1.id, teamName: ts1.teamName, p1FirstName: ts1.p1FirstName, p2FirstName: ts1.p2FirstName, teamRank: ts1.teamRank },
-      seed2: { id: ts2.id, teamName: ts2.teamName, p1FirstName: ts2.p1FirstName, p2FirstName: ts2.p2FirstName, teamRank: ts2.teamRank },
-      pool: pool.map(p => ({ id:p.id, teamName:p.teamName, p1FirstName:p.p1FirstName, p2FirstName:p.p2FirstName, teamRank:p.teamRank })),
+      seed1: { id: ts1.id, teamName: ts1.teamName, p1FirstName: ts1.p1FirstName, p2FirstName: ts1.p2FirstName, teamRank: calcTeamRank(ts1) },
+      seed2: { id: ts2.id, teamName: ts2.teamName, p1FirstName: ts2.p1FirstName, p2FirstName: ts2.p2FirstName, teamRank: calcTeamRank(ts2) },
+      pool: pool.map(p => ({ id:p.id, teamName:p.teamName, p1FirstName:p.p1FirstName, p2FirstName:p.p2FirstName, teamRank: calcTeamRank(p) })),
       order,
       revealed: 0,
-      revealedAt: [],
-      createdAt: serverTimestamp()
+      revealedAtMs: [],
+      createdAt: serverTimestamp(),
+      validatedAt: null
     };
 
-    await setDoc(DRAW_REF, payload, { merge: true });
+    await setDoc(drawDocRef(), payload, { merge:true });
     await readDraw();
+
     uiSet("▶️ Tirage lancé. Clique “Tirer la prochaine équipe”.");
     setButtons();
+
+    renderPreviewFromData(draw.seed1, draw.seed2, draw.pool, []);
+    matchesBox.innerHTML = "—";
   }
 
   async function rouletteSpin(finalText, durationMs = 1300){
     const start = Date.now();
     wheelSub.textContent = "La roulette tourne…";
-    const fake = ["🌪️", "🎾", "🔥", "🍀", "⚡️", "🎲", "🏖️"];
+    const fake = ["🌪️", "🎾", "🔥", "🍀", "⚡️", "🎲", "🏖️", "🇮🇹"];
 
     return new Promise((resolve) => {
       const tick = () => {
@@ -344,39 +512,23 @@
           resolve();
           return;
         }
-        wheel.textContent = fake[Math.floor(Math.random()*fake.length)] + " " + fake[Math.floor(Math.random()*fake.length)];
+        wheel.textContent =
+          fake[Math.floor(Math.random()*fake.length)] + " " +
+          fake[Math.floor(Math.random()*fake.length)];
         requestAnimationFrame(tick);
       };
       tick();
     });
   }
 
-  function renderRevealedFromDraw(){
-    const order = draw?.order || [];
-    const pool = draw?.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-    const revealed = Number(draw?.revealed || 0);
-
-    const shown = order.slice(0, revealed);
-    revealedList.innerHTML = shown.length
-      ? shown.map((id, i)=>{
-          const t = poolById.get(id);
-          return `<div class="card" style="margin:0;">
-            <div style="display:flex;justify-content:space-between;gap:10px;">
-              <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
-              <span class="pill">tirée</span>
-            </div>
-          </div>`;
-        }).join("")
-      : `<div class="muted">En attente…</div>`;
-  }
-
   async function nextPick(){
     await readDraw();
+
     if(!draw || draw.status !== "running"){
       alert("Le tirage n’est pas en cours.");
       return;
     }
+
     const order = draw.order || [];
     const pool = draw.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
@@ -389,26 +541,42 @@
 
     const id = order[revealed];
     const t = poolById.get(id);
+
     await rouletteSpin(teamLabel(t), 1300);
 
-    // on commit la révélation (live public)
     const newRevealed = revealed + 1;
-    const revealedAt = Array.isArray(draw.revealedAt) ? draw.revealedAt.slice() : [];
-    revealedAt.push(serverTimestamp());
+    const revealedAtMs = Array.isArray(draw.revealedAtMs) ? draw.revealedAtMs.slice() : [];
+    revealedAtMs.push(Date.now());
 
-    await updateDoc(DRAW_REF, {
+    await updateDoc(drawDocRef(), {
       revealed: newRevealed,
-      revealedAt
+      revealedAtMs
     });
 
     await readDraw();
-    renderRevealedFromDraw();
+
+    // render revealed
+    const shownIds = (draw.order || []).slice(0, Math.min(draw.revealed || 0, 6));
+    const shownTeams = shownIds.map(x => poolById.get(x)).filter(Boolean);
+
+    revealedList.innerHTML = shownTeams.length
+      ? shownTeams.map((tt, i)=> `
+        <div class="card" style="margin:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <div><b>#${i+1}</b> — ${esc(teamLabel(tt))}</div>
+            <span class="pill">tirée</span>
+          </div>
+        </div>
+      `).join("")
+      : `<div class="muted">En attente…</div>`;
+
+    renderMatches(draw.seed1, draw.seed2, poolById, draw.order || [], Number(draw.revealed || 0));
 
     if(newRevealed >= 6){
-      await updateDoc(DRAW_REF, { status: "pending_validation" });
+      await updateDoc(drawDocRef(), { status: "pending_validation" });
       await readDraw();
       uiSet("⏳ Tirage terminé — clique “Valider le tirage”.");
-    } else {
+    }else{
       uiSet(`🎰 Tirage #${newRevealed} effectué.`);
     }
 
@@ -419,10 +587,11 @@
     const ok = confirm("Valider le tirage ?\n\nLe public verra le tirage VALIDÉ + date/heure, et pourra lancer le replay.");
     if(!ok) return;
 
-    await updateDoc(DRAW_REF, {
+    await updateDoc(drawDocRef(), {
       status: "validated",
       validatedAt: serverTimestamp()
     });
+
     await readDraw();
     uiSet("✅ Tirage validé.");
     setButtons();
@@ -433,24 +602,30 @@
     if(!ok1) return;
 
     const typed = prompt('Tape exactement : RESET');
-    if(typed !== "RESET"){ alert("Annulé."); return; }
+    if(typed !== "RESET"){
+      alert("Annulé.");
+      return;
+    }
 
-    await setDoc(DRAW_REF, {
-      scope,
+    await setDoc(drawDocRef(), {
+      scope: currentScope,
       status: "idle",
       seed1: null,
       seed2: null,
       pool: [],
       order: [],
       revealed: 0,
-      revealedAt: [],
+      revealedAtMs: [],
       createdAt: serverTimestamp(),
       validatedAt: null
-    }, { merge: true });
+    }, { merge:true });
 
     await readDraw();
     uiSet("🧼 Tirage réinitialisé.");
-    renderPreview(null, null, []);
+
+    cachedMainTeams = [];
+    renderPreviewFromData(null, null, [], []);
+    matchesBox.innerHTML = "—";
     setButtons();
   }
 
@@ -468,31 +643,75 @@
     window.location.href = "../index.html";
   };
 
-  // Guard
-  onAuthStateChanged(auth, async (user)=>{
-    accessDenied.style.display = "none";
+  function showDenied(){
+    accessDenied.style.display = "block";
     adminUI.style.display = "none";
-    panel.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelControl.style.display = "none";
+    panelPreview.style.display = "none";
+  }
 
-    if(!user){ accessDenied.style.display = "block"; return; }
-    const ok = await ensureAdmin();
-    if(!ok){ accessDenied.style.display = "block"; return; }
-
+  function showAdmin(){
+    accessDenied.style.display = "none";
     adminUI.style.display = "block";
-    panel.style.display = "block";
 
-    await readDraw();
-    setButtons();
+    scopeEl.value = currentScope;
+    persistScope(currentScope);
 
-    uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
 
-    // si tirage déjà lancé, on affiche ce qu’on peut
-    if(draw?.seed1 || draw?.seed2){
-      seed1El.textContent = draw.seed1 ? teamLabel(draw.seed1) : "—";
-      seed2El.textContent = draw.seed2 ? teamLabel(draw.seed2) : "—";
-      poolList.innerHTML = (draw.pool || []).map(p=> `<div class="card" style="margin:0;"><b>${esc(teamLabel(p))}</b></div>`).join("") || `<div class="muted">—</div>`;
-      renderRevealedFromDraw();
+    scopeEl.onchange = async ()=>{
+      currentScope = scopeEl.value || "general";
+      persistScope(currentScope);
+
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+
+      // reset UI state on scope change
+      cachedMainTeams = [];
+      draw = null;
+      uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
+      renderPreviewFromData(null, null, [], []);
+      matchesBox.innerHTML = "—";
+      setButtons();
+
+      if(currentScope !== "general"){
+        await readDraw();
+        setButtons();
+        // si déjà un tirage existant
+        if(draw?.seed1 || draw?.seed2){
+          const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+          const shownIds = (draw.order || []).slice(0, Math.min(draw.revealed || 0, 6));
+          const shownTeams = shownIds.map(id => poolById.get(id)).filter(Boolean);
+          renderPreviewFromData(draw.seed1, draw.seed2, draw.pool || [], shownTeams);
+          renderMatches(draw.seed1, draw.seed2, poolById, draw.order || [], Number(draw.revealed || 0));
+        }
+      }
+    };
+  }
+
+  // Guard admin (comme tes autres pages)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+    if(currentScope !== "general"){
+      await readDraw();
+      setButtons();
+      uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
+    }else{
+      uiSet("Choisis une étape.");
+      setButtons();
     }
+  }
+
+  // robuste si session change
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
   });
 </script>
 
