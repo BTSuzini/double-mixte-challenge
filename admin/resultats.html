@@ -137,10 +137,11 @@
     opacity:.85;
   }
 
+  /* ✅ scores saisis à la place des tirets (dans la ligne équipe) */
   .team-row{
     margin-top:10px;
     display:grid;
-    grid-template-columns: 1fr 22px 22px 24px;
+    grid-template-columns: 1fr 54px 54px 54px;
     align-items:center;
     gap:6px;
   }
@@ -164,13 +165,19 @@
     text-overflow:ellipsis;
   }
 
-  .sc{
-    text-align:right;
-    font-size:15px;
+  .ibox{
+    width:54px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,.12);
+    background:#fff;
     font-weight:900;
-    white-space:nowrap;
+    font-size:16px;
+    text-align:center;
+    outline:none;
     font-variant-numeric: tabular-nums;
   }
+  .ibox:focus{ box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
 
   .vs-line{
     margin:10px 0 6px;
@@ -181,68 +188,9 @@
     font-size:12px;
   }
 
-  /* === Résultats : zone saisie à droite (responsive) === */
-  .result-layout{
-    display:flex;
-    gap:12px;
-    align-items:stretch;
-  }
-  .result-left{ flex:1 1 auto; min-width:0; }
-  .result-right{
-    width:176px;
-    flex:0 0 auto;
-  }
-
-  .scorebox{
-    border:1px solid rgba(0,0,0,.10);
-    background:rgba(255,255,255,.70);
-    border-radius:16px;
-    padding:10px;
-  }
-
-  .mini-h{
-    font-size:12px;
-    font-weight:900;
-    opacity:.75;
-    margin:0 0 8px;
-  }
-
-  .score-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:8px;
-  }
-
-  .side-label{
-    font-size:12px;
-    font-weight:900;
-    opacity:.75;
-    margin:0 0 6px;
-  }
-
-  .score-row{
-    display:flex;
-    gap:6px;
-    justify-content:space-between;
-    align-items:center;
-  }
-
-  .ibox{
-    width:52px;
-    height:40px;
-    border-radius:12px;
-    border:1px solid rgba(0,0,0,.12);
-    background:#fff;
-    font-weight:900;
-    font-size:16px;
-    text-align:center;
-    outline:none;
-  }
-  .ibox:focus{ box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
-
   .btnsave{
     width:100%;
-    margin-top:10px;
+    margin-top:12px;
     padding:11px 12px;
     border-radius:14px;
     border:1px solid rgba(0,0,0,.12);
@@ -268,11 +216,9 @@
     display:none;
   }
 
-  /* ✅ Mobile : scorebox passe dessous */
   @media (max-width: 420px){
-    .result-layout{ flex-direction:column; }
-    .result-right{ width:auto; }
-    .ibox{ width:50px; }
+    .team-row{ grid-template-columns: 1fr 52px 52px 52px; }
+    .ibox{ width:52px; height:40px; }
   }
 
   @media (max-width: 380px){
@@ -280,7 +226,7 @@
     .m-court{ font-size:13px; }
     .team-title{ font-size:14px; }
     .team-sub{ font-size:12px; }
-    .sc{ font-size:14px; }
+    .ibox{ width:50px; }
   }
 </style>
 
@@ -662,88 +608,68 @@
       const done = (stored.winnerSide === "A" || stored.winnerSide === "B");
 
       const v = {
-        s1A: stored.s1A ?? "",
-        s1B: stored.s1B ?? "",
-        s2A: stored.s2A ?? "",
-        s2B: stored.s2B ?? "",
-        s3A: stored.s3A ?? "",
-        s3B: stored.s3B ?? "",
+        s1A: (stored.s1A ?? "") === null ? "" : String(stored.s1A ?? ""),
+        s1B: (stored.s1B ?? "") === null ? "" : String(stored.s1B ?? ""),
+        s2A: (stored.s2A ?? "") === null ? "" : String(stored.s2A ?? ""),
+        s2B: (stored.s2B ?? "") === null ? "" : String(stored.s2B ?? ""),
+        s3A: (stored.s3A ?? "") === null ? "" : String(stored.s3A ?? ""),
+        s3B: (stored.s3B ?? "") === null ? "" : String(stored.s3B ?? ""),
       };
 
       cards.push(`
         <div class="match-card ${esc(courtClass(s.court))}" data-mid="${esc(mid)}">
-          <div class="result-layout">
-
-            <div class="result-left">
-              <div class="match-head">
-                <div class="m-time">${esc(s.time)}</div>
-                <div class="m-court">${esc(courtLabel(s.court))}</div>
-                <div class="m-status">${done ? "✅" : "⏳"}</div>
-              </div>
-
-              ${s.note ? `<div class="muted-mini">⚠️ ${esc(s.note)}</div>` : ""}
-
-              <div class="team-row">
-                <div class="team-block">
-                  <div class="team-title">${esc(a.title)}</div>
-                  ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
-                </div>
-                <div class="sc">${esc(stored.s1A ?? "—")}</div>
-                <div class="sc">${esc(stored.s2A ?? "—")}</div>
-                <div class="sc">${esc(stored.s3A ?? "—")}</div>
-              </div>
-
-              <div class="vs-line">VS</div>
-
-              <div class="team-row">
-                <div class="team-block">
-                  <div class="team-title">${esc(b.title)}</div>
-                  ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
-                </div>
-                <div class="sc">${esc(stored.s1B ?? "—")}</div>
-                <div class="sc">${esc(stored.s2B ?? "—")}</div>
-                <div class="sc">${esc(stored.s3B ?? "—")}</div>
-              </div>
-
-              <div class="errline" id="err-${esc(mid)}"></div>
-            </div>
-
-            <div class="result-right">
-              <div class="scorebox">
-                <div class="mini-h">S1 / S2 / TB</div>
-
-                <div class="score-grid">
-                  <div>
-                    <div class="side-label">A</div>
-                    <div class="score-row">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1A" value="${esc(v.s1A)}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2A" value="${esc(v.s2A)}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3A" value="${esc(v.s3A)}">
-                    </div>
-                  </div>
-
-                  <div>
-                    <div class="side-label">B</div>
-                    <div class="score-row">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s1B" value="${esc(v.s1B)}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s2B" value="${esc(v.s2B)}">
-                      <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-mid="${esc(mid)}" data-k="s3B" value="${esc(v.s3B)}">
-                    </div>
-                  </div>
-                </div>
-
-                <button class="btnsave" data-act="save" data-mid="${esc(mid)}">
-                  ${done ? "✅ Mettre à jour" : "💾 Enregistrer / Valider"}
-                </button>
-
-                <div class="muted-mini">
-                  <b>Dernière maj :</b>
-                  ${stored.updatedAt?.toDate ? esc(stored.updatedAt.toDate().toLocaleString()) : "—"}
-                </div>
-              </div>
-            </div>
-
+          <div class="match-head">
+            <div class="m-time">${esc(s.time)}</div>
+            <div class="m-court">${esc(courtLabel(s.court))}</div>
+            <div class="m-status">${done ? "✅" : "⏳"}</div>
           </div>
+
+          ${s.note ? `<div class="muted-mini">⚠️ ${esc(s.note)}</div>` : ""}
+
+          <div class="team-row">
+            <div class="team-block">
+              <div class="team-title">${esc(a.title)}</div>
+              ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
+            </div>
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s1A" value="${esc(v.s1A)}">
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s2A" value="${esc(v.s2A)}">
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s3A" value="${esc(v.s3A)}">
+          </div>
+
+          <div class="vs-line">VS</div>
+
+          <div class="team-row">
+            <div class="team-block">
+              <div class="team-title">${esc(b.title)}</div>
+              ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
+            </div>
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s1B" value="${esc(v.s1B)}">
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s2B" value="${esc(v.s2B)}">
+
+            <input class="ibox" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+              data-mid="${esc(mid)}" data-k="s3B" value="${esc(v.s3B)}">
+          </div>
+
+          <button class="btnsave" data-act="save" data-mid="${esc(mid)}">
+            ${done ? "✅ Mettre à jour" : "💾 Enregistrer / Valider"}
+          </button>
+
+          <div class="muted-mini">
+            <b>Dernière maj :</b>
+            ${stored.updatedAt?.toDate ? esc(stored.updatedAt.toDate().toLocaleString()) : "—"}
+          </div>
+
+          <div class="errline" id="err-${esc(mid)}"></div>
         </div>
       `);
     }
@@ -820,7 +746,6 @@
     if(!(el instanceof HTMLInputElement)) return;
     if(!el.classList.contains("ibox")) return;
 
-    // keep digits only (optional safety)
     el.value = el.value.replace(/[^\d]/g, "");
 
     const max = Number(el.getAttribute("maxlength") || "0");
@@ -835,7 +760,6 @@
     if(!el.classList.contains("ibox")) return;
 
     if(e.key === "Backspace" && (el.value === "" || el.value.length === 0)){
-      // go to previous field
       e.preventDefault();
       focusPrevInput(el);
     }
