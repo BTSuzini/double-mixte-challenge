@@ -53,7 +53,7 @@
   <!-- CHRONO -->
   <section class="card" id="panelChrono" style="display:none;">
     <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
-    <div id="chronoCards" style="display:grid; gap:12px;"></div>
+    <div id="chronoList"></div>
   </section>
 
   <!-- TABLEAU -->
@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <div id="tableCards" style="display:grid; gap:12px;"></div>
+    <div id="tableList"></div>
 
     <p class="muted" style="margin-top:10px;">
       Les équipes se “placent” automatiquement dès qu’un résultat est validé.
@@ -85,129 +85,126 @@
 </main>
 
 <style>
-  .pill{
-    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
-    border:1px solid #eee; background:#fafafa; white-space:nowrap;
-  }
+  /* ====== Cards list ====== */
+  .match-list{ display:flex; flex-direction:column; gap:14px; }
 
-  /* --- Match cards (responsive) --- */
+  /* Encarts couleur terrain */
   .match-card{
-    border-radius:16px;
-    border:1px solid rgba(0,0,0,.06);
-    overflow:hidden;
-    background:#fff;
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
   }
-  .match-card.yellow{ background:rgba(255, 221, 87, .22); border-color:rgba(255, 221, 87, .55); }
-  .match-card.red{ background:rgba(255, 77, 77, .12); border-color:rgba(255, 77, 77, .28); }
+  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  .match-inner{
-    padding:12px;
-    display:flex;
+  /* Layout anti-chevauchement (✅ le score ne recouvre jamais la ligne court) */
+  .match-grid{
+    display:grid;
+    grid-template-columns: 1fr 92px; /* score fixe à droite */
     gap:12px;
     align-items:stretch;
   }
 
-  .match-left{ flex:1 1 auto; min-width:0; }
-
+  /* Colonne gauche */
+  .match-left{ min-width:0; } /* nécessaire pour ellipsis */
   .match-topline{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    gap:10px;
-  }
-
-  .when-line{
     display:flex;
     align-items:baseline;
     gap:10px;
     min-width:0;
   }
-
-  .when-time{
-    font-weight:1000;
-    font-size:20px;
+  .match-time{
+    font-size:34px;
+    font-weight:900;
     letter-spacing:.2px;
     white-space:nowrap;
   }
 
-  /* court small, non-bold, single line */
-  .when-court{
-    font-size:13px;
+  /* court: plus petit, pas gras, italique, sur 1 ligne */
+  .match-court{
+    font-size:16px;
     font-weight:600;
-    opacity:.92;
     font-style:italic;
+    opacity:.95;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    min-width:0;
+    flex:1;
   }
 
-  .status-emoji{
-    font-size:18px;
+  /* statut = emoji seul */
+  .match-status{
+    font-size:22px;
     line-height:1;
     white-space:nowrap;
   }
 
-  .teams{
-    margin-top:10px;
-    display:grid;
-    gap:8px;
-  }
-  .team-name{
-    font-weight:950;
-    font-size:18px;
-    line-height:1.15;
-    word-break:break-word;
-  }
-  .vsline{
-    text-align:center;
-    font-weight:900;
-    opacity:.55;
-    letter-spacing:.25em;
-  }
-
-  .match-right{
-    width:92px;
-    flex:0 0 auto;
-    display:flex;
-    align-items:stretch;
-  }
-
-  .scorebox{
-    width:100%;
-    border:1px solid rgba(0,0,0,.08);
-    background:rgba(255,255,255,.70);
-    border-radius:16px;
-    padding:10px 10px;
+  .match-body{
+    margin-top:12px;
     display:flex;
     flex-direction:column;
     gap:10px;
-    justify-content:center;
   }
-  .scoreline{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    font-weight:1000;
+
+  .team-line{
+    font-size:22px;
+    font-weight:900;
+    line-height:1.15;
   }
-  .scoreval{
+
+  .vs-line{
+    text-align:center;
     font-size:18px;
-    line-height:1;
-    min-width:18px;
+    font-weight:900;
+    opacity:.55;
+    letter-spacing:2px;
+  }
+
+  /* Colonne score */
+  .score-box{
+    border-radius:16px;
+    border:2px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.55);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:10px 10px;
+    height:100%;
+  }
+  .score-row{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-weight:900;
+    font-size:18px;
+    padding:6px 0;
+  }
+  .score-row + .score-row{ border-top:1px solid rgba(0,0,0,.08); }
+
+  .score-side{
+    font-size:14px;
+    font-weight:900;
+    opacity:.65;
+    width:18px;
+    text-align:left;
+  }
+  .score-val{
+    font-size:22px;
+    font-weight:900;
+    width:36px;
     text-align:right;
   }
 
-  .muted-mini{
-    font-size:12px;
-    opacity:.7;
-  }
-
-  @media (max-width: 420px){
-    .match-inner{ padding:10px; gap:10px; }
-    .when-time{ font-size:18px; }
-    .team-name{ font-size:16px; }
-    .match-right{ width:86px; }
-    .scoreval{ font-size:16px; }
+  /* responsive: sur petits écrans, on réduit un peu l’heure */
+  @media (max-width: 380px){
+    .match-time{ font-size:30px; }
+    .team-line{ font-size:20px; }
+    .score-val{ font-size:20px; }
+    .match-grid{ grid-template-columns: 1fr 86px; }
   }
 </style>
 
@@ -228,54 +225,21 @@
   const panelChrono = document.getElementById("panelChrono");
   const panelTableau = document.getElementById("panelTableau");
 
-  const chronoCards = document.getElementById("chronoCards");
+  const chronoList = document.getElementById("chronoList");
 
   const selBracket = document.getElementById("selBracket");
   const selRound = document.getElementById("selRound");
-  const tableCards = document.getElementById("tableCards");
+  const tableList = document.getElementById("tableList");
 
   const PROG_REF = doc(db, "programmations", scope);
   const RESULTS_COL = collection(db, `resultats_${scope}`);
 
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreA, scoreB, score, updatedAt}
+  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreA, scoreB, s1A...}
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-  }
-
-  function teamLabel(t){
-    if(!t) return "—";
-    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
-  }
-
-  function courtName(courtKey){
-    const c = currentProg?.courts || {};
-    return c[courtKey] || (courtKey || "—");
-  }
-
-  function courtDecor(courtKey){
-    if(courtKey === "A") return { cls:"yellow", emo:"🐝" };
-    if(courtKey === "B") return { cls:"red", emo:"🌶️" };
-    return { cls:"", emo:"🎾" };
-  }
-
-  function parseHHMM(hhmm){
-    const m = String(hhmm || "").match(/^(\d{1,2}):(\d{2})$/);
-    if(!m) return null;
-    const H = Number(m[1]), M = Number(m[2]);
-    if(!Number.isFinite(H) || !Number.isFinite(M)) return null;
-    return { H, M };
-  }
-
-  function statusEmoji(slotTime, done){
-    if(done) return "✅";
-    const p = parseHHMM(slotTime);
-    if(!p) return "⏳";
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), p.H, p.M, 0, 0);
-    return now >= start ? "🟢" : "⏳";
   }
 
   function roundOptions(bracket){
@@ -301,6 +265,35 @@
 
     tabChrono.style.fontWeight = isChrono ? "900" : "800";
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
+  }
+
+  function teamShort(t){
+    if(!t) return "—";
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
+  }
+
+  function courtMeta(courtKey){
+    // A = 🐝 jaune, B = 🌶️ rouge
+    if(courtKey === "A"){
+      return { cls:"courtA", emoji:"🐝", name: currentProg?.courts?.A || "court A" };
+    }
+    if(courtKey === "B"){
+      return { cls:"courtB", emoji:"🌶️", name: currentProg?.courts?.B || "court B" };
+    }
+    return { cls:"", emoji:"", name: courtKey || "—" };
+  }
+
+  function statusEmoji(res){
+    // emoji seul : ⏳ à venir / 🟢 en cours / ✅ terminé
+    if(res?.winnerSide === "A" || res?.winnerSide === "B") return "✅";
+    const hasSomething =
+      (res?.s1A != null) || (res?.s1B != null) ||
+      (res?.s2A != null) || (res?.s2B != null) ||
+      (res?.s3A != null) || (res?.s3B != null);
+    return hasSomething ? "🟢" : "⏳";
   }
 
   // Résolution des équipes (direct / winner / loser)
@@ -336,23 +329,53 @@
     return null;
   }
 
-  function scoreForMatch(mid){
-    const r = resultsByMatch.get(mid);
-    if(!r) return { A:"—", B:"—", done:false };
-    const A = (r.scoreA ?? "—");
-    const B = (r.scoreB ?? "—");
-    const done = !!(r.winnerSide === "A" || r.winnerSide === "B");
-    return { A, B, done };
-  }
+  function renderCard({time, courtKey, teamA, teamB, res}){
+    const cm = courtMeta(courtKey);
 
-  function refreshRounds(){
-    const opts = roundOptions(selBracket.value);
-    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
+    const aTxt = teamShort(teamA);
+    const bTxt = teamShort(teamB);
+
+    // Score affiché en 2 lignes (haut = A, bas = B)
+    const scoreA = (res?.scoreA && res.scoreA.trim()) ? res.scoreA : "—";
+    const scoreB = (res?.scoreB && res.scoreB.trim()) ? res.scoreB : "—";
+
+    const st = statusEmoji(res);
+
+    return `
+      <div class="match-card ${esc(cm.cls)}">
+        <div class="match-grid">
+          <div class="match-left">
+            <div class="match-topline">
+              <div class="match-time">${esc(time)}</div>
+              <div class="match-court">${esc(cm.emoji)} <span>${esc(cm.name)}</span> ${esc(cm.emoji)}</div>
+              <div class="match-status" title="Statut">${esc(st)}</div>
+            </div>
+
+            <div class="match-body">
+              <div class="team-line">${esc(aTxt)}</div>
+              <div class="vs-line">VS</div>
+              <div class="team-line">${esc(bTxt)}</div>
+            </div>
+          </div>
+
+          <div class="score-box" aria-label="Score">
+            <div class="score-row">
+              <span class="score-side">A</span>
+              <span class="score-val">${esc(scoreA)}</span>
+            </div>
+            <div class="score-row">
+              <span class="score-side">B</span>
+              <span class="score-val">${esc(scoreB)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function renderChrono(){
     if(!currentProg){
-      chronoCards.innerHTML = "";
+      chronoList.innerHTML = "";
       return;
     }
 
@@ -367,6 +390,7 @@
     });
 
     const cards = [];
+
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
@@ -374,55 +398,23 @@
 
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
+      const res = resultsByMatch.get(mid) || null;
 
-      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
-      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
-
-      const courtKey = s.court;
-      const courtTxt = courtName(courtKey);
-      const deco = courtDecor(courtKey);
-
-      const sc = scoreForMatch(mid);
-      const st = statusEmoji(s.time, sc.done);
-
-      cards.push(`
-        <div class="match-card ${esc(deco.cls)}">
-          <div class="match-inner">
-            <div class="match-left">
-              <div class="match-topline">
-                <div class="when-line">
-                  <div class="when-time">${esc(s.time)}</div>
-                  <div class="when-court">${esc(deco.emo)} ${esc(courtTxt)} ${esc(deco.emo)}</div>
-                </div>
-                <div class="status-emoji" title="Statut">${esc(st)}</div>
-              </div>
-
-              ${s.note ? `<div class="muted-mini" style="margin-top:6px;">⚠️ ${esc(s.note)}</div>` : ""}
-
-              <div class="teams">
-                <div class="team-name">${esc(aTxt)}</div>
-                <div class="vsline">VS</div>
-                <div class="team-name">${esc(bTxt)}</div>
-              </div>
-            </div>
-
-            <div class="match-right">
-              <div class="scorebox" aria-label="Score">
-                <div class="scoreline"><span class="muted-mini">A</span><span class="scoreval">${esc(sc.A)}</span></div>
-                <div class="scoreline"><span class="muted-mini">B</span><span class="scoreval">${esc(sc.B)}</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
+      cards.push(renderCard({
+        time: s.time,
+        courtKey: s.court,
+        teamA,
+        teamB,
+        res
+      }));
     }
 
-    chronoCards.innerHTML = cards.join("") || `<div class="muted">Aucun match.</div>`;
+    chronoList.innerHTML = `<div class="match-list">${cards.join("")}</div>`;
   }
 
   function renderTableau(){
     if(!currentProg){
-      tableCards.innerHTML = "";
+      tableList.innerHTML = "";
       return;
     }
 
@@ -435,56 +427,44 @@
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
-      // Court/time depuis schedule+slots (si on veut l'afficher ici aussi)
-      const schedule = currentProg.schedule || {};
-      const slotNum = Number(schedule[m.id] || 0);
-      const slot = (Array.isArray(currentProg.slots) ? currentProg.slots : []).find(x => Number(x.slot) === slotNum) || null;
-
-      const time = slot?.time || "";
-      const courtKey = slot?.court || "";
-      const deco = courtDecor(courtKey);
-      const courtTxt = courtKey ? courtName(courtKey) : "";
-
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
+      const res = resultsByMatch.get(m.id) || null;
 
-      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
-      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
+      // pour le tableau : on ne “dépend” pas d’un slot => on choisit le court via le slot actuel si dispo
+      // on essaye de retrouver court/time depuis schedule+slots, sinon court A par défaut pour la couleur
+      let courtKey = "A";
+      let time = "—";
 
-      const sc = scoreForMatch(m.id);
-      const st = statusEmoji(time, sc.done);
+      const schedule = currentProg.schedule || {};
+      const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+      const slotNum = schedule[m.id];
 
-      return `
-        <div class="match-card ${esc(deco.cls)}">
-          <div class="match-inner">
-            <div class="match-left">
-              <div class="match-topline">
-                <div class="when-line">
-                  ${time ? `<div class="when-time">${esc(time)}</div>` : `<div class="when-time">—</div>`}
-                  ${courtTxt ? `<div class="when-court">${esc(deco.emo)} ${esc(courtTxt)} ${esc(deco.emo)}</div>` : `<div class="when-court">${esc(deco.emo)} — ${esc(deco.emo)}</div>`}
-                </div>
-                <div class="status-emoji" title="Statut">${esc(st)}</div>
-              </div>
+      if(slotNum){
+        const s = slots.find(x => Number(x.slot) === Number(slotNum));
+        if(s){
+          courtKey = s.court || "A";
+          time = s.time || "—";
+        }
+      }
 
-              <div class="teams">
-                <div class="team-name">${esc(aTxt)}</div>
-                <div class="vsline">VS</div>
-                <div class="team-name">${esc(bTxt)}</div>
-              </div>
-            </div>
-
-            <div class="match-right">
-              <div class="scorebox" aria-label="Score">
-                <div class="scoreline"><span class="muted-mini">A</span><span class="scoreval">${esc(sc.A)}</span></div>
-                <div class="scoreline"><span class="muted-mini">B</span><span class="scoreval">${esc(sc.B)}</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      return renderCard({
+        time,
+        courtKey,
+        teamA,
+        teamB,
+        res
+      });
     });
 
-    tableCards.innerHTML = cards.join("") || `<div class="muted">Aucun match pour ce filtre.</div>`;
+    tableList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match pour ce filtre.</p>`;
+  }
+
+  function refreshRounds(){
+    const opts = roundOptions(selBracket.value);
+    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
   }
 
   function renderAll(){
@@ -516,8 +496,14 @@
       resultsByMatch.set(d.id, {
         winnerSide: x.winnerSide || null,
         score: x.score || "",
-        scoreA: x.scoreA ?? null,
-        scoreB: x.scoreB ?? null,
+        scoreA: x.scoreA || "",
+        scoreB: x.scoreB || "",
+        s1A: (x.s1A === undefined ? null : x.s1A),
+        s1B: (x.s1B === undefined ? null : x.s1B),
+        s2A: (x.s2A === undefined ? null : x.s2A),
+        s2B: (x.s2B === undefined ? null : x.s2B),
+        s3A: (x.s3A === undefined ? null : x.s3A),
+        s3B: (x.s3B === undefined ? null : x.s3B),
         updatedAt: x.updatedAt || null
       });
     });
