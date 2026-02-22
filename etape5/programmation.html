@@ -59,7 +59,7 @@
         <thead>
           <tr>
             <th style="width:90px;">Heure</th>
-            <th style="width:90px;">Terrain</th>
+            <th style="width:240px;">Terrain</th>
             <th style="width:70px;">Match</th>
             <th>Rencontre</th>
             <th style="width:110px;">Statut</th>
@@ -129,7 +129,7 @@
 <script type="module">
   import { db } from "../assets/js/firebase.js";
   import {
-    doc, onSnapshot, collection, onSnapshot as onSnapCol
+    doc, onSnapshot, collection
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const scope = "etape5";
@@ -163,6 +163,11 @@
   function teamLabel(t){
     if(!t) return "—";
     return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+  }
+
+  function courtLabel(courtKey){
+    const c = currentProg?.courts || {};
+    return c[courtKey] || (courtKey || "—");
   }
 
   function roundOptions(bracket){
@@ -243,7 +248,6 @@
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
-
       if(!m) continue;
 
       const teamA = resolveTeamRef(m.A);
@@ -252,10 +256,17 @@
       const res = resultsByMatch.get(mid);
       const done = !!(res && res.winnerSide);
 
+      const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
+      const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
+
       rows.push({
-        time: s.time, court: s.court, matchId: mid,
-        A: teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`)),
-        B: teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`)),
+        time: s.time,
+        courtKey: s.court,
+        courtName: courtLabel(s.court),
+        note: s.note || "",
+        matchId: mid,
+        A: aTxt,
+        B: bTxt,
         status: done ? "✅ Terminé" : "⏳ À venir"
       });
     }
@@ -263,7 +274,10 @@
     chronoBody.innerHTML = rows.map(r => `
       <tr>
         <td><b>${esc(r.time)}</b></td>
-        <td><span class="pill">${esc(r.court)}</span></td>
+        <td>
+          <span class="pill">${esc(r.courtName)}</span>
+          ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
+        </td>
         <td><b>${esc(r.matchId)}</b></td>
         <td>${esc(r.A)} <span class="muted">vs</span> ${esc(r.B)}</td>
         <td>${esc(r.status)}</td>
@@ -336,8 +350,8 @@
   refreshRounds();
   selRound.value = "QF";
 
-  // ---- Listen results (live)
-  onSnapCol(RESULTS_COL, (snap)=>{
+  // ---- Listen results (live) — ✅ corrigé (onSnapshot sur collection)
+  onSnapshot(RESULTS_COL, (snap)=>{
     resultsByMatch = new Map();
     snap.forEach(d=>{
       const x = d.data() || {};
@@ -366,7 +380,6 @@
     subtitle.textContent = "🧩 Tableau + 🕒 Chronologique (mise à jour en direct).";
 
     panelChrono.style.display = "block";
-    // panelTableau visible via onglet
     renderAll();
   }, (err)=>{
     console.error(err);
