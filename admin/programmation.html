@@ -80,8 +80,7 @@
     </div>
 
     <p class="muted" style="margin-top:12px;">
-      ✅ Le tableau est chargé dès la <b>validation du tirage</b>. Les matchs suivants se “remplissent” au fur et à mesure
-      de la validation des résultats (page admin/resultats).
+      ✅ Le tableau est chargé dès la <b>validation du tirage</b>.
     </p>
   </section>
 
@@ -92,7 +91,7 @@
     <div id="adminList" style="margin-top:12px;"></div>
 
     <p class="muted" style="margin-top:10px;">
-      💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> (heure/terrain) entre matchs.
+      💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> entre matchs.
     </p>
   </section>
 
@@ -105,43 +104,32 @@
     border-radius:18px;
     border:2px solid rgba(0,0,0,.06);
     padding:14px;
+    background:#fff;
     box-shadow:0 1px 0 rgba(0,0,0,.03);
   }
   .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
   .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  .match-grid{
-    display:grid;
-    grid-template-columns: 1fr 92px;
-    gap:12px;
-    align-items:stretch;
-  }
-
-  .match-left{ min-width:0; }
-
-  .match-topline{
+  /* Ligne 1 admin: slot + heure + court + (actions) */
+  .match-head{
     display:flex;
     align-items:baseline;
     gap:10px;
     min-width:0;
   }
-
-  .match-slot{
-    font-size:16px;
+  .m-slot{
+    font-size:14px;
     font-weight:900;
     opacity:.7;
     white-space:nowrap;
   }
-
-  .match-time{
+  .m-time{
     font-size:34px;
     font-weight:900;
-    letter-spacing:.2px;
     white-space:nowrap;
   }
-
-  .match-court{
-    font-size:16px;
+  .m-court{
+    font-size:15px;
     font-weight:600;
     font-style:italic;
     opacity:.95;
@@ -152,70 +140,72 @@
     flex:1;
   }
 
-  .match-body{
-    margin-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .team-line{
-    font-size:22px;
-    font-weight:900;
-    line-height:1.15;
-  }
-
-  .vs-line{
-    text-align:center;
-    font-size:18px;
-    font-weight:900;
-    opacity:.55;
-    letter-spacing:2px;
-  }
-
-  .score-box{
-    border-radius:16px;
-    border:2px solid rgba(0,0,0,.08);
-    background:rgba(255,255,255,.55);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    padding:10px 10px;
-    height:100%;
-  }
-  .score-row{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    font-weight:900;
-    font-size:18px;
-    padding:6px 0;
-  }
-  .score-row + .score-row{ border-top:1px solid rgba(0,0,0,.08); }
-  .score-side{ font-size:14px; font-weight:900; opacity:.65; width:18px; text-align:left; }
-  .score-val{ font-size:22px; font-weight:900; width:36px; text-align:right; }
-
-  .admin-actions{
-    margin-top:12px;
+  .actions{
     display:flex;
     gap:8px;
-    flex-wrap:wrap;
-    justify-content:flex-end;
+    align-items:center;
+    white-space:nowrap;
   }
   .btnx{
-    padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff;
-    cursor:pointer; font-weight:900;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:#fff;
+    cursor:pointer;
+    font-weight:900;
   }
   .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
+  .score-head{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 34px 34px 38px;
+    align-items:center;
+    gap:8px;
+    opacity:.65;
+    font-weight:900;
+    font-size:12px;
+    letter-spacing:.4px;
+  }
+  .score-head .sh{ text-align:right; }
+
+  .team-row{
+    margin-top:8px;
+    display:grid;
+    grid-template-columns: 1fr 34px 34px 38px;
+    align-items:center;
+    gap:8px;
+  }
+  .team-name{
+    font-size:20px;
+    font-weight:900;
+    line-height:1.15;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .sc{
+    text-align:right;
+    font-size:18px;
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .vs-line{
+    margin:10px 0 6px;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:2px;
+    opacity:.55;
+  }
+
   @media (max-width: 380px){
-    .match-time{ font-size:30px; }
-    .team-line{ font-size:20px; }
-    .score-val{ font-size:20px; }
-    .match-grid{ grid-template-columns: 1fr 86px; }
+    .m-time{ font-size:30px; }
+    .team-name{ font-size:18px; }
+    .sc{ font-size:17px; }
+    .score-head{ font-size:11px; }
   }
 </style>
 
@@ -253,8 +243,7 @@
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
-    const n = scope.replace("etape","");
-    return `Étape ${n}`;
+    return `Étape ${scope.replace("etape","")}`;
   }
 
   function esc(s){
@@ -295,27 +284,8 @@
     }
   }
 
-  function stopProgListener(){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-  }
-
-  function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
-
-    if(scope === "general"){
-      panelNeedStep.style.display = "block";
-      panelBuild.style.display = "none";
-      panelSchedule.style.display = "none";
-      stopProgListener();
-      return;
-    }
-
-    panelNeedStep.style.display = "none";
-    panelBuild.style.display = "block";
-    panelSchedule.style.display = "block";
-
-    startProgListener(scope);
-  }
+  function progRef(scope){ return doc(db, "programmations", scope); }
+  function drawRef(scope){ return doc(db, "tirages", scope); }
 
   function defaultCourts(){
     return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
@@ -323,22 +293,18 @@
 
   function buildMatches(){
     return {
-      M1:  { id:"M1",  n:1,  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"} },
-      M2:  { id:"M2",  n:2,  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"} },
-      M3:  { id:"M3",  n:3,  bracket:"main", round:"QF", A:{type:"team", key:"TS1"}, B:{type:"team", key:"E3"} },
-      M4:  { id:"M4",  n:4,  bracket:"main", round:"QF", A:{type:"team", key:"TS2"}, B:{type:"team", key:"E8"} },
-
-      M5:  { id:"M5",  n:5,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
-      M6:  { id:"M6",  n:6,  bracket:"5-8", round:"SF", A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
-
-      M7:  { id:"M7",  n:7,  bracket:"main", round:"SF", A:{type:"winner", matchId:"M1"}, B:{type:"winner", matchId:"M2"} },
-      M8:  { id:"M8",  n:8,  bracket:"main", round:"SF", A:{type:"winner", matchId:"M3"}, B:{type:"winner", matchId:"M4"} },
-
-      M9:  { id:"M9",  n:9,  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
-      M10: { id:"M10", n:10, bracket:"5-8", round:"5th", A:{type:"winner", matchId:"M5"}, B:{type:"winner", matchId:"M6"} },
-
-      M11: { id:"M11", n:11, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
-      M12: { id:"M12", n:12, bracket:"main", round:"F",   A:{type:"winner", matchId:"M7"}, B:{type:"winner", matchId:"M8"} },
+      M1:{id:"M1",n:1,A:{type:"team",key:"E4"},B:{type:"team",key:"E5"}},
+      M2:{id:"M2",n:2,A:{type:"team",key:"E6"},B:{type:"team",key:"E7"}},
+      M3:{id:"M3",n:3,A:{type:"team",key:"TS1"},B:{type:"team",key:"E3"}},
+      M4:{id:"M4",n:4,A:{type:"team",key:"TS2"},B:{type:"team",key:"E8"}},
+      M5:{id:"M5",n:5,A:{type:"loser",matchId:"M1"},B:{type:"loser",matchId:"M2"}},
+      M6:{id:"M6",n:6,A:{type:"loser",matchId:"M3"},B:{type:"loser",matchId:"M4"}},
+      M7:{id:"M7",n:7,A:{type:"winner",matchId:"M1"},B:{type:"winner",matchId:"M2"}},
+      M8:{id:"M8",n:8,A:{type:"winner",matchId:"M3"},B:{type:"winner",matchId:"M4"}},
+      M9:{id:"M9",n:9,A:{type:"loser",matchId:"M5"},B:{type:"loser",matchId:"M6"}},
+      M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"},B:{type:"winner",matchId:"M6"}},
+      M11:{id:"M11",n:11,A:{type:"loser",matchId:"M7"},B:{type:"loser",matchId:"M8"}},
+      M12:{id:"M12",n:12,A:{type:"winner",matchId:"M7"},B:{type:"winner",matchId:"M8"}},
     };
   }
 
@@ -359,23 +325,20 @@
     ];
   }
 
-  function progRef(scope){ return doc(db, "programmations", scope); }
-  function drawRef(scope){ return doc(db, "tirages", scope); }
-
   async function generateFromValidatedDraw(scope){
     const dSnap = await getDoc(drawRef(scope));
     if(!dSnap.exists()) throw new Error("Tirage introuvable.");
     const draw = dSnap.data() || {};
-    if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer la programmation.");
+    if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer.");
 
     const order = draw.order || [];
     const pool = draw.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
     const revealed = Number(draw.revealed || 0);
-    if(revealed < 6) throw new Error("Il faut 6 équipes tirées (tirage complet) avant validation.");
+    if(revealed < 6) throw new Error("Tirage incomplet.");
 
     const picks = order.slice(0, 6).map(id => poolById.get(id)).filter(Boolean);
-    if(picks.length !== 6) throw new Error("Impossible de reconstruire E3..E8 depuis le tirage.");
+    if(picks.length !== 6) throw new Error("Impossible de reconstruire E3..E8.");
 
     const teams = {
       TS1: draw.seed1 || null,
@@ -388,17 +351,12 @@
       E8: picks[5] || null,
     };
 
-    if(!teams.TS1 || !teams.TS2) throw new Error("Seeds manquantes.");
-    for(const k of ["E3","E4","E5","E6","E7","E8"]){
-      if(!teams[k]) throw new Error("Équipe manquante : " + k);
-    }
-
     const matches = buildMatches();
     const slots = defaultSlots();
     const courts = defaultCourts();
 
     const schedule = {};
-    Object.keys(matches).forEach((mid)=>{ schedule[mid] = matches[mid].n; });
+    Object.keys(matches).forEach(mid => schedule[mid] = matches[mid].n);
 
     const payload = {
       formatVersion: 2,
@@ -414,113 +372,102 @@
     return payload;
   }
 
-  function courtMeta(prog, courtKey){
-    if(courtKey === "A"){
-      return { cls:"courtA", emoji:"🐝", name: prog?.courts?.A || "court A" };
-    }
-    if(courtKey === "B"){
-      return { cls:"courtB", emoji:"🌶️", name: prog?.courts?.B || "court B" };
-    }
-    return { cls:"", emoji:"", name: courtKey || "—" };
+  function courtLabel(prog, courtKey){
+    const name = prog?.courts?.[courtKey] || courtKey || "—";
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
+    return emo ? `${emo} ${name} ${emo}` : name;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
 
   function teamShort(t){
     if(!t) return "—";
-    const tn = t.teamName || "Équipe";
-    const p1 = t.p1FirstName || "?";
-    const p2 = t.p2FirstName || "?";
-    return `${tn} (${p1} / ${p2})`;
+    return `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
   }
 
-  function resolveTeamRef(prog, results, ref){
-    if(!prog) return null;
-    const teams = prog.teams || {};
-    const matches = prog.matches || {};
-    if(!ref) return null;
-
-    if(ref.type === "team") return teams[ref.key] || null;
-
-    if(ref.type === "winner" || ref.type === "loser"){
-      const mid = ref.matchId;
-      const m = matches[mid];
-      if(!m) return null;
-
-      const res = results.get(mid);
-      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
-
-      const teamA = resolveTeamRef(prog, results, m.A);
-      const teamB = resolveTeamRef(prog, results, m.B);
-      const winner = (res.winnerSide === "A") ? teamA : teamB;
-      const loser  = (res.winnerSide === "A") ? teamB : teamA;
-      return ref.type === "winner" ? winner : loser;
+  function teamRefLabel(prog, ref){
+    if(!ref) return "—";
+    if(ref.type === "team"){
+      const t = prog?.teams?.[ref.key] || null;
+      return t ? teamShort(t) : ref.key;
     }
-    return null;
+    if(ref.type === "winner") return `V${ref.matchId.slice(1)}`;
+    if(ref.type === "loser") return `P${ref.matchId.slice(1)}`;
+    return "—";
   }
 
-  function renderAdminCards(prog){
-    const matches = prog?.matches || {};
-    const slots = Array.isArray(prog?.slots) ? prog.slots : [];
-    const schedule = prog?.schedule || {};
+  function fmt(x){ return (x === null || x === undefined) ? "—" : String(x); }
+
+  function renderAdminCard({slot, time, courtKey, note, teamA, teamB}){
+    return `
+      <div class="match-card ${esc(courtClass(courtKey))}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(slot)}</div>
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(courtLabel(currentProg, courtKey))}</div>
+          <div class="actions">
+            <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot<=1 ? "disabled":""}>↑</button>
+            <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot>=12 ? "disabled":""}>↓</button>
+          </div>
+        </div>
+
+        ${note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(note)}</div>` : ""}
+
+        <div class="score-head">
+          <div></div>
+          <div class="sh">S1</div>
+          <div class="sh">S2</div>
+          <div class="sh">TB</div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamA)}</div>
+          <div class="sc">—</div>
+          <div class="sc">—</div>
+          <div class="sc">—</div>
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(teamB)}</div>
+          <div class="sc">—</div>
+          <div class="sc">—</div>
+          <div class="sc">—</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdminList(){
+    if(!currentProg){ adminList.innerHTML = ""; return; }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
 
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=> slotToMatch.set(Number(slotNum), mid));
 
     const cards = [];
-
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
-      if(!mid) continue;
-      const m = matches[mid];
+      const m = mid ? matches[mid] : null;
       if(!m) continue;
 
-      const cm = courtMeta(prog, s.court);
+      const aTxt = teamRefLabel(currentProg, m.A);
+      const bTxt = teamRefLabel(currentProg, m.B);
 
-      // ⚠️ en admin: on affiche le match "réel" = résolu si possible, sinon placeholders
-      // (ici sans résultats en live pour admin/programmation : on reste sur clés, c’est OK)
-      const aTxt = (m.A?.type === "team") ? (prog.teams?.[m.A.key] ? teamShort(prog.teams[m.A.key]) : m.A.key) : (m.A?.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`);
-      const bTxt = (m.B?.type === "team") ? (prog.teams?.[m.B.key] ? teamShort(prog.teams[m.B.key]) : m.B.key) : (m.B?.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`);
-
-      // Score affichage admin = vide ici (les scores viennent de admin/resultats)
-      const scoreA = "—";
-      const scoreB = "—";
-
-      cards.push(`
-        <div class="match-card ${esc(cm.cls)}">
-          <div class="match-grid">
-            <div class="match-left">
-              <div class="match-topline">
-                <div class="match-slot">#${esc(s.slot)}</div>
-                <div class="match-time">${esc(s.time)}</div>
-                <div class="match-court">${esc(cm.emoji)} <span>${esc(cm.name)}</span> ${esc(cm.emoji)}</div>
-              </div>
-
-              ${s.note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(s.note)}</div>` : ""}
-
-              <div class="match-body">
-                <div class="team-line">${esc(aTxt)}</div>
-                <div class="vs-line">VS</div>
-                <div class="team-line">${esc(bTxt)}</div>
-              </div>
-
-              <div class="admin-actions">
-                <button class="btnx" data-act="up" data-slot="${esc(s.slot)}" ${s.slot<=1 ? "disabled":""}>↑</button>
-                <button class="btnx" data-act="down" data-slot="${esc(s.slot)}" ${s.slot>=12 ? "disabled":""}>↓</button>
-              </div>
-            </div>
-
-            <div class="score-box" aria-label="Score">
-              <div class="score-row">
-                <span class="score-side">A</span>
-                <span class="score-val">${esc(scoreA)}</span>
-              </div>
-              <div class="score-row">
-                <span class="score-side">B</span>
-                <span class="score-val">${esc(scoreB)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
+      cards.push(renderAdminCard({
+        slot: s.slot,
+        time: s.time,
+        courtKey: s.court,
+        note: s.note || "",
+        teamA: aTxt,
+        teamB: bTxt
+      }));
     }
 
     adminList.innerHTML = cards.length
@@ -569,7 +516,7 @@
       }
 
       buildStatus.textContent = "✅ Programmation présente.";
-      renderAdminCards(currentProg);
+      renderAdminList();
     }, (err)=>{
       console.error(err);
       buildStatus.textContent = "❌ Erreur Firestore (programmation).";
@@ -577,21 +524,37 @@
     });
   }
 
-  // ---- Events
+  // UI panels
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelBuild.style.display = "none";
+      panelSchedule.style.display = "none";
+      if(unsubProg){ unsubProg(); unsubProg = null; }
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelBuild.style.display = "block";
+    panelSchedule.style.display = "block";
+    startProgListener(scope);
+  }
+
+  // Events
   btnGenerate.onclick = async (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
-
     btnGenerate.disabled = true;
     buildStatus.textContent = "Génération…";
-
     try{
       await generateFromValidatedDraw(currentScope);
-      buildStatus.textContent = "✅ Programmation générée depuis le tirage VALIDÉ.";
+      buildStatus.textContent = "✅ Programmation générée.";
     }catch(err){
       console.error(err);
-      buildStatus.textContent = "❌ " + (err?.message || "Impossible de générer.");
-      alert("Erreur ❌\n\n" + (err?.message || "Impossible de générer."));
+      buildStatus.textContent = "❌ " + (err?.message || "Impossible.");
+      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
     }finally{
       btnGenerate.disabled = false;
     }
