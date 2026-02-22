@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Tirage</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title" id="pageTitle">
+        Tirage (admin)<br><span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#" id="tabEquipes">👥 Équipes</a>
+      <a href="#" id="tabInscriptions">📝 Inscriptions</a>
+      <a href="#" id="tabRepas">🍽️ Repas</a>
+      <a href="#" id="tabTirage" aria-current="page">🎲 Tirage</a>
+      <a href="#" id="tabResultats">🏁 Résultats</a>
+      <a href="#" id="btnPublic">Vue publique</a>
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎲 Tirage au sort — contrôle admin</h2>
+
+    <p class="muted" id="status" style="margin:0;">Chargement…</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnLoad" style="font-weight:900; color:#111;">🔄 Charger équipes (liste principale)</button>
+      <button class="btn" id="btnStart" style="font-weight:900; color:#111;">▶️ Lancer le tirage</button>
+      <button class="btn" id="btnNext" style="font-weight:900; color:#111;">🎰 Tirer la prochaine équipe</button>
+      <button class="btn" id="btnValidate" style="font-weight:900; color:#111;">✅ Valider le tirage</button>
+      <button class="btn" id="btnReset" style="font-weight:900; color:#111; border-color:#f1b2b2;">🧨 Réinitialiser</button>
+    </div>
+
+    <p class="muted" style="margin-top:10px;">
+      Règle : TS1 et TS2 = meilleures équipes (classement équipe le plus petit).<br>
+      Puis 6 tirées au sort : 1ère vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.
+    </p>
+  </section>
+
+  <section class="card" id="panel" style="display:none;">
+    <h2 style="margin:0 0 10px;">📌 Aperçu</h2>
+
+    <div class="grid">
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ Tête de série #1</div>
+        <div class="muted" id="seed1">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ Tête de série #2</div>
+        <div class="muted" id="seed2">—</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">🎰 Roulette (admin)</div>
+      <div class="roulette-wheel" id="wheel">—</div>
+      <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (6 équipes)</div>
+      <div id="poolList" style="display:grid; gap:8px;"></div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">📌 Tirages révélés</div>
+      <div id="revealedList" style="display:grid; gap:8px;"></div>
+    </div>
+  </section>
+
+</main>
+
+<style>
+  .roulette-wheel{
+    height:68px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    font-size:18px;
+    letter-spacing:.2px;
+    background:linear-gradient(180deg,#fff,#fafafa);
+  }
+  .pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    border:1px solid #eee;
+    background:#fafafa;
+    white-space:nowrap;
+  }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection, getDocs, query, orderBy,
+    doc, getDoc, setDoc, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // ---- scope
+  const params = new URLSearchParams(location.search);
+  const scope = params.get("scope") || "etape5";
+  const stepNum = scope.replace("etape","");
+  const stepLabel = `Étape ${stepNum}`;
+
+  document.getElementById("pageSub").textContent = `${stepLabel} — BT250`;
+
+  // nav keep scope
+  document.getElementById("tabEquipes").href = `equipes.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabInscriptions").href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabRepas").href = `repas.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabTirage").href = `tirage.html?scope=${encodeURIComponent(scope)}`;
+  document.getElementById("tabResultats").href = `resultats.html?scope=${encodeURIComponent(scope)}`;
+
+  document.getElementById("btnPublic").onclick = (e)=>{
+    e.preventDefault();
+    window.location.href = `../${scope}/tirage.html`;
+  };
+
+  // ---- DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+  const panel = document.getElementById("panel");
+  const statusEl = document.getElementById("status");
+
+  const seed1El = document.getElementById("seed1");
+  const seed2El = document.getElementById("seed2");
+  const poolList = document.getElementById("poolList");
+  const revealedList = document.getElementById("revealedList");
+
+  const wheel = document.getElementById("wheel");
+  const wheelSub = document.getElementById("wheelSub");
+
+  const btnLoad = document.getElementById("btnLoad");
+  const btnStart = document.getElementById("btnStart");
+  const btnNext = document.getElementById("btnNext");
+  const btnValidate = document.getElementById("btnValidate");
+  const btnReset = document.getElementById("btnReset");
+
+  // ---- Data
+  const COL_PUBLIC = `equipes_${scope}_public`; // 8 équipes main attendues
+  const DRAW_REF = doc(db, "tirages", scope);
+
+  let cachedMainTeams = [];   // [{id, teamName, p1FirstName, p2FirstName, p1Rank, p2Rank, teamRank}]
+  let draw = null;            // doc tirage courant
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function teamRank(t){
+    const a = toNum(t.p1Rank);
+    const b = toNum(t.p2Rank);
+    if(a === null || b === null) return Number.POSITIVE_INFINITY; // non renseigné => “moins bien classé”
+    return a + b;
+  }
+
+  function teamLabel(t){
+    if(!t) return "—";
+    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+  }
+
+  async function ensureAdmin(){
+    const u = auth.currentUser;
+    if(!u) return false;
+    const r = await getRoleByEmail(u.email);
+    return r === "admin";
+  }
+
+  function uiSet(msg){ statusEl.textContent = msg; }
+
+  async function loadMainTeams(){
+    uiSet("Chargement équipes…");
+
+    const snap = await getDocs(query(collection(db, COL_PUBLIC), orderBy("createdAt","asc")));
+
+    const rows = [];
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      // on prend seulement la liste principale + pas STBY
+      const isMain = (x.list === "main") && (x.stby !== true);
+      if(!isMain) return;
+
+      const t = {
+        id: d.id,
+        teamName: x.teamName || "",
+        p1FirstName: x.p1FirstName || "",
+        p2FirstName: x.p2FirstName || "",
+        p1Rank: x.p1Rank ?? null,
+        p2Rank: x.p2Rank ?? null
+      };
+      t.teamRank = teamRank(t);
+      rows.push(t);
+    });
+
+    if(rows.length !== 8){
+      uiSet(`⚠️ Liste principale détectée = ${rows.length} équipe(s). Il en faut 8 (list=main, stby=false).`);
+      cachedMainTeams = rows;
+      panel.style.display = "block";
+      renderPreview(null, null, []);
+      return;
+    }
+
+    // tri par teamRank asc => TS1 + TS2
+    rows.sort((a,b)=> a.teamRank - b.teamRank);
+
+    cachedMainTeams = rows;
+    const ts1 = rows[0];
+    const ts2 = rows[1];
+    const pool = rows.slice(2); // 6
+
+    uiSet("✅ Équipes chargées.");
+    panel.style.display = "block";
+    renderPreview(ts1, ts2, pool);
+  }
+
+  function renderPreview(ts1, ts2, pool){
+    seed1El.textContent = ts1 ? teamLabel(ts1) + (Number.isFinite(ts1.teamRank) ? ` — rank équipe: ${ts1.teamRank}` : "") : "—";
+    seed2El.textContent = ts2 ? teamLabel(ts2) + (Number.isFinite(ts2.teamRank) ? ` — rank équipe: ${ts2.teamRank}` : "") : "—";
+
+    poolList.innerHTML = pool.length
+      ? pool.map(p=> `<div class="card" style="margin:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <div><b>${esc(teamLabel(p))}</b></div>
+            <span class="pill">urne</span>
+          </div>
+        </div>`).join("")
+      : `<div class="muted">—</div>`;
+
+    revealedList.innerHTML = `<div class="muted">—</div>`;
+    wheel.textContent = "—";
+    wheelSub.textContent = "—";
+  }
+
+  function randomShuffle(arr){
+    // Fisher-Yates avec crypto si dispo
+    const a = arr.slice();
+    const rand = (n)=>{
+      const u = new Uint32Array(1);
+      crypto.getRandomValues(u);
+      return u[0] % n;
+    };
+    for(let i=a.length-1;i>0;i--){
+      const j = rand(i+1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function readDraw(){
+    const s = await getDoc(DRAW_REF);
+    draw = s.exists() ? (s.data() || {}) : null;
+    return draw;
+  }
+
+  function setButtons(){
+    const st = draw?.status || "idle";
+    btnStart.disabled = !(cachedMainTeams.length >= 8) || (st === "running" || st === "pending_validation");
+    btnNext.disabled = !(st === "running") || ((draw?.revealed || 0) >= 6);
+    btnValidate.disabled = !(st === "pending_validation");
+  }
+
+  async function startDraw(){
+    if(cachedMainTeams.length < 8){
+      alert("Charge d’abord les équipes (8 en liste principale).");
+      return;
+    }
+    // TS1 / TS2 / pool
+    const ts1 = cachedMainTeams[0];
+    const ts2 = cachedMainTeams[1];
+    const pool = cachedMainTeams.slice(2);
+
+    const order = randomShuffle(pool.map(x => x.id)); // 6 ids
+
+    // payload minimal mais suffisant pour public + replay
+    const payload = {
+      scope,
+      status: "running",
+      seed1: { id: ts1.id, teamName: ts1.teamName, p1FirstName: ts1.p1FirstName, p2FirstName: ts1.p2FirstName, teamRank: ts1.teamRank },
+      seed2: { id: ts2.id, teamName: ts2.teamName, p1FirstName: ts2.p1FirstName, p2FirstName: ts2.p2FirstName, teamRank: ts2.teamRank },
+      pool: pool.map(p => ({ id:p.id, teamName:p.teamName, p1FirstName:p.p1FirstName, p2FirstName:p.p2FirstName, teamRank:p.teamRank })),
+      order,
+      revealed: 0,
+      revealedAt: [],
+      createdAt: serverTimestamp()
+    };
+
+    await setDoc(DRAW_REF, payload, { merge: true });
+    await readDraw();
+    uiSet("▶️ Tirage lancé. Clique “Tirer la prochaine équipe”.");
+    setButtons();
+  }
+
+  async function rouletteSpin(finalText, durationMs = 1300){
+    const start = Date.now();
+    wheelSub.textContent = "La roulette tourne…";
+    const fake = ["🌪️", "🎾", "🔥", "🍀", "⚡️", "🎲", "🏖️"];
+
+    return new Promise((resolve) => {
+      const tick = () => {
+        const t = Date.now() - start;
+        if(t >= durationMs){
+          wheel.textContent = finalText;
+          wheelSub.textContent = "✅ Révélé";
+          resolve();
+          return;
+        }
+        wheel.textContent = fake[Math.floor(Math.random()*fake.length)] + " " + fake[Math.floor(Math.random()*fake.length)];
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+  }
+
+  function renderRevealedFromDraw(){
+    const order = draw?.order || [];
+    const pool = draw?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+    const revealed = Number(draw?.revealed || 0);
+
+    const shown = order.slice(0, revealed);
+    revealedList.innerHTML = shown.length
+      ? shown.map((id, i)=>{
+          const t = poolById.get(id);
+          return `<div class="card" style="margin:0;">
+            <div style="display:flex;justify-content:space-between;gap:10px;">
+              <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
+              <span class="pill">tirée</span>
+            </div>
+          </div>`;
+        }).join("")
+      : `<div class="muted">En attente…</div>`;
+  }
+
+  async function nextPick(){
+    await readDraw();
+    if(!draw || draw.status !== "running"){
+      alert("Le tirage n’est pas en cours.");
+      return;
+    }
+    const order = draw.order || [];
+    const pool = draw.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+    const revealed = Number(draw.revealed || 0);
+
+    if(revealed >= 6){
+      alert("Les 6 équipes ont déjà été tirées.");
+      return;
+    }
+
+    const id = order[revealed];
+    const t = poolById.get(id);
+    await rouletteSpin(teamLabel(t), 1300);
+
+    // on commit la révélation (live public)
+    const newRevealed = revealed + 1;
+    const revealedAt = Array.isArray(draw.revealedAt) ? draw.revealedAt.slice() : [];
+    revealedAt.push(serverTimestamp());
+
+    await updateDoc(DRAW_REF, {
+      revealed: newRevealed,
+      revealedAt
+    });
+
+    await readDraw();
+    renderRevealedFromDraw();
+
+    if(newRevealed >= 6){
+      await updateDoc(DRAW_REF, { status: "pending_validation" });
+      await readDraw();
+      uiSet("⏳ Tirage terminé — clique “Valider le tirage”.");
+    } else {
+      uiSet(`🎰 Tirage #${newRevealed} effectué.`);
+    }
+
+    setButtons();
+  }
+
+  async function validateDraw(){
+    const ok = confirm("Valider le tirage ?\n\nLe public verra le tirage VALIDÉ + date/heure, et pourra lancer le replay.");
+    if(!ok) return;
+
+    await updateDoc(DRAW_REF, {
+      status: "validated",
+      validatedAt: serverTimestamp()
+    });
+    await readDraw();
+    uiSet("✅ Tirage validé.");
+    setButtons();
+  }
+
+  async function resetDraw(){
+    const ok1 = confirm("⚠️ Réinitialiser le tirage ?\n\nCela efface l’état du tirage pour cette étape.");
+    if(!ok1) return;
+
+    const typed = prompt('Tape exactement : RESET');
+    if(typed !== "RESET"){ alert("Annulé."); return; }
+
+    await setDoc(DRAW_REF, {
+      scope,
+      status: "idle",
+      seed1: null,
+      seed2: null,
+      pool: [],
+      order: [],
+      revealed: 0,
+      revealedAt: [],
+      createdAt: serverTimestamp(),
+      validatedAt: null
+    }, { merge: true });
+
+    await readDraw();
+    uiSet("🧼 Tirage réinitialisé.");
+    renderPreview(null, null, []);
+    setButtons();
+  }
+
+  // Buttons
+  btnLoad.onclick = async (e)=>{ e.preventDefault(); await loadMainTeams(); };
+  btnStart.onclick = async (e)=>{ e.preventDefault(); await startDraw(); };
+  btnNext.onclick = async (e)=>{ e.preventDefault(); await nextPick(); };
+  btnValidate.onclick = async (e)=>{ e.preventDefault(); await validateDraw(); };
+  btnReset.onclick = async (e)=>{ e.preventDefault(); await resetDraw(); };
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  // Guard
+  onAuthStateChanged(auth, async (user)=>{
+    accessDenied.style.display = "none";
+    adminUI.style.display = "none";
+    panel.style.display = "none";
+
+    if(!user){ accessDenied.style.display = "block"; return; }
+    const ok = await ensureAdmin();
+    if(!ok){ accessDenied.style.display = "block"; return; }
+
+    adminUI.style.display = "block";
+    panel.style.display = "block";
+
+    await readDraw();
+    setButtons();
+
+    uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
+
+    // si tirage déjà lancé, on affiche ce qu’on peut
+    if(draw?.seed1 || draw?.seed2){
+      seed1El.textContent = draw.seed1 ? teamLabel(draw.seed1) : "—";
+      seed2El.textContent = draw.seed2 ? teamLabel(draw.seed2) : "—";
+      poolList.innerHTML = (draw.pool || []).map(p=> `<div class="card" style="margin:0;"><b>${esc(teamLabel(p))}</b></div>`).join("") || `<div class="muted">—</div>`;
+      renderRevealedFromDraw();
+    }
+  });
+</script>
+
+</body>
+</html>
