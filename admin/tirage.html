@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Tirage</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -84,7 +84,7 @@
     </div>
 
     <div style="margin-top:12px;">
-      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (6 équipes)</div>
+      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (équipes restantes)</div>
       <div id="poolList" style="display:grid; gap:8px;"></div>
     </div>
 
@@ -214,9 +214,16 @@
     return draw;
   }
 
+  function drawHasUrn(d){
+    return !!(d && d.seed1 && d.seed2 && Array.isArray(d.pool) && d.pool.length === 6);
+  }
+
   function setButtons(){
     const st = draw?.status || "idle";
-    btnStart.disabled = !(cachedMainTeams.length >= 8) || (st === "running" || st === "pending_validation" || st === "validated");
+    const okUrn = (cachedMainTeams.length >= 8) || drawHasUrn(draw);
+
+    // start possible si urne chargée (cache ou doc), et pas déjà en cours/validé
+    btnStart.disabled = !okUrn || (st === "running" || st === "pending_validation" || st === "validated");
     btnNext.disabled = !(st === "running") || ((draw?.revealed || 0) >= 6);
     btnValidate.disabled = !(st === "pending_validation");
   }
@@ -235,12 +242,28 @@
     return a;
   }
 
-  function renderPreview(ts1, ts2, pool, revealedIds=[]){
+  function pickTeamsFromDraw(d){
+    const order = d?.order || [];
+    const pool = d?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+    const revealed = Number(d?.revealed || 0);
+
+    const revealedIds = order.slice(0, revealed);
+    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
+
+    // si order pas encore défini (idle), on affiche l'urne complète = pool
+    const remainingIds = (order.length ? order.slice(revealed) : pool.map(x => x.id));
+    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
+
+    return { revealedTeams, remainingTeams };
+  }
+
+  function renderPreview(ts1, ts2, poolRemaining, revealedTeams=[]){
     seed1El.textContent = ts1 ? (teamLabel(ts1) + (Number.isFinite(ts1.teamRank) ? ` — rank équipe: ${ts1.teamRank}` : "")) : "—";
     seed2El.textContent = ts2 ? (teamLabel(ts2) + (Number.isFinite(ts2.teamRank) ? ` — rank équipe: ${ts2.teamRank}` : "")) : "—";
 
-    poolList.innerHTML = pool.length
-      ? pool.map(p=> `<div class="card" style="margin:0;">
+    poolList.innerHTML = poolRemaining.length
+      ? poolRemaining.map(p=> `<div class="card" style="margin:0;">
           <div style="display:flex;justify-content:space-between;gap:10px;">
             <div><b>${esc(teamLabel(p))}</b></div>
             <span class="pill">urne</span>
@@ -248,8 +271,8 @@
         </div>`).join("")
       : `<div class="muted">—</div>`;
 
-    revealedList.innerHTML = revealedIds.length
-      ? revealedIds.map((t,i)=> `<div class="card" style="margin:0;">
+    revealedList.innerHTML = revealedTeams.length
+      ? revealedTeams.map((t,i)=> `<div class="card" style="margin:0;">
           <div style="display:flex;justify-content:space-between;gap:10px;">
             <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
             <span class="pill">tirée</span>
@@ -264,10 +287,9 @@
   async function loadMainTeams(){
     uiSet("Chargement équipes…");
 
-    // si tirage déjà en cours/validé => demander confirmation
     await readDraw();
     if(draw && (draw.status === "running" || draw.status === "pending_validation" || draw.status === "validated")){
-      const ok = confirm("Un tirage existe déjà pour " + stepLabel + " (statut: " + draw.status + ").\n\nRecharger va préparer une nouvelle urne (sans lancer).\nContinuer ?");
+      const ok = confirm("Un tirage existe déjà pour " + stepLabel + " (statut: " + draw.status + ").\n\nRecharger va republier l’urne en mode “idle” (sans lancer) et remettre revealed=0.\nContinuer ?");
       if(!ok){ uiSet("Annulé."); return; }
     }
 
@@ -292,12 +314,11 @@
     });
 
     cachedMainTeams = rows.sort((a,b)=> a.teamRank - b.teamRank);
-
     panel.style.display = "block";
 
     if(cachedMainTeams.length !== 8){
       uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Il en faut 8 (list=main, stby=false).`);
-      renderPreview(null, null, cachedMainTeams.slice(0, 6));
+      renderPreview(null, null, cachedMainTeams.slice(0, 6), []);
       return;
     }
 
@@ -305,7 +326,7 @@
     const ts2 = cachedMainTeams[1];
     const pool = cachedMainTeams.slice(2);
 
-    // ✅ IMPORTANT : publier l'urne en PUBLIC dès le chargement (status=idle)
+    // ✅ Publier l’urne en public dès le chargement
     await setDoc(DRAW_REF, {
       scope,
       status: "idle",
@@ -327,23 +348,29 @@
   }
 
   async function startDraw(){
-    if(cachedMainTeams.length < 8){
-      alert("Charge d’abord les équipes (8 en liste principale).");
+    await readDraw();
+
+    // si on n'a pas cache, on essaie de démarrer depuis le doc (seed/pool)
+    let ts1 = cachedMainTeams[0] || draw?.seed1;
+    let ts2 = cachedMainTeams[1] || draw?.seed2;
+
+    let poolArr = cachedMainTeams.length >= 8
+      ? cachedMainTeams.slice(2).map(p => ({ id:p.id, teamName:p.teamName, p1FirstName:p.p1FirstName, p2FirstName:p.p2FirstName, teamRank:p.teamRank }))
+      : (draw?.pool || []);
+
+    if(!ts1 || !ts2 || !Array.isArray(poolArr) || poolArr.length !== 6){
+      alert("Urne non prête. Clique d’abord “Charger équipes (liste principale)”.");
       return;
     }
 
-    const ts1 = cachedMainTeams[0];
-    const ts2 = cachedMainTeams[1];
-    const pool = cachedMainTeams.slice(2);
-
-    const order = randomShuffle(pool.map(x => x.id)); // 6 ids
+    const order = randomShuffle(poolArr.map(x => x.id)); // 6 ids
 
     await setDoc(DRAW_REF, {
       scope,
       status: "running",
-      seed1: { id: ts1.id, teamName: ts1.teamName, p1FirstName: ts1.p1FirstName, p2FirstName: ts1.p2FirstName, teamRank: ts1.teamRank },
-      seed2: { id: ts2.id, teamName: ts2.teamName, p1FirstName: ts2.p1FirstName, p2FirstName: ts2.p2FirstName, teamRank: ts2.teamRank },
-      pool: pool.map(p => ({ id:p.id, teamName:p.teamName, p1FirstName:p.p1FirstName, p2FirstName:p.p2FirstName, teamRank:p.teamRank })),
+      seed1: ts1,
+      seed2: ts2,
+      pool: poolArr,
       order,
       revealed: 0,
       revealedAtMs: [],
@@ -354,6 +381,9 @@
     await readDraw();
     uiSet("▶️ Tirage lancé. Clique “Tirer la prochaine équipe”.");
     setButtons();
+
+    const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
+    renderPreview(draw.seed1, draw.seed2, remainingTeams, revealedTeams);
   }
 
   async function rouletteSpin(finalText, durationMs = 1300){
@@ -367,7 +397,7 @@
         if(t >= durationMs){
           wheel.textContent = finalText;
           wheelSub.textContent = "✅ Révélé";
-          resolve();
+          resolve("done");
           return;
         }
         wheel.textContent = fake[Math.floor(Math.random()*fake.length)] + " " + fake[Math.floor(Math.random()*fake.length)];
@@ -375,21 +405,6 @@
       };
       tick();
     });
-  }
-
-  function pickTeamsFromDraw(){
-    const order = draw?.order || [];
-    const pool = draw?.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-    const revealed = Number(draw?.revealed || 0);
-
-    const revealedIds = order.slice(0, revealed);
-    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
-
-    const remainingIds = order.slice(revealed);
-    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
-
-    return { revealedTeams, remainingTeams, poolById };
   }
 
   async function nextPick(){
@@ -413,7 +428,7 @@
     const id = order[revealed];
     const t = poolById.get(id);
 
-    // ✅ animation d'abord, commit ensuite (sinon le public “voit” trop tôt)
+    // ✅ animation d'abord, commit ensuite
     await rouletteSpin(teamLabel(t), 1300);
 
     const newRevealed = revealed + 1;
@@ -427,12 +442,8 @@
 
     await readDraw();
 
-    const { revealedTeams, remainingTeams } = pickTeamsFromDraw();
-    const ts1 = draw.seed1 || null;
-    const ts2 = draw.seed2 || null;
-
-    // urne restante + révélés
-    renderPreview(ts1, ts2, remainingTeams, revealedTeams);
+    const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
+    renderPreview(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
 
     if(newRevealed >= 6){
       await updateDoc(DRAW_REF, { status: "pending_validation" });
@@ -480,6 +491,7 @@
     }, { merge: true });
 
     await readDraw();
+    cachedMainTeams = [];
     uiSet("🧼 Tirage réinitialisé.");
     renderPreview(null, null, [], []);
     setButtons();
@@ -517,15 +529,18 @@
 
     uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
 
-    // si doc existe, on affiche l'état
     if(draw){
-      const { revealedTeams, remainingTeams } = pickTeamsFromDraw();
+      const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
       renderPreview(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
+
       if(draw.status === "pending_validation"){
         uiSet("🏁 Tirage fini — en attente de validation par le comité du tournoi.");
       }
       if(draw.status === "validated"){
         uiSet("✅ Tirage validé.");
+      }
+      if(draw.status === "idle" && !drawHasUrn(draw)){
+        uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
       }
     }
   });
