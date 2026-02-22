@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 </head>
 <body>
 
@@ -22,10 +22,10 @@
       </div>
     </div>
 
-    <!-- ✅ Bandeau identique partout (comme demandé) -->
+    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -39,17 +39,17 @@
 
   <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
   <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general" selected>Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
@@ -86,7 +86,6 @@
 </main>
 
 <script type="module">
-  // ✅ On réutilise tes modules (moins de risque)
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
 
@@ -116,6 +115,8 @@
   const infosList = document.getElementById("infosList");
 
   let unsubscribeInfos = null;
+
+  const LS_SCOPE_KEY = "admin_scope_last";
 
   function esc(str){
     return (str || "")
@@ -215,13 +216,26 @@
     });
   }
 
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
   function setTabs(scope){
     tabsEl.innerHTML = "";
     panelGeneral.style.display = "none";
     stopInfos();
 
+    // mémorise la zone
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+
     if(scope === "general"){
-      hintEl.textContent = "Zone Général : gestion des infos (publication / modification / suppression).";
+      hintEl.textContent = "🌐 Zone Général : gestion des infos (publication / modification / suppression).";
       panelGeneral.style.display = "block";
 
       const a = document.createElement("a");
@@ -235,15 +249,26 @@
       return;
     }
 
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / résultats.";
-    
-const links = [
-  ["👥 Équipes", "equipes.html"],
-  ["📝 Inscriptions", "inscriptions.html"],
-  ["🍽️ Repas", "repas.html"],          // ✅ AJOUT
-  ["🏁 Résultats", "resultats.html"],
-];
-   
+    // Zone Étape
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+    ];
+
+    // Repas : pas pour l’étape 5 (test)
+    if(scope !== "etape5"){
+      links.splice(2, 0, ["🍽️ Repas", "repas.html"]);
+    }else{
+      // on affiche quand même un bouton “Repas (plus tard)” pour éviter la confusion
+      tabsEl.appendChild(
+        makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test).")
+      );
+    }
 
     for(const [label, url] of links){
       const a = document.createElement("a");
@@ -254,7 +279,7 @@ const links = [
     }
   }
 
-  // Publish
+  // Publish infos
   infoForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
     publishBtn.disabled = true;
@@ -284,7 +309,6 @@ const links = [
     window.location.href = "../index.html";
   };
 
-  // Guard (admin only) + UI
   async function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
@@ -295,21 +319,28 @@ const links = [
   async function showAdmin(){
     accessDenied.style.display = "none";
     adminUI.style.display = "block";
+
+    // restore scope
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved && [...scopeEl.options].some(o => o.value === saved)){
+        scopeEl.value = saved;
+      }
+    }catch(e){}
+
     setTabs(scopeEl.value);
     scopeEl.onchange = ()=> setTabs(scopeEl.value);
   }
 
-  // 1) check au chargement (avec persistance)
+  // Guard (admin only)
   const g = await requireRole(["admin"]);
   if(!g.ok){ await showDenied(); }
   else { await showAdmin(); }
 
-  // 2) robuste si session change (logout ailleurs)
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ await showDenied(); return; }
     const g2 = await requireRole(["admin"]);
     if(!g2.ok){ await showDenied(); return; }
-    // déjà affiché => rien
   });
 </script>
 
