@@ -97,7 +97,7 @@
           <tr>
             <th style="width:70px;">Slot</th>
             <th style="width:90px;">Heure</th>
-            <th style="width:90px;">Terrain</th>
+            <th style="width:220px;">Terrain</th>
             <th>Match</th>
             <th>Rencontre (règlement)</th>
             <th style="width:160px;">Actions</th>
@@ -241,12 +241,18 @@
     startProgListener(scope);
   }
 
+  // ---- Courts (fixes)
+  function defaultCourts(){
+    return {
+      A: "court Manon Queen Bee",
+      B: "court Lisa de Los Pimentos"
+    };
+  }
+
   // ---- modèle "règlement" (matches fixes)
   // mapping équipes :
   // TS1, TS2, E3..E8 (E3=pick1 etc)
   function buildMatches(){
-    // Références possibles:
-    // {type:"team", key:"E4"} ; {type:"winner", matchId:"M1"} ; {type:"loser", matchId:"M2"}
     const matches = {
       M1:  { id:"M1",  n:1,  label:"Match 1",  bracket:"main", round:"QF", A:{type:"team", key:"E4"},  B:{type:"team", key:"E5"},  winLabel:"V1", loseLabel:"P1" },
       M2:  { id:"M2",  n:2,  label:"Match 2",  bracket:"main", round:"QF", A:{type:"team", key:"E6"},  B:{type:"team", key:"E7"},  winLabel:"V2", loseLabel:"P2" },
@@ -277,7 +283,7 @@
       { slot:3,  time:"18:50", court:"A" },
       { slot:4,  time:"18:50", court:"B" },
       { slot:5,  time:"19:40", court:"A" },
-      { slot:6,  time:"20:05", court:"B" }, // pause spéciale “prise en compte” dans ton doc
+      { slot:6,  time:"20:05", court:"B", note:"pause spécifique avant ce match" },
       { slot:7,  time:"20:30", court:"A" },
       { slot:8,  time:"20:55", court:"B" },
       { slot:9,  time:"21:20", court:"A" },
@@ -288,7 +294,6 @@
   }
 
   function prettyMeet(m){
-    // Affichage “règlement”
     const a = (m.A?.type === "team") ? m.A.key : (m.A?.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`);
     const b = (m.B?.type === "team") ? m.B.key : (m.B?.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`);
     return `${a} vs ${b}`;
@@ -305,7 +310,6 @@
     if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer la programmation.");
 
     // mapping équipes (règlement)
-    // TS1/TS2 + E3..E8
     const order = draw.order || [];
     const pool = draw.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
@@ -327,43 +331,47 @@
       E8: picks[5] || null,
     };
 
-    // sanity
     if(!teams.TS1 || !teams.TS2) throw new Error("Seeds manquantes.");
     for(const k of ["E3","E4","E5","E6","E7","E8"]){
       if(!teams[k]) throw new Error("Équipe manquante : " + k);
     }
 
-    // matches + schedule
     const matches = buildMatches();
     const slots = defaultSlots();
+    const courts = defaultCourts();
 
     // schedule: matchId -> slotNumber (défaut M1->1 ... M12->12)
     const schedule = {};
     Object.keys(matches).forEach((mid)=>{
-      const n = matches[mid].n;
-      schedule[mid] = n; // 1..12
+      schedule[mid] = matches[mid].n;
     });
 
     const payload = {
-      formatVersion: 1,
+      formatVersion: 2,
       scope,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
 
-      // provenance
+      courts, // ✅ noms courts A/B
+
       source: {
         drawValidatedAt: draw.validatedAt || null,
         drawDoc: "tirages/" + scope
       },
 
-      teams,     // TS1/TS2/E3..E8
-      matches,   // modèle règlement
-      slots,     // liste des créneaux (heure/terrain)
-      schedule,  // mapping matchId -> slot (permet réordonnancement)
+      teams,
+      matches,
+      slots,
+      schedule
     };
 
     await setDoc(progRef(scope), payload, { merge:true });
     return payload;
+  }
+
+  function courtLabel(prog, courtKey){
+    const c = prog?.courts || {};
+    return c[courtKey] || (courtKey || "—");
   }
 
   function renderSchedule(prog){
@@ -371,7 +379,6 @@
     const slots = Array.isArray(prog?.slots) ? prog.slots : [];
     const schedule = prog?.schedule || {};
 
-    // inverse: slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=>{
       slotToMatch.set(Number(slotNum), mid);
@@ -384,7 +391,9 @@
       rows.push({
         slot: s.slot,
         time: s.time,
-        court: s.court,
+        courtKey: s.court,
+        courtName: courtLabel(prog, s.court),
+        note: s.note || "",
         matchId: mid,
         matchLabel: m ? m.label : "—",
         meet: m ? prettyMeet(m) : "—"
@@ -395,7 +404,10 @@
       <tr>
         <td><span class="pill">#${esc(r.slot)}</span></td>
         <td><b>${esc(r.time)}</b></td>
-        <td><span class="pill">${esc(r.court)}</span></td>
+        <td>
+          <div><span class="pill">${esc(r.courtName)}</span></div>
+          ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
+        </td>
         <td>${r.matchId ? `<b>${esc(r.matchId)}</b> — ${esc(r.matchLabel)}` : "—"}</td>
         <td>${esc(r.meet)}</td>
         <td>
@@ -418,14 +430,12 @@
     const prog = snap.data() || {};
     const schedule = prog.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, s]) => slotToMatch.set(Number(s), mid));
 
     const mA = slotToMatch.get(Number(slotA)) || null;
     const mB = slotToMatch.get(Number(slotB)) || null;
 
-    // swap (en gardant les “trous” si jamais)
     const newSchedule = { ...schedule };
     if(mA) newSchedule[mA] = Number(slotB);
     if(mB) newSchedule[mB] = Number(slotA);
@@ -484,7 +494,6 @@
   btnOpenPublic.onclick = (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
-    // page publique (programmation)
     window.location.href = `../${currentScope}/programmation.html`;
   };
 
