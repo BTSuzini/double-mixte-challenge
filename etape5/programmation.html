@@ -50,7 +50,7 @@
     <p class="muted" id="subtitle" style="margin-top:10px;"></p>
   </section>
 
-  <!-- CHRONO (encarts) -->
+  <!-- CHRONO -->
   <section class="card" id="panelChrono" style="display:none;">
     <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
     <div id="chronoCards" style="display:grid; gap:12px;"></div>
@@ -75,18 +75,7 @@
       </div>
     </div>
 
-    <div class="table-wrap">
-      <table class="teams-table" aria-label="Tableau">
-        <thead>
-          <tr>
-            <th>Équipe A</th>
-            <th>Équipe B</th>
-            <th style="width:160px;">Résultat</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
+    <div id="tableCards" style="display:grid; gap:12px;"></div>
 
     <p class="muted" style="margin-top:10px;">
       Les équipes se “placent” automatiquement dès qu’un résultat est validé.
@@ -96,22 +85,6 @@
 </main>
 
 <style>
-  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
-  .teams-table thead th{
-    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
-    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
-    white-space:nowrap;
-  }
-  .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
-  .teams-table tbody tr:last-child td{ border-bottom:none; }
-
-  .pill{
-    display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
-    border:1px solid #eee; background:#fafafa; white-space:nowrap;
-  }
-
-  /* --- CARTES CHRONO --- */
   .match-card{
     border-radius:16px;
     border:1px solid rgba(0,0,0,.06);
@@ -121,23 +94,49 @@
   .match-card.courtA{ background:rgba(255, 214, 0, .14); border-color:rgba(255, 214, 0, .35); }
   .match-card.courtB{ background:rgba(230, 57, 70, .10); border-color:rgba(230, 57, 70, .28); }
 
-  .match-top{
+  .toprow{
     display:flex;
     justify-content:space-between;
+    align-items:center;
     gap:12px;
-    align-items:flex-start;
     margin-bottom:10px;
   }
-  .match-time{
+
+  /* ✅ heure + court sur une ligne, court petit, non gras */
+  .timecourt{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+    min-width:0;
+  }
+  .time{
     font-weight:1000;
     font-size:16px;
     white-space:nowrap;
   }
-  .court-title{
+  .court{
     font-style:italic;
-    font-weight:900;
-    text-align:right;
+    font-weight:500;
+    font-size:12.5px;
+    opacity:.9;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
   }
+
+  .badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    border:1px solid rgba(0,0,0,.10);
+    background:rgba(255,255,255,.65);
+    white-space:nowrap;
+  }
+  .badge.todo{ opacity:.85; }
 
   .teams{
     display:grid;
@@ -152,6 +151,7 @@
     justify-content:center;
     gap:8px;
   }
+
   .team-line{
     font-weight:1000;
     font-size:15px;
@@ -177,6 +177,7 @@
   .score-top{ font-weight:1000; font-size:16px; }
   .score-bot{ font-weight:1000; font-size:16px; margin-top:10px; }
   .score-muted{ opacity:.65; font-weight:900; font-size:12px; margin-left:6px; }
+
   .note{
     margin-top:10px;
     font-weight:900;
@@ -200,10 +201,10 @@
   const panelTableau = document.getElementById("panelTableau");
 
   const chronoCards = document.getElementById("chronoCards");
+  const tableCards = document.getElementById("tableCards");
 
   const selBracket = document.getElementById("selBracket");
   const selRound = document.getElementById("selRound");
-  const tableBody = document.getElementById("tableBody");
 
   const PROG_REF = doc(db, "programmations", scope);
   const RESULTS_COL = collection(db, `resultats_${scope}`);
@@ -303,6 +304,59 @@
     return { top, bot, raw: s };
   }
 
+  function badgeForMatch(matchId){
+    const res = resultsByMatch.get(matchId);
+    const done = !!(res && (res.winnerSide === "A" || res.winnerSide === "B"));
+    return done ? `<span class="badge">✅ Terminé</span>` : `<span class="badge todo">⏳ À venir</span>`;
+  }
+
+  function slotInfoForMatch(matchId){
+    if(!currentProg) return { time:"—", courtKey:null, note:"" };
+
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+    const slotNum = Number(schedule[matchId] || 0);
+    const s = slots.find(x => Number(x.slot) === slotNum);
+    if(!s) return { time:"—", courtKey:null, note:"" };
+    return { time: s.time || "—", courtKey: s.court || null, note: s.note || "" };
+  }
+
+  function renderCard(matchId, aTxt, bTxt){
+    const info = slotInfoForMatch(matchId);
+    const cm = info.courtKey ? courtMeta(info.courtKey) : { name:"—", emoji:"🎾", cls:"" };
+    const sc = scoreLinesForMatch(matchId);
+    const badge = badgeForMatch(matchId);
+
+    const courtTxt = (info.courtKey ? `${cm.emoji} ${cm.name} ${cm.emoji}` : "—");
+
+    return `
+      <div class="match-card ${esc(cm.cls)}">
+        <div class="toprow">
+          <div class="timecourt" title="${esc(info.time)} — ${esc(courtTxt)}">
+            <span class="time">${esc(info.time)}</span>
+            <span class="court">${esc(courtTxt)}</span>
+          </div>
+          <div>${badge}</div>
+        </div>
+
+        <div class="teams">
+          <div class="team-block">
+            <div class="team-line">${esc(aTxt)}</div>
+            <div class="vs-line">vs</div>
+            <div class="team-line">${esc(bTxt)}</div>
+          </div>
+
+          <div class="score-box" title="${esc(sc.raw || "")}">
+            <div class="score-top">${esc(sc.top)} <span class="score-muted">A</span></div>
+            <div class="score-bot">${esc(sc.bot)} <span class="score-muted">B</span></div>
+          </div>
+        </div>
+
+        ${info.note ? `<div class="note">⚠️ ${esc(info.note)}</div>` : ""}
+      </div>
+    `;
+  }
+
   function renderChronoCards(){
     if(!currentProg){
       chronoCards.innerHTML = "";
@@ -331,40 +385,15 @@
       const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
       const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
 
-      const cm = courtMeta(s.court);
-      const sc = scoreLinesForMatch(mid);
-
-      cards.push(`
-        <div class="match-card ${esc(cm.cls)}">
-          <div class="match-top">
-            <div class="match-time">${esc(s.time)}</div>
-            <div class="court-title">${esc(cm.emoji)} ${esc(cm.name)} ${esc(cm.emoji)}</div>
-          </div>
-
-          <div class="teams">
-            <div class="team-block">
-              <div class="team-line">${esc(aTxt)}</div>
-              <div class="vs-line">vs</div>
-              <div class="team-line">${esc(bTxt)}</div>
-            </div>
-
-            <div class="score-box" title="${esc(sc.raw || "")}">
-              <div class="score-top">${esc(sc.top)} <span class="score-muted">A</span></div>
-              <div class="score-bot">${esc(sc.bot)} <span class="score-muted">B</span></div>
-            </div>
-          </div>
-
-          ${s.note ? `<div class="note">⚠️ ${esc(s.note)}</div>` : ""}
-        </div>
-      `);
+      cards.push(renderCard(mid, aTxt, bTxt));
     }
 
     chronoCards.innerHTML = cards.join("") || `<div class="muted">Aucun match à afficher.</div>`;
   }
 
-  function renderTableau(){
+  function renderTableauCards(){
     if(!currentProg){
-      tableBody.innerHTML = "";
+      tableCards.innerHTML = "";
       return;
     }
 
@@ -376,33 +405,17 @@
       .filter(m => m.bracket === bracket && m.round === round)
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
-    tableBody.innerHTML = list.map(m=>{
+    const cards = list.map(m=>{
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
 
       const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
       const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
 
-      const res = resultsByMatch.get(m.id);
-      const s = res?.scoreDisplay ? String(res.scoreDisplay) : "—";
-      const parts = s.split(/\s+/).filter(Boolean);
-      let top = "—", bot = "—";
-      if(parts.length >= 1){
-        const p = parts[0].split("/");
-        if(p.length === 2){ top = p[0]; bot = p[1]; }
-      }
+      return renderCard(m.id, aTxt, bTxt);
+    });
 
-      return `
-        <tr>
-          <td>${esc(aTxt)}</td>
-          <td>${esc(bTxt)}</td>
-          <td title="${esc(s === "—" ? "" : s)}">
-            <div><b>${esc(top)}</b> <span class="muted">(A)</span></div>
-            <div style="margin-top:6px;"><b>${esc(bot)}</b> <span class="muted">(B)</span></div>
-          </td>
-        </tr>
-      `;
-    }).join("") || `<tr><td colspan="3" class="muted">Aucun match pour ce filtre.</td></tr>`;
+    tableCards.innerHTML = cards.join("") || `<div class="muted">Aucun match pour ce filtre.</div>`;
   }
 
   function refreshRounds(){
@@ -412,7 +425,7 @@
 
   function renderAll(){
     renderChronoCards();
-    renderTableau();
+    renderTableauCards();
   }
 
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
@@ -420,9 +433,9 @@
 
   selBracket.onchange = ()=>{
     refreshRounds();
-    renderTableau();
+    renderTableauCards();
   };
-  selRound.onchange = ()=> renderTableau();
+  selRound.onchange = ()=> renderTableauCards();
 
   setActiveTab("chrono");
   refreshRounds();
