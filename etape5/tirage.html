@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage au sort — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
 </head>
 <body>
 
@@ -16,8 +16,8 @@
       </div>
 
       <h1 class="brand-title">
-        Étape 5 — 17 avril 2026<br>
-        <span style="opacity:.95;font-weight:800;">BT250</span>
+        Étape 5 — TEST<br>
+        <span style="opacity:.95;font-weight:800;">Tirage au sort 🎲</span>
       </h1>
 
       <div class="brand-logo">
@@ -39,69 +39,69 @@
 <main class="container">
 
   <section class="card">
-    <h2>🎲 Tirage au sort</h2>
-    <p class="muted" id="stateMsg" style="margin-top:0;">Chargement…</p>
+    <h2 style="margin:0 0 10px;">🎲 Tirage au sort</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
-    <div id="liveBox" style="display:none; margin-top:12px;">
-      <div class="muted" style="margin-bottom:8px;">
-        🔴 <b>En direct</b> — le tirage est en cours…
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnReplay" style="font-weight:900; color:#111; display:none;">▶️ Replay roulette</button>
+      <button class="btn" id="btnStopReplay" style="font-weight:900; color:#111; display:none;">⏹️ Stop replay</button>
+    </div>
+
+    <p class="muted" id="modeBadge" style="margin-top:10px;"></p>
+    <p class="muted" id="validatedAt" style="margin-top:6px;"></p>
+  </section>
+
+  <section class="card" id="panelMain" style="display:none;">
+    <div class="grid">
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ Tête de série #1</div>
+        <div class="muted" id="seed1">—</div>
       </div>
-
-      <div class="roulette">
-        <div class="roulette-title">🎰 Roulette</div>
-        <div class="roulette-wheel" id="wheel">—</div>
-        <div class="roulette-sub muted" id="rouletteSub">En attente du prochain tirage…</div>
-      </div>
-
-      <div style="margin-top:14px;">
-        <h3 style="margin:0 0 8px;">📌 Tirages révélés</h3>
-        <div id="revealedList" style="display:grid; gap:8px;"></div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ Tête de série #2</div>
+        <div class="muted" id="seed2">—</div>
       </div>
     </div>
 
-    <div id="validatedBox" style="display:none; margin-top:12px;">
-      <div class="muted" id="validatedAt">✅ Tirage validé.</div>
-
-      <div style="margin-top:12px;">
-        <h3 style="margin:0 0 8px;">📋 Tableau (tirage validé)</h3>
-        <div class="table-wrap">
-          <table class="teams-table" aria-label="Tirage validé">
-            <thead>
-              <tr>
-                <th style="width:70px;">Match</th>
-                <th>Équipe A</th>
-                <th>Équipe B</th>
-              </tr>
-            </thead>
-            <tbody id="bracketBody"></tbody>
-          </table>
-        </div>
-        <p class="muted" style="margin-top:10px;">
-          🎥 Replay : tu peux relancer l’animation ci-dessous.
-        </p>
-
-        <div class="grid" style="margin-top:8px;">
-          <button class="btn" id="btnReplay" style="font-weight:900; color:#111;">▶️ Voir le replay roulette</button>
-        </div>
-      </div>
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">🎰 Roulette</div>
+      <div class="roulette-wheel" id="wheel">—</div>
+      <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
     </div>
 
+    <div style="margin-top:12px;" id="urneBlock">
+      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (équipes restantes)</div>
+      <div id="urneList" style="display:grid; gap:8px;"></div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">📌 Tirages révélés</div>
+      <div id="revealedList" style="display:grid; gap:8px;"></div>
+    </div>
+  </section>
+
+  <section class="card" id="panelMatches" style="display:none;">
+    <h2 style="margin:0 0 10px;">📋 Affiche des matchs</h2>
+    <div class="table-wrap">
+      <table class="teams-table" aria-label="Matchs">
+        <thead>
+          <tr>
+            <th style="width:60px;">Match</th>
+            <th>Équipe A</th>
+            <th>Équipe B</th>
+          </tr>
+        </thead>
+        <tbody id="matchBody"></tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-top:10px;">
+      Rappel : 1ère tirée vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.
+    </p>
   </section>
 
 </main>
 
 <style>
-  .roulette{
-    border:1px solid #eee;
-    border-radius:16px;
-    padding:14px;
-    background:#fff;
-    box-shadow: 0 10px 25px rgba(0,0,0,.05);
-  }
-  .roulette-title{
-    font-weight:1000;
-    margin-bottom:10px;
-  }
   .roulette-wheel{
     height:68px;
     border-radius:14px;
@@ -114,39 +114,6 @@
     letter-spacing:.2px;
     background:linear-gradient(180deg,#fff,#fafafa);
   }
-  .roulette-sub{ margin-top:10px; }
-  .table-wrap{
-    overflow:auto;
-    border:1px solid #eee;
-    border-radius:14px;
-    background:#fff;
-  }
-  .teams-table{
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    min-width: 520px;
-  }
-  .teams-table thead th{
-    text-align:left;
-    font-size:13px;
-    color:#444;
-    background:#f7f7f7;
-    border-bottom:1px solid #eee;
-    padding:12px;
-    position:sticky;
-    top:0;
-    z-index:1;
-    white-space:nowrap;
-  }
-  .teams-table tbody td{
-    padding:12px;
-    border-bottom:1px solid #f0f0f0;
-    font-size:14px;
-    vertical-align:top;
-  }
-  .teams-table tbody tr:last-child td{ border-bottom:none; }
-
   .pill{
     display:inline-block;
     padding:4px 10px;
@@ -156,72 +123,89 @@
     background:#fafafa;
     white-space:nowrap;
   }
+  .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:700px; }
+  .teams-table thead th{
+    text-align:left; font-size:13px; color:#444; background:#f7f7f7;
+    border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
+    white-space:nowrap;
+  }
+  .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
 </style>
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
-  import {
-    doc,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const SCOPE = "etape5";
-  const DRAW_REF = doc(db, "tirages", SCOPE);
+  const scope = "etape5";
+  const DRAW_REF = doc(db, "tirages", scope);
 
-  const stateMsg = document.getElementById("stateMsg");
-  const liveBox = document.getElementById("liveBox");
-  const validatedBox = document.getElementById("validatedBox");
+  const statusText = document.getElementById("statusText");
+  const modeBadge = document.getElementById("modeBadge");
+  const validatedAtEl = document.getElementById("validatedAt");
+
+  const panelMain = document.getElementById("panelMain");
+  const panelMatches = document.getElementById("panelMatches");
+
+  const seed1El = document.getElementById("seed1");
+  const seed2El = document.getElementById("seed2");
 
   const wheel = document.getElementById("wheel");
-  const rouletteSub = document.getElementById("rouletteSub");
+  const wheelSub = document.getElementById("wheelSub");
+
+  const urneBlock = document.getElementById("urneBlock");
+  const urneList = document.getElementById("urneList");
   const revealedList = document.getElementById("revealedList");
+  const matchBody = document.getElementById("matchBody");
 
-  const validatedAtEl = document.getElementById("validatedAt");
-  const bracketBody = document.getElementById("bracketBody");
   const btnReplay = document.getElementById("btnReplay");
+  const btnStopReplay = document.getElementById("btnStopReplay");
 
-  let lastRevealed = 0;
-  let lastData = null;
-  let replayLock = false;
+  let currentDraw = null;
+
+  // LIVE reveal (affichage après animation)
+  let shownCount = 0;
+  let revealedShownIds = []; // ids déjà “révélés” visuellement
+  let liveAnimating = false;
+
+  // Replay
+  let replayMode = false;
+  let replayAbort = false;
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
+  function teamLabel(t){
+    if(!t) return "—";
+    return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+  }
+
   function fmtDate(ts){
     try{
       const d = ts?.toDate ? ts.toDate() : null;
-      if(!d) return "—";
+      if(!d) return "";
       return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
-    }catch{ return "—"; }
+    }catch{ return ""; }
   }
 
-  function teamLabel(t){
-    if(!t) return "—";
-    const name = t.teamName ? t.teamName : "Équipe";
-    const p1 = t.p1FirstName ? t.p1FirstName : "";
-    const p2 = t.p2FirstName ? t.p2FirstName : "";
-    const players = (p1 || p2) ? ` (${p1}${p1 && p2 ? " / " : ""}${p2})` : "";
-    return `${name}${players}`;
-  }
-
-  // petite animation roulette locale
-  async function rouletteSpin(finalText, durationMs = 1400){
+  async function rouletteSpin(finalText, durationMs = 1300){
     const start = Date.now();
-    rouletteSub.textContent = "La roulette tourne…";
-    const fake = ["🌪️", "🎾", "🔥", "🍀", "⚡️", "🎲", "🏖️"];
+    wheelSub.textContent = replayMode ? "Replay en cours…" : "La roulette tourne…";
+    const fake = ["🌪️","🎾","🔥","🍀","⚡️","🎲","🏖️"];
 
     return new Promise((resolve) => {
       const tick = () => {
+        if(replayAbort){ resolve("aborted"); return; }
         const t = Date.now() - start;
         if(t >= durationMs){
           wheel.textContent = finalText;
-          rouletteSub.textContent = "✅ Tirage révélé";
-          resolve();
+          wheelSub.textContent = "✅ Révélé";
+          resolve("done");
           return;
         }
-        // effet “roulette”
         wheel.textContent = fake[Math.floor(Math.random()*fake.length)] + " " + fake[Math.floor(Math.random()*fake.length)];
         requestAnimationFrame(tick);
       };
@@ -229,159 +213,283 @@
     });
   }
 
-  function renderRevealed(order, poolById, revealed){
-    revealedList.innerHTML = "";
-    if(!order || !order.length){
-      revealedList.innerHTML = `<div class="muted">Aucun tirage pour le moment.</div>`;
-      return;
-    }
-    const shown = order.slice(0, revealed);
-    if(shown.length === 0){
-      revealedList.innerHTML = `<div class="muted">En attente du 1er tirage…</div>`;
-      return;
-    }
-    revealedList.innerHTML = shown.map((id, i) => {
-      const t = poolById.get(id);
-      return `<div class="card" style="margin:0;">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-          <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
-          <span class="pill">tirée</span>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  function renderBracket(d){
-    // mapping : A vs TS1, B vs C, D vs E, F vs TS2
-    const order = d.order || [];
-    const pool = d.pool || [];
+  function computeLists(draw){
+    const order = draw?.order || [];
+    const pool = draw?.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
 
-    const A = poolById.get(order[0]);
-    const B = poolById.get(order[1]);
-    const C = poolById.get(order[2]);
-    const D = poolById.get(order[3]);
-    const E = poolById.get(order[4]);
-    const F = poolById.get(order[5]);
+    const revealed = Number(draw?.revealed || 0);
+    const revealedIds = order.slice(0, revealed);
+    const remainingIds = order.slice(revealed);
 
-    const TS1 = d.seed1 || null;
-    const TS2 = d.seed2 || null;
+    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
+    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
 
-    const rows = [
-      ["M1", teamLabel(A), teamLabel(TS1)],
-      ["M2", teamLabel(B), teamLabel(C)],
-      ["M3", teamLabel(D), teamLabel(E)],
-      ["M4", teamLabel(F), teamLabel(TS2)],
-    ];
+    return { poolById, revealedIds, revealedTeams, remainingTeams };
+  }
 
-    bracketBody.innerHTML = rows.map(r => `
-      <tr>
-        <td><b>${esc(r[0])}</b></td>
-        <td>${esc(r[1])}</td>
-        <td>${esc(r[2])}</td>
-      </tr>
+  function renderUrne(remainingTeams, draw){
+    // ✅ Urne visible si on a un pool, et si tirage pas terminé (revealed < 6)
+    const revealed = Number(draw?.revealed || 0);
+
+    if(!remainingTeams.length || revealed >= 6){
+      urneBlock.style.display = "none";
+      urneList.innerHTML = "";
+      return;
+    }
+
+    urneBlock.style.display = "block";
+    urneList.innerHTML = remainingTeams.map(t => `
+      <div class="card" style="margin:0;">
+        <div style="display:flex;justify-content:space-between;gap:10px;">
+          <div><b>${esc(teamLabel(t))}</b></div>
+          <span class="pill">urne</span>
+        </div>
+      </div>
     `).join("");
   }
 
-  async function playReplay(d){
-    if(replayLock) return;
-    replayLock = true;
-
-    try{
-      const order = d.order || [];
-      const pool = d.pool || [];
-      const poolById = new Map(pool.map(x => [x.id, x]));
-
-      liveBox.style.display = "block";
-      validatedBox.style.display = "block";
-      rouletteSub.textContent = "Replay en cours…";
-      wheel.textContent = "—";
-
-      revealedList.innerHTML = "";
-      // rejoue 6 spins
-      for(let i=0;i<order.length;i++){
-        const t = poolById.get(order[i]);
-        const label = teamLabel(t);
-        await rouletteSpin(label, 1200);
-        renderRevealed(order, poolById, i+1);
-        await new Promise(r => setTimeout(r, 350));
-      }
-      rouletteSub.textContent = "🎥 Replay terminé";
-    } finally{
-      replayLock = false;
-    }
+  function renderRevealedList(teams){
+    revealedList.innerHTML = teams.length
+      ? teams.map((t,i)=> `
+        <div class="card" style="margin:0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <div><b>#${i+1}</b> — ${esc(teamLabel(t))}</div>
+            <span class="pill">tirée</span>
+          </div>
+        </div>
+      `).join("")
+      : `<div class="muted">En attente…</div>`;
   }
 
-  btnReplay.addEventListener("click", async (e)=>{
+  function renderMatches(draw){
+    const seed1 = draw?.seed1 || null;
+    const seed2 = draw?.seed2 || null;
+    const { revealedTeams } = computeLists(draw);
+
+    // il faut 6 tirés pour avoir 4 matchs complets
+    if(revealedTeams.length < 6){
+      panelMatches.style.display = "none";
+      matchBody.innerHTML = "";
+      return;
+    }
+
+    // Règle:
+    // pick1 vs TS1   (MAIS tu veux TS1 en équipe A => inversion ici)
+    // pick2 vs pick3
+    // pick4 vs pick5
+    // pick6 vs TS2
+    const p1 = revealedTeams[0];
+    const p2 = revealedTeams[1];
+    const p3 = revealedTeams[2];
+    const p4 = revealedTeams[3];
+    const p5 = revealedTeams[4];
+    const p6 = revealedTeams[5];
+
+    const matches = [
+      { n: 1, A: seed1, B: p1 }, // ✅ inversion demandée
+      { n: 2, A: p2, B: p3 },
+      { n: 3, A: p4, B: p5 },
+      { n: 4, A: p6, B: seed2 }
+    ];
+
+    matchBody.innerHTML = matches.map(m => `
+      <tr>
+        <td><b>#${m.n}</b></td>
+        <td>${esc(teamLabel(m.A))}</td>
+        <td>${esc(teamLabel(m.B))}</td>
+      </tr>
+    `).join("");
+
+    panelMatches.style.display = "block";
+  }
+
+  function updateHeader(draw){
+    panelMain.style.display = "block";
+
+    seed1El.textContent = draw?.seed1 ? teamLabel(draw.seed1) : "—";
+    seed2El.textContent = draw?.seed2 ? teamLabel(draw.seed2) : "—";
+  }
+
+  function updateStatus(draw){
+    const st = draw?.status || "idle";
+    const revealed = Number(draw?.revealed || 0);
+
+    // mode badge
+    if(replayMode){
+      modeBadge.textContent = "🎥 Mode REPLAY";
+    } else if(st === "running"){
+      modeBadge.textContent = "🟢 En direct";
+    } else {
+      modeBadge.textContent = "";
+    }
+
+    // texte principal
+    if(!draw){
+      statusText.textContent = "⏳ Tirage non prêt.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "idle"){
+      statusText.textContent = "📥 Urne prête. Tirage pas encore lancé.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "running"){
+      statusText.textContent = `🎰 Tirage en cours… (${revealed}/6 révélées)`;
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "pending_validation"){
+      statusText.textContent = "🏁 Tirage fini — en attente de validation par le comité du tournoi.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "validated"){
+      statusText.textContent = "✅ Tirage validé.";
+      const d = fmtDate(draw.validatedAt);
+      validatedAtEl.textContent = d ? ("🗓️ Validé le " + d) : "";
+      return;
+    }
+
+    statusText.textContent = "—";
+  }
+
+  async function applyLiveRevealAnimation(draw){
+    if(replayMode) return;
+    if(liveAnimating) return;
+
+    const st = draw?.status || "idle";
+    if(st !== "running" && st !== "pending_validation" && st !== "validated") return;
+
+    const { poolById, revealedIds, remainingTeams } = computeLists(draw);
+
+    // urne mise à jour tout le temps
+    renderUrne(remainingTeams, draw);
+
+    // si revealed a augmenté : on anime chaque nouvelle révélation
+    if(revealedIds.length <= shownCount){
+      // rien de nouveau : juste garantir que la liste affichée est cohérente
+      const shownTeams = revealedShownIds.map(id => poolById.get(id)).filter(Boolean);
+      renderRevealedList(shownTeams);
+      renderMatches(draw);
+      return;
+    }
+
+    liveAnimating = true;
+
+    while(shownCount < revealedIds.length){
+      const id = revealedIds[shownCount];
+      const t = poolById.get(id);
+      // ✅ animation d'abord, puis on “affiche” dans la liste
+      await rouletteSpin(teamLabel(t), 1300);
+      revealedShownIds.push(id);
+      shownCount++;
+
+      const shownTeams = revealedShownIds.map(x => poolById.get(x)).filter(Boolean);
+      renderRevealedList(shownTeams);
+      renderMatches(draw);
+      renderUrne(remainingTeams, draw); // recalcul ok, et masque si 6/6
+    }
+
+    liveAnimating = false;
+  }
+
+  async function doReplay(draw){
+    if(!draw || draw.status !== "validated"){
+      alert("Replay disponible uniquement quand le tirage est validé.");
+      return;
+    }
+
+    replayMode = true;
+    replayAbort = false;
+    btnReplay.style.display = "none";
+    btnStopReplay.style.display = "inline-flex";
+
+    updateStatus(draw);
+
+    const { poolById, revealedIds } = computeLists(draw);
+
+    // reset affichage
+    shownCount = 0;
+    revealedShownIds = [];
+    wheel.textContent = "—";
+    wheelSub.textContent = "Replay en cours…";
+    renderRevealedList([]);
+
+    // urne cachée en replay (optionnel) — tu peux la laisser si tu veux
+    urneBlock.style.display = "none";
+
+    for(let i=0;i<revealedIds.length;i++){
+      if(replayAbort) break;
+      const id = revealedIds[i];
+      const t = poolById.get(id);
+      await rouletteSpin(teamLabel(t), 1300);
+      revealedShownIds.push(id);
+
+      const shownTeams = revealedShownIds.map(x => poolById.get(x)).filter(Boolean);
+      renderRevealedList(shownTeams);
+      renderMatches(draw);
+    }
+
+    btnStopReplay.style.display = "none";
+    btnReplay.style.display = "inline-flex";
+
+    replayMode = false;
+    replayAbort = false;
+
+    // revenir à un état “normal”
+    updateStatus(currentDraw);
+    wheelSub.textContent = "✅ Replay terminé";
+  }
+
+  btnReplay.onclick = async (e)=>{
     e.preventDefault();
-    if(lastData) await playReplay(lastData);
-  });
+    await doReplay(currentDraw);
+  };
 
-  // Live listener
-  onSnapshot(DRAW_REF, async (snap) => {
-    if(!snap.exists()){
-      stateMsg.textContent = "⏳ Tirage non lancé (en attente).";
-      liveBox.style.display = "none";
-      validatedBox.style.display = "none";
-      lastRevealed = 0;
-      lastData = null;
+  btnStopReplay.onclick = (e)=>{
+    e.preventDefault();
+    replayAbort = true;
+  };
+
+  onSnapshot(DRAW_REF, async (snap)=>{
+    currentDraw = snap.exists() ? (snap.data() || {}) : null;
+
+    if(!currentDraw){
+      panelMain.style.display = "none";
+      panelMatches.style.display = "none";
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
+      statusText.textContent = "⏳ Tirage non prêt.";
+      modeBadge.textContent = "";
+      validatedAtEl.textContent = "";
       return;
     }
 
-    const d = snap.data() || {};
-    lastData = d;
+    // afficher seeds/pool etc
+    updateHeader(currentDraw);
+    updateStatus(currentDraw);
 
-    const status = d.status || "idle";
-    const order = d.order || [];
-    const pool = d.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-    const revealed = Number(d.revealed || 0);
-
-    if(status === "validated"){
-      stateMsg.textContent = "✅ Tirage validé — visible ci-dessous.";
-      validatedBox.style.display = "block";
-      liveBox.style.display = "none";
-      validatedAtEl.textContent = `✅ Tirage validé le ${fmtDate(d.validatedAt)}`;
-      renderBracket(d);
-      return;
+    // bouton replay visible uniquement si validated
+    if(currentDraw.status === "validated"){
+      if(!replayMode) btnReplay.style.display = "inline-flex";
+    } else {
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
     }
 
-    // running / pending_validation
-    if(status === "running" || status === "pending_validation"){
-      validatedBox.style.display = "none";
-      liveBox.style.display = "block";
-      stateMsg.textContent = (status === "running")
-        ? "🔴 Tirage en cours (live)…"
-        : "⏳ Tirage terminé — en attente de validation par l’admin.";
-
-      // render list
-      renderRevealed(order, poolById, revealed);
-
-      // si nouveau reveal, joue animation une fois
-      if(revealed > lastRevealed && revealed <= order.length){
-        const id = order[revealed - 1];
-        const t = poolById.get(id);
-        await rouletteSpin(teamLabel(t), 1400);
-        lastRevealed = revealed;
-      } else {
-        // état “stable”
-        wheel.textContent = revealed > 0 ? teamLabel(poolById.get(order[revealed-1])) : "—";
-        rouletteSub.textContent = revealed > 0 ? "✅ Dernier tirage affiché" : "En attente du prochain tirage…";
-        lastRevealed = revealed;
-      }
-
-      return;
+    // LIVE : animation + reveal (pas immédiat)
+    if(!replayMode){
+      await applyLiveRevealAnimation(currentDraw);
     }
-
-    // idle
-    stateMsg.textContent = "⏳ Tirage non lancé (en attente).";
-    liveBox.style.display = "none";
-    validatedBox.style.display = "none";
-    lastRevealed = 0;
-
-  }, (err) => {
+  }, (err)=>{
     console.error(err);
-    stateMsg.textContent = "❌ Impossible de charger le tirage. Réessaie plus tard.";
+    statusText.textContent = "🔴 Erreur de connexion au tirage.";
   });
 </script>
 
