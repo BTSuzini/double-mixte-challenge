@@ -50,24 +50,10 @@
     <p class="muted" id="subtitle" style="margin-top:10px;"></p>
   </section>
 
-  <!-- CHRONO -->
+  <!-- CHRONO (encarts) -->
   <section class="card" id="panelChrono" style="display:none;">
     <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
-
-    <div class="table-wrap">
-      <table class="teams-table" aria-label="Planning">
-        <thead>
-          <tr>
-            <th style="width:90px;">Heure</th>
-            <th style="width:240px;">Terrain</th>
-            <th style="width:70px;">Match</th>
-            <th>Rencontre</th>
-            <th style="width:110px;">Statut</th>
-          </tr>
-        </thead>
-        <tbody id="chronoBody"></tbody>
-      </table>
-    </div>
+    <div id="chronoCards" style="display:grid; gap:12px;"></div>
   </section>
 
   <!-- TABLEAU -->
@@ -93,10 +79,9 @@
       <table class="teams-table" aria-label="Tableau">
         <thead>
           <tr>
-            <th style="width:70px;">Match</th>
             <th>Équipe A</th>
             <th>Équipe B</th>
-            <th style="width:140px;">Résultat</th>
+            <th style="width:160px;">Résultat</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -112,7 +97,7 @@
 
 <style>
   .table-wrap{ overflow:auto; border:1px solid #eee; border-radius:14px; background:#fff; }
-  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:820px; }
+  .teams-table{ width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
   .teams-table thead th{
     text-align:left; font-size:13px; color:#444; background:#f7f7f7;
     border-bottom:1px solid #eee; padding:12px; position:sticky; top:0; z-index:1;
@@ -120,17 +105,88 @@
   }
   .teams-table tbody td{ padding:12px; border-bottom:1px solid #f0f0f0; font-size:14px; vertical-align:top; }
   .teams-table tbody tr:last-child td{ border-bottom:none; }
+
   .pill{
     display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
     border:1px solid #eee; background:#fafafa; white-space:nowrap;
+  }
+
+  /* --- CARTES CHRONO --- */
+  .match-card{
+    border-radius:16px;
+    border:1px solid rgba(0,0,0,.06);
+    padding:12px 14px;
+    background:#fff;
+  }
+  .match-card.courtA{ background:rgba(255, 214, 0, .14); border-color:rgba(255, 214, 0, .35); }
+  .match-card.courtB{ background:rgba(230, 57, 70, .10); border-color:rgba(230, 57, 70, .28); }
+
+  .match-top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .match-time{
+    font-weight:1000;
+    font-size:16px;
+    white-space:nowrap;
+  }
+  .court-title{
+    font-style:italic;
+    font-weight:900;
+    text-align:right;
+  }
+
+  .teams{
+    display:grid;
+    grid-template-columns: 1fr 90px;
+    gap:12px;
+    align-items:stretch;
+  }
+
+  .team-block{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
+  }
+  .team-line{
+    font-weight:1000;
+    font-size:15px;
+    line-height:1.2;
+  }
+  .vs-line{
+    text-align:center;
+    font-weight:900;
+    opacity:.55;
+    margin:4px 0;
+  }
+
+  .score-box{
+    border-radius:14px;
+    border:1px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.65);
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-width:90px;
+  }
+  .score-top{ font-weight:1000; font-size:16px; }
+  .score-bot{ font-weight:1000; font-size:16px; margin-top:10px; }
+  .score-muted{ opacity:.65; font-weight:900; font-size:12px; margin-left:6px; }
+  .note{
+    margin-top:10px;
+    font-weight:900;
+    opacity:.75;
   }
 </style>
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
-  import {
-    doc, onSnapshot, collection
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const scope = "etape5";
 
@@ -143,7 +199,7 @@
   const panelChrono = document.getElementById("panelChrono");
   const panelTableau = document.getElementById("panelTableau");
 
-  const chronoBody = document.getElementById("chronoBody");
+  const chronoCards = document.getElementById("chronoCards");
 
   const selBracket = document.getElementById("selBracket");
   const selRound = document.getElementById("selRound");
@@ -153,7 +209,7 @@
   const RESULTS_COL = collection(db, `resultats_${scope}`);
 
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> {winnerSide:"A"|"B", score, updatedAt}
+  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreDisplay, updatedAt}
 
   function esc(s){
     return (s ?? "").toString()
@@ -165,9 +221,12 @@
     return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
   }
 
-  function courtLabel(courtKey){
+  function courtMeta(courtKey){
     const c = currentProg?.courts || {};
-    return c[courtKey] || (courtKey || "—");
+    const name = c[courtKey] || courtKey || "—";
+    if(courtKey === "A") return { name, emoji:"🐝", cls:"courtA" };
+    if(courtKey === "B") return { name, emoji:"🌶️", cls:"courtB" };
+    return { name, emoji:"🎾", cls:"" };
   }
 
   function roundOptions(bracket){
@@ -195,7 +254,6 @@
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
   }
 
-  // Résolution des équipes (direct / winner / loser)
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -228,9 +286,26 @@
     return null;
   }
 
-  function renderChrono(){
+  function scoreLinesForMatch(matchId){
+    const res = resultsByMatch.get(matchId);
+    if(!res || !res.scoreDisplay){
+      return { top:"—", bot:"—", raw:"" };
+    }
+    const s = String(res.scoreDisplay || "").trim();
+    const parts = s.split(/\s+/).filter(Boolean);
+
+    let top = "—";
+    let bot = "—";
+    if(parts.length >= 1){
+      const p = parts[0].split("/");
+      if(p.length === 2){ top = p[0]; bot = p[1]; }
+    }
+    return { top, bot, raw: s };
+  }
+
+  function renderChronoCards(){
     if(!currentProg){
-      chronoBody.innerHTML = "";
+      chronoCards.innerHTML = "";
       return;
     }
 
@@ -238,13 +313,13 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     Object.entries(schedule).forEach(([mid, slotNum])=>{
       slotToMatch.set(Number(slotNum), mid);
     });
 
-    const rows = [];
+    const cards = [];
+
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
@@ -253,36 +328,38 @@
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
 
-      const res = resultsByMatch.get(mid);
-      const done = !!(res && res.winnerSide);
-
       const aTxt = teamA ? teamLabel(teamA) : (m.A.type === "team" ? m.A.key : (m.A.type === "winner" ? `V${m.A.matchId.slice(1)}` : `P${m.A.matchId.slice(1)}`));
       const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
 
-      rows.push({
-        time: s.time,
-        courtKey: s.court,
-        courtName: courtLabel(s.court),
-        note: s.note || "",
-        matchId: mid,
-        A: aTxt,
-        B: bTxt,
-        status: done ? "✅ Terminé" : "⏳ À venir"
-      });
+      const cm = courtMeta(s.court);
+      const sc = scoreLinesForMatch(mid);
+
+      cards.push(`
+        <div class="match-card ${esc(cm.cls)}">
+          <div class="match-top">
+            <div class="match-time">${esc(s.time)}</div>
+            <div class="court-title">${esc(cm.emoji)} ${esc(cm.name)} ${esc(cm.emoji)}</div>
+          </div>
+
+          <div class="teams">
+            <div class="team-block">
+              <div class="team-line">${esc(aTxt)}</div>
+              <div class="vs-line">vs</div>
+              <div class="team-line">${esc(bTxt)}</div>
+            </div>
+
+            <div class="score-box" title="${esc(sc.raw || "")}">
+              <div class="score-top">${esc(sc.top)} <span class="score-muted">A</span></div>
+              <div class="score-bot">${esc(sc.bot)} <span class="score-muted">B</span></div>
+            </div>
+          </div>
+
+          ${s.note ? `<div class="note">⚠️ ${esc(s.note)}</div>` : ""}
+        </div>
+      `);
     }
 
-    chronoBody.innerHTML = rows.map(r => `
-      <tr>
-        <td><b>${esc(r.time)}</b></td>
-        <td>
-          <span class="pill">${esc(r.courtName)}</span>
-          ${r.note ? `<div class="muted" style="margin-top:6px;">⚠️ ${esc(r.note)}</div>` : ""}
-        </td>
-        <td><b>${esc(r.matchId)}</b></td>
-        <td>${esc(r.A)} <span class="muted">vs</span> ${esc(r.B)}</td>
-        <td>${esc(r.status)}</td>
-      </tr>
-    `).join("");
+    chronoCards.innerHTML = cards.join("") || `<div class="muted">Aucun match à afficher.</div>`;
   }
 
   function renderTableau(){
@@ -307,21 +384,25 @@
       const bTxt = teamB ? teamLabel(teamB) : (m.B.type === "team" ? m.B.key : (m.B.type === "winner" ? `V${m.B.matchId.slice(1)}` : `P${m.B.matchId.slice(1)}`));
 
       const res = resultsByMatch.get(m.id);
-      const score = res?.score ? res.score : "—";
-      const win = res?.winnerSide ? ("Gagnant: " + res.winnerSide) : "—";
+      const s = res?.scoreDisplay ? String(res.scoreDisplay) : "—";
+      const parts = s.split(/\s+/).filter(Boolean);
+      let top = "—", bot = "—";
+      if(parts.length >= 1){
+        const p = parts[0].split("/");
+        if(p.length === 2){ top = p[0]; bot = p[1]; }
+      }
 
       return `
         <tr>
-          <td><b>${esc(m.id)}</b></td>
           <td>${esc(aTxt)}</td>
           <td>${esc(bTxt)}</td>
-          <td>
-            <div class="muted">${esc(win)}</div>
-            <div><b>${esc(score)}</b></div>
+          <td title="${esc(s === "—" ? "" : s)}">
+            <div><b>${esc(top)}</b> <span class="muted">(A)</span></div>
+            <div style="margin-top:6px;"><b>${esc(bot)}</b> <span class="muted">(B)</span></div>
           </td>
         </tr>
       `;
-    }).join("") || `<tr><td colspan="4" class="muted">Aucun match pour ce filtre.</td></tr>`;
+    }).join("") || `<tr><td colspan="3" class="muted">Aucun match pour ce filtre.</td></tr>`;
   }
 
   function refreshRounds(){
@@ -330,41 +411,36 @@
   }
 
   function renderAll(){
-    renderChrono();
+    renderChronoCards();
     renderTableau();
   }
 
-  // ---- Tabs UI
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
 
-  // ---- Filters
   selBracket.onchange = ()=>{
     refreshRounds();
     renderTableau();
   };
   selRound.onchange = ()=> renderTableau();
 
-  // init UI
   setActiveTab("chrono");
   refreshRounds();
   selRound.value = "QF";
 
-  // ---- Listen results (live) — ✅ corrigé (onSnapshot sur collection)
   onSnapshot(RESULTS_COL, (snap)=>{
     resultsByMatch = new Map();
     snap.forEach(d=>{
       const x = d.data() || {};
       resultsByMatch.set(d.id, {
         winnerSide: x.winnerSide || null,
-        score: x.score || "",
+        scoreDisplay: x.scoreDisplay || "",
         updatedAt: x.updatedAt || null
       });
     });
     renderAll();
   });
 
-  // ---- Listen programmation
   onSnapshot(PROG_REF, (snap)=>{
     currentProg = snap.exists() ? (snap.data() || {}) : null;
 
