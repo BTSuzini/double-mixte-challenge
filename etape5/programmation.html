@@ -85,7 +85,6 @@
 </main>
 
 <style>
-  /* ====== Cards list ====== */
   .match-list{ display:flex; flex-direction:column; gap:14px; }
 
   /* Encarts couleur terrain */
@@ -93,37 +92,26 @@
     border-radius:18px;
     border:2px solid rgba(0,0,0,.06);
     padding:14px;
+    background:#fff;
     box-shadow:0 1px 0 rgba(0,0,0,.03);
   }
   .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
   .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
 
-  /* Layout anti-chevauchement (✅ le score ne recouvre jamais la ligne court) */
-  .match-grid{
-    display:grid;
-    grid-template-columns: 1fr 92px; /* score fixe à droite */
-    gap:12px;
-    align-items:stretch;
-  }
-
-  /* Colonne gauche */
-  .match-left{ min-width:0; } /* nécessaire pour ellipsis */
-  .match-topline{
+  /* Ligne 1: heure + court + statut */
+  .match-head{
     display:flex;
     align-items:baseline;
-    gap:10px;
+    gap:12px;
     min-width:0;
   }
-  .match-time{
+  .m-time{
     font-size:34px;
     font-weight:900;
-    letter-spacing:.2px;
     white-space:nowrap;
   }
-
-  /* court: plus petit, pas gras, italique, sur 1 ligne */
-  .match-court{
-    font-size:16px;
+  .m-court{
+    font-size:15px;
     font-weight:600;
     font-style:italic;
     opacity:.95;
@@ -133,86 +121,68 @@
     min-width:0;
     flex:1;
   }
-
-  /* statut = emoji seul */
-  .match-status{
+  .m-status{
     font-size:22px;
     line-height:1;
     white-space:nowrap;
   }
 
-  .match-body{
-    margin-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+  /* Mini tableau score (S1 S2 TB) */
+  .score-head{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 34px 34px 38px;
+    align-items:center;
+    gap:8px;
+    opacity:.65;
+    font-weight:900;
+    font-size:12px;
+    letter-spacing:.4px;
   }
+  .score-head .sh{ text-align:right; }
 
-  .team-line{
-    font-size:22px;
+  .team-row{
+    margin-top:8px;
+    display:grid;
+    grid-template-columns: 1fr 34px 34px 38px;
+    align-items:center;
+    gap:8px;
+  }
+  .team-name{
+    font-size:20px;
     font-weight:900;
     line-height:1.15;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .sc{
+    text-align:right;
+    font-size:18px;
+    font-weight:900;
+    white-space:nowrap;
   }
 
   .vs-line{
+    margin:10px 0 6px;
     text-align:center;
-    font-size:18px;
     font-weight:900;
-    opacity:.55;
     letter-spacing:2px;
+    opacity:.55;
   }
 
-  /* Colonne score */
-  .score-box{
-    border-radius:16px;
-    border:2px solid rgba(0,0,0,.08);
-    background:rgba(255,255,255,.55);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    padding:10px 10px;
-    height:100%;
-  }
-  .score-row{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    font-weight:900;
-    font-size:18px;
-    padding:6px 0;
-  }
-  .score-row + .score-row{ border-top:1px solid rgba(0,0,0,.08); }
-
-  .score-side{
-    font-size:14px;
-    font-weight:900;
-    opacity:.65;
-    width:18px;
-    text-align:left;
-  }
-  .score-val{
-    font-size:22px;
-    font-weight:900;
-    width:36px;
-    text-align:right;
-  }
-
-  /* responsive: sur petits écrans, on réduit un peu l’heure */
   @media (max-width: 380px){
-    .match-time{ font-size:30px; }
-    .team-line{ font-size:20px; }
-    .score-val{ font-size:20px; }
-    .match-grid{ grid-template-columns: 1fr 86px; }
+    .m-time{ font-size:30px; }
+    .team-name{ font-size:18px; }
+    .sc{ font-size:17px; }
+    .score-head{ font-size:11px; }
   }
 </style>
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
-  import {
-    doc, onSnapshot, collection
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const scope = "etape5";
 
@@ -235,7 +205,7 @@
   const RESULTS_COL = collection(db, `resultats_${scope}`);
 
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> {winnerSide, scoreA, scoreB, s1A...}
+  let resultsByMatch = new Map();
 
   function esc(s){
     return (s ?? "").toString()
@@ -269,31 +239,33 @@
 
   function teamShort(t){
     if(!t) return "—";
-    const tn = t.teamName || "Équipe";
     const p1 = t.p1FirstName || "?";
     const p2 = t.p2FirstName || "?";
-    return `${tn} (${p1} / ${p2})`;
+    return `${p1} / ${p2}`;
   }
 
-  function courtMeta(courtKey){
-    // A = 🐝 jaune, B = 🌶️ rouge
-    if(courtKey === "A"){
-      return { cls:"courtA", emoji:"🐝", name: currentProg?.courts?.A || "court A" };
-    }
-    if(courtKey === "B"){
-      return { cls:"courtB", emoji:"🌶️", name: currentProg?.courts?.B || "court B" };
-    }
-    return { cls:"", emoji:"", name: courtKey || "—" };
+  function courtLabel(courtKey){
+    const c = currentProg?.courts || {};
+    const name = c[courtKey] || (courtKey || "—");
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
+    return emo ? `${emo} ${name} ${emo}` : name;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
 
   function statusEmoji(res){
-    // emoji seul : ⏳ à venir / 🟢 en cours / ✅ terminé
     if(res?.winnerSide === "A" || res?.winnerSide === "B") return "✅";
-    const hasSomething =
+    const hasAny =
       (res?.s1A != null) || (res?.s1B != null) ||
       (res?.s2A != null) || (res?.s2B != null) ||
       (res?.s3A != null) || (res?.s3B != null);
-    return hasSomething ? "🟢" : "⏳";
+    return hasAny ? "🟢" : "⏳";
+  }
+
+  function fmt(x){
+    return (x === null || x === undefined) ? "—" : String(x);
   }
 
   // Résolution des équipes (direct / winner / loser)
@@ -305,9 +277,7 @@
 
     if(!ref) return null;
 
-    if(ref.type === "team"){
-      return teams[ref.key] || null;
-    }
+    if(ref.type === "team") return teams[ref.key] || null;
 
     if(ref.type === "winner" || ref.type === "loser"){
       const mid = ref.matchId;
@@ -329,55 +299,59 @@
     return null;
   }
 
-  function renderCard({time, courtKey, teamA, teamB, res}){
-    const cm = courtMeta(courtKey);
-
-    const aTxt = teamShort(teamA);
-    const bTxt = teamShort(teamB);
-
-    // Score affiché en 2 lignes (haut = A, bas = B)
-    const scoreA = (res?.scoreA && res.scoreA.trim()) ? res.scoreA : "—";
-    const scoreB = (res?.scoreB && res.scoreB.trim()) ? res.scoreB : "—";
-
+  function renderMatchCard({ time, courtKey, teamA, teamB, res }){
     const st = statusEmoji(res);
+    const cls = courtClass(courtKey);
+    const court = courtLabel(courtKey);
+
+    // Scores (A = équipe du haut / B = équipe du bas)
+    const s1A = fmt(res?.s1A);
+    const s2A = fmt(res?.s2A);
+    const tbA = fmt(res?.s3A);
+
+    const s1B = fmt(res?.s1B);
+    const s2B = fmt(res?.s2B);
+    const tbB = fmt(res?.s3B);
+
+    const nameA = teamShort(teamA);
+    const nameB = teamShort(teamB);
 
     return `
-      <div class="match-card ${esc(cm.cls)}">
-        <div class="match-grid">
-          <div class="match-left">
-            <div class="match-topline">
-              <div class="match-time">${esc(time)}</div>
-              <div class="match-court">${esc(cm.emoji)} <span>${esc(cm.name)}</span> ${esc(cm.emoji)}</div>
-              <div class="match-status" title="Statut">${esc(st)}</div>
-            </div>
+      <div class="match-card ${esc(cls)}">
+        <div class="match-head">
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(court)}</div>
+          <div class="m-status" title="Statut">${esc(st)}</div>
+        </div>
 
-            <div class="match-body">
-              <div class="team-line">${esc(aTxt)}</div>
-              <div class="vs-line">VS</div>
-              <div class="team-line">${esc(bTxt)}</div>
-            </div>
-          </div>
+        <div class="score-head">
+          <div></div>
+          <div class="sh">S1</div>
+          <div class="sh">S2</div>
+          <div class="sh">TB</div>
+        </div>
 
-          <div class="score-box" aria-label="Score">
-            <div class="score-row">
-              <span class="score-side">A</span>
-              <span class="score-val">${esc(scoreA)}</span>
-            </div>
-            <div class="score-row">
-              <span class="score-side">B</span>
-              <span class="score-val">${esc(scoreB)}</span>
-            </div>
-          </div>
+        <div class="team-row">
+          <div class="team-name">${esc(nameA)}</div>
+          <div class="sc">${esc(s1A)}</div>
+          <div class="sc">${esc(s2A)}</div>
+          <div class="sc">${esc(tbA)}</div>
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-name">${esc(nameB)}</div>
+          <div class="sc">${esc(s1B)}</div>
+          <div class="sc">${esc(s2B)}</div>
+          <div class="sc">${esc(tbB)}</div>
         </div>
       </div>
     `;
   }
 
   function renderChrono(){
-    if(!currentProg){
-      chronoList.innerHTML = "";
-      return;
-    }
+    if(!currentProg){ chronoList.innerHTML = ""; return; }
 
     const matches = currentProg.matches || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
@@ -390,7 +364,6 @@
     });
 
     const cards = [];
-
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
@@ -400,23 +373,21 @@
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(mid) || null;
 
-      cards.push(renderCard({
+      cards.push(renderMatchCard({
         time: s.time,
         courtKey: s.court,
-        teamA,
-        teamB,
+        teamA, teamB,
         res
       }));
     }
 
-    chronoList.innerHTML = `<div class="match-list">${cards.join("")}</div>`;
+    chronoList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match.</p>`;
   }
 
   function renderTableau(){
-    if(!currentProg){
-      tableList.innerHTML = "";
-      return;
-    }
+    if(!currentProg){ tableList.innerHTML = ""; return; }
 
     const bracket = selBracket.value;
     const round = selRound.value;
@@ -426,35 +397,24 @@
       .filter(m => m.bracket === bracket && m.round === round)
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
+    const schedule = currentProg.schedule || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+
     const cards = list.map(m=>{
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(m.id) || null;
 
-      // pour le tableau : on ne “dépend” pas d’un slot => on choisit le court via le slot actuel si dispo
-      // on essaye de retrouver court/time depuis schedule+slots, sinon court A par défaut pour la couleur
+      // on récupère court+heure depuis le slot du match (si dispo)
       let courtKey = "A";
       let time = "—";
-
-      const schedule = currentProg.schedule || {};
-      const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
       const slotNum = schedule[m.id];
-
       if(slotNum){
         const s = slots.find(x => Number(x.slot) === Number(slotNum));
-        if(s){
-          courtKey = s.court || "A";
-          time = s.time || "—";
-        }
+        if(s){ courtKey = s.court || "A"; time = s.time || "—"; }
       }
 
-      return renderCard({
-        time,
-        courtKey,
-        teamA,
-        teamB,
-        res
-      });
+      return renderMatchCard({ time, courtKey, teamA, teamB, res });
     });
 
     tableList.innerHTML = cards.length
@@ -472,32 +432,26 @@
     renderTableau();
   }
 
-  // ---- Tabs UI
+  // Tabs
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
 
-  // ---- Filters
-  selBracket.onchange = ()=>{
-    refreshRounds();
-    renderTableau();
-  };
+  // Filters
+  selBracket.onchange = ()=>{ refreshRounds(); renderTableau(); };
   selRound.onchange = ()=> renderTableau();
 
-  // init UI
+  // init
   setActiveTab("chrono");
   refreshRounds();
   selRound.value = "QF";
 
-  // ---- Listen results (live)
+  // Listen results
   onSnapshot(RESULTS_COL, (snap)=>{
     resultsByMatch = new Map();
     snap.forEach(d=>{
       const x = d.data() || {};
       resultsByMatch.set(d.id, {
         winnerSide: x.winnerSide || null,
-        score: x.score || "",
-        scoreA: x.scoreA || "",
-        scoreB: x.scoreB || "",
         s1A: (x.s1A === undefined ? null : x.s1A),
         s1B: (x.s1B === undefined ? null : x.s1B),
         s2A: (x.s2A === undefined ? null : x.s2A),
@@ -510,7 +464,7 @@
     renderAll();
   });
 
-  // ---- Listen programmation
+  // Listen programmation
   onSnapshot(PROG_REF, (snap)=>{
     currentProg = snap.exists() ? (snap.data() || {}) : null;
 
@@ -524,7 +478,6 @@
 
     statusText.textContent = "✅ Programmation disponible.";
     subtitle.textContent = "🧩 Tableau + 🕒 Chronologique (mise à jour en direct).";
-
     panelChrono.style.display = "block";
     renderAll();
   }, (err)=>{
