@@ -91,7 +91,7 @@
     <div id="adminList" style="margin-top:12px;"></div>
 
     <p class="muted" style="margin-top:10px;">
-      💡 Les boutons ↑ ↓ échangent les <b>créneaux</b> entre matchs.
+      💡 ↑ ↓ échangent les <b>créneaux</b> (heure). Le bouton 🐝/🌶️ change le <b>terrain</b> sans changer l’heure.
     </p>
   </section>
 
@@ -123,7 +123,6 @@
     white-space:nowrap;
   }
 
-  /* ✅ heure = même taille que court */
   .m-time{
     font-size:13px;
     font-weight:900;
@@ -131,7 +130,6 @@
     letter-spacing:.2px;
   }
 
-  /* ✅ court pas en gras */
   .m-court{
     font-size:13px;
     font-weight:400;
@@ -161,7 +159,6 @@
   .btnx:hover{ background:#f5f5f5; }
   .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
-  /* ✅ plus de ligne d’en-tête S1/S2/TB */
   .team-row{
     margin-top:10px;
     display:grid;
@@ -194,6 +191,7 @@
     font-size:15px;
     font-weight:900;
     white-space:nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .vs-line{
@@ -218,7 +216,7 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
@@ -244,7 +242,10 @@
 
   let currentScope = scopeFromUrl;
   let unsubProg = null;
+  let unsubRes = null;
+
   let currentProg = null;
+  let resultsByMatch = new Map(); // matchId -> result doc
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -291,28 +292,38 @@
 
   function progRef(scope){ return doc(db, "programmations", scope); }
   function drawRef(scope){ return doc(db, "tirages", scope); }
+  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
   function defaultCourts(){
     return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
+  // ✅ LOGIQUE OFFICIELLE (fixe) — matchId ne change jamais
   function buildMatches(){
     return {
-      M1:{id:"M1",n:1,A:{type:"team",key:"E4"},B:{type:"team",key:"E5"}},
-      M2:{id:"M2",n:2,A:{type:"team",key:"E6"},B:{type:"team",key:"E7"}},
-      M3:{id:"M3",n:3,A:{type:"team",key:"TS1"},B:{type:"team",key:"E3"}},
-      M4:{id:"M4",n:4,A:{type:"team",key:"TS2"},B:{type:"team",key:"E8"}},
-      M5:{id:"M5",n:5,A:{type:"loser",matchId:"M1"},B:{type:"loser",matchId:"M2"}},
-      M6:{id:"M6",n:6,A:{type:"loser",matchId:"M3"},B:{type:"loser",matchId:"M4"}},
-      M7:{id:"M7",n:7,A:{type:"winner",matchId:"M1"},B:{type:"winner",matchId:"M2"}},
-      M8:{id:"M8",n:8,A:{type:"winner",matchId:"M3"},B:{type:"winner",matchId:"M4"}},
-      M9:{id:"M9",n:9,A:{type:"loser",matchId:"M5"},B:{type:"loser",matchId:"M6"}},
-      M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"},B:{type:"winner",matchId:"M6"}},
-      M11:{id:"M11",n:11,A:{type:"loser",matchId:"M7"},B:{type:"loser",matchId:"M8"}},
-      M12:{id:"M12",n:12,A:{type:"winner",matchId:"M7"},B:{type:"winner",matchId:"M8"}},
+      // Quarts
+      M1:{id:"M1",n:1,  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
+      M2:{id:"M2",n:2,  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
+      M3:{id:"M3",n:3,  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
+      M4:{id:"M4",n:4,  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
+
+      // 5-8 (demi)
+      M5:{id:"M5",n:5,  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
+      M6:{id:"M6",n:6,  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
+
+      // Tableau principal (demi)
+      M7:{id:"M7",n:7,  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
+      M8:{id:"M8",n:8,  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
+
+      // Classements
+      M9:{id:"M9",n:9,   A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
+      M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
+      M11:{id:"M11",n:11,A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
+      M12:{id:"M12",n:12,A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
     };
   }
 
+  // Slots = créneaux "heure (+ note)". On garde court en legacy mais il n’est plus “source de vérité”.
   function defaultSlots(){
     return [
       { slot:1,  time:"18:00", court:"A" },
@@ -328,6 +339,23 @@
       { slot:11, time:"22:10", court:"A" },
       { slot:12, time:"22:35", court:"B" },
     ];
+  }
+
+  // ✅ schedule normalization (compat: number OR {slot,court})
+  function normalizeScheduleEntry(entry, slotObj){
+    // entry can be: 5 OR {slot:5,court:"A"}
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
   }
 
   async function generateFromValidatedDraw(scope){
@@ -360,11 +388,16 @@
     const slots = defaultSlots();
     const courts = defaultCourts();
 
+    // ✅ NEW schedule format: schedule[mid] = {slot, court}
     const schedule = {};
-    Object.keys(matches).forEach(mid => schedule[mid] = matches[mid].n);
+    for(const mid of Object.keys(matches)){
+      const n = Number(matches[mid].n);
+      const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court: (n%2? "A":"B") };
+      schedule[mid] = normalizeScheduleEntry({ slot:n, court: slotObj.court }, slotObj);
+    }
 
     const payload = {
-      formatVersion: 2,
+      formatVersion: 3,
       scope,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -379,8 +412,8 @@
 
   function courtLabel(prog, courtKey){
     const name = prog?.courts?.[courtKey] || courtKey || "—";
-    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
-    return emo ? `${emo} ${name} ${emo}` : name;
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name} ${emo}`;
   }
 
   function courtClass(courtKey){
@@ -407,14 +440,22 @@
     return { title:"—", sub:"" };
   }
 
-  function renderAdminCard({slot, time, courtKey, note, teamA, teamB}){
+  function fmtScoreCell(v){
+    return (v === null || typeof v === "undefined" || v === "") ? "—" : String(v);
+  }
+
+  function renderAdminCard({slot, time, courtKey, note, teamA, teamB, mid, stored, isDone}){
     return `
       <div class="match-card ${esc(courtClass(courtKey))}">
         <div class="match-head">
-          <div class="m-slot">#${esc(slot)}</div>
+          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
           <div class="m-time">${esc(time)}</div>
           <div class="m-court">${esc(courtLabel(currentProg, courtKey))}</div>
+
           <div class="actions">
+            <button class="btnx" data-act="court" data-mid="${esc(mid)}" title="Changer de terrain">
+              ${courtKey === "A" ? "🐝" : "🌶️"}
+            </button>
             <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot<=1 ? "disabled":""}>↑</button>
             <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot>=12 ? "disabled":""}>↓</button>
           </div>
@@ -427,9 +468,9 @@
             <div class="team-title">${esc(teamA.title)}</div>
             ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ``}
           </div>
-          <div class="sc">—</div>
-          <div class="sc">—</div>
-          <div class="sc">—</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s1A))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s2A))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s3A))}</div>
         </div>
 
         <div class="vs-line">VS</div>
@@ -439,9 +480,13 @@
             <div class="team-title">${esc(teamB.title)}</div>
             ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ``}
           </div>
-          <div class="sc">—</div>
-          <div class="sc">—</div>
-          <div class="sc">—</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s1B))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s2B))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s3B))}</div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          ${isDone ? "✅ Résultat validé" : "⏳ Résultat en attente"}
         </div>
       </div>
     `;
@@ -454,8 +499,15 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
+    // slot -> mid (si collisions, on prend le premier trouvé)
     const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, slotNum])=> slotToMatch.set(Number(slotNum), mid));
+    for(const [mid, entry] of Object.entries(schedule)){
+      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const norm = normalizeScheduleEntry(entry, sObj);
+      if(!slotToMatch.has(norm.slot)){
+        slotToMatch.set(norm.slot, mid);
+      }
+    }
 
     const cards = [];
     for(const s of slots){
@@ -466,13 +518,23 @@
       const a = teamRefParts(currentProg, m.A);
       const b = teamRefParts(currentProg, m.B);
 
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
+
+      const stored = resultsByMatch.get(mid) || null;
+      const isDone = !!stored && (stored.winnerSide === "A" || stored.winnerSide === "B");
+
       cards.push(renderAdminCard({
         slot: s.slot,
         time: s.time,
-        courtKey: s.court,
+        courtKey,
         note: s.note || "",
         teamA: a,
-        teamB: b
+        teamB: b,
+        mid,
+        stored,
+        isDone
       }));
     }
 
@@ -489,19 +551,72 @@
     if(!snap.exists()) throw new Error("Programmation introuvable.");
 
     const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
     const schedule = prog.schedule || {};
 
-    const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, s]) => slotToMatch.set(Number(s), mid));
-
-    const mA = slotToMatch.get(Number(slotA)) || null;
-    const mB = slotToMatch.get(Number(slotB)) || null;
+    // Find match assigned to slotA and slotB (first match found)
+    let mA = null, mB = null;
+    for(const [mid, entry] of Object.entries(schedule)){
+      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const norm = normalizeScheduleEntry(entry, sObj);
+      if(norm.slot === Number(slotA) && !mA) mA = mid;
+      if(norm.slot === Number(slotB) && !mB) mB = mid;
+    }
 
     const newSchedule = { ...schedule };
-    if(mA) newSchedule[mA] = Number(slotB);
-    if(mB) newSchedule[mB] = Number(slotA);
+
+    function setEntry(mid, newSlot){
+      if(!mid) return;
+      const curEntry = newSchedule[mid];
+      const slotObj = slots.find(x => Number(x.slot) === Number(newSlot));
+      const norm = normalizeScheduleEntry(curEntry, slotObj);
+      newSchedule[mid] = { slot: Number(newSlot), court: norm.court };
+    }
+
+    setEntry(mA, slotB);
+    setEntry(mB, slotA);
 
     await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
+  }
+
+  async function toggleCourt(scope, mid){
+    const ref = progRef(scope);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) throw new Error("Programmation introuvable.");
+
+    const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+    const schedule = prog.schedule || {};
+
+    const entry = schedule[mid];
+    // derive slotObj
+    const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+    const slotObj = slots.find(x => Number(x.slot) === slotNum) || null;
+
+    const norm = normalizeScheduleEntry(entry, slotObj);
+    const nextCourt = (norm.court === "A") ? "B" : "A";
+
+    const newSchedule = { ...schedule, [mid]: { slot: norm.slot, court: nextCourt } };
+    await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
+  }
+
+  function stopListeners(){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+  }
+
+  function startResultsListener(scope){
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+    resultsByMatch = new Map();
+
+    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
+      resultsByMatch = new Map();
+      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
+      renderAdminList();
+    }, (err)=>{
+      console.error(err);
+      // pas bloquant : on garde la prog
+    });
   }
 
   function startProgListener(scope){
@@ -537,14 +652,16 @@
       panelNeedStep.style.display = "block";
       panelBuild.style.display = "none";
       panelSchedule.style.display = "none";
-      if(unsubProg){ unsubProg(); unsubProg = null; }
+      stopListeners();
       return;
     }
 
     panelNeedStep.style.display = "none";
     panelBuild.style.display = "block";
     panelSchedule.style.display = "block";
+
     startProgListener(scope);
+    startResultsListener(scope);
   }
 
   btnGenerate.onclick = async (e)=>{
@@ -577,12 +694,24 @@
     if(!currentProg){ alert("Pas de programmation."); return; }
 
     const act = btn.dataset.act;
-    const slot = Number(btn.dataset.slot);
 
     try{
       schedStatus.textContent = "Traitement…";
-      if(act === "up" && slot > 1) await swapSlots(currentScope, slot, slot-1);
-      if(act === "down" && slot < 12) await swapSlots(currentScope, slot, slot+1);
+
+      if(act === "up" || act === "down"){
+        const slot = Number(btn.dataset.slot);
+        if(!Number.isFinite(slot)) return;
+        if(act === "up" && slot > 1) await swapSlots(currentScope, slot, slot-1);
+        if(act === "down" && slot < 12) await swapSlots(currentScope, slot, slot+1);
+      }
+
+      if(act === "court"){
+        const mid = btn.dataset.mid;
+        if(!mid) return;
+        await toggleCourt(currentScope, mid);
+      }
+
+      schedStatus.textContent = "✅ OK";
     }catch(err){
       console.error(err);
       schedStatus.textContent = "❌ Erreur";
@@ -602,7 +731,7 @@
     panelNeedStep.style.display = "none";
     panelBuild.style.display = "none";
     panelSchedule.style.display = "none";
-    if(unsubProg){ unsubProg(); unsubProg = null; }
+    stopListeners();
   }
 
   function showAdmin(){
