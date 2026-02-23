@@ -250,19 +250,22 @@
     }
 
     // Zone Étape
-    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats / vérification / classement / RAZ.";
 
     const links = [
       ["👥 Équipes",        "equipes.html"],
       ["📝 Inscriptions",   "inscriptions.html"],
+      ["🔎 Vérification",   "verification.html"],
       ["🎲 Tirage",         "tirage.html"],
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
+      ["🧨 RAZ",            "raz.html"],
     ];
 
     // Repas : pas pour l’étape 5 (test)
     if(scope !== "etape5"){
-      links.splice(2, 0, ["🍽️ Repas", "repas.html"]);
+      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
     }else{
       // on affiche quand même un bouton “Repas (plus tard)” pour éviter la confusion
       tabsEl.appendChild(
