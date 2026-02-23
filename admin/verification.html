@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Vérification</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        🔎 Vérification (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <!-- ✅ Encart Zone (même partout) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour vérifier licences / classements / paiements.
+    </p>
+  </section>
+
+  <section class="card" id="panelVerify" style="display:none;">
+    <h2 style="margin:0 0 10px;">🔎 Vérification</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div id="cards" style="display:grid; gap:12px; margin-top:14px;"></div>
+
+    <p class="muted" style="margin-top:12px;">
+      💡 Clique sur un bouton pour faire tourner le statut :
+      <b>Non vérifié</b> → <b>OK</b> → <b>Non OK</b>.
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .team-card{
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+  }
+
+  .team-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .team-title{
+    font-size:16px;
+    font-weight:1000;
+    line-height:1.15;
+    margin:0;
+    min-width:0;
+  }
+  .team-sub{
+    margin-top:6px;
+    font-size:12px;
+    opacity:.75;
+  }
+
+  .row{
+    margin-top:12px;
+    border-top:1px solid rgba(0,0,0,.06);
+    padding-top:12px;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap:8px;
+    align-items:center;
+  }
+
+  .pname{
+    font-weight:950;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+  }
+
+  .vbtn{
+    width:100%;
+    padding:10px 10px;
+    border-radius:14px;
+    border:1px solid rgba(0,0,0,.12);
+    background:#fff;
+    cursor:pointer;
+    text-align:left;
+    font-weight:900;
+    line-height:1.05;
+  }
+  .vbtn:hover{ background:rgba(255,255,255,.88); }
+  .vbtn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .vlabel{
+    font-size:11px;
+    opacity:.7;
+    font-weight:900;
+    display:block;
+    margin-bottom:6px;
+  }
+
+  .vstatus{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    font-size:13px;
+    font-weight:1000;
+  }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid rgba(0,0,0,.12);
+    font-size:11px;
+    font-weight:1000;
+    white-space:nowrap;
+  }
+  .pill.nv{ opacity:.7; }
+  .pill.ok{ }
+  .pill.nok{ }
+
+  @media (max-width: 520px){
+    .row{
+      grid-template-columns: 1fr 1fr;
+    }
+    .pname{
+      grid-column:1 / -1;
+    }
+  }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    collection, doc, query, orderBy, onSnapshot, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // ---- scope (URL ?scope=etape5)
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape5";
+
+  // ---- DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelVerify   = document.getElementById("panelVerify");
+  const statusText    = document.getElementById("statusText");
+  const cards         = document.getElementById("cards");
+
+  // ---- state
+  let currentScope = scopeFromUrl;
+  let unsub = null;
+  let rows = [];
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : pas de vérification ici (choisis une étape).";
+
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / vérification / tirage / programmation / résultats / classement / RAZ.";
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ["🔎 Vérification",   "verification.html"],
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
+      ["🧨 RAZ",            "raz.html"],
+    ];
+
+    // Repas : pas pour l’étape 5 (test) — même logique que ton index
+    if(scope !== "etape5"){
+      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
+    }else{
+      const fake = document.createElement("a");
+      fake.className = "btn disabled";
+      fake.href = "#";
+      fake.setAttribute("aria-disabled","true");
+      fake.textContent = "🍽️ Repas (plus tard)";
+      fake.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
+      tabsEl.appendChild(fake);
+    }
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "verification.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function stop(){
+    if(unsub){ unsub(); unsub = null; }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelVerify.style.display = "none";
+      stop();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelVerify.style.display = "block";
+    startListener(scope);
+  }
+
+  // ---- Firestore
+  function inscriptionsCol(scope){
+    // ex: inscriptions_etape5_private
+    return collection(db, `inscriptions_${scope}_private`);
+  }
+
+  // ---- status helpers
+  const STATUS = {
+    nv: { label:"Non vérifié", pill:"nv" },
+    ok: { label:"OK",          pill:"ok" },
+    nok:{ label:"Non OK",      pill:"nok" },
+  };
+
+  function nextStatus(s){
+    const v = (s === "ok" || s === "nok" || s === "nv") ? s : "nv";
+    if(v === "nv") return "ok";
+    if(v === "ok") return "nok";
+    return "nv";
+  }
+
+  function statusToText(s){
+    const v = STATUS[s] ? s : "nv";
+    return STATUS[v].label;
+  }
+
+  function statusPillClass(s){
+    const v = STATUS[s] ? s : "nv";
+    return STATUS[v].pill;
+  }
+
+  function getVerif(docData, playerKey, itemKey){
+    // doc.verif.p1.licence / rank / payment
+    const v = docData?.verif?.[playerKey]?.[itemKey];
+    return (v === "ok" || v === "nok" || v === "nv") ? v : "nv";
+  }
+
+  function playerName(docData, idx){
+    // on affiche NOM Prénom (nom puis prénom)
+    const fn = (docData?.[`p${idx}FirstName`] || "").toString().trim();
+    const ln = (docData?.[`p${idx}LastName`]  || "").toString().trim();
+    const name = `${ln} ${fn}`.trim();
+    return name || `Joueur ${idx}`;
+  }
+
+  function teamName(docData){
+    const t = (docData?.teamName || "").toString().trim();
+    return t || "Équipe";
+  }
+
+  function badgeTextFromData(docData, idx){
+    // petit rappel sous l’équipe : licences/classements saisis (si dispo)
+    const lic = (docData?.[`p${idx}Licence`] ?? "").toString().trim();
+    const rk  = (docData?.[`p${idx}Rank`] ?? "").toString().trim();
+    const parts = [];
+    if(lic) parts.push(`Licence: ${lic}`);
+    if(rk)  parts.push(`Clt: ${rk}`);
+    return parts.join(" • ");
+  }
+
+  function render(){
+    statusText.textContent = rows.length
+      ? `✅ ${rows.length} équipe${rows.length>1?"s":""} (clic pour vérifier)`
+      : "ℹ️ Aucune inscription à vérifier.";
+
+    if(rows.length === 0){
+      cards.innerHTML = `<p class="muted" style="margin:0;">Aucune inscription.</p>`;
+      return;
+    }
+
+    const html = rows.map(r=>{
+      const d = r.data;
+
+      const p1 = playerName(d, 1);
+      const p2 = playerName(d, 2);
+
+      const p1Lic = getVerif(d,"p1","licence");
+      const p1Rk  = getVerif(d,"p1","rank");
+      const p1Pay = getVerif(d,"p1","payment");
+
+      const p2Lic = getVerif(d,"p2","licence");
+      const p2Rk  = getVerif(d,"p2","rank");
+      const p2Pay = getVerif(d,"p2","payment");
+
+      const sub1 = badgeTextFromData(d,1);
+      const sub2 = badgeTextFromData(d,2);
+      const sub = [sub1, sub2].filter(Boolean).join(" — ");
+
+      return `
+        <div class="team-card" data-id="${esc(r.id)}">
+          <div class="team-head">
+            <div style="min-width:0;">
+              <div class="team-title">${esc(teamName(d))}</div>
+              <div class="team-sub muted">${esc(sub || "—")}</div>
+            </div>
+            <div class="muted" style="font-weight:900; white-space:nowrap;">#${esc(r.id.slice(0,6))}</div>
+          </div>
+
+          <div class="row">
+            <div class="pname">${esc(p1)}</div>
+
+            <button class="vbtn" data-act="toggle" data-player="p1" data-item="licence">
+              <span class="vlabel">N° licence</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p1Lic))}</span>
+                <span class="pill ${esc(statusPillClass(p1Lic))}">${esc(p1Lic.toUpperCase())}</span>
+              </span>
+            </button>
+
+            <button class="vbtn" data-act="toggle" data-player="p1" data-item="rank">
+              <span class="vlabel">Classement</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p1Rk))}</span>
+                <span class="pill ${esc(statusPillClass(p1Rk))}">${esc(p1Rk.toUpperCase())}</span>
+              </span>
+            </button>
+
+            <button class="vbtn" data-act="toggle" data-player="p1" data-item="payment">
+              <span class="vlabel">Paiement</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p1Pay))}</span>
+                <span class="pill ${esc(statusPillClass(p1Pay))}">${esc(p1Pay.toUpperCase())}</span>
+              </span>
+            </button>
+          </div>
+
+          <div class="row">
+            <div class="pname">${esc(p2)}</div>
+
+            <button class="vbtn" data-act="toggle" data-player="p2" data-item="licence">
+              <span class="vlabel">N° licence</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p2Lic))}</span>
+                <span class="pill ${esc(statusPillClass(p2Lic))}">${esc(p2Lic.toUpperCase())}</span>
+              </span>
+            </button>
+
+            <button class="vbtn" data-act="toggle" data-player="p2" data-item="rank">
+              <span class="vlabel">Classement</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p2Rk))}</span>
+                <span class="pill ${esc(statusPillClass(p2Rk))}">${esc(p2Rk.toUpperCase())}</span>
+              </span>
+            </button>
+
+            <button class="vbtn" data-act="toggle" data-player="p2" data-item="payment">
+              <span class="vlabel">Paiement</span>
+              <span class="vstatus">
+                <span>${esc(statusToText(p2Pay))}</span>
+                <span class="pill ${esc(statusPillClass(p2Pay))}">${esc(p2Pay.toUpperCase())}</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    cards.innerHTML = html;
+  }
+
+  function startListener(scope){
+    stop();
+
+    statusText.textContent = "Chargement…";
+    cards.innerHTML = "";
+
+    const q = query(inscriptionsCol(scope), orderBy("createdAt","asc"));
+    unsub = onSnapshot(q, (snap)=>{
+      rows = snap.docs.map(d => ({ id: d.id, data: d.data() || {} }));
+      render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "❌ Erreur Firestore (inscriptions).";
+      cards.innerHTML = "";
+    });
+  }
+
+  async function toggleStatus(docId, playerKey, itemKey){
+    const row = rows.find(x => x.id === docId);
+    const cur = row ? (row.data || {}) : {};
+
+    const curStatus = getVerif(cur, playerKey, itemKey);
+    const next = nextStatus(curStatus);
+
+    const userEmail = auth.currentUser?.email || null;
+
+    const ref = doc(db, `inscriptions_${currentScope}_private`, docId);
+
+    // update nested field
+    const patch = {};
+    patch[`verif.${playerKey}.${itemKey}`] = next;
+    patch[`verif.updatedAt`] = serverTimestamp();
+    patch[`verif.updatedBy`] = userEmail;
+
+    await updateDoc(ref, patch);
+  }
+
+  // ---- UI (scope)
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelVerify.style.display = "none";
+    stop();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // ---- Events
+  cards.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act='toggle']");
+    if(!btn) return;
+
+    const card = btn.closest(".team-card");
+    const docId = card?.dataset?.id;
+    const playerKey = btn.dataset.player;
+    const itemKey = btn.dataset.item;
+    if(!docId || !playerKey || !itemKey) return;
+
+    btn.disabled = true;
+    try{
+      await toggleStatus(docId, playerKey, itemKey);
+    }catch(err){
+      console.error(err);
+      alert("Erreur Firestore ❌");
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  // Guard
+  const g = await requireRole(["admin"]);
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
