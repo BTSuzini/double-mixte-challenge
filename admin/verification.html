@@ -39,7 +39,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (même partout) -->
+  <!-- ✅ Encart Zone -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
@@ -62,7 +62,7 @@
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
-      Sélectionne une <b>Étape</b> dans “Zone” pour vérifier licences / classements / paiements.
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer la vérification.
     </p>
   </section>
 
@@ -71,11 +71,6 @@
     <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
     <div id="cards" style="display:grid; gap:12px; margin-top:14px;"></div>
-
-    <p class="muted" style="margin-top:12px;">
-      💡 Clique sur un bouton pour faire tourner le statut :
-      <b>Non vérifié</b> → <b>OK</b> → <b>Non OK</b>.
-    </p>
   </section>
 
 </main>
@@ -94,91 +89,110 @@
     align-items:flex-start;
     justify-content:space-between;
     gap:10px;
-  }
-  .team-title{
-    font-size:16px;
-    font-weight:1000;
-    line-height:1.15;
-    margin:0;
     min-width:0;
   }
-  .team-sub{
-    margin-top:6px;
-    font-size:12px;
-    opacity:.75;
-  }
 
-  .row{
-    margin-top:12px;
-    border-top:1px solid rgba(0,0,0,.06);
-    padding-top:12px;
-    display:grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap:8px;
-    align-items:center;
-  }
-
-  .pname{
-    font-weight:950;
+  .team-name{
+    font-size:18px;
+    font-weight:1000;
+    line-height:1.15;
+    min-width:0;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
-    min-width:0;
   }
 
-  .vbtn{
-    width:100%;
-    padding:10px 10px;
+  .team-mini{
+    font-size:12px;
+    font-weight:900;
+    opacity:.6;
+    white-space:nowrap;
+  }
+
+  .sep{
+    height:1px;
+    background:rgba(0,0,0,.08);
+    border:none;
+    margin:12px 0;
+  }
+
+  .player-name{
+    font-size:16px;
+    font-weight:1000;
+    margin:0 0 10px;
+  }
+
+  .checklist{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .checkitem{
+    border:1px solid rgba(0,0,0,.10);
     border-radius:14px;
-    border:1px solid rgba(0,0,0,.12);
-    background:#fff;
-    cursor:pointer;
-    text-align:left;
-    font-weight:900;
-    line-height:1.05;
-  }
-  .vbtn:hover{ background:rgba(255,255,255,.88); }
-  .vbtn:disabled{ opacity:.6; cursor:not-allowed; }
-
-  .vlabel{
-    font-size:11px;
-    opacity:.7;
-    font-weight:900;
-    display:block;
-    margin-bottom:6px;
-  }
-
-  .vstatus{
+    background:rgba(255,255,255,.7);
+    padding:10px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:8px;
-    font-size:13px;
-    font-weight:1000;
+    gap:10px;
   }
 
-  .pill{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:4px 8px;
+  .ci-left{
+    min-width:0;
+  }
+
+  .ci-label{
+    font-size:12px;
+    font-weight:1000;
+    opacity:.75;
+    margin:0;
+  }
+
+  .ci-value{
+    font-size:15px;
+    font-weight:1000;
+    margin:4px 0 0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .stbtn{
+    flex:0 0 auto;
+    border:1px solid rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:8px 10px;
+    font-weight:1000;
+    background:#fff;
+    cursor:pointer;
+    min-width:74px;
+    text-align:center;
+  }
+  .stbtn:hover{ background:rgba(255,255,255,.85); }
+  .stbtn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:1000;
+    padding:5px 10px;
     border-radius:999px;
     border:1px solid rgba(0,0,0,.12);
-    font-size:11px;
-    font-weight:1000;
-    white-space:nowrap;
   }
-  .pill.nv{ opacity:.7; }
-  .pill.ok{ }
-  .pill.nok{ }
 
+  .b-nv{ opacity:.8; }
+  .b-ok{ }
+  .b-nok{ }
+
+  .two-col{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
   @media (max-width: 520px){
-    .row{
-      grid-template-columns: 1fr 1fr;
-    }
-    .pname{
-      grid-column:1 / -1;
-    }
+    .two-col{ grid-template-columns: 1fr; }
   }
 </style>
 
@@ -188,14 +202,14 @@
 
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    collection, doc, query, orderBy, onSnapshot, updateDoc, serverTimestamp
+    doc, collection, onSnapshot, setDoc,
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape5)
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
 
-  // ---- DOM
+  // DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -205,14 +219,17 @@
   const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
-  const panelVerify   = document.getElementById("panelVerify");
-  const statusText    = document.getElementById("statusText");
-  const cards         = document.getElementById("cards");
+  const panelVerify = document.getElementById("panelVerify");
+  const statusText = document.getElementById("statusText");
+  const cardsEl = document.getElementById("cards");
 
-  // ---- state
+  // State
   let currentScope = scopeFromUrl;
-  let unsub = null;
-  let rows = [];
+  let unsubIns = null;
+  let unsubVer = null;
+
+  let inscriptions = [];          // docs inscriptions
+  let verifsById = new Map();     // inscriptionId -> verif doc
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -224,12 +241,12 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
+  // Tabs (inclut Vérification)
   function setTabs(scope){
     tabsEl.innerHTML = "";
 
     if(scope === "general"){
-      hintEl.textContent = "Zone Général : pas de vérification ici (choisis une étape).";
-
+      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
@@ -247,22 +264,9 @@
       ["🎲 Tirage",         "tirage.html"],
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
-      ["🏆 Classement",     "classement.html"],
+      ["🏅 Classement",     "classement.html"],
       ["🧨 RAZ",            "raz.html"],
     ];
-
-    // Repas : pas pour l’étape 5 (test) — même logique que ton index
-    if(scope !== "etape5"){
-      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
-    }else{
-      const fake = document.createElement("a");
-      fake.className = "btn disabled";
-      fake.href = "#";
-      fake.setAttribute("aria-disabled","true");
-      fake.textContent = "🍽️ Repas (plus tard)";
-      fake.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
-      tabsEl.appendChild(fake);
-    }
 
     for(const [label, url] of links){
       const a = document.createElement("a");
@@ -274,8 +278,13 @@
     }
   }
 
-  function stop(){
-    if(unsub){ unsub(); unsub = null; }
+  // Firestore refs
+  function inscCol(scope){ return collection(db, `inscriptions_${scope}_private`); }
+  function verifCol(scope){ return collection(db, `verifications_${scope}`); } // ✅ collection dédiée
+
+  function stopListeners(){
+    if(unsubIns){ unsubIns(); unsubIns = null; }
+    if(unsubVer){ unsubVer(); unsubVer = null; }
   }
 
   function showPanelsForScope(scope){
@@ -284,218 +293,212 @@
     if(scope === "general"){
       panelNeedStep.style.display = "block";
       panelVerify.style.display = "none";
-      stop();
+      stopListeners();
       return;
     }
 
     panelNeedStep.style.display = "none";
     panelVerify.style.display = "block";
-    startListener(scope);
+
+    startListeners(scope);
   }
 
-  // ---- Firestore
-  function inscriptionsCol(scope){
-    // ex: inscriptions_etape5_private
-    return collection(db, `inscriptions_${scope}_private`);
+  function normalizeInsc(d){
+    return {
+      id: d.id,
+      ...d.data(),
+    };
   }
 
-  // ---- status helpers
-  const STATUS = {
-    nv: { label:"Non vérifié", pill:"nv" },
-    ok: { label:"OK",          pill:"ok" },
-    nok:{ label:"Non OK",      pill:"nok" },
-  };
+  function getPlayer(ins, which){
+    // which: "p1" ou "p2"
+    const first = (ins[`${which}FirstName`] || "").toString().trim();
+    const last  = (ins[`${which}LastName`] || "").toString().trim();
+    const licence = (ins[`${which}Licence`] || "").toString().trim();
+    const rank = (ins[`${which}Rank`] ?? ins[`${which}Classement`] ?? "").toString().trim();
 
-  function nextStatus(s){
-    const v = (s === "ok" || s === "nok" || s === "nv") ? s : "nv";
-    if(v === "nv") return "ok";
-    if(v === "ok") return "nok";
-    return "nv";
+    return { first, last, licence, rank };
   }
 
-  function statusToText(s){
-    const v = STATUS[s] ? s : "nv";
-    return STATUS[v].label;
+  function statusCycle(cur){
+    // NV -> OK -> NOK -> NV
+    if(cur === "ok") return "nok";
+    if(cur === "nok") return "nv";
+    return "ok";
   }
 
-  function statusPillClass(s){
-    const v = STATUS[s] ? s : "nv";
-    return STATUS[v].pill;
+  function statusLabel(s){
+    if(s === "ok") return { text:"OK", cls:"b-ok" };
+    if(s === "nok") return { text:"Non OK", cls:"b-nok" };
+    return { text:"Non vérifié", cls:"b-nv" };
   }
 
-  function getVerif(docData, playerKey, itemKey){
-    // doc.verif.p1.licence / rank / payment
-    const v = docData?.verif?.[playerKey]?.[itemKey];
-    return (v === "ok" || v === "nok" || v === "nv") ? v : "nv";
+  function verifFor(insId){
+    return verifsById.get(insId) || {};
   }
 
-  function playerName(docData, idx){
-    // on affiche NOM Prénom (nom puis prénom)
-    const fn = (docData?.[`p${idx}FirstName`] || "").toString().trim();
-    const ln = (docData?.[`p${idx}LastName`]  || "").toString().trim();
-    const name = `${ln} ${fn}`.trim();
-    return name || `Joueur ${idx}`;
-  }
-
-  function teamName(docData){
-    const t = (docData?.teamName || "").toString().trim();
-    return t || "Équipe";
-  }
-
-  function badgeTextFromData(docData, idx){
-    // petit rappel sous l’équipe : licences/classements saisis (si dispo)
-    const lic = (docData?.[`p${idx}Licence`] ?? "").toString().trim();
-    const rk  = (docData?.[`p${idx}Rank`] ?? "").toString().trim();
-    const parts = [];
-    if(lic) parts.push(`Licence: ${lic}`);
-    if(rk)  parts.push(`Clt: ${rk}`);
-    return parts.join(" • ");
-  }
-
-  function render(){
-    statusText.textContent = rows.length
-      ? `✅ ${rows.length} équipe${rows.length>1?"s":""} (clic pour vérifier)`
-      : "ℹ️ Aucune inscription à vérifier.";
-
-    if(rows.length === 0){
-      cards.innerHTML = `<p class="muted" style="margin:0;">Aucune inscription.</p>`;
-      return;
+  function getV(vdoc, path, fallback="nv"){
+    // path ex: "p1.licence"
+    const parts = path.split(".");
+    let cur = vdoc;
+    for(const p of parts){
+      if(!cur || typeof cur !== "object") return fallback;
+      cur = cur[p];
     }
+    return (cur === "ok" || cur === "nok" || cur === "nv") ? cur : fallback;
+  }
 
-    const html = rows.map(r=>{
-      const d = r.data;
+  function renderPlayerBlock(ins, which){
+    const p = getPlayer(ins, which);
+    const vdoc = verifFor(ins.id);
 
-      const p1 = playerName(d, 1);
-      const p2 = playerName(d, 2);
+    const displayName = `${(p.last || "—").toUpperCase()} ${p.first || ""}`.trim();
 
-      const p1Lic = getVerif(d,"p1","licence");
-      const p1Rk  = getVerif(d,"p1","rank");
-      const p1Pay = getVerif(d,"p1","payment");
+    const items = [
+      { key:`${which}.licence`, label:"N° licence", value: p.licence || "—" },
+      { key:`${which}.rank`, label:"Classement", value: p.rank || "—" },
+      { key:`${which}.payment`, label:"Paiement", value: "—" }, // valeur éventuelle plus tard
+    ];
 
-      const p2Lic = getVerif(d,"p2","licence");
-      const p2Rk  = getVerif(d,"p2","rank");
-      const p2Pay = getVerif(d,"p2","payment");
-
-      const sub1 = badgeTextFromData(d,1);
-      const sub2 = badgeTextFromData(d,2);
-      const sub = [sub1, sub2].filter(Boolean).join(" — ");
-
+    const htmlItems = items.map(it=>{
+      const st = getV(vdoc, it.key, "nv");
+      const sl = statusLabel(st);
       return `
-        <div class="team-card" data-id="${esc(r.id)}">
-          <div class="team-head">
-            <div style="min-width:0;">
-              <div class="team-title">${esc(teamName(d))}</div>
-              <div class="team-sub muted">${esc(sub || "—")}</div>
-            </div>
-            <div class="muted" style="font-weight:900; white-space:nowrap;">#${esc(r.id.slice(0,6))}</div>
+        <div class="checkitem">
+          <div class="ci-left">
+            <p class="ci-label">${esc(it.label)}</p>
+            <p class="ci-value">${esc(it.value)}</p>
           </div>
-
-          <div class="row">
-            <div class="pname">${esc(p1)}</div>
-
-            <button class="vbtn" data-act="toggle" data-player="p1" data-item="licence">
-              <span class="vlabel">N° licence</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p1Lic))}</span>
-                <span class="pill ${esc(statusPillClass(p1Lic))}">${esc(p1Lic.toUpperCase())}</span>
-              </span>
-            </button>
-
-            <button class="vbtn" data-act="toggle" data-player="p1" data-item="rank">
-              <span class="vlabel">Classement</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p1Rk))}</span>
-                <span class="pill ${esc(statusPillClass(p1Rk))}">${esc(p1Rk.toUpperCase())}</span>
-              </span>
-            </button>
-
-            <button class="vbtn" data-act="toggle" data-player="p1" data-item="payment">
-              <span class="vlabel">Paiement</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p1Pay))}</span>
-                <span class="pill ${esc(statusPillClass(p1Pay))}">${esc(p1Pay.toUpperCase())}</span>
-              </span>
-            </button>
-          </div>
-
-          <div class="row">
-            <div class="pname">${esc(p2)}</div>
-
-            <button class="vbtn" data-act="toggle" data-player="p2" data-item="licence">
-              <span class="vlabel">N° licence</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p2Lic))}</span>
-                <span class="pill ${esc(statusPillClass(p2Lic))}">${esc(p2Lic.toUpperCase())}</span>
-              </span>
-            </button>
-
-            <button class="vbtn" data-act="toggle" data-player="p2" data-item="rank">
-              <span class="vlabel">Classement</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p2Rk))}</span>
-                <span class="pill ${esc(statusPillClass(p2Rk))}">${esc(p2Rk.toUpperCase())}</span>
-              </span>
-            </button>
-
-            <button class="vbtn" data-act="toggle" data-player="p2" data-item="payment">
-              <span class="vlabel">Paiement</span>
-              <span class="vstatus">
-                <span>${esc(statusToText(p2Pay))}</span>
-                <span class="pill ${esc(statusPillClass(p2Pay))}">${esc(p2Pay.toUpperCase())}</span>
-              </span>
-            </button>
-          </div>
+          <button class="stbtn" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}">
+            <span class="badge ${esc(sl.cls)}">${esc(sl.text)}</span>
+          </button>
         </div>
       `;
     }).join("");
 
-    cards.innerHTML = html;
+    return `
+      <div>
+        <div class="player-name">${esc(displayName)}</div>
+        <div class="checklist">
+          ${htmlItems}
+        </div>
+      </div>
+    `;
   }
 
-  function startListener(scope){
-    stop();
+  function render(){
+    const n = inscriptions.length;
+    statusText.textContent = `✅ ${n} équipe${n>1?"s":""} (clic sur un statut pour vérifier)`;
 
+    if(n === 0){
+      cardsEl.innerHTML = `<p class="muted" style="margin:0;">Aucune inscription.</p>`;
+      return;
+    }
+
+    const cards = inscriptions.map(ins=>{
+      const teamName = (ins.teamName || "Équipe").toString().trim();
+
+      return `
+        <div class="team-card">
+          <div class="team-head">
+            <div class="team-name">${esc(teamName)}</div>
+          </div>
+
+          <hr class="sep" />
+
+          <div class="two-col">
+            ${renderPlayerBlock(ins, "p1")}
+            ${renderPlayerBlock(ins, "p2")}
+          </div>
+        </div>
+      `;
+    });
+
+    cardsEl.innerHTML = cards.join("");
+  }
+
+  function startListeners(scope){
+    stopListeners();
+    inscriptions = [];
+    verifsById = new Map();
     statusText.textContent = "Chargement…";
-    cards.innerHTML = "";
+    cardsEl.innerHTML = "";
 
-    const q = query(inscriptionsCol(scope), orderBy("createdAt","asc"));
-    unsub = onSnapshot(q, (snap)=>{
-      rows = snap.docs.map(d => ({ id: d.id, data: d.data() || {} }));
+    unsubIns = onSnapshot(inscCol(scope), (snap)=>{
+      inscriptions = snap.docs.map(normalizeInsc);
+
+      // tri simple : par teamName
+      inscriptions.sort((a,b)=> (a.teamName||"").localeCompare((b.teamName||""), "fr"));
+
       render();
     }, (err)=>{
       console.error(err);
       statusText.textContent = "❌ Erreur Firestore (inscriptions).";
-      cards.innerHTML = "";
+    });
+
+    unsubVer = onSnapshot(verifCol(scope), (snap)=>{
+      verifsById = new Map();
+      snap.forEach(d=>{
+        verifsById.set(d.id, d.data() || {});
+      });
+      render();
+    }, (err)=>{
+      console.error(err);
+      // pas bloquant pour afficher inscriptions, mais on le signale
+      statusText.textContent = "⚠️ Inscriptions OK, mais verifs indisponibles (droits ?).";
     });
   }
 
-  async function toggleStatus(docId, playerKey, itemKey){
-    const row = rows.find(x => x.id === docId);
-    const cur = row ? (row.data || {}) : {};
+  async function toggleStatus(insId, key){
+    const curDoc = verifFor(insId);
+    const cur = getV(curDoc, key, "nv");
+    const next = statusCycle(cur);
 
-    const curStatus = getVerif(cur, playerKey, itemKey);
-    const next = nextStatus(curStatus);
+    // construire update merge (nested)
+    // key: "p1.licence" => { p1: { licence: next } }
+    const [p, f] = key.split(".");
+    const patch = {
+      [p]: { ...(curDoc[p] || {}), [f]: next },
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || null
+    };
 
-    const userEmail = auth.currentUser?.email || null;
-
-    const ref = doc(db, `inscriptions_${currentScope}_private`, docId);
-
-    // update nested field
-    const patch = {};
-    patch[`verif.${playerKey}.${itemKey}`] = next;
-    patch[`verif.updatedAt`] = serverTimestamp();
-    patch[`verif.updatedBy`] = userEmail;
-
-    await updateDoc(ref, patch);
+    await setDoc(doc(db, `verifications_${currentScope}`, insId), patch, { merge:true });
   }
 
-  // ---- UI (scope)
+  // Click handler
+  cardsEl.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act='toggle']");
+    if(!btn) return;
+
+    const insId = btn.dataset.ins;
+    const key = btn.dataset.key;
+    if(!insId || !key) return;
+
+    btn.disabled = true;
+    try{
+      await toggleStatus(insId, key);
+    }catch(err){
+      console.error(err);
+      alert("Erreur Firestore ❌\n\n" + (err?.message || "Vérifie les droits Firestore (rules)."));
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
   function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
     panelNeedStep.style.display = "none";
     panelVerify.style.display = "none";
-    stop();
+    stopListeners();
   }
 
   function showAdmin(){
@@ -512,35 +515,6 @@
       showPanelsForScope(currentScope);
     };
   }
-
-  // ---- Events
-  cards.addEventListener("click", async (e)=>{
-    const btn = e.target.closest("button[data-act='toggle']");
-    if(!btn) return;
-
-    const card = btn.closest(".team-card");
-    const docId = card?.dataset?.id;
-    const playerKey = btn.dataset.player;
-    const itemKey = btn.dataset.item;
-    if(!docId || !playerKey || !itemKey) return;
-
-    btn.disabled = true;
-    try{
-      await toggleStatus(docId, playerKey, itemKey);
-    }catch(err){
-      console.error(err);
-      alert("Erreur Firestore ❌");
-    }finally{
-      btn.disabled = false;
-    }
-  });
-
-  // Logout
-  document.getElementById("btnLogout").onclick = async (e)=>{
-    e.preventDefault();
-    await logout();
-    window.location.href = "../index.html";
-  };
 
   // Guard
   const g = await requireRole(["admin"]);
