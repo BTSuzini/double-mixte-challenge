@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Classement</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        🏆 Classement (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <!-- ✅ Encart Zone (même partout) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour consulter/valider le classement.
+    </p>
+  </section>
+
+  <section class="card" id="panelRank" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏆 Classement final</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnValidate" style="font-weight:900; color:#111;" disabled>
+        ✅ Valider le classement
+      </button>
+    </div>
+
+    <div id="validatedBox" class="muted" style="margin-top:10px; display:none;"></div>
+
+    <hr class="sep" style="margin-top:14px;" />
+
+    <h3 style="margin:0 0 8px;">👥 Classement des équipes</h3>
+    <div id="teamList"></div>
+
+    <hr class="sep" style="margin-top:14px;" />
+
+    <h3 style="margin:0 0 8px;">🧍 Classement des joueurs</h3>
+    <div id="playerList"></div>
+
+    <p class="muted" style="margin-top:12px;">
+      Le classement est calculé à partir des matchs :
+      <b>M9</b> (7e/8e), <b>M10</b> (5e/6e), <b>M11</b> (3e/4e), <b>M12</b> (Finale).
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .rank-card{
+    border-radius:16px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:12px;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    justify-content:space-between;
+  }
+
+  .rk{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    border:1px solid rgba(0,0,0,.10);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    font-size:16px;
+    flex:0 0 auto;
+  }
+
+  .rmain{
+    min-width:0;
+    flex:1 1 auto;
+  }
+
+  .rtitle{
+    font-weight:1000;
+    line-height:1.15;
+    margin:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .rsub{
+    margin-top:6px;
+    font-size:12px;
+    opacity:.8;
+    line-height:1.35;
+  }
+
+  .tag{
+    border:1px solid rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:5px 9px;
+    font-size:11px;
+    font-weight:1000;
+    white-space:nowrap;
+    opacity:.9;
+    flex:0 0 auto;
+  }
+
+  .warn{
+    border:1px solid rgba(176,0,32,.25);
+    background:rgba(176,0,32,.06);
+    padding:10px 12px;
+    border-radius:14px;
+    font-weight:900;
+    margin-top:10px;
+  }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc, onSnapshot, collection,
+    setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // ---- scope (URL ?scope=etape5)
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape5";
+
+  // ---- DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelRank     = document.getElementById("panelRank");
+
+  const statusText    = document.getElementById("statusText");
+  const btnValidate   = document.getElementById("btnValidate");
+  const validatedBox  = document.getElementById("validatedBox");
+
+  const teamList      = document.getElementById("teamList");
+  const playerList    = document.getElementById("playerList");
+
+  // ---- state
+  let currentScope = scopeFromUrl;
+  let currentProg = null;
+  let resultsByMatch = new Map();
+  let currentClassementDoc = null;
+
+  let unsubProg = null;
+  let unsubRes  = null;
+  let unsubCls  = null;
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
+    }catch{ return "—"; }
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : pas de classement ici (choisis une étape).";
+
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / vérification / tirage / programmation / résultats / classement / RAZ.";
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ["🔎 Vérification",   "verification.html"],
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
+      ["🧨 RAZ",            "raz.html"],
+    ];
+
+    if(scope !== "etape5"){
+      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
+    }else{
+      const fake = document.createElement("a");
+      fake.className = "btn disabled";
+      fake.href = "#";
+      fake.setAttribute("aria-disabled","true");
+      fake.textContent = "🍽️ Repas (plus tard)";
+      fake.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
+      tabsEl.appendChild(fake);
+    }
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "classement.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function stopListeners(){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+    if(unsubCls){ unsubCls(); unsubCls = null; }
+  }
+
+  // ---- Firestore refs
+  function progRef(scope){ return doc(db, "programmations", scope); }
+  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
+  function classementRef(scope){ return doc(db, "classements", scope); }
+
+  // ---- Resolver (team / winner / loser)
+  function resolveTeamRef(ref){
+    if(!currentProg) return null;
+
+    const teams = currentProg.teams || {};
+    const matches = currentProg.matches || {};
+
+    if(!ref) return null;
+
+    if(ref.type === "team"){
+      return teams[ref.key] || null;
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = resultsByMatch.get(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return ref.type === "winner" ? winner : loser;
+    }
+
+    return null;
+  }
+
+  function getWinnerTeam(matchId){
+    const m = currentProg?.matches?.[matchId];
+    if(!m) return null;
+
+    const res = resultsByMatch.get(matchId);
+    if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+    const teamA = resolveTeamRef(m.A);
+    const teamB = resolveTeamRef(m.B);
+    if(!teamA || !teamB) return null;
+
+    return (res.winnerSide === "A") ? teamA : teamB;
+  }
+
+  function getLoserTeam(matchId){
+    const m = currentProg?.matches?.[matchId];
+    if(!m) return null;
+
+    const res = resultsByMatch.get(matchId);
+    if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+    const teamA = resolveTeamRef(m.A);
+    const teamB = resolveTeamRef(m.B);
+    if(!teamA || !teamB) return null;
+
+    return (res.winnerSide === "A") ? teamB : teamA;
+  }
+
+  function teamParts(t){
+    if(!t) return { teamName:"—", p1:"—", p2:"—" };
+    const teamName = t.teamName || "Équipe";
+    const p1 = `${t.p1LastName || ""} ${t.p1FirstName || ""}`.trim() || "—";
+    const p2 = `${t.p2LastName || ""} ${t.p2FirstName || ""}`.trim() || "—";
+    return { teamName, p1, p2 };
+  }
+
+  function buildFinalRanking(){
+    // need M9,M10,M11,M12
+    const needed = ["M9","M10","M11","M12"];
+
+    const missing = [];
+    for(const mid of needed){
+      const r = resultsByMatch.get(mid);
+      if(!r || (r.winnerSide !== "A" && r.winnerSide !== "B")){
+        missing.push(mid);
+      }
+    }
+
+    // even if results exist, we also need resolution of teams to not be null
+    const positions = [
+      { pos: 1, from: () => getWinnerTeam("M12"), label:"🥇 1er" },
+      { pos: 2, from: () => getLoserTeam("M12"),  label:"🥈 2e"  },
+      { pos: 3, from: () => getWinnerTeam("M11"), label:"🥉 3e"  },
+      { pos: 4, from: () => getLoserTeam("M11"),  label:"4e"     },
+      { pos: 5, from: () => getWinnerTeam("M10"), label:"5e"     },
+      { pos: 6, from: () => getLoserTeam("M10"),  label:"6e"     },
+      { pos: 7, from: () => getWinnerTeam("M9"),  label:"7e"     },
+      { pos: 8, from: () => getLoserTeam("M9"),   label:"8e"     },
+    ];
+
+    const resolved = positions.map(x => ({ ...x, team: x.from() }));
+
+    const unresolved = resolved.filter(x => !x.team).map(x => x.pos);
+
+    const complete = (missing.length === 0 && unresolved.length === 0);
+
+    return { complete, missing, unresolved, resolved };
+  }
+
+  function render(){
+    if(!currentProg){
+      statusText.textContent = "⏳ Programmation non disponible (génère-la d’abord).";
+      btnValidate.disabled = true;
+      teamList.innerHTML = "";
+      playerList.innerHTML = "";
+      validatedBox.style.display = "none";
+      return;
+    }
+
+    // validated status
+    if(currentClassementDoc?.validatedAt){
+      validatedBox.style.display = "block";
+      validatedBox.innerHTML = `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
+    }else{
+      validatedBox.style.display = "none";
+      validatedBox.innerHTML = "";
+    }
+
+    const { complete, missing, unresolved, resolved } = buildFinalRanking();
+
+    if(!complete){
+      let msg = "⏳ Classement incomplet.";
+      if(missing.length) msg += ` Match(s) manquant(s) : ${missing.join(", ")}.`;
+      if(unresolved.length) msg += ` Équipe(s) non résolue(s) aux positions : ${unresolved.join(", ")}.`;
+      statusText.textContent = msg;
+    }else{
+      statusText.textContent = "✅ Classement complet (prêt à valider).";
+    }
+
+    // enable validate if complete AND not already validated
+    btnValidate.disabled = !(complete && !currentClassementDoc?.validatedAt);
+
+    // teams list
+    const teamCards = resolved.map(x=>{
+      const t = teamParts(x.team);
+      return `
+        <div class="rank-card">
+          <div class="rk">${esc(String(x.pos))}</div>
+          <div class="rmain">
+            <div class="rtitle">${esc(t.teamName)}</div>
+            <div class="rsub muted">${esc(t.p1)}<br>${esc(t.p2)}</div>
+          </div>
+          <div class="tag">${esc(x.label)}</div>
+        </div>
+      `;
+    });
+
+    teamList.innerHTML = teamCards.length
+      ? `<div class="list">${teamCards.join("")}</div>`
+      : `<p class="muted">—</p>`;
+
+    // players list (flatten)
+    const players = [];
+    for(const x of resolved){
+      const t = teamParts(x.team);
+      players.push({ pos:x.pos, name:t.p1, team:t.teamName });
+      players.push({ pos:x.pos, name:t.p2, team:t.teamName });
+    }
+
+    const playerCards = players.map(p=>{
+      return `
+        <div class="rank-card">
+          <div class="rk">${esc(String(p.pos))}</div>
+          <div class="rmain">
+            <div class="rtitle">${esc(p.name)}</div>
+            <div class="rsub muted">${esc(p.team)}</div>
+          </div>
+          <div class="tag">Position ${esc(String(p.pos))}</div>
+        </div>
+      `;
+    });
+
+    playerList.innerHTML = playerCards.length
+      ? `<div class="list">${playerCards.join("")}</div>`
+      : `<p class="muted">—</p>`;
+  }
+
+  function startProgListener(scope){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    unsubProg = onSnapshot(progRef(scope), (snap)=>{
+      currentProg = snap.exists() ? (snap.data() || {}) : null;
+      render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "🔴 Erreur programmation.";
+    });
+  }
+
+  function startResultsListener(scope){
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
+      resultsByMatch = new Map();
+      snap.forEach(d=>{
+        resultsByMatch.set(d.id, d.data() || {});
+      });
+      render();
+    });
+  }
+
+  function startClassementListener(scope){
+    if(unsubCls){ unsubCls(); unsubCls = null; }
+    unsubCls = onSnapshot(classementRef(scope), (snap)=>{
+      currentClassementDoc = snap.exists() ? (snap.data() || {}) : null;
+      render();
+    });
+  }
+
+  async function validateClassement(){
+    const { complete, resolved } = buildFinalRanking();
+    if(!complete){
+      alert("Classement incomplet ❌");
+      return;
+    }
+
+    const userEmail = auth.currentUser?.email || null;
+
+    const positions = resolved.map(x=>{
+      const t = x.team;
+      return {
+        pos: x.pos,
+        teamName: t?.teamName || null,
+        p1FirstName: t?.p1FirstName || null,
+        p1LastName:  t?.p1LastName  || null,
+        p2FirstName: t?.p2FirstName || null,
+        p2LastName:  t?.p2LastName  || null,
+      };
+    });
+
+    const players = [];
+    for(const p of positions){
+      players.push({ pos:p.pos, lastName:p.p1LastName, firstName:p.p1FirstName, teamName:p.teamName });
+      players.push({ pos:p.pos, lastName:p.p2LastName, firstName:p.p2FirstName, teamName:p.teamName });
+    }
+
+    const payload = {
+      scope: currentScope,
+      computedAt: serverTimestamp(),
+      computedFrom: { matches: ["M9","M10","M11","M12"] },
+      positions,
+      players,
+      validatedAt: serverTimestamp(),
+      validatedBy: userEmail
+    };
+
+    await setDoc(classementRef(currentScope), payload, { merge:true });
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelRank.style.display = "none";
+      stopListeners();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelRank.style.display = "block";
+
+    startProgListener(scope);
+    startResultsListener(scope);
+    startClassementListener(scope);
+  }
+
+  // ---- UI guards
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelRank.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // ---- events
+  btnValidate.onclick = async (e)=>{
+    e.preventDefault();
+    if(btnValidate.disabled) return;
+
+    const ok = confirm("Valider le classement final ?\n\n⚠️ Action enregistrée en base.");
+    if(!ok) return;
+
+    btnValidate.disabled = true;
+    try{
+      await validateClassement();
+      alert("✅ Classement validé !");
+    }catch(err){
+      console.error(err);
+      alert("Erreur Firestore ❌");
+    }finally{
+      // re-render will re-enable if needed
+      render();
+    }
+  };
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  // Guard
+  const g = await requireRole(["admin"]);
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
