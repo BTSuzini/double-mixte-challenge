@@ -1,1 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
+</head>
+<body>
 
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">🧑‍⚖️ JAT — Console</h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs et aux JAT.</p>
+  </section>
+
+  <section class="card" id="jatUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir une étape</label>
+      <select id="scope">
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelGeneral" style="display:none;">
+    <h2 style="margin:0 0 10px;">📰 Infos (lecture)</h2>
+    <p class="muted" style="margin:0;">
+      Accès rapide aux infos (même interface que l’admin si besoin), sinon on pourra faire une version lecture seule plus tard.
+    </p>
+
+    <div class="grid" style="margin-top:12px;">
+      <a class="btn" id="btnGoInfos" href="../admin/index.html" style="font-weight:900; color:#111;">
+        📰 Ouvrir Infos (admin)
+      </a>
+    </div>
+  </section>
+
+  <section class="card" id="panelStep" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎾 Outils JAT</h2>
+    <p class="muted" style="margin:0;" id="stepTitle">—</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <a class="btn" id="goProg" href="#" style="font-weight:900; color:#111;">📅 Programmation</a>
+      <a class="btn" id="goRes"  href="#" style="font-weight:900; color:#111;">🏁 Résultats</a>
+      <a class="btn" id="goVer"  href="#" style="font-weight:900; color:#111;">🔎 Vérification</a>
+      <a class="btn" id="goCls"  href="#" style="font-weight:900; color:#111;">🏅 Classement</a>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      ℹ️ Pour l’instant, droits identiques à l’admin. On affinera plus tard.
+    </p>
+  </section>
+
+</main>
+
+<script type="module">
+  import { auth } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  const accessDenied = document.getElementById("accessDenied");
+  const jatUI = document.getElementById("jatUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl = document.getElementById("tabs");
+  const hintEl = document.getElementById("hint");
+
+  const panelGeneral = document.getElementById("panelGeneral");
+  const panelStep = document.getElementById("panelStep");
+  const stepTitle = document.getElementById("stepTitle");
+
+  const goProg = document.getElementById("goProg");
+  const goRes  = document.getElementById("goRes");
+  const goVer  = document.getElementById("goVer");
+  const goCls  = document.getElementById("goCls");
+
+  const LS_SCOPE_KEY = "jat_scope_last";
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+    panelGeneral.style.display = "none";
+    panelStep.style.display = "none";
+
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch{}
+
+    if(scope === "general"){
+      hintEl.textContent = "🌐 Zone Général : accès infos.";
+      panelGeneral.style.display = "block";
+
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "#";
+      a.textContent = "📰 Infos";
+      a.onclick = (e)=> e.preventDefault();
+      tabsEl.appendChild(a);
+
+      return;
+    }
+
+    hintEl.textContent = "🎾 Zone Étape : programmation / résultats / vérification / classement.";
+    panelStep.style.display = "block";
+
+    stepTitle.textContent = `${stepLabel(scope)} — BT250`;
+
+    goProg.href = `programmation.html?scope=${encodeURIComponent(scope)}`;
+    goRes.href  = `resultats.html?scope=${encodeURIComponent(scope)}`;
+    goVer.href  = `verification.html?scope=${encodeURIComponent(scope)}`;
+    goCls.href  = `classement.html?scope=${encodeURIComponent(scope)}`;
+  }
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    jatUI.style.display = "none";
+  }
+
+  function showJat(){
+    accessDenied.style.display = "none";
+    jatUI.style.display = "block";
+
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved && [...scopeEl.options].some(o => o.value === saved)){
+        scopeEl.value = saved;
+      }
+    }catch{}
+
+    setTabs(scopeEl.value);
+    scopeEl.onchange = ()=> setTabs(scopeEl.value);
+  }
+
+  const g = await requireRole(["admin","jat"]);
+  if(!g.ok){ showDenied(); } else { showJat(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin","jat"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
