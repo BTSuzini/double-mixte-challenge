@@ -39,7 +39,6 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (même partout) -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
@@ -91,7 +90,6 @@
 <style>
   .match-list{ display:flex; flex-direction:column; gap:14px; }
 
-  /* === Encarts identiques à ADMIN/PROGRAMMATION === */
   .match-card{
     border-radius:18px;
     border:2px solid rgba(0,0,0,.06);
@@ -109,7 +107,6 @@
     min-width:0;
   }
 
-  /* ✅ heure = même taille que court */
   .m-time{
     font-size:13px;
     font-weight:900;
@@ -117,7 +114,6 @@
     letter-spacing:.2px;
   }
 
-  /* ✅ court pas en gras */
   .m-court{
     font-size:13px;
     font-weight:400;
@@ -137,7 +133,6 @@
     opacity:.85;
   }
 
-  /* ✅ scores saisis à la place des tirets (dans la ligne équipe) */
   .team-row{
     margin-top:10px;
     display:grid;
@@ -240,11 +235,9 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape1)
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape1";
 
-  // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -259,10 +252,9 @@
   const matchCards    = document.getElementById("matchCards");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
-  // ---- state
   let currentScope = scopeFromUrl;
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> stored result doc
+  let resultsByMatch = new Map();
   let unsubProg = null;
   let unsubRes = null;
 
@@ -332,11 +324,24 @@
     startResultsListener(scope);
   }
 
-  // ---- Firestore refs
   function progRef(scope){ return doc(db, "programmations", scope); }
   function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
-  // Résolution des équipes (direct / winner / loser)
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -425,15 +430,10 @@
       if(s3A !== null || s3B !== null) errs.push("Set 3 : à laisser vide (match gagné en 2 sets).");
     }
 
-    let w3 = null;
-    if(needTB){
-      if(s3A === null || s3B === null){
-        // in progress allowed
-      } else {
-        if(s3A === s3B) errs.push("Set 3 : égalité impossible.");
-        w3 = (s3A > s3B) ? "A" : "B";
-        if(w3 === "A") setsA++; else setsB++;
-      }
+    if(needTB && s3A !== null && s3B !== null){
+      if(s3A === s3B) errs.push("Set 3 : égalité impossible.");
+      const w3 = (s3A > s3B) ? "A" : "B";
+      if(w3 === "A") setsA++; else setsB++;
     }
 
     const complete = (setsA === 2 || setsB === 2);
@@ -590,16 +590,24 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
+    // slot -> mid
     const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, slotNum])=>{
-      slotToMatch.set(Number(slotNum), mid);
-    });
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
+      }
+    }
 
     const cards = [];
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
       if(!m) continue;
+
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
 
       const a = teamRefPartsForMatchSide(m.A);
       const b = teamRefPartsForMatchSide(m.B);
@@ -617,10 +625,10 @@
       };
 
       cards.push(`
-        <div class="match-card ${esc(courtClass(s.court))}" data-mid="${esc(mid)}">
+        <div class="match-card ${esc(courtClass(courtKey))}" data-mid="${esc(mid)}">
           <div class="match-head">
             <div class="m-time">${esc(s.time)}</div>
-            <div class="m-court">${esc(courtLabel(s.court))}</div>
+            <div class="m-court">${esc(courtLabel(courtKey))}</div>
             <div class="m-status">${done ? "✅" : "⏳"}</div>
           </div>
 
@@ -693,52 +701,35 @@
     if(unsubRes){ unsubRes(); unsubRes = null; }
     unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
       resultsByMatch = new Map();
-      snap.forEach(d=>{
-        resultsByMatch.set(d.id, d.data() || {});
-      });
+      snap.forEach(d=> resultsByMatch.set(d.id, d.data() || {}));
       renderAll();
     });
   }
 
-  // =========================
-  // ✅ OPTION 3 : auto-advance saisie (mobile friendly)
-  // - avance au champ suivant quand maxlength atteint
-  // - retour au champ précédent si Backspace sur champ vide
-  // =========================
+  // ✅ auto-advance (option 3)
   const INPUT_ORDER = ["s1A","s2A","s3A","s1B","s2B","s3B"];
 
   function focusNextInput(currentInput){
     const card = currentInput.closest(".match-card");
     if(!card) return;
-
     const k = currentInput.dataset.k;
     const idx = INPUT_ORDER.indexOf(k);
     if(idx < 0) return;
-
     const nextK = INPUT_ORDER[idx + 1];
     if(!nextK) return;
-
     const next = card.querySelector(`input.ibox[data-k="${CSS.escape(nextK)}"]`);
-    if(next){
-      next.focus();
-      next.select?.();
-    }
+    if(next){ next.focus(); next.select?.(); }
   }
 
   function focusPrevInput(currentInput){
     const card = currentInput.closest(".match-card");
     if(!card) return;
-
     const k = currentInput.dataset.k;
     const idx = INPUT_ORDER.indexOf(k);
     if(idx <= 0) return;
-
     const prevK = INPUT_ORDER[idx - 1];
     const prev = card.querySelector(`input.ibox[data-k="${CSS.escape(prevK)}"]`);
-    if(prev){
-      prev.focus();
-      prev.select?.();
-    }
+    if(prev){ prev.focus(); prev.select?.(); }
   }
 
   matchCards.addEventListener("input", (e)=>{
@@ -747,11 +738,8 @@
     if(!el.classList.contains("ibox")) return;
 
     el.value = el.value.replace(/[^\d]/g, "");
-
     const max = Number(el.getAttribute("maxlength") || "0");
-    if(max > 0 && el.value.length >= max){
-      focusNextInput(el);
-    }
+    if(max > 0 && el.value.length >= max) focusNextInput(el);
   });
 
   matchCards.addEventListener("keydown", (e)=>{
@@ -765,7 +753,6 @@
     }
   });
 
-  // ---- UI (scope)
   function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
@@ -789,7 +776,6 @@
     };
   }
 
-  // ---- Events
   btnOpenPublic.onclick = (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -814,14 +800,12 @@
     }
   });
 
-  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
     window.location.href = "../index.html";
   };
 
-  // Guard
   const g = await requireRole(["admin"]);
   if(!g.ok){ showDenied(); }
   else { showAdmin(); }
