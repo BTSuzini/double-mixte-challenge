@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Vérification</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        🔎 Vérification (JAT)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs et aux JAT.</p>
+  </section>
+
+  <!-- ✅ Encart Zone -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer la vérification.
+    </p>
+  </section>
+
+  <section class="card" id="panelVerify" style="display:none;">
+    <h2 style="margin:0 0 10px;">🔎 Vérification</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div id="cards" style="display:grid; gap:12px; margin-top:14px;"></div>
+  </section>
+
+</main>
+
+<style>
+  .team-card{
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+  }
+
+  .team-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    min-width:0;
+  }
+
+  .team-name{
+    font-size:18px;
+    font-weight:1000;
+    line-height:1.15;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .sep{
+    height:1px;
+    background:rgba(0,0,0,.08);
+    border:none;
+    margin:12px 0;
+  }
+
+  .player-name{
+    font-size:16px;
+    font-weight:1000;
+    margin:0 0 10px;
+  }
+
+  .checklist{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .checkitem{
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:14px;
+    background:rgba(255,255,255,.7);
+    padding:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .ci-left{ min-width:0; }
+
+  .ci-label{
+    font-size:12px;
+    font-weight:1000;
+    opacity:.75;
+    margin:0;
+  }
+
+  .ci-value{
+    font-size:15px;
+    font-weight:1000;
+    margin:4px 0 0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* ✅ Bouton statut + couleurs */
+  .stbtn{
+    flex:0 0 auto;
+    border:1px solid rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:8px 12px;
+    font-weight:1000;
+    background:#fff;
+    cursor:pointer;
+    min-width:92px;
+    text-align:center;
+  }
+  .stbtn:hover{ filter:brightness(.98); }
+  .stbtn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .stbtn.nv{
+    background:#f3f4f6;
+    border-color:rgba(0,0,0,.10);
+    color:#111;
+  }
+  .stbtn.ok{
+    background:#d1fae5;
+    border-color:rgba(16,185,129,.35);
+    color:#064e3b;
+  }
+  .stbtn.nok{
+    background:#fee2e2;
+    border-color:rgba(239,68,68,.35);
+    color:#7f1d1d;
+  }
+
+  .two-col{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width: 520px){
+    .two-col{ grid-template-columns: 1fr; }
+  }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc, collection, onSnapshot, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape5";
+
+  // DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelVerify = document.getElementById("panelVerify");
+  const statusText = document.getElementById("statusText");
+  const cardsEl = document.getElementById("cards");
+
+  // State
+  let currentScope = scopeFromUrl;
+  let unsubIns = null;
+  let unsubEq = null;
+  let unsubVer = null;
+
+  let inscriptions = [];             // docs inscriptions
+  let equipesByTeamName = new Map(); // teamName -> equipe doc (pour rank)
+  let verifsById = new Map();        // inscriptionId -> verif doc
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // ✅ Tabs JAT (réduits)
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : infos (depuis JAT).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html?scope=general";
+      a.textContent = "📰 Infos";
+      a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : programmation / résultats / vérification / classement.";
+
+    const links = [
+      ["📅 Programmation", "programmation.html"],
+      ["🏁 Résultats", "resultats.html"],
+      ["🔎 Vérification", "verification.html"],
+      ["🏅 Classement", "classement.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "verification.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  // Firestore refs
+  function inscCol(scope){ return collection(db, `inscriptions_${scope}_private`); }
+  function equipesCol(scope){ return collection(db, `equipes_${scope}_public`); }
+  function verifCol(scope){ return collection(db, `verifications_${scope}`); }
+
+  function stopListeners(){
+    if(unsubIns){ unsubIns(); unsubIns = null; }
+    if(unsubEq){ unsubEq(); unsubEq = null; }
+    if(unsubVer){ unsubVer(); unsubVer = null; }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelVerify.style.display = "none";
+      stopListeners();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelVerify.style.display = "block";
+
+    startListeners(scope);
+  }
+
+  function normalizeDoc(d){
+    return { id: d.id, ...d.data() };
+  }
+
+  function safeTeamName(x){
+    return (x?.teamName || "").toString().trim();
+  }
+
+  function getEquipeForInsc(ins){
+    const tn = safeTeamName(ins);
+    if(!tn) return null;
+    return equipesByTeamName.get(tn) || null;
+  }
+
+  function getPlayer(ins, which){
+    const first = (ins[`${which}FirstName`] || "").toString().trim();
+    const last  = (ins[`${which}LastName`] || "").toString().trim();
+    const licence = (ins[`${which}Licence`] || "").toString().trim();
+
+    // ✅ rank vient de equipes_{scope}_public (p1Rank/p2Rank)
+    const eq = getEquipeForInsc(ins);
+    const rankVal = eq ? eq[`${which}Rank`] : null;
+    const rank = (rankVal === null || typeof rankVal === "undefined") ? "" : String(rankVal);
+
+    return { first, last, licence, rank };
+  }
+
+  function statusCycle(cur){
+    // NV -> OK -> NOK -> NV
+    if(cur === "ok") return "nok";
+    if(cur === "nok") return "nv";
+    return "ok";
+  }
+
+  function statusTextOf(s){
+    if(s === "ok") return "OK";
+    if(s === "nok") return "Non OK";
+    return "Non vérifié";
+  }
+
+  function verifFor(insId){
+    return verifsById.get(insId) || {};
+  }
+
+  function getV(vdoc, path, fallback="nv"){
+    const parts = path.split(".");
+    let cur = vdoc;
+    for(const p of parts){
+      if(!cur || typeof cur !== "object") return fallback;
+      cur = cur[p];
+    }
+    return (cur === "ok" || cur === "nok" || cur === "nv") ? cur : fallback;
+  }
+
+  function renderPlayerBlock(ins, which){
+    const p = getPlayer(ins, which);
+    const vdoc = verifFor(ins.id);
+
+    const displayName = `${(p.last || "—").toUpperCase()} ${p.first || ""}`.trim();
+
+    const items = [
+      { key:`${which}.licence`, label:"N° licence", value: p.licence || "—" },
+      { key:`${which}.rank`,    label:"Classement", value: p.rank || "—" },
+      { key:`${which}.payment`, label:"Paiement", value: "—" },
+    ];
+
+    const htmlItems = items.map(it=>{
+      const st = getV(vdoc, it.key, "nv");
+      return `
+        <div class="checkitem">
+          <div class="ci-left">
+            <p class="ci-label">${esc(it.label)}</p>
+            <p class="ci-value">${esc(it.value)}</p>
+          </div>
+          <button class="stbtn ${esc(st)}" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}">
+            ${esc(statusTextOf(st))}
+          </button>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div>
+        <div class="player-name">${esc(displayName)}</div>
+        <div class="checklist">
+          ${htmlItems}
+        </div>
+      </div>
+    `;
+  }
+
+  function render(){
+    const n = inscriptions.length;
+    statusText.textContent = `✅ ${n} équipe${n>1?"s":""} (clic sur un statut pour vérifier)`;
+
+    if(n === 0){
+      cardsEl.innerHTML = `<p class="muted" style="margin:0;">Aucune inscription.</p>`;
+      return;
+    }
+
+    const cards = inscriptions.map(ins=>{
+      const teamName = safeTeamName(ins) || "Équipe";
+
+      return `
+        <div class="team-card">
+          <div class="team-head">
+            <div class="team-name">${esc(teamName)}</div>
+          </div>
+
+          <hr class="sep" />
+
+          <div class="two-col">
+            ${renderPlayerBlock(ins, "p1")}
+            ${renderPlayerBlock(ins, "p2")}
+          </div>
+        </div>
+      `;
+    });
+
+    cardsEl.innerHTML = cards.join("");
+  }
+
+  function startListeners(scope){
+    stopListeners();
+    inscriptions = [];
+    equipesByTeamName = new Map();
+    verifsById = new Map();
+    statusText.textContent = "Chargement…";
+    cardsEl.innerHTML = "";
+
+    // 1) inscriptions privées (source licence/nom)
+    unsubIns = onSnapshot(inscCol(scope), (snap)=>{
+      inscriptions = snap.docs.map(normalizeDoc);
+
+      // tri : par teamName
+      inscriptions.sort((a,b)=> safeTeamName(a).localeCompare(safeTeamName(b), "fr"));
+
+      render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "❌ Erreur Firestore (inscriptions).";
+    });
+
+    // 2) equipes publiques (source ranks p1Rank/p2Rank)
+    unsubEq = onSnapshot(equipesCol(scope), (snap)=>{
+      equipesByTeamName = new Map();
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        const tn = safeTeamName(x);
+        if(tn) equipesByTeamName.set(tn, x);
+      });
+      render();
+    }, (err)=>{
+      console.error(err);
+      // pas bloquant
+      render();
+    });
+
+    // 3) verifications (statuts)
+    unsubVer = onSnapshot(verifCol(scope), (snap)=>{
+      verifsById = new Map();
+      snap.forEach(d=>{
+        verifsById.set(d.id, d.data() || {});
+      });
+      render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "⚠️ Inscriptions OK, mais verifs indisponibles (droits ?).";
+    });
+  }
+
+  async function toggleStatus(insId, key){
+    const curDoc = verifFor(insId);
+    const cur = getV(curDoc, key, "nv");
+    const next = statusCycle(cur);
+
+    const [p, f] = key.split(".");
+    const patch = {
+      [p]: { ...(curDoc[p] || {}), [f]: next },
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || null
+    };
+
+    await setDoc(doc(db, `verifications_${currentScope}`, insId), patch, { merge:true });
+  }
+
+  // Click handler
+  cardsEl.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act='toggle']");
+    if(!btn) return;
+
+    const insId = btn.dataset.ins;
+    const key = btn.dataset.key;
+    if(!insId || !key) return;
+
+    btn.disabled = true;
+    try{
+      await toggleStatus(insId, key);
+    }catch(err){
+      console.error(err);
+      alert("Erreur Firestore ❌\n\n" + (err?.message || "Vérifie les droits Firestore (rules)."));
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelVerify.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // ✅ Guard : admin OU jat
+  const g = await requireRole(["admin","jat"]);
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin","jat"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
