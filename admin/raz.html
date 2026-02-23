@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — RAZ</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        🧨 RAZ (admin)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
+
+  <!-- ✅ Encart Zone (même partout) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour utiliser la RAZ.
+    </p>
+  </section>
+
+  <section class="card" id="panelRaz" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧨 Réinitialisation</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div class="warn" style="margin-top:12px;">
+      ⚠️ Attention : ces actions suppriment des données Firestore et sont <b>irréversibles</b>.
+      <br>Une confirmation “double” est demandée (popup + saisie d’un mot).
+    </div>
+
+    <div class="grid" style="margin-top:14px;">
+      <button class="btn" id="btnRazAll" style="font-weight:900; color:#111;">🔥 RAZ TOUT LE TOURNOI</button>
+      <button class="btn" id="btnRazInscriptions" style="font-weight:900; color:#111;">📝 RAZ Inscriptions</button>
+      <button class="btn" id="btnRazResults" style="font-weight:900; color:#111;">🏁 RAZ Résultats</button>
+      <button class="btn" id="btnRazProg" style="font-weight:900; color:#111;">📅 RAZ Programmation</button>
+      <button class="btn" id="btnRazDraw" style="font-weight:900; color:#111;">🎲 RAZ Tirage</button>
+      <button class="btn" id="btnRazClassement" style="font-weight:900; color:#111;">🏆 RAZ Classement</button>
+      <button class="btn" id="btnRazVerification" style="font-weight:900; color:#111;">🔎 RAZ Vérification</button>
+    </div>
+
+    <hr class="sep" style="margin-top:16px;" />
+
+    <h3 style="margin:0 0 8px;">📦 État (aperçu)</h3>
+    <div id="stateBox" class="muted">—</div>
+
+    <p class="muted" style="margin-top:12px;">
+      Notes :
+      <br>• “Résultats” correspond à la collection <b>resultats_${scope}</b>.
+      <br>• “Programmation” correspond au document <b>programmations/{scope}</b>.
+      <br>• “Tirage” correspond au document <b>tirages/{scope}</b>.
+      <br>• “Classement” correspond au document <b>classements/{scope}</b>.
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .warn{
+    border:1px solid rgba(176,0,32,.25);
+    background:rgba(176,0,32,.06);
+    padding:10px 12px;
+    border-radius:14px;
+    font-weight:900;
+  }
+  .mini{
+    font-size:12px;
+    opacity:.82;
+    line-height:1.45;
+  }
+  .kv{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    gap:8px 12px;
+    margin-top:10px;
+  }
+  .k{ font-weight:900; }
+  .v{ text-align:right; font-variant-numeric: tabular-nums; }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import {
+    doc, getDoc, deleteDoc,
+    collection, getDocs,
+    query, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // ---- scope (URL ?scope=etape5)
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape5";
+
+  // ---- DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelRaz = document.getElementById("panelRaz");
+
+  const statusText = document.getElementById("statusText");
+  const stateBox = document.getElementById("stateBox");
+
+  const btnRazAll = document.getElementById("btnRazAll");
+  const btnRazInscriptions = document.getElementById("btnRazInscriptions");
+  const btnRazResults = document.getElementById("btnRazResults");
+  const btnRazProg = document.getElementById("btnRazProg");
+  const btnRazDraw = document.getElementById("btnRazDraw");
+  const btnRazClassement = document.getElementById("btnRazClassement");
+  const btnRazVerification = document.getElementById("btnRazVerification");
+
+  // ---- state
+  let currentScope = scopeFromUrl;
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : pas de RAZ ici (choisis une étape).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html";
+      a.textContent = "📰 Aller aux infos (Général)";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : équipes / inscriptions / vérification / tirage / programmation / résultats / classement / RAZ.";
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ["🔎 Vérification",   "verification.html"],
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
+      ["🧨 RAZ",            "raz.html"],
+    ];
+
+    if(scope !== "etape5"){
+      links.splice(4, 0, ["🍽️ Repas", "repas.html"]);
+    }else{
+      const fake = document.createElement("a");
+      fake.className = "btn disabled";
+      fake.href = "#";
+      fake.setAttribute("aria-disabled","true");
+      fake.textContent = "🍽️ Repas (plus tard)";
+      fake.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
+      tabsEl.appendChild(fake);
+    }
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "raz.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  // ---- Firestore refs (CONVENTIONS)
+  // ⚠️ Adapte ces noms si tes collections/docs ont un autre nom exact.
+  function inscriptionsCol(scope){ return collection(db, `inscriptions_${scope}`); }
+  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
+  function verificationCol(scope){ return collection(db, `verifications_${scope}`); } // futur fichier admin/verification
+  function progDoc(scope){ return doc(db, "programmations", scope); }
+  function drawDoc(scope){ return doc(db, "tirages", scope); }
+  function classementDoc(scope){ return doc(db, "classements", scope); }
+
+  async function countSome(colRef){
+    // cheap peek: read up to 50 docs to show an estimate without heavy cost
+    const snap = await getDocs(query(colRef, limit(50)));
+    return snap.size; // "at least" value if > 50 not known, but ok for preview
+  }
+
+  async function existsDoc(ref){
+    const s = await getDoc(ref);
+    return s.exists();
+  }
+
+  async function refreshState(){
+    if(currentScope === "general"){
+      stateBox.innerHTML = "—";
+      return;
+    }
+    statusText.textContent = "🔎 Lecture état…";
+
+    try{
+      const [insN, resN, verN, hasProg, hasDraw, hasCls] = await Promise.all([
+        countSome(inscriptionsCol(currentScope)).catch(()=> null),
+        countSome(resultsCol(currentScope)).catch(()=> null),
+        countSome(verificationCol(currentScope)).catch(()=> null),
+        existsDoc(progDoc(currentScope)).catch(()=> false),
+        existsDoc(drawDoc(currentScope)).catch(()=> false),
+        existsDoc(classementDoc(currentScope)).catch(()=> false),
+      ]);
+
+      stateBox.innerHTML = `
+        <div class="kv">
+          <div class="k">📝 Inscriptions</div><div class="v">${insN === null ? "?" : esc(String(insN))}${insN === 50 ? "+" : ""}</div>
+          <div class="k">🏁 Résultats</div><div class="v">${resN === null ? "?" : esc(String(resN))}${resN === 50 ? "+" : ""}</div>
+          <div class="k">🔎 Vérification</div><div class="v">${verN === null ? "?" : esc(String(verN))}${verN === 50 ? "+" : ""}</div>
+          <div class="k">📅 Programmation</div><div class="v">${hasProg ? "✅" : "—"}</div>
+          <div class="k">🎲 Tirage</div><div class="v">${hasDraw ? "✅" : "—"}</div>
+          <div class="k">🏆 Classement</div><div class="v">${hasCls ? "✅" : "—"}</div>
+        </div>
+        <div class="mini muted" style="margin-top:10px;">
+          Astuce : les nombres affichés sont un aperçu (lecture max 50 docs).
+        </div>
+      `;
+
+      statusText.textContent = "✅ Prêt.";
+    }catch(err){
+      console.error(err);
+      statusText.textContent = "❌ Erreur lecture état.";
+      stateBox.innerHTML = `<div class="muted">Erreur.</div>`;
+    }
+  }
+
+  async function deleteAllDocsInCollection(colRef){
+    // ⚠️ Cette approche lit puis supprime chaque doc : OK pour petits volumes.
+    // Pour gros volumes : utiliser une fonction Cloud / batch côté serveur.
+    const snap = await getDocs(colRef);
+    const tasks = [];
+    snap.forEach(d => tasks.push(deleteDoc(d.ref)));
+    await Promise.all(tasks);
+    return snap.size;
+  }
+
+  async function doubleConfirm(actionLabel){
+    const ok = confirm(`${actionLabel}\n\n⚠️ Action irréversible.\n\nContinuer ?`);
+    if(!ok) return false;
+    const word = prompt(`Pour confirmer, tape : RAZ`);
+    if(word === null) return false;
+    if((word || "").trim().toUpperCase() !== "RAZ"){
+      alert("Confirmation refusée (mot incorrect).");
+      return false;
+    }
+    return true;
+  }
+
+  async function runRaz(which){
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+
+    const labelMap = {
+      all: "🔥 RAZ TOUT LE TOURNOI",
+      inscriptions: "📝 RAZ Inscriptions",
+      results: "🏁 RAZ Résultats",
+      programmation: "📅 RAZ Programmation",
+      tirage: "🎲 RAZ Tirage",
+      classement: "🏆 RAZ Classement",
+      verification: "🔎 RAZ Vérification",
+    };
+
+    const ok = await doubleConfirm(labelMap[which] || "RAZ");
+    if(!ok) return;
+
+    // lock UI
+    for(const b of [btnRazAll,btnRazInscriptions,btnRazResults,btnRazProg,btnRazDraw,btnRazClassement,btnRazVerification]){
+      b.disabled = true;
+    }
+    statusText.textContent = "🧨 Réinitialisation en cours…";
+
+    try{
+      const logs = [];
+
+      const doInscriptions = async ()=>{
+        const n = await deleteAllDocsInCollection(inscriptionsCol(currentScope));
+        logs.push(`📝 Inscriptions supprimées : ${n}`);
+      };
+
+      const doResults = async ()=>{
+        const n = await deleteAllDocsInCollection(resultsCol(currentScope));
+        logs.push(`🏁 Résultats supprimés : ${n}`);
+      };
+
+      const doVerification = async ()=>{
+        const n = await deleteAllDocsInCollection(verificationCol(currentScope));
+        logs.push(`🔎 Vérification supprimée : ${n}`);
+      };
+
+      const doProg = async ()=>{
+        await deleteDoc(progDoc(currentScope));
+        logs.push("📅 Programmation supprimée : OK");
+      };
+
+      const doDraw = async ()=>{
+        await deleteDoc(drawDoc(currentScope));
+        logs.push("🎲 Tirage supprimé : OK");
+      };
+
+      const doClassement = async ()=>{
+        await deleteDoc(classementDoc(currentScope));
+        logs.push("🏆 Classement supprimé : OK");
+      };
+
+      if(which === "all"){
+        // ordre logique : résultats -> classement -> prog -> tirage -> inscriptions -> vérif
+        await doResults().catch(e=> logs.push("🏁 Résultats : (déjà vide ou erreur)"));
+        await doClassement().catch(e=> logs.push("🏆 Classement : (déjà vide ou erreur)"));
+        await doProg().catch(e=> logs.push("📅 Programmation : (déjà vide ou erreur)"));
+        await doDraw().catch(e=> logs.push("🎲 Tirage : (déjà vide ou erreur)"));
+        await doInscriptions().catch(e=> logs.push("📝 Inscriptions : (déjà vide ou erreur)"));
+        await doVerification().catch(e=> logs.push("🔎 Vérification : (déjà vide ou erreur)"));
+      }else{
+        if(which === "inscriptions") await doInscriptions();
+        if(which === "results") await doResults();
+        if(which === "verification") await doVerification();
+        if(which === "programmation") await doProg();
+        if(which === "tirage") await doDraw();
+        if(which === "classement") await doClassement();
+      }
+
+      statusText.textContent = "✅ RAZ terminée.";
+      alert("✅ Terminé\n\n" + logs.join("\n"));
+      await refreshState();
+    }catch(err){
+      console.error(err);
+      statusText.textContent = "❌ Erreur RAZ.";
+      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
+    }finally{
+      for(const b of [btnRazAll,btnRazInscriptions,btnRazResults,btnRazProg,btnRazDraw,btnRazClassement,btnRazVerification]){
+        b.disabled = false;
+      }
+    }
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelRaz.style.display = "none";
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelRaz.style.display = "block";
+    refreshState();
+  }
+
+  // ---- UI guards
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelRaz.style.display = "none";
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // ---- events
+  btnRazAll.onclick = (e)=>{ e.preventDefault(); runRaz("all"); };
+  btnRazInscriptions.onclick = (e)=>{ e.preventDefault(); runRaz("inscriptions"); };
+  btnRazResults.onclick = (e)=>{ e.preventDefault(); runRaz("results"); };
+  btnRazProg.onclick = (e)=>{ e.preventDefault(); runRaz("programmation"); };
+  btnRazDraw.onclick = (e)=>{ e.preventDefault(); runRaz("tirage"); };
+  btnRazClassement.onclick = (e)=>{ e.preventDefault(); runRaz("classement"); };
+  btnRazVerification.onclick = (e)=>{ e.preventDefault(); runRaz("verification"); };
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  // Guard
+  const g = await requireRole(["admin"]);
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
