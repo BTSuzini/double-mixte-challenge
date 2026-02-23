@@ -102,7 +102,6 @@
     min-width:0;
   }
 
-  /* ✅ heure = même taille que court */
   .m-time{
     font-size:13px;
     font-weight:900;
@@ -110,7 +109,6 @@
     letter-spacing:.2px;
   }
 
-  /* ✅ court pas en gras */
   .m-court{
     font-size:13px;
     font-weight:400;
@@ -123,7 +121,6 @@
     flex:1;
   }
 
-  /* ✅ plus de ligne d’en-tête S1/S2/TB */
   .team-row{
     margin-top:10px;
     display:grid;
@@ -156,6 +153,7 @@
     font-size:15px;
     font-weight:900;
     white-space:nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .vs-line{
@@ -206,6 +204,22 @@
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // ✅ Compat: schedule[mid] = number OR {slot,court}
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
   }
 
   function roundOptions(bracket){
@@ -339,10 +353,14 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
+    // slot -> mid (premier match trouvé)
     const slotToMatch = new Map();
-    Object.entries(schedule).forEach(([mid, slotNum])=>{
-      slotToMatch.set(Number(slotNum), mid);
-    });
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
+      }
+    }
 
     const cards = [];
     for(const s of slots){
@@ -350,13 +368,18 @@
       const m = mid ? matches[mid] : null;
       if(!m) continue;
 
+      // ✅ terrain réel du match (schedule[mid].court) + compat legacy
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
+
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(mid) || null;
 
       cards.push(renderMatchCard({
         time: s.time,
-        courtKey: s.court,
+        courtKey,
         teamA, teamB,
         res
       }));
@@ -386,12 +409,18 @@
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(m.id) || null;
 
-      let courtKey = "A";
+      // ✅ heure = slot du match (schedule[m.id].slot)
       let time = "—";
-      const slotNum = schedule[m.id];
-      if(slotNum){
-        const s = slots.find(x => Number(x.slot) === Number(slotNum));
-        if(s){ courtKey = s.court || "A"; time = s.time || "—"; }
+      let courtKey = "A";
+
+      const entry = schedule[m.id];
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+
+      if(Number.isFinite(slotNum) && slotNum > 0){
+        const s = slots.find(x => Number(x.slot) === slotNum) || null;
+        const norm = normalizeScheduleEntry(entry, s);
+        courtKey = norm.court;
+        time = s?.time || "—";
       }
 
       return renderMatchCard({ time, courtKey, teamA, teamB, res });
@@ -454,6 +483,7 @@
     statusText.textContent = "✅ Programmation disponible.";
     subtitle.textContent = "🧩 Tableau + 🕒 Chronologique (mise à jour en direct).";
     panelChrono.style.display = "block";
+    panelTableau.style.display = "none"; // on garde l’onglet chrono par défaut
     renderAll();
   }, (err)=>{
     console.error(err);
