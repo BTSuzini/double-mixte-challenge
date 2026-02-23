@@ -102,13 +102,6 @@
     white-space:nowrap;
   }
 
-  .team-mini{
-    font-size:12px;
-    font-weight:900;
-    opacity:.6;
-    white-space:nowrap;
-  }
-
   .sep{
     height:1px;
     background:rgba(0,0,0,.08);
@@ -139,9 +132,7 @@
     gap:10px;
   }
 
-  .ci-left{
-    min-width:0;
-  }
+  .ci-left{ min-width:0; }
 
   .ci-label{
     font-size:12px;
@@ -159,32 +150,36 @@
     text-overflow:ellipsis;
   }
 
+  /* ✅ Bouton statut + couleurs */
   .stbtn{
     flex:0 0 auto;
     border:1px solid rgba(0,0,0,.12);
     border-radius:999px;
-    padding:8px 10px;
+    padding:8px 12px;
     font-weight:1000;
     background:#fff;
     cursor:pointer;
-    min-width:74px;
+    min-width:92px;
     text-align:center;
   }
-  .stbtn:hover{ background:rgba(255,255,255,.85); }
+  .stbtn:hover{ filter:brightness(.98); }
   .stbtn:disabled{ opacity:.6; cursor:not-allowed; }
 
-  .badge{
-    display:inline-block;
-    font-size:12px;
-    font-weight:1000;
-    padding:5px 10px;
-    border-radius:999px;
-    border:1px solid rgba(0,0,0,.12);
+  .stbtn.nv{
+    background:#f3f4f6;
+    border-color:rgba(0,0,0,.10);
+    color:#111;
   }
-
-  .b-nv{ opacity:.8; }
-  .b-ok{ }
-  .b-nok{ }
+  .stbtn.ok{
+    background:#d1fae5;
+    border-color:rgba(16,185,129,.35);
+    color:#064e3b;
+  }
+  .stbtn.nok{
+    background:#fee2e2;
+    border-color:rgba(239,68,68,.35);
+    color:#7f1d1d;
+  }
 
   .two-col{
     display:grid;
@@ -202,8 +197,7 @@
 
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    doc, collection, onSnapshot, setDoc,
-    serverTimestamp
+    doc, collection, onSnapshot, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const params = new URLSearchParams(location.search);
@@ -226,10 +220,12 @@
   // State
   let currentScope = scopeFromUrl;
   let unsubIns = null;
+  let unsubEq = null;
   let unsubVer = null;
 
-  let inscriptions = [];          // docs inscriptions
-  let verifsById = new Map();     // inscriptionId -> verif doc
+  let inscriptions = [];           // docs inscriptions
+  let equipesByTeamName = new Map(); // teamName -> equipe doc (pour rank)
+  let verifsById = new Map();      // inscriptionId -> verif doc
 
   function stepLabel(scope){
     if(!scope || scope === "general") return "Général";
@@ -280,10 +276,12 @@
 
   // Firestore refs
   function inscCol(scope){ return collection(db, `inscriptions_${scope}_private`); }
-  function verifCol(scope){ return collection(db, `verifications_${scope}`); } // ✅ collection dédiée
+  function equipesCol(scope){ return collection(db, `equipes_${scope}_public`); }
+  function verifCol(scope){ return collection(db, `verifications_${scope}`); }
 
   function stopListeners(){
     if(unsubIns){ unsubIns(); unsubIns = null; }
+    if(unsubEq){ unsubEq(); unsubEq = null; }
     if(unsubVer){ unsubVer(); unsubVer = null; }
   }
 
@@ -303,19 +301,29 @@
     startListeners(scope);
   }
 
-  function normalizeInsc(d){
-    return {
-      id: d.id,
-      ...d.data(),
-    };
+  function normalizeDoc(d){
+    return { id: d.id, ...d.data() };
+  }
+
+  function safeTeamName(x){
+    return (x?.teamName || "").toString().trim();
+  }
+
+  function getEquipeForInsc(ins){
+    const tn = safeTeamName(ins);
+    if(!tn) return null;
+    return equipesByTeamName.get(tn) || null;
   }
 
   function getPlayer(ins, which){
-    // which: "p1" ou "p2"
     const first = (ins[`${which}FirstName`] || "").toString().trim();
     const last  = (ins[`${which}LastName`] || "").toString().trim();
     const licence = (ins[`${which}Licence`] || "").toString().trim();
-    const rank = (ins[`${which}Rank`] ?? ins[`${which}Classement`] ?? "").toString().trim();
+
+    // ✅ rank vient de equipes_{scope}_public (p1Rank/p2Rank)
+    const eq = getEquipeForInsc(ins);
+    const rankVal = eq ? eq[`${which}Rank`] : null;
+    const rank = (rankVal === null || typeof rankVal === "undefined") ? "" : String(rankVal);
 
     return { first, last, licence, rank };
   }
@@ -327,10 +335,10 @@
     return "ok";
   }
 
-  function statusLabel(s){
-    if(s === "ok") return { text:"OK", cls:"b-ok" };
-    if(s === "nok") return { text:"Non OK", cls:"b-nok" };
-    return { text:"Non vérifié", cls:"b-nv" };
+  function statusTextOf(s){
+    if(s === "ok") return "OK";
+    if(s === "nok") return "Non OK";
+    return "Non vérifié";
   }
 
   function verifFor(insId){
@@ -338,7 +346,6 @@
   }
 
   function getV(vdoc, path, fallback="nv"){
-    // path ex: "p1.licence"
     const parts = path.split(".");
     let cur = vdoc;
     for(const p of parts){
@@ -356,21 +363,20 @@
 
     const items = [
       { key:`${which}.licence`, label:"N° licence", value: p.licence || "—" },
-      { key:`${which}.rank`, label:"Classement", value: p.rank || "—" },
-      { key:`${which}.payment`, label:"Paiement", value: "—" }, // valeur éventuelle plus tard
+      { key:`${which}.rank`,    label:"Classement", value: p.rank || "—" },
+      { key:`${which}.payment`, label:"Paiement", value: "—" },
     ];
 
     const htmlItems = items.map(it=>{
       const st = getV(vdoc, it.key, "nv");
-      const sl = statusLabel(st);
       return `
         <div class="checkitem">
           <div class="ci-left">
             <p class="ci-label">${esc(it.label)}</p>
             <p class="ci-value">${esc(it.value)}</p>
           </div>
-          <button class="stbtn" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}">
-            <span class="badge ${esc(sl.cls)}">${esc(sl.text)}</span>
+          <button class="stbtn ${esc(st)}" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}">
+            ${esc(statusTextOf(st))}
           </button>
         </div>
       `;
@@ -396,7 +402,7 @@
     }
 
     const cards = inscriptions.map(ins=>{
-      const teamName = (ins.teamName || "Équipe").toString().trim();
+      const teamName = safeTeamName(ins) || "Équipe";
 
       return `
         <div class="team-card">
@@ -420,15 +426,17 @@
   function startListeners(scope){
     stopListeners();
     inscriptions = [];
+    equipesByTeamName = new Map();
     verifsById = new Map();
     statusText.textContent = "Chargement…";
     cardsEl.innerHTML = "";
 
+    // 1) inscriptions privées (source licence/nom)
     unsubIns = onSnapshot(inscCol(scope), (snap)=>{
-      inscriptions = snap.docs.map(normalizeInsc);
+      inscriptions = snap.docs.map(normalizeDoc);
 
-      // tri simple : par teamName
-      inscriptions.sort((a,b)=> (a.teamName||"").localeCompare((b.teamName||""), "fr"));
+      // tri : par teamName
+      inscriptions.sort((a,b)=> safeTeamName(a).localeCompare(safeTeamName(b), "fr"));
 
       render();
     }, (err)=>{
@@ -436,6 +444,22 @@
       statusText.textContent = "❌ Erreur Firestore (inscriptions).";
     });
 
+    // 2) equipes publiques (source ranks p1Rank/p2Rank)
+    unsubEq = onSnapshot(equipesCol(scope), (snap)=>{
+      equipesByTeamName = new Map();
+      snap.forEach(d=>{
+        const x = d.data() || {};
+        const tn = safeTeamName(x);
+        if(tn) equipesByTeamName.set(tn, x);
+      });
+      render();
+    }, (err)=>{
+      console.error(err);
+      // pas bloquant
+      render();
+    });
+
+    // 3) verifications (statuts)
     unsubVer = onSnapshot(verifCol(scope), (snap)=>{
       verifsById = new Map();
       snap.forEach(d=>{
@@ -444,7 +468,6 @@
       render();
     }, (err)=>{
       console.error(err);
-      // pas bloquant pour afficher inscriptions, mais on le signale
       statusText.textContent = "⚠️ Inscriptions OK, mais verifs indisponibles (droits ?).";
     });
   }
@@ -454,8 +477,6 @@
     const cur = getV(curDoc, key, "nv");
     const next = statusCycle(cur);
 
-    // construire update merge (nested)
-    // key: "p1.licence" => { p1: { licence: next } }
     const [p, f] = key.split(".");
     const patch = {
       [p]: { ...(curDoc[p] || {}), [f]: next },
@@ -516,14 +537,14 @@
     };
   }
 
-  // Guard
-  const g = await requireRole(["admin"]);
+  // ✅ Guard : admin OU jat
+  const g = await requireRole(["admin","jat"]);
   if(!g.ok){ showDenied(); }
   else { showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
-    const g2 = await requireRole(["admin"]);
+    const g2 = await requireRole(["admin","jat"]);
     if(!g2.ok){ showDenied(); return; }
   });
 </script>
