@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JAT — Programmation</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <h1 class="brand-title">
+        📅 Programmation (JAT)<br>
+        <span style="opacity:.95;font-weight:800;" id="pageSub">Étape —</span>
+      </h1>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="../index.html">Accueil public</a>
+      <a href="#" id="btnLogout">Déconnexion</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs et aux JAT.</p>
+  </section>
+
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">Général</option>
+        <option value="etape1">Étape 1</option>
+        <option value="etape2">Étape 2</option>
+        <option value="etape3">Étape 3</option>
+        <option value="etape4">Étape 4</option>
+        <option value="etape5">Étape 5</option>
+      </select>
+    </div>
+
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer la programmation.
+    </p>
+  </section>
+
+  <section class="card" id="panelBuild" style="display:none;">
+    <h2 style="margin:0 0 10px;">⚙️ Génération (selon règlement)</h2>
+    <p class="muted" id="buildStatus" style="margin:0;">Chargement…</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnGenerate" style="font-weight:900; color:#111;">
+        🧩 Générer la programmation depuis le tirage VALIDÉ
+      </button>
+
+      <button class="btn" id="btnOpenPublic" style="font-weight:900; color:#111;">
+        👀 Ouvrir la programmation (public)
+      </button>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      ✅ Le tableau est chargé dès la <b>validation du tirage</b>.
+    </p>
+  </section>
+
+  <section class="card" id="panelSchedule" style="display:none;">
+    <h2 style="margin:0 0 10px;">🗓️ Ordre chronologique</h2>
+    <p class="muted" id="schedStatus" style="margin:0;">—</p>
+
+    <div id="adminList" style="margin-top:12px;"></div>
+
+    <p class="muted" style="margin-top:10px;">
+      💡 ↑ ↓ échangent les <b>créneaux</b> (heure). Le bouton 🐝/🌶️ change le <b>terrain</b> sans changer l’heure.
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .match-list{ display:flex; flex-direction:column; gap:14px; }
+
+  .match-card{
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+  }
+  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
+
+  .match-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .m-slot{
+    font-size:12px;
+    font-weight:900;
+    opacity:.7;
+    white-space:nowrap;
+  }
+
+  .m-time{
+    font-size:13px;
+    font-weight:900;
+    white-space:nowrap;
+    letter-spacing:.2px;
+  }
+
+  .m-court{
+    font-size:13px;
+    font-weight:400;
+    font-style:italic;
+    opacity:.95;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+    flex:1;
+  }
+
+  .actions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    white-space:nowrap;
+  }
+  .btnx{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:#fff;
+    cursor:pointer;
+    font-weight:900;
+  }
+  .btnx:hover{ background:#f5f5f5; }
+  .btnx:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .team-row{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 22px 22px 24px;
+    align-items:center;
+    gap:6px;
+  }
+
+  .team-block{ min-width:0; }
+  .team-title{
+    font-size:15px;
+    font-weight:900;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .team-sub{
+    margin-top:2px;
+    font-size:13px;
+    font-weight:800;
+    opacity:.85;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .sc{
+    text-align:right;
+    font-size:15px;
+    font-weight:900;
+    white-space:nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vs-line{
+    margin:10px 0 6px;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:2px;
+    opacity:.55;
+    font-size:12px;
+  }
+
+  @media (max-width: 380px){
+    .m-time{ font-size:13px; }
+    .m-court{ font-size:13px; }
+    .team-title{ font-size:14px; }
+    .team-sub{ font-size:12px; }
+    .sc{ font-size:14px; }
+  }
+</style>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope") || "etape5";
+
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+  const pageSub = document.getElementById("pageSub");
+
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelBuild = document.getElementById("panelBuild");
+  const panelSchedule = document.getElementById("panelSchedule");
+
+  const buildStatus = document.getElementById("buildStatus");
+  const schedStatus = document.getElementById("schedStatus");
+  const adminList = document.getElementById("adminList");
+
+  const btnGenerate = document.getElementById("btnGenerate");
+  const btnOpenPublic = document.getElementById("btnOpenPublic");
+
+  let currentScope = scopeFromUrl;
+  let unsubProg = null;
+  let unsubRes = null;
+
+  let currentProg = null;
+  let resultsByMatch = new Map(); // matchId -> result doc
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // ✅ Tabs JAT (réduits)
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    if(scope === "general"){
+      hintEl.textContent = "Zone Général : infos (depuis JAT).";
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "index.html?scope=general";
+      a.textContent = "📰 Infos";
+      a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+      return;
+    }
+
+    hintEl.textContent = "Zone Étape : programmation / résultats / vérification / classement.";
+
+    const links = [
+      ["📅 Programmation", "programmation.html"],
+      ["🏁 Résultats", "resultats.html"],
+      ["🔎 Vérification", "verification.html"],
+      ["🏅 Classement", "classement.html"],
+    ];
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      if(url === "programmation.html") a.style.fontWeight = "900";
+      tabsEl.appendChild(a);
+    }
+  }
+
+  function progRef(scope){ return doc(db, "programmations", scope); }
+  function drawRef(scope){ return doc(db, "tirages", scope); }
+  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
+
+  function defaultCourts(){
+    return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
+  }
+
+  // ✅ LOGIQUE OFFICIELLE (fixe) — matchId ne change jamais
+  function buildMatches(){
+    return {
+      // Quarts
+      M1:{id:"M1",n:1,  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
+      M2:{id:"M2",n:2,  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
+      M3:{id:"M3",n:3,  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
+      M4:{id:"M4",n:4,  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
+
+      // 5-8 (demi)
+      M5:{id:"M5",n:5,  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
+      M6:{id:"M6",n:6,  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
+
+      // Tableau principal (demi)
+      M7:{id:"M7",n:7,  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
+      M8:{id:"M8",n:8,  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
+
+      // Classements
+      M9:{id:"M9",n:9,   A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
+      M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
+      M11:{id:"M11",n:11,A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
+      M12:{id:"M12",n:12,A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
+    };
+  }
+
+  // Slots = créneaux "heure (+ note)". On garde court en legacy mais il n’est plus “source de vérité”.
+  function defaultSlots(){
+    return [
+      { slot:1,  time:"18:00", court:"A" },
+      { slot:2,  time:"18:00", court:"B" },
+      { slot:3,  time:"18:50", court:"A" },
+      { slot:4,  time:"18:50", court:"B" },
+      { slot:5,  time:"19:40", court:"A" },
+      { slot:6,  time:"20:05", court:"B", note:"pause spécifique avant ce match" },
+      { slot:7,  time:"20:30", court:"A" },
+      { slot:8,  time:"20:55", court:"B" },
+      { slot:9,  time:"21:20", court:"A" },
+      { slot:10, time:"21:45", court:"B" },
+      { slot:11, time:"22:10", court:"A" },
+      { slot:12, time:"22:35", court:"B" },
+    ];
+  }
+
+  // ✅ schedule normalization (compat: number OR {slot,court})
+  function normalizeScheduleEntry(entry, slotObj){
+    // entry can be: 5 OR {slot:5,court:"A"}
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
+  async function generateFromValidatedDraw(scope){
+    const dSnap = await getDoc(drawRef(scope));
+    if(!dSnap.exists()) throw new Error("Tirage introuvable.");
+    const draw = dSnap.data() || {};
+    if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer.");
+
+    const order = draw.order || [];
+    const pool = draw.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+    const revealed = Number(draw.revealed || 0);
+    if(revealed < 6) throw new Error("Tirage incomplet.");
+
+    const picks = order.slice(0, 6).map(id => poolById.get(id)).filter(Boolean);
+    if(picks.length !== 6) throw new Error("Impossible de reconstruire E3..E8.");
+
+    const teams = {
+      TS1: draw.seed1 || null,
+      TS2: draw.seed2 || null,
+      E3: picks[0] || null,
+      E4: picks[1] || null,
+      E5: picks[2] || null,
+      E6: picks[3] || null,
+      E7: picks[4] || null,
+      E8: picks[5] || null,
+    };
+
+    const matches = buildMatches();
+    const slots = defaultSlots();
+    const courts = defaultCourts();
+
+    // ✅ NEW schedule format: schedule[mid] = {slot, court}
+    const schedule = {};
+    for(const mid of Object.keys(matches)){
+      const n = Number(matches[mid].n);
+      const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court: (n%2? "A":"B") };
+      schedule[mid] = normalizeScheduleEntry({ slot:n, court: slotObj.court }, slotObj);
+    }
+
+    const payload = {
+      formatVersion: 3,
+      scope,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      courts,
+      source: { drawValidatedAt: draw.validatedAt || null, drawDoc: "tirages/" + scope },
+      teams, matches, slots, schedule
+    };
+
+    await setDoc(progRef(scope), payload, { merge:true });
+    return payload;
+  }
+
+  function courtLabel(prog, courtKey){
+    const name = prog?.courts?.[courtKey] || courtKey || "—";
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name} ${emo}`;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+  }
+
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
+  }
+
+  function teamRefParts(prog, ref){
+    if(!ref) return { title:"—", sub:"" };
+
+    if(ref.type === "team"){
+      const t = prog?.teams?.[ref.key] || null;
+      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
+    }
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+
+    return { title:"—", sub:"" };
+  }
+
+  function fmtScoreCell(v){
+    return (v === null || typeof v === "undefined" || v === "") ? "—" : String(v);
+  }
+
+  function renderAdminCard({slot, time, courtKey, note, teamA, teamB, mid, stored, isDone}){
+    return `
+      <div class="match-card ${esc(courtClass(courtKey))}">
+        <div class="match-head">
+          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(courtLabel(currentProg, courtKey))}</div>
+
+          <div class="actions">
+            <button class="btnx" data-act="court" data-mid="${esc(mid)}" title="Changer de terrain">
+              ${courtKey === "A" ? "🐝" : "🌶️"}
+            </button>
+            <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot<=1 ? "disabled":""}>↑</button>
+            <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot>=12 ? "disabled":""}>↓</button>
+          </div>
+        </div>
+
+        ${note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(note)}</div>` : ""}
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-title">${esc(teamA.title)}</div>
+            ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ``}
+          </div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s1A))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s2A))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s3A))}</div>
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-title">${esc(teamB.title)}</div>
+            ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ``}
+          </div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s1B))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s2B))}</div>
+          <div class="sc">${esc(fmtScoreCell(stored?.s3B))}</div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          ${isDone ? "✅ Résultat validé" : "⏳ Résultat en attente"}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdminList(){
+    if(!currentProg){ adminList.innerHTML = ""; return; }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    // slot -> mid (si collisions, on prend le premier trouvé)
+    const slotToMatch = new Map();
+    for(const [mid, entry] of Object.entries(schedule)){
+      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const norm = normalizeScheduleEntry(entry, sObj);
+      if(!slotToMatch.has(norm.slot)){
+        slotToMatch.set(norm.slot, mid);
+      }
+    }
+
+    const cards = [];
+    for(const s of slots){
+      const mid = slotToMatch.get(Number(s.slot));
+      const m = mid ? matches[mid] : null;
+      if(!m) continue;
+
+      const a = teamRefParts(currentProg, m.A);
+      const b = teamRefParts(currentProg, m.B);
+
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
+
+      const stored = resultsByMatch.get(mid) || null;
+      const isDone = !!stored && (stored.winnerSide === "A" || stored.winnerSide === "B");
+
+      cards.push(renderAdminCard({
+        slot: s.slot,
+        time: s.time,
+        courtKey,
+        note: s.note || "",
+        teamA: a,
+        teamB: b,
+        mid,
+        stored,
+        isDone
+      }));
+    }
+
+    adminList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match.</p>`;
+
+    schedStatus.textContent = "✅ OK";
+  }
+
+  async function swapSlots(scope, slotA, slotB){
+    const ref = progRef(scope);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) throw new Error("Programmation introuvable.");
+
+    const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+    const schedule = prog.schedule || {};
+
+    // Find match assigned to slotA and slotB (first match found)
+    let mA = null, mB = null;
+    for(const [mid, entry] of Object.entries(schedule)){
+      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const norm = normalizeScheduleEntry(entry, sObj);
+      if(norm.slot === Number(slotA) && !mA) mA = mid;
+      if(norm.slot === Number(slotB) && !mB) mB = mid;
+    }
+
+    const newSchedule = { ...schedule };
+
+    function setEntry(mid, newSlot){
+      if(!mid) return;
+      const curEntry = newSchedule[mid];
+      const slotObj = slots.find(x => Number(x.slot) === Number(newSlot));
+      const norm = normalizeScheduleEntry(curEntry, slotObj);
+      newSchedule[mid] = { slot: Number(newSlot), court: norm.court };
+    }
+
+    setEntry(mA, slotB);
+    setEntry(mB, slotA);
+
+    await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
+  }
+
+  async function toggleCourt(scope, mid){
+    const ref = progRef(scope);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) throw new Error("Programmation introuvable.");
+
+    const prog = snap.data() || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+    const schedule = prog.schedule || {};
+
+    const entry = schedule[mid];
+    const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+    const slotObj = slots.find(x => Number(x.slot) === slotNum) || null;
+
+    const norm = normalizeScheduleEntry(entry, slotObj);
+    const nextCourt = (norm.court === "A") ? "B" : "A";
+
+    const newSchedule = { ...schedule, [mid]: { slot: norm.slot, court: nextCourt } };
+    await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
+  }
+
+  function stopListeners(){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+  }
+
+  function startResultsListener(scope){
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+    resultsByMatch = new Map();
+
+    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
+      resultsByMatch = new Map();
+      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
+      renderAdminList();
+    }, (err)=>{
+      console.error(err);
+      // pas bloquant
+    });
+  }
+
+  function startProgListener(scope){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+
+    buildStatus.textContent = "Chargement…";
+    schedStatus.textContent = "Chargement…";
+    adminList.innerHTML = "";
+
+    unsubProg = onSnapshot(progRef(scope), (snap)=>{
+      currentProg = snap.exists() ? (snap.data() || {}) : null;
+
+      if(!currentProg){
+        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée. Génère-la depuis le tirage validé.";
+        schedStatus.textContent = "—";
+        adminList.innerHTML = "";
+        return;
+      }
+
+      buildStatus.textContent = "✅ Programmation présente.";
+      renderAdminList();
+    }, (err)=>{
+      console.error(err);
+      buildStatus.textContent = "❌ Erreur Firestore (programmation).";
+      schedStatus.textContent = "❌ Erreur";
+    });
+  }
+
+  function showPanelsForScope(scope){
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelBuild.style.display = "none";
+      panelSchedule.style.display = "none";
+      stopListeners();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelBuild.style.display = "block";
+    panelSchedule.style.display = "block";
+
+    startProgListener(scope);
+    startResultsListener(scope);
+  }
+
+  btnGenerate.onclick = async (e)=>{
+    e.preventDefault();
+    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    btnGenerate.disabled = true;
+    buildStatus.textContent = "Génération…";
+    try{
+      await generateFromValidatedDraw(currentScope);
+      buildStatus.textContent = "✅ Programmation générée.";
+    }catch(err){
+      console.error(err);
+      buildStatus.textContent = "❌ " + (err?.message || "Impossible.");
+      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
+    }finally{
+      btnGenerate.disabled = false;
+    }
+  };
+
+  btnOpenPublic.onclick = (e)=>{
+    e.preventDefault();
+    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    window.location.href = `../${currentScope}/programmation.html`;
+  };
+
+  adminList.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act]");
+    if(!btn) return;
+    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(!currentProg){ alert("Pas de programmation."); return; }
+
+    const act = btn.dataset.act;
+
+    try{
+      schedStatus.textContent = "Traitement…";
+
+      if(act === "up" || act === "down"){
+        const slot = Number(btn.dataset.slot);
+        if(!Number.isFinite(slot)) return;
+        if(act === "up" && slot > 1) await swapSlots(currentScope, slot, slot-1);
+        if(act === "down" && slot < 12) await swapSlots(currentScope, slot, slot+1);
+      }
+
+      if(act === "court"){
+        const mid = btn.dataset.mid;
+        if(!mid) return;
+        await toggleCourt(currentScope, mid);
+      }
+
+      schedStatus.textContent = "✅ OK";
+    }catch(err){
+      console.error(err);
+      schedStatus.textContent = "❌ Erreur";
+      alert("Erreur ❌");
+    }
+  });
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelBuild.style.display = "none";
+    panelSchedule.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+    };
+  }
+
+  // ✅ Guard JAT + Admin
+  const g = await requireRole(["admin","jat"]);
+  if(!g.ok){ showDenied(); } else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin","jat"]);
+    if(!g2.ok){ showDenied(); return; }
+  });
+</script>
+
+</body>
+</html>
