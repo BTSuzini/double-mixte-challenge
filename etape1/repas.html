@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Repas — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
 </head>
 <body>
 
@@ -44,22 +44,16 @@
     <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
 
     <div class="subtabs" role="tablist" aria-label="Espace repas">
-      <button class="subtab" id="tabFlyer" type="button" role="tab" aria-selected="true" aria-controls="panelFlyer">
-        📄 Flyer
-      </button>
-      <button class="subtab" id="tabCommander" type="button" role="tab" aria-selected="false" aria-controls="panelCommander">
-        🛒 Commander
-      </button>
-      <button class="subtab" id="tabCommandes" type="button" role="tab" aria-selected="false" aria-controls="panelCommandes">
-        📦 Commandes
-      </button>
+      <button class="subtab" id="tabFlyer" type="button" aria-selected="true">📄 Flyer</button>
+      <button class="subtab" id="tabCommander" type="button" aria-selected="false">🛒 Commander</button>
+      <button class="subtab" id="tabCommandes" type="button" aria-selected="false">📦 Commandes</button>
     </div>
   </section>
 
   <!-- ======================
         FLYER
   ======================= -->
-  <section class="card" id="panelFlyer" role="tabpanel" aria-labelledby="tabFlyer">
+  <section class="card" id="panelFlyer">
     <h2>📄 Flyer officiel</h2>
 
     <div style="text-align:center; margin-top:15px;">
@@ -74,7 +68,7 @@
   <!-- ======================
         COMMANDER
   ======================= -->
-  <section class="card" id="panelCommander" style="display:none;" role="tabpanel" aria-labelledby="tabCommander">
+  <section class="card" id="panelCommander" style="display:none;">
     <h2>🛒 Commander</h2>
 
     <div style="margin-top:12px; line-height:1.6;">
@@ -146,8 +140,8 @@
   <!-- ======================
         COMMANDES EFFECTUÉES
   ======================= -->
-  <section class="card" id="panelCommandes" style="display:none;" role="tabpanel" aria-labelledby="tabCommandes">
-    <h2>📦 Commandes effectuées</h2>
+  <section class="card" id="panelCommandes" style="display:none;">
+    <h2>📦 Commandes</h2>
 
     <p class="muted" style="margin-top:10px;">
       1 ligne par beacheur (les commandes se <b>cumulent automatiquement</b>).
@@ -155,19 +149,8 @@
 
     <p class="muted" id="ordersStatus" style="margin:10px 0 0;">Chargement…</p>
 
-    <div class="table-wrap" style="margin-top:10px;">
-      <table class="teams-table" aria-label="Commandes repas">
-        <thead>
-          <tr>
-            <th style="width:44px;">#</th>
-            <th>Beacheur</th>
-            <th style="width:140px;">Qté</th>
-            <th style="width:140px;">Montant</th>
-          </tr>
-        </thead>
-        <tbody id="ordersBody"></tbody>
-      </table>
-    </div>
+    <!-- ✅ Liste mobile-friendly (no horizontal scroll) -->
+    <div id="ordersList" class="orders-list" aria-label="Commandes repas" style="margin-top:10px;"></div>
 
     <p class="muted" style="margin:10px 0 0;">
       💡 La quantité correspond au nombre de <b>packs “3 arancini”</b>.
@@ -196,7 +179,6 @@
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
 
-  /* ✅ Nav étape : justifiée, 2 lignes si besoin */
   .nav-step{
     gap:8px;
     justify-content:space-between;
@@ -207,7 +189,6 @@
     padding:8px 12px;
   }
 
-  /* ✅ Lien actif plus visible */
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
@@ -222,13 +203,19 @@
     .step-title-img{ max-height: 74px; }
   }
 
-  /* ✅ Sous-onglets : Flyer ligne 1 (plein), Commander + Commandes ligne 2 */
+  /* ======================================
+     SUBTABS — Flyer ligne 1, 2 boutons ligne 2
+  ======================================= */
   .subtabs{
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap:10px;
     margin-top:10px;
   }
+  #tabFlyer{
+    grid-column: 1 / -1; /* plein largeur */
+  }
+
   .subtab{
     appearance:none;
     border:1px solid #ddd;
@@ -237,49 +224,75 @@
     padding:10px 14px;
     font-weight:900;
     cursor:pointer;
-    width:100%;
   }
-  /* Flyer prend toute la ligne */
-  #tabFlyer{ grid-column: 1 / -1; }
-
   .subtab[aria-selected="true"]{
     background:#fff;
     border-color:#cfcfcf;
     box-shadow: 0 6px 14px rgba(0,0,0,.06);
   }
 
-  .table-wrap{
-    overflow:auto;
+  /* ======================================
+     COMMANDES — Liste compacte (no scroll horizontal)
+  ======================================= */
+  .orders-list{
+    display:grid;
+    gap:8px; /* ✅ plus serré */
+  }
+
+  .order-row{
     border:1px solid #eee;
     border-radius:14px;
     background:#fff;
+    padding:10px 10px; /* ✅ compact */
+    box-shadow: 0 6px 16px rgba(0,0,0,.04);
+    display:grid;
+    grid-template-columns: 38px 1fr auto;
+    gap:10px;
+    align-items:center;
   }
-  .teams-table{
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    min-width: 520px;
-  }
-  .teams-table thead th{
-    text-align:left;
-    font-size:13px;
-    letter-spacing:.2px;
-    color:#444;
-    background:#f7f7f7;
-    border-bottom:1px solid #eee;
-    padding:12px 12px;
-    position:sticky;
-    top:0;
-    z-index:1;
+
+  .order-num{
+    color:#666;
+    font-weight:900;
+    font-variant-numeric: tabular-nums;
     white-space:nowrap;
   }
-  .teams-table tbody td{
-    padding:12px 12px;
-    border-bottom:1px solid #f0f0f0;
-    vertical-align:top;
-    font-size:14px;
+
+  .order-main{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px; /* ✅ compact */
   }
-  .teams-table tbody tr:last-child td{ border-bottom:none; }
+
+  .order-name{
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    line-height:1.15;
+  }
+
+  .order-sub{
+    font-size:12px;
+    color:#666;
+    line-height:1.15;
+  }
+
+  .order-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:2px; /* ✅ compact */
+    white-space:nowrap;
+  }
+
+  .order-qty{
+    font-weight:900;
+  }
+  .order-total{
+    font-weight:900;
+  }
 </style>
 
 <script type="module">
@@ -295,7 +308,7 @@
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ===== Collections (Challenge)
-  const COL_TEAMS_PUBLIC = "equipes_etape1_public"; // pour construire la liste des beacheurs
+  const COL_TEAMS_PUBLIC = "equipes_etape1_public"; // pour construire la liste des beacheurs (+ ranks)
   const COL_ORDERS = "repas_etape1";                // 1 doc par beacheurKey (cumul)
 
   const UNIT_PRICE = 10; // 1 pack "3 arancini"
@@ -309,38 +322,32 @@
   const panelCommander = document.getElementById("panelCommander");
   const panelCommandes = document.getElementById("panelCommandes");
 
-  function setTab(tabEl, selected){
-    tabEl.setAttribute("aria-selected", selected ? "true" : "false");
-  }
-
-  function showPanel(panel){
+  function show(panel){
     panelFlyer.style.display = "none";
     panelCommander.style.display = "none";
     panelCommandes.style.display = "none";
 
-    setTab(tabFlyer, false);
-    setTab(tabCommander, false);
-    setTab(tabCommandes, false);
+    tabFlyer.setAttribute("aria-selected","false");
+    tabCommander.setAttribute("aria-selected","false");
+    tabCommandes.setAttribute("aria-selected","false");
 
     panel.style.display = "block";
   }
 
-  function goFlyer(){
-    showPanel(panelFlyer);
-    setTab(tabFlyer, true);
-  }
-  function goCommander(){
-    showPanel(panelCommander);
-    setTab(tabCommander, true);
-  }
-  function goCommandes(){
-    showPanel(panelCommandes);
-    setTab(tabCommandes, true);
-  }
+  tabFlyer.onclick = ()=>{
+    show(panelFlyer);
+    tabFlyer.setAttribute("aria-selected","true");
+  };
 
-  tabFlyer.addEventListener("click", goFlyer);
-  tabCommander.addEventListener("click", goCommander);
-  tabCommandes.addEventListener("click", goCommandes);
+  tabCommander.onclick = ()=>{
+    show(panelCommander);
+    tabCommander.setAttribute("aria-selected","true");
+  };
+
+  tabCommandes.onclick = ()=>{
+    show(panelCommandes);
+    tabCommandes.setAttribute("aria-selected","true");
+  };
 
   // ===== Commander UI
   const orderForm = document.getElementById("orderForm");
@@ -356,11 +363,21 @@
 
   // ===== Commandes effectuées UI
   const ordersStatus = document.getElementById("ordersStatus");
-  const ordersBody = document.getElementById("ordersBody");
+  const ordersList = document.getElementById("ordersList");
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function toNum(v){
+    if(v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function fmtRank(n){
+    return (n === null || n === undefined) ? "—" : String(n);
   }
 
   function setOrderStatus(msg){ orderStatus.textContent = msg || ""; }
@@ -379,13 +396,14 @@
     setOrderEnabled(true);
   }
 
-  btnNewOrder.addEventListener("click", resetOrderUI);
-
-  btnGoList.addEventListener("click", ()=>{
-    goCommandes();
-  });
+  btnNewOrder.onclick = ()=> resetOrderUI();
+  btnGoList.onclick = ()=>{
+    show(panelCommandes);
+    tabCommandes.setAttribute("aria-selected","true");
+  };
 
   // ===== Charger les beacheurs (depuis les équipes)
+  // beacheurKey = "<teamDocId>_p1" | "<teamDocId>_p2"
   function setBeacheurLoading(){
     beacheurSelect.innerHTML = `<option value="" selected disabled>Chargement…</option>`;
   }
@@ -395,22 +413,34 @@
 
   setBeacheurLoading();
 
+  // Map pour retrouver rapidement le classement côté "Commandes"
+  const beacheurMap = new Map(); // key -> { name, team, rank }
+
   const teamsQ = query(collection(db, COL_TEAMS_PUBLIC), orderBy("createdAt", "asc"));
 
   onSnapshot(teamsQ, (snap)=>{
     const opts = [];
+    beacheurMap.clear();
 
     snap.forEach(d=>{
       const data = d.data() || {};
       const teamName = (data.teamName || "").trim();
+
       const p1 = (data.p1FirstName || "").trim();
       const p2 = (data.p2FirstName || "").trim();
 
+      const r1 = toNum(data.p1Rank ?? null);
+      const r2 = toNum(data.p2Rank ?? null);
+
       if(teamName && p1){
-        opts.push({ key: `${d.id}_p1`, name: p1, team: teamName });
+        const key = `${d.id}_p1`;
+        beacheurMap.set(key, { name: p1, team: teamName, rank: r1 });
+        opts.push({ key, name: p1, team: teamName });
       }
       if(teamName && p2){
-        opts.push({ key: `${d.id}_p2`, name: p2, team: teamName });
+        const key = `${d.id}_p2`;
+        beacheurMap.set(key, { name: p2, team: teamName, rank: r2 });
+        opts.push({ key, name: p2, team: teamName });
       }
     });
 
@@ -419,11 +449,8 @@
       return;
     }
 
-    // tri prénom puis équipe (plus agréable)
-    opts.sort((a,b)=>
-      (a.name||"").localeCompare((b.name||""), "fr") ||
-      (a.team||"").localeCompare((b.team||""), "fr")
-    );
+    // tri prénom puis équipe (stable et agréable)
+    opts.sort((a,b)=> (a.name||"").localeCompare((b.name||""), "fr") || (a.team||"").localeCompare((b.team||""), "fr"));
 
     beacheurSelect.innerHTML =
       `<option value="" selected disabled>Choisir…</option>` +
@@ -480,7 +507,12 @@
     setOrderStatus("Enregistrement…");
 
     try{
-      await upsertCumulativeOrder({ beacheurKey:key, beacheurName, teamName, addQty:qty });
+      await upsertCumulativeOrder({
+        beacheurKey: key,
+        beacheurName,
+        teamName,
+        addQty: qty
+      });
 
       alert("Commande enregistrée ✅");
 
@@ -492,6 +524,7 @@
         Ajout : <b>+${esc(String(qty))}</b> pack(s) — Total cumulé visible dans “Commandes”.
       `;
       setOrderStatus("");
+
     }catch(err){
       console.error(err);
       setOrderEnabled(true);
@@ -499,7 +532,7 @@
     }
   });
 
-  // ===== Récap commandes (lecture en direct)
+  // ===== Récap commandes (lecture en direct) — rendu sans scroll horizontal
   const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
 
   onSnapshot(ordersQ, (snap)=>{
@@ -508,6 +541,7 @@
       const x = d.data() || {};
       rows.push({
         id: d.id,
+        beacheurKey: x.beacheurKey || d.id,
         beacheurName: x.beacheurName || "",
         qty: Number.isFinite(x.qty) ? x.qty : (x.qty || 0),
         total: Number.isFinite(x.total) ? x.total : (x.total || 0)
@@ -515,29 +549,42 @@
     });
 
     if(rows.length === 0){
-      ordersBody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
+      ordersList.innerHTML = `<p class="muted" style="margin:0;">Aucune commande pour le moment.</p>`;
       ordersStatus.textContent = "🟢 En direct — 0 commande";
       return;
     }
 
-    ordersBody.innerHTML = rows.map((r, i)=>`
-      <tr>
-        <td>#${i+1}</td>
-        <td><b>${esc(r.beacheurName)}</b></td>
-        <td>${esc(String(r.qty))}</td>
-        <td><b>${esc(String(r.total))} €</b></td>
-      </tr>
-    `).join("");
+    ordersList.innerHTML = rows.map((r, i)=>{
+      const meta = beacheurMap.get(r.beacheurKey);
+      const rank = meta ? meta.rank : null;
+
+      const displayName = r.beacheurName || (meta?.name || "—");
+      const nameWithRank = (rank !== null && rank !== undefined && rank !== "")
+        ? `${displayName} (${fmtRank(rank)})`
+        : displayName;
+
+      return `
+        <div class="order-row">
+          <div class="order-num">#${i+1}</div>
+
+          <div class="order-main">
+            <div class="order-name">${esc(nameWithRank)}</div>
+            <div class="order-sub">Qté : <b>${esc(String(r.qty))}</b></div>
+          </div>
+
+          <div class="order-right">
+            <div class="order-total">${esc(String(r.total))} €</div>
+          </div>
+        </div>
+      `;
+    }).join("");
 
     ordersStatus.textContent = `🟢 En direct — ${rows.length} ligne(s)`;
   }, (err)=>{
     console.error(err);
     ordersStatus.textContent = "🔴 Erreur de connexion";
-    ordersBody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
+    ordersList.innerHTML = `<p class="muted" style="margin:0;">Erreur de connexion.</p>`;
   });
-
-  // ✅ état initial
-  goFlyer();
 </script>
 
 </body>
