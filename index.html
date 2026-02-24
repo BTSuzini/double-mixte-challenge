@@ -38,10 +38,11 @@
     <h2>🗓️ Les étapes</h2>
     <div class="grid">
       <a class="btn" href="etape1/equipes.html">🎾 Étape 1 — 27/02/2026 — BT250</a>
-      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 2 — 12/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 3 — 26/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" aria-disabled="true">⏳ Étape 4 — 09/04/2026 — à venir</a>
-     
+
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 2 — 12/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 3 — 26/03/2026 — à venir</a>
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 4 — 09/04/2026 — à venir</a>
+
       <a class="btn" href="etape5/equipes.html">🧪 Étape 5 — 17/04/2026 — TEST</a>
     </div>
     <p class="muted">📌 Le classement général est calculé par joueur (points + départages).</p>
@@ -81,15 +82,28 @@
   // ✅ persistance (reste connecté sur le même appareil)
   await ensurePersistence();
 
+  // ✅ neutralise les liens disabled proprement
+  document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
+    a.addEventListener("click", (e)=>{
+      e.preventDefault();
+    });
+  });
+
+  async function goToRoleHome(roleHomePath){
+    // Si déjà connecté => redirige direct. Sinon => prompt login.
+    await autoLoginOrPrompt("general");
+    // si login ok (ou déjà connecté) -> on navigue
+    window.location.href = roleHomePath;
+  }
+
   document.getElementById("btnAdmin").onclick = async (e)=>{
     e.preventDefault();
-    // Si déjà connecté => redirige direct. Sinon => prompt.
-    await autoLoginOrPrompt("general");
+    await goToRoleHome("admin/index.html");
   };
 
   document.getElementById("btnJat").onclick = async (e)=>{
     e.preventDefault();
-    await autoLoginOrPrompt("general");
+    await goToRoleHome("jat/index.html");
   };
 
   document.getElementById("btnLogout").onclick = async (e)=>{
