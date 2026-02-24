@@ -4,14 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="assets/css/main.css?v=20260224" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="container">
 
-    <!-- ===== Bandeau haut ===== -->
+    <!-- Bandeau général -->
     <div class="topbar-row topbar-row-general">
       <div class="brand-logo">
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- ===== NAVIGATION ===== -->
+    <!-- NAVIGATION -->
     <nav class="nav nav-general">
       <a href="index.html" aria-current="page">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
@@ -40,7 +40,7 @@
 
   </div>
 </header>
-  
+
 <main class="container">
 
   <section class="card">
@@ -70,122 +70,7 @@
     </p>
   </section>
 
-  <section class="card">
-    <h2>⚡ Accès rapide</h2>
-    <div class="grid">
-      <a class="btn" href="pages/classement.html">🏆 Voir le classement général</a>
-      <a class="btn" href="pages/reglement.html">📘 Lire le règlement</a>
-      <a class="btn" href="pages/infos.html">📰 Fil d’infos</a>
-      <a class="btn" href="pages/boutique.html">🛍️ Boutique / Paiement</a>
-      <a class="btn" href="pages/contact.html">📩 Contact</a>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>🔐 Accès organisateurs</h2>
-
-    <div class="grid">
-      <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
-      <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
-      <a class="btn" href="#" id="btnLogout">🚪 Déconnexion</a>
-    </div>
-
-    <p class="muted">Accès sécurisé (email / mot de passe).</p>
-    <p class="muted" id="authHint" style="margin-top:8px;"></p>
-  </section>
-
 </main>
-
-<!-- ===== STYLE SPÉCIFIQUE AU BANDEAU GÉNÉRAL ===== -->
-<style>
-
-/* Structure bandeau */
-.topbar-row-general{
-  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-}
-
-.general-title-wrap{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height: calc(var(--logo-size) * 0.6);
-}
-
-.general-title-img{
-  width: min(560px, 100%);
-  max-height: 90px;
-  object-fit: contain;
-  display:block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-}
-
-/* ===== NAVIGATION 2 LIGNES FIXES ===== */
-
-.nav-general{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.nav-general a{
-  text-align: center;
-  padding: 10px 12px;
-}
-
-/* Petit écran extrême */
-@media (max-width: 340px){
-  .nav-general{
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Lien actif */
-.nav a[aria-current="page"]{
-  background: rgba(255,255,255,.26);
-  border-color: rgba(255,255,255,.45);
-  box-shadow: 0 6px 14px rgba(0,0,0,.10);
-}
-
-</style>
-
-<script type="module">
-  import { auth } from "./assets/js/firebase.js";
-  import { autoLoginOrPrompt, logout, ensurePersistence } from "./assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-  await ensurePersistence();
-
-  document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
-    a.addEventListener("click", (e)=> e.preventDefault());
-  });
-
-  async function goToRoleHome(path){
-    await autoLoginOrPrompt("general");
-    window.location.href = path;
-  }
-
-  document.getElementById("btnAdmin").onclick = async (e)=>{
-    e.preventDefault();
-    await goToRoleHome("admin/index.html");
-  };
-
-  document.getElementById("btnJat").onclick = async (e)=>{
-    e.preventDefault();
-    await goToRoleHome("jat/index.html");
-  };
-
-  document.getElementById("btnLogout").onclick = async (e)=>{
-    e.preventDefault();
-    await logout();
-    alert("Déconnecté ✅");
-  };
-
-  onAuthStateChanged(auth, (user)=>{
-    document.getElementById("authHint").textContent =
-      user ? ("Connecté : " + user.email) : "Non connecté.";
-  });
-</script>
 
 </body>
 </html>
