@@ -1,11 +1,10 @@
 /* =========================================================
-   main.css — Open BT / Challenge (base)
+   main.css — Open BT / Challenge
    ========================================================= */
 
 :root{
   --max: 980px;
 
-  /* Couleurs */
   --green: #1f7a3a;
   --green-dark: #16602d;
 
@@ -16,51 +15,39 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  /* Accent (lien actif) */
-  --accent1: #1f7a3f; /* vert */
-  --accent2: #f2c200; /* jaune */
+  --accent1: #1f7a3f;
+  --accent2: #f2c200;
 
-  /* Logos */
   --logo-size: clamp(74px, 14vw, 112px);
 
-  /* Typo bandeau */
-  --title-size: clamp(16px, 3.2vw, 23px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
-  /* Bandeau */
-  --topbar-pad-y: 14px;
-  --topbar-gap: 16px;
   --topbar-shadow: 0 8px 18px rgba(0,0,0,.10);
 
-  /* Pills nav */
-  --pill-border: rgba(255,255,255,.25);
-  --pill-bg: rgba(255,255,255,.10);
-  --pill-bg-hover: rgba(255,255,255,.18);
-
-  /* UI */
   --radius-card: 16px;
   --radius-btn: 14px;
 }
 
 *{ box-sizing:border-box; }
 
-html, body{ height:100%; }
-
 body{
   margin:0;
   font-family:-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-  line-height:1.45;
-  color:var(--text);
   background:var(--bg);
+  color:var(--text);
 }
 
-/* Anti “liens bleus iOS” + tap highlight */
-a, a:visited, a:hover, a:active{
-  color:inherit;
-  text-decoration:none;
-}
-a, button{
-  -webkit-tap-highlight-color: transparent;
+/* =========================================================
+   BANDEAU
+   ========================================================= */
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background: linear-gradient(180deg, var(--green), var(--green-dark));
+  color:#fff;
+  box-shadow: var(--topbar-shadow);
 }
 
 .container{
@@ -69,28 +56,11 @@ a, button{
   padding:16px;
 }
 
-/* =========================================================
-   BANDEAU
-   ========================================================= */
-
-.topbar{
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: linear-gradient(180deg, var(--green), var(--green-dark));
-  color:#fff;
-  box-shadow: var(--topbar-shadow);
-}
-
-.topbar .container{
-  padding: var(--topbar-pad-y) 16px;
-}
-
 .topbar-row{
   display:grid;
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   align-items:center;
-  gap: var(--topbar-gap);
+  gap:16px;
 }
 
 .brand-logo{
@@ -99,231 +69,114 @@ a, button{
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
 }
 
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
-  display:block;
 }
 
-.brand-title{
-  margin:0;
-  text-align:center;
-  font-weight:900;
-  font-size:var(--title-size);
-  line-height:1.18;
-  letter-spacing:.2px;
-  text-shadow: 0 1px 0 rgba(0,0,0,.15);
-}
-
-/* =========================================================
-   NAV PILLS
-   ========================================================= */
-
-.nav{
-  margin-top:12px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.nav a{
-  color:#fff;
-  font-size:var(--nav-font);
-  padding:9px 16px;
-  border-radius:999px;
-  border:1px solid var(--pill-border);
-  background: var(--pill-bg);
-  transition:.18s ease;
-  white-space:nowrap;
-  position: relative;
-}
-
-.nav a:hover{
-  background: var(--pill-bg-hover);
-}
-
-/* Lien actif (aria-current) */
-.nav a[aria-current="page"]{
-  font-weight: 1000;
-  background: rgba(255,255,255,.22);
-  border-color: rgba(255,255,255,.45);
-  box-shadow: 0 6px 14px rgba(0,0,0,.10);
-}
-
-/* Soulignement discret (par défaut) */
-.nav a[aria-current="page"]::after{
-  content:"";
-  position:absolute;
-  left:12px;
-  right:12px;
-  bottom:-7px;
-  height:3px;
-  border-radius:3px;
-  background: linear-gradient(90deg, var(--accent1), var(--accent2));
-  opacity:.95;
-}
-
-/* =========================================================
-   BANDEAU “ÉTAPE” (Challenge)
-   - centre = image (etape1.png, etc.)
-   - nav en 2 lignes (6 items)
-   ========================================================= */
-
-.topbar-row-step{
-  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-}
-
-.step-title-wrap{
+/* Image centrale */
+.general-title-wrap{
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height: calc(var(--logo-size) * 0.55);
 }
 
-.step-title-img{
-  width: min(520px, 100%);
-  max-height: 88px;
-  height: auto;
-  object-fit: contain;
-  display:block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-}
-
-/* Nav Étape : 6 onglets justifiés (2 lignes) */
-.nav.nav-step{
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.nav.nav-step::after{
-  content:"";
-  flex:auto;
-}
-
-.nav.nav-step a{
-  padding:8px 12px;
-  flex: 1 1 auto;
-  text-align:center;
-}
-
-/* (Optionnel) active un peu plus visible sur nav-step */
-.nav.nav-step a[aria-current="page"]{
-  background: rgba(255,255,255,.26);
-  border-color: rgba(255,255,255,.45);
-  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+.general-title-img{
+  width:min(560px,100%);
+  max-height:90px;
+  object-fit:contain;
 }
 
 /* =========================================================
-   CARTES / BOUTONS
+   NAV JUSTIFIÉE PRO
+   ========================================================= */
+
+.nav{
+  margin-top:16px;
+}
+
+.nav.nav-general{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px 12px;
+  align-items:center;
+}
+
+.nav.nav-general a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:fit-content;
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:var(--nav-font);
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  transition:.15s ease;
+  white-space:nowrap;
+}
+
+/* Justification */
+.nav.nav-general a:nth-child(3n+1){ justify-self:start; }
+.nav.nav-general a:nth-child(3n+2){ justify-self:center; }
+.nav.nav-general a:nth-child(3n){ justify-self:end; }
+
+.nav.nav-general a:hover{
+  background:rgba(255,255,255,.18);
+}
+
+.nav.nav-general a[aria-current="page"]{
+  background:rgba(255,255,255,.25);
+  border-color:rgba(255,255,255,.45);
+}
+
+/* =========================================================
+   CARTES
    ========================================================= */
 
 .card{
   border:1px solid var(--border);
-  background:var(--card);
+  background:#fff;
   border-radius:var(--radius-card);
   padding:18px;
   margin:16px 0;
-  box-shadow: 0 6px 16px rgba(0,0,0,.05);
-}
-
-.card h2{
-  margin:0 0 10px;
-  font-size:20px;
+  box-shadow:0 6px 16px rgba(0,0,0,.05);
 }
 
 .grid{
   display:grid;
-  grid-template-columns:1fr;
   gap:12px;
   margin-top:12px;
 }
 
-/* Boutons */
-.btn, a.btn, a.btn:visited{
+.btn{
   display:block;
-  padding:14px 16px;
+  padding:14px;
   border-radius:var(--radius-btn);
   border:1px solid #ddd;
   background:#fafafa;
   font-weight:700;
-  color:var(--text) !important;
-  text-decoration:none !important;
-  transition:.18s ease;
 }
 
-.btn:hover, a.btn:hover{ background:#f0f0f0; }
-
-.btn.disabled{
-  opacity:.55;
-  pointer-events:none;
-}
+.btn:hover{ background:#f0f0f0; }
 
 .muted{
   color:var(--muted);
   font-size:14px;
-  margin-top:10px;
 }
 
-/* =========================================================
-   FORMULAIRES
-   ========================================================= */
-
-.form{ display:grid; gap:12px; }
-.field{ display:grid; gap:6px; }
-
-input, select, textarea{
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:12px;
-  font:inherit;
-  background:#fff;
+/* Responsive */
+@media (min-width:780px){
+  .grid{ grid-template-columns:1fr 1fr; }
 }
 
-.sep{
-  border:0;
-  border-top:1px solid #eee;
-  margin:10px 0;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (min-width: 780px){
-  .grid{ grid-template-columns: 1fr 1fr; }
-}
-
-/* petits écrans */
-@media (max-width: 420px){
-  .nav a{ padding:8px 14px; }
-  .nav a[aria-current="page"]::after{
-    left:10px;
-    right:10px;
-    bottom:-6px;
-  }
-
-  .nav.nav-step a{
-    padding:7px 10px;
-    font-size: 13px;
-  }
-  .step-title-img{ max-height: 74px; }
-}
-
-@media (max-width: 360px){
-  :root{
-    --logo-size: clamp(66px, 15vw, 98px);
-    --title-size: clamp(15px, 3.9vw, 20px);
-  }
-
-  .nav a{ padding:8px 12px; }
-
-  .nav a[aria-current="page"]::after{
-    left:9px;
-    right:9px;
+@media (max-width:420px){
+  .nav.nav-general a{
+    padding:6px 10px;
+    font-size:13px;
   }
 }
