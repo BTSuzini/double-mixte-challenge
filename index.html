@@ -11,7 +11,7 @@
 <header class="topbar">
   <div class="container">
 
-    <!-- Bandeau général -->
+    <!-- ===== Bandeau haut (GÉNÉRAL) ===== -->
     <div class="topbar-row topbar-row-general">
       <div class="brand-logo">
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
@@ -28,14 +28,14 @@
       </div>
     </div>
 
-    <!-- NAVIGATION -->
-    <nav class="nav nav-general">
-      <a href="index.html" aria-current="page">🏠</a>
+    <!-- ===== NAVIGATION (2 lignes fixes, justifiée, largeur au texte) ===== -->
+    <nav class="nav nav-general" aria-label="Navigation générale">
+      <a href="index.html" aria-current="page" aria-label="Accueil" title="Accueil">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
       <a href="pages/classement.html">🏆 Classement</a>
       <a href="pages/boutique.html">🛍️ Boutique</a>
       <a href="pages/infos.html">📰 Infos</a>
-      <a href="pages/contact.html">📩 📞</a>
+      <a href="pages/contact.html" aria-label="Contact" title="Contact">📩 📞</a>
     </nav>
 
   </div>
@@ -70,7 +70,70 @@
     </p>
   </section>
 
+  <section class="card">
+    <h2>⚡ Accès rapide</h2>
+    <div class="grid">
+      <a class="btn" href="pages/classement.html">🏆 Voir le classement général</a>
+      <a class="btn" href="pages/reglement.html">📘 Lire le règlement</a>
+      <a class="btn" href="pages/infos.html">📰 Fil d’infos</a>
+      <a class="btn" href="pages/boutique.html">🛍️ Boutique / Paiement</a>
+      <a class="btn" href="pages/contact.html">📩 Contact</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔐 Accès organisateurs</h2>
+
+    <div class="grid">
+      <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
+      <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
+      <a class="btn" href="#" id="btnLogout">🚪 Déconnexion</a>
+    </div>
+
+    <p class="muted">Accès sécurisé (email / mot de passe).</p>
+    <p class="muted" id="authHint" style="margin-top:8px;"></p>
+  </section>
+
 </main>
+
+<script type="module">
+  import { auth } from "./assets/js/firebase.js";
+  import { autoLoginOrPrompt, logout, ensurePersistence } from "./assets/js/session.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  await ensurePersistence();
+
+  // ✅ neutralise les liens disabled proprement
+  document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
+    a.addEventListener("click", (e)=> e.preventDefault());
+  });
+
+  async function goToRoleHome(path){
+    await autoLoginOrPrompt("general");
+    window.location.href = path;
+  }
+
+  document.getElementById("btnAdmin").onclick = async (e)=>{
+    e.preventDefault();
+    await goToRoleHome("admin/index.html");
+  };
+
+  document.getElementById("btnJat").onclick = async (e)=>{
+    e.preventDefault();
+    await goToRoleHome("jat/index.html");
+  };
+
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    alert("Déconnecté ✅");
+  };
+
+  onAuthStateChanged(auth, (user)=>{
+    document.getElementById("authHint").textContent =
+      user ? ("Connecté : " + user.email) : "Non connecté.";
+  });
+</script>
 
 </body>
 </html>
