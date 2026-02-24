@@ -12,6 +12,10 @@
   --card: #fff;
   --bg: #f6f7f8;
 
+  /* Accent (pour lien actif) */
+  --accent1: #1f7a3f;  /* vert */
+  --accent2: #f2c200;  /* jaune */
+
   /* Logos (recadrés => moins gros) */
   --logo-size: clamp(74px, 14vw, 112px);
 
@@ -131,10 +135,32 @@ a, button{
   background: var(--pill-bg);
   transition:.18s ease;
   white-space:nowrap;
+  position: relative; /* utile pour l’indicateur actif */
 }
 
 .nav a:hover{
   background: var(--pill-bg-hover);
+}
+
+/* ✅ Lien actif (aria-current) : plus marqué visuellement */
+.nav a[aria-current="page"]{
+  font-weight: 1000;
+  background: rgba(255,255,255,.22);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
+/* Soulignement “Suzini” discret */
+.nav a[aria-current="page"]::after{
+  content:"";
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:-7px;
+  height:3px;
+  border-radius:3px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  opacity:.95;
 }
 
 /* ======================================
@@ -224,6 +250,11 @@ input, select, textarea{
 /* très petits écrans */
 @media (max-width: 420px){
   .nav a{ padding:8px 14px; }
+  .nav a[aria-current="page"]::after{
+    left:10px;
+    right:10px;
+    bottom:-6px;
+  }
 }
 
 @media (max-width: 360px){
@@ -232,4 +263,8 @@ input, select, textarea{
     --title-size: clamp(15px, 3.9vw, 20px);
   }
   .nav a{ padding:8px 12px; }
+  .nav a[aria-current="page"]::after{
+    left:9px;
+    right:9px;
+  }
 }
