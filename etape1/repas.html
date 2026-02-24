@@ -15,7 +15,8 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <div class="step-title-wrap">
+      <!-- ✅ Image au centre -->
+      <div class="step-title-wrap" aria-label="Étape 1">
         <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
       </div>
 
@@ -24,12 +25,12 @@
       </div>
     </div>
 
-    <!-- NAV ÉTAPE 1 -->
+    <!-- ✅ Nav Étape 1 (identique à équipes) -->
     <nav class="nav nav-step">
-      <a href="../index.html">🏠</a>
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
       <a href="inscriptions.html">📝 Inscriptions</a>
       <a href="repas.html" aria-current="page">🍽️ Repas</a>
-      <a href="programmation.html">🗓️ Prog</a>
+      <a href="programmation.html">🗓️ Programmation</a>
       <a href="equipes.html">👥 Équipes</a>
       <a href="tirage.html">🎲 Tirage</a>
     </nav>
@@ -42,165 +43,501 @@
   <section class="card">
     <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
 
-    <!-- ✅ version compacte sur 1 ligne -->
-    <div class="subtabs subtabs-compact">
-      <button class="subtab" id="tabFlyer" aria-selected="true">📄 Flyer</button>
-      <button class="subtab" id="tabCommander" aria-selected="false">🛒 Commander</button>
-      <button class="subtab" id="tabCommandes" aria-selected="false">📦 Commandes</button>
+    <div class="subtabs" role="tablist" aria-label="Espace repas">
+      <button class="subtab" id="tabFlyer" type="button" role="tab" aria-selected="true" aria-controls="panelFlyer">
+        📄 Flyer
+      </button>
+      <button class="subtab" id="tabCommander" type="button" role="tab" aria-selected="false" aria-controls="panelCommander">
+        🛒 Commander
+      </button>
+      <button class="subtab" id="tabCommandes" type="button" role="tab" aria-selected="false" aria-controls="panelCommandes">
+        📦 Commandes
+      </button>
     </div>
   </section>
 
-  <!-- FLYER -->
-  <section class="card" id="panelFlyer">
+  <!-- ======================
+        FLYER
+  ======================= -->
+  <section class="card" id="panelFlyer" role="tabpanel" aria-labelledby="tabFlyer">
     <h2>📄 Flyer officiel</h2>
-    <div style="text-align:center;margin-top:15px;">
-      <img src="../assets/img/flyer.jpeg"
-           style="max-width:100%;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.08);">
+
+    <div style="text-align:center; margin-top:15px;">
+      <img
+        src="../assets/img/flyer.jpeg"
+        alt="Flyer soirée italienne"
+        style="max-width:100%; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.08);"
+      >
     </div>
   </section>
 
-  <!-- COMMANDER -->
-  <section class="card" id="panelCommander" style="display:none;">
+  <!-- ======================
+        COMMANDER
+  ======================= -->
+  <section class="card" id="panelCommander" style="display:none;" role="tabpanel" aria-labelledby="tabCommander">
     <h2>🛒 Commander</h2>
-    <!-- Contenu inchangé -->
+
+    <div style="margin-top:12px; line-height:1.6;">
+      <p style="font-size:18px; font-weight:900; margin:0;">
+        🎾 Offre spéciale pour les beacheurs !
+      </p>
+
+      <p style="margin:10px 0 0;">
+        Profitez d’un <strong>prix exclusif tournoi</strong> :<br>
+        <strong>3 arancini pour 10€</strong> 🇮🇹🔥
+      </p>
+
+      <p style="margin:10px 0 0; font-weight:900;">
+        ⏳ Réservations possibles jusqu’au <span style="white-space:nowrap;">25/08</span>
+      </p>
+
+      <hr class="sep" style="margin:14px 0;" />
+    </div>
+
+    <!-- Form -->
+    <form id="orderForm" class="form" autocomplete="off">
+      <div class="field">
+        <label for="beacheurSelect">Beacheur *</label>
+        <select id="beacheurSelect" required>
+          <option value="" selected disabled>Chargement…</option>
+        </select>
+        <p class="muted" style="margin:8px 0 0;">Sélection = <b>Prénom</b> + (<b>équipe</b>)</p>
+      </div>
+
+      <div class="field">
+        <label for="qtySelect">Nombre de repas (packs “3 arancini”) *</label>
+        <select id="qtySelect" required>
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+
+      <button id="btnOrder" class="btn" type="submit" style="font-weight:900; color:#111;">
+        ✅ Valider la commande
+      </button>
+
+      <p id="orderStatus" class="muted" role="status" aria-live="polite" style="margin-top:10px;"></p>
+    </form>
+
+    <!-- Success box -->
+    <div id="orderDone" class="card" style="display:none; margin:14px 0 0;">
+      <h3 style="margin:0 0 6px;">✅ Commande enregistrée</h3>
+      <p class="muted" id="orderDoneText" style="margin:0;"></p>
+      <div class="grid" style="margin-top:12px;">
+        <button class="btn" id="btnNewOrder" type="button" style="font-weight:900; color:#111;">
+          ➕ Autre commande
+        </button>
+        <button class="btn" id="btnGoList" type="button" style="font-weight:900; color:#111;">
+          📦 Voir commandes
+        </button>
+      </div>
+    </div>
+
   </section>
 
-  <!-- COMMANDES EFFECTUÉES -->
-  <section class="card" id="panelCommandes" style="display:none;">
-    <h2>📦 Commandes</h2>
+  <!-- ======================
+        COMMANDES EFFECTUÉES
+  ======================= -->
+  <section class="card" id="panelCommandes" style="display:none;" role="tabpanel" aria-labelledby="tabCommandes">
+    <h2>📦 Commandes effectuées</h2>
 
-    <p id="ordersStatus" class="muted">Chargement…</p>
+    <p class="muted" style="margin-top:10px;">
+      1 ligne par beacheur (les commandes se <b>cumulent automatiquement</b>).
+    </p>
 
-    <div id="ordersList" class="orders-list"></div>
+    <p class="muted" id="ordersStatus" style="margin:10px 0 0;">Chargement…</p>
+
+    <div class="table-wrap" style="margin-top:10px;">
+      <table class="teams-table" aria-label="Commandes repas">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Beacheur</th>
+            <th style="width:140px;">Qté</th>
+            <th style="width:140px;">Montant</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin:10px 0 0;">
+      💡 La quantité correspond au nombre de <b>packs “3 arancini”</b>.
+    </p>
   </section>
 
 </main>
 
 <style>
-/* ===== Bandeau ===== */
-.topbar-row-step{
-  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-}
-.step-title-wrap{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.step-title-img{
-  max-height:80px;
-  width:auto;
-}
-.nav-step{
-  justify-content:space-between;
-  gap:8px;
-}
-.nav-step a{
-  flex:1 1 auto;
-  text-align:center;
-  padding:8px 6px;
-}
-.nav a[aria-current="page"]{
-  background:rgba(255,255,255,.25);
-}
+  /* ✅ Bandeau étape (identique à équipes) */
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+  }
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+  }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
 
-/* ===== Sous-onglets compacts ===== */
-.subtabs-compact{
-  display:flex;
-  gap:6px;
-  flex-wrap:nowrap;
-}
-.subtabs-compact .subtab{
-  flex:1 1 0;
-  padding:8px 6px;
-  font-size:13px;
-  text-align:center;
-}
+  /* ✅ Nav étape : justifiée, 2 lignes si besoin */
+  .nav-step{
+    gap:8px;
+    justify-content:space-between;
+  }
+  .nav-step a{
+    flex: 1 1 auto;
+    text-align:center;
+    padding:8px 12px;
+  }
 
-/* ===== Liste commandes mobile ===== */
-.orders-list{
-  display:grid;
-  gap:10px;
-  margin-top:12px;
-}
-.order-card{
-  border:1px solid #eee;
-  border-radius:14px;
-  padding:12px;
-  background:#fff;
-  box-shadow:0 6px 16px rgba(0,0,0,.04);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.order-left{
-  display:flex;
-  flex-direction:column;
-}
-.order-name{
-  font-weight:900;
-}
-.order-meta{
-  font-size:14px;
-  color:#555;
-}
-.order-right{
-  text-align:right;
-  font-weight:900;
-}
+  /* ✅ Lien actif plus visible */
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
+    .step-title-img{ max-height: 74px; }
+  }
+
+  /* ✅ Sous-onglets : Flyer ligne 1 (plein), Commander + Commandes ligne 2 */
+  .subtabs{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .subtab{
+    appearance:none;
+    border:1px solid #ddd;
+    background:#fafafa;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:900;
+    cursor:pointer;
+    width:100%;
+  }
+  /* Flyer prend toute la ligne */
+  #tabFlyer{ grid-column: 1 / -1; }
+
+  .subtab[aria-selected="true"]{
+    background:#fff;
+    border-color:#cfcfcf;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  }
+
+  .table-wrap{
+    overflow:auto;
+    border:1px solid #eee;
+    border-radius:14px;
+    background:#fff;
+  }
+  .teams-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width: 520px;
+  }
+  .teams-table thead th{
+    text-align:left;
+    font-size:13px;
+    letter-spacing:.2px;
+    color:#444;
+    background:#f7f7f7;
+    border-bottom:1px solid #eee;
+    padding:12px 12px;
+    position:sticky;
+    top:0;
+    z-index:1;
+    white-space:nowrap;
+  }
+  .teams-table tbody td{
+    padding:12px 12px;
+    border-bottom:1px solid #f0f0f0;
+    vertical-align:top;
+    font-size:14px;
+  }
+  .teams-table tbody tr:last-child td{ border-bottom:none; }
 </style>
 
 <script type="module">
-import { db } from "../assets/js/firebase.js";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection,
+    query,
+    orderBy,
+    onSnapshot,
+    doc,
+    runTransaction,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const COL_ORDERS = "repas_etape1";
-const ordersList = document.getElementById("ordersList");
-const ordersStatus = document.getElementById("ordersStatus");
+  // ===== Collections (Challenge)
+  const COL_TEAMS_PUBLIC = "equipes_etape1_public"; // pour construire la liste des beacheurs
+  const COL_ORDERS = "repas_etape1";                // 1 doc par beacheurKey (cumul)
 
-function esc(s){
-  return (s??"").toString()
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
+  const UNIT_PRICE = 10; // 1 pack "3 arancini"
 
-const q = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+  // ===== Tabs
+  const tabFlyer = document.getElementById("tabFlyer");
+  const tabCommander = document.getElementById("tabCommander");
+  const tabCommandes = document.getElementById("tabCommandes");
 
-onSnapshot(q, (snap)=>{
-  const rows=[];
-  snap.forEach(d=>{
-    const x=d.data()||{};
-    rows.push({
-      name:x.beacheurName||"",
-      rank:x.rank||"—",
-      qty:x.qty||0,
-      total:x.total||0
-    });
-  });
+  const panelFlyer = document.getElementById("panelFlyer");
+  const panelCommander = document.getElementById("panelCommander");
+  const panelCommandes = document.getElementById("panelCommandes");
 
-  if(rows.length===0){
-    ordersList.innerHTML=`<p class="muted">Aucune commande.</p>`;
-    ordersStatus.textContent="🟢 0 commande";
-    return;
+  function setTab(tabEl, selected){
+    tabEl.setAttribute("aria-selected", selected ? "true" : "false");
   }
 
-  ordersList.innerHTML=rows.map(r=>`
-    <div class="order-card">
-      <div class="order-left">
-        <div class="order-name">${esc(r.name)} (${esc(r.rank)})</div>
-        <div class="order-meta">Qté : ${esc(r.qty)}</div>
-      </div>
-      <div class="order-right">${esc(r.total)} €</div>
-    </div>
-  `).join("");
+  function showPanel(panel){
+    panelFlyer.style.display = "none";
+    panelCommander.style.display = "none";
+    panelCommandes.style.display = "none";
 
-  ordersStatus.textContent=`🟢 ${rows.length} commande(s)`;
-});
+    setTab(tabFlyer, false);
+    setTab(tabCommander, false);
+    setTab(tabCommandes, false);
+
+    panel.style.display = "block";
+  }
+
+  function goFlyer(){
+    showPanel(panelFlyer);
+    setTab(tabFlyer, true);
+  }
+  function goCommander(){
+    showPanel(panelCommander);
+    setTab(tabCommander, true);
+  }
+  function goCommandes(){
+    showPanel(panelCommandes);
+    setTab(tabCommandes, true);
+  }
+
+  tabFlyer.addEventListener("click", goFlyer);
+  tabCommander.addEventListener("click", goCommander);
+  tabCommandes.addEventListener("click", goCommandes);
+
+  // ===== Commander UI
+  const orderForm = document.getElementById("orderForm");
+  const beacheurSelect = document.getElementById("beacheurSelect");
+  const qtySelect = document.getElementById("qtySelect");
+  const btnOrder = document.getElementById("btnOrder");
+  const orderStatus = document.getElementById("orderStatus");
+
+  const orderDone = document.getElementById("orderDone");
+  const orderDoneText = document.getElementById("orderDoneText");
+  const btnNewOrder = document.getElementById("btnNewOrder");
+  const btnGoList = document.getElementById("btnGoList");
+
+  // ===== Commandes effectuées UI
+  const ordersStatus = document.getElementById("ordersStatus");
+  const ordersBody = document.getElementById("ordersBody");
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function setOrderStatus(msg){ orderStatus.textContent = msg || ""; }
+
+  function setOrderEnabled(enabled){
+    beacheurSelect.disabled = !enabled;
+    qtySelect.disabled = !enabled;
+    btnOrder.disabled = !enabled;
+    btnOrder.classList.toggle("disabled", !enabled);
+  }
+
+  function resetOrderUI(){
+    orderDone.style.display = "none";
+    orderForm.style.display = "block";
+    setOrderStatus("");
+    setOrderEnabled(true);
+  }
+
+  btnNewOrder.addEventListener("click", resetOrderUI);
+
+  btnGoList.addEventListener("click", ()=>{
+    goCommandes();
+  });
+
+  // ===== Charger les beacheurs (depuis les équipes)
+  function setBeacheurLoading(){
+    beacheurSelect.innerHTML = `<option value="" selected disabled>Chargement…</option>`;
+  }
+  function setBeacheurError(){
+    beacheurSelect.innerHTML = `<option value="" selected disabled>Impossible de charger la liste</option>`;
+  }
+
+  setBeacheurLoading();
+
+  const teamsQ = query(collection(db, COL_TEAMS_PUBLIC), orderBy("createdAt", "asc"));
+
+  onSnapshot(teamsQ, (snap)=>{
+    const opts = [];
+
+    snap.forEach(d=>{
+      const data = d.data() || {};
+      const teamName = (data.teamName || "").trim();
+      const p1 = (data.p1FirstName || "").trim();
+      const p2 = (data.p2FirstName || "").trim();
+
+      if(teamName && p1){
+        opts.push({ key: `${d.id}_p1`, name: p1, team: teamName });
+      }
+      if(teamName && p2){
+        opts.push({ key: `${d.id}_p2`, name: p2, team: teamName });
+      }
+    });
+
+    if(opts.length === 0){
+      beacheurSelect.innerHTML = `<option value="" selected disabled>Aucun beacheur pour le moment</option>`;
+      return;
+    }
+
+    // tri prénom puis équipe (plus agréable)
+    opts.sort((a,b)=>
+      (a.name||"").localeCompare((b.name||""), "fr") ||
+      (a.team||"").localeCompare((b.team||""), "fr")
+    );
+
+    beacheurSelect.innerHTML =
+      `<option value="" selected disabled>Choisir…</option>` +
+      opts.map(o => `<option value="${esc(o.key)}" data-name="${esc(o.name)}" data-team="${esc(o.team)}">${esc(o.name)} (${esc(o.team)})</option>`).join("");
+
+  }, (err)=>{
+    console.error(err);
+    setBeacheurError();
+  });
+
+  // ===== Enregistrer commande (cumul)
+  async function upsertCumulativeOrder({ beacheurKey, beacheurName, teamName, addQty }){
+    const ref = doc(db, COL_ORDERS, beacheurKey);
+
+    await runTransaction(db, async (tx)=>{
+      const snap = await tx.get(ref);
+      const curQty = snap.exists() ? (snap.data().qty || 0) : 0;
+      const nextQty = curQty + addQty;
+
+      const payload = {
+        beacheurKey,
+        beacheurName,
+        teamName,
+        qty: nextQty,
+        unitPrice: UNIT_PRICE,
+        total: nextQty * UNIT_PRICE,
+        updatedAt: serverTimestamp()
+      };
+
+      if(!snap.exists()){
+        payload.createdAt = serverTimestamp();
+      } else {
+        payload.createdAt = snap.data().createdAt; // conserve
+      }
+
+      tx.set(ref, payload, { merge: false });
+    });
+  }
+
+  orderForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+
+    const key = (beacheurSelect.value || "").trim();
+    const qty = Number(qtySelect.value || "0");
+
+    if(!key){ setOrderStatus("❌ Choisis un beacheur."); return; }
+    if(!Number.isFinite(qty) || qty < 1){ setOrderStatus("❌ Quantité invalide."); return; }
+
+    const opt = beacheurSelect.selectedOptions?.[0];
+    const beacheurName = opt?.dataset?.name || "";
+    const teamName = opt?.dataset?.team || "";
+
+    setOrderEnabled(false);
+    setOrderStatus("Enregistrement…");
+
+    try{
+      await upsertCumulativeOrder({ beacheurKey:key, beacheurName, teamName, addQty:qty });
+
+      alert("Commande enregistrée ✅");
+
+      orderForm.reset();
+      orderForm.style.display = "none";
+      orderDone.style.display = "block";
+      orderDoneText.innerHTML = `
+        <b>${esc(beacheurName)}</b> (${esc(teamName)})<br>
+        Ajout : <b>+${esc(String(qty))}</b> pack(s) — Total cumulé visible dans “Commandes”.
+      `;
+      setOrderStatus("");
+    }catch(err){
+      console.error(err);
+      setOrderEnabled(true);
+      setOrderStatus("❌ Erreur : impossible d’enregistrer la commande.");
+    }
+  });
+
+  // ===== Récap commandes (lecture en direct)
+  const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+
+  onSnapshot(ordersQ, (snap)=>{
+    const rows = [];
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      rows.push({
+        id: d.id,
+        beacheurName: x.beacheurName || "",
+        qty: Number.isFinite(x.qty) ? x.qty : (x.qty || 0),
+        total: Number.isFinite(x.total) ? x.total : (x.total || 0)
+      });
+    });
+
+    if(rows.length === 0){
+      ordersBody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:14px;">Aucune commande pour le moment.</td></tr>`;
+      ordersStatus.textContent = "🟢 En direct — 0 commande";
+      return;
+    }
+
+    ordersBody.innerHTML = rows.map((r, i)=>`
+      <tr>
+        <td>#${i+1}</td>
+        <td><b>${esc(r.beacheurName)}</b></td>
+        <td>${esc(String(r.qty))}</td>
+        <td><b>${esc(String(r.total))} €</b></td>
+      </tr>
+    `).join("");
+
+    ordersStatus.textContent = `🟢 En direct — ${rows.length} ligne(s)`;
+  }, (err)=>{
+    console.error(err);
+    ordersStatus.textContent = "🔴 Erreur de connexion";
+    ordersBody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:14px;">Erreur de connexion.</td></tr>`;
+  });
+
+  // ✅ état initial
+  goFlyer();
 </script>
 
 </body>
