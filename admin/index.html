@@ -5,6 +5,238 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Double Mixte Challenge</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+
+  <style>
+    /* =========================
+       Sous-onglets Général (Infos / Paiements)
+    ========================== */
+    .subtabs{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .subtab{
+      appearance:none;
+      border:1px solid #ddd;
+      background:#fafafa;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:900;
+      cursor:pointer;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .subtab[aria-selected="true"]{
+      background:#fff;
+      border-color:#cfcfcf;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+
+    /* =========================
+       Étapes : scroll horizontal (pills)
+    ========================== */
+    .stepbar-wrap{
+      margin-top:10px;
+    }
+    .stepbar{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding:6px 2px 2px;
+      scroll-snap-type:x mandatory;
+    }
+    .stepbar::-webkit-scrollbar{ display:none; }
+    .step-pill{
+      flex: 0 0 auto;
+      scroll-snap-align:start;
+      border:1px solid #ddd;
+      background:#fafafa;
+      color:#111;
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:950;
+      white-space:nowrap;
+      cursor:pointer;
+      user-select:none;
+    }
+    .step-pill[aria-selected="true"]{
+      background:#fff;
+      border-color:#cfcfcf;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+    .step-pill[aria-disabled="true"]{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    /* =========================
+       Paiements UI (list)
+    ========================== */
+    .admin-top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .admin-top h2{ margin:0; }
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .search{
+      flex: 1 1 260px;
+      min-width: 220px;
+    }
+    .search input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid #ddd;
+      background:#fff;
+      font-weight:800;
+      outline:none;
+    }
+
+    .stats{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fafafa;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+      background:#bbb;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+    }
+    .dot.red{ background:#e74c3c; }
+    .dot.orange{ background:#f39c12; }
+    .dot.green{ background:#2ecc71; }
+
+    .pay-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .pay-card{
+      border:1px solid #eee;
+      border-radius:16px;
+      background:#fff;
+      padding:12px 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.04);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+    .pay-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-width:0;
+    }
+    .pay-team{
+      font-weight:950;
+      font-size:16px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+
+    .players{
+      display:grid;
+      gap:8px;
+    }
+    .player-row{
+      border:1px solid #f0f0f0;
+      background:#fbfbfb;
+      border-radius:12px;
+      padding:10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-width:0;
+    }
+    .player-name{
+      font-weight:900;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex: 0 0 auto;
+      white-space:nowrap;
+    }
+    .toggle button{
+      appearance:none;
+      border:1px solid #ddd;
+      background:#fff;
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .toggle button.paid{
+      border-color:#bfe9c8;
+      background:#ecfff0;
+    }
+    .toggle button.unpaid{
+      border-color:#ffd0cb;
+      background:#fff0ef;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:4px;
+    }
+    .meta small{ opacity:.75; }
+
+    @media (max-width:420px){
+      .pay-team{ font-size:15px; }
+      .toggle button{ padding:7px 9px; font-size:13px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -22,7 +254,6 @@
       </div>
     </div>
 
-    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
       <a href="../index.html">🏠 Accueil public</a>
       <a href="#" id="btnLogout">🚪 Déconnexion</a>
@@ -37,7 +268,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (à recopier dans toutes les pages admin) -->
+  <!-- ✅ Encart Zone -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
@@ -59,28 +290,93 @@
 
   <!-- Zone: Général -->
   <section class="card" id="panelGeneral" style="display:none;">
-    <h2 style="margin:0 0 10px;">📰 Infos (admin)</h2>
 
-    <form id="infoForm" class="form" autocomplete="off">
-      <div class="field">
-        <label for="infoTitle">Titre *</label>
-        <input id="infoTitle" name="infoTitle" required maxlength="80" placeholder="Ex : Inscriptions ouvertes ✅">
+    <h2 style="margin:0 0 6px;">🌐 Général</h2>
+    <p class="muted" style="margin:0;">
+      Sous-onglets : gestion des infos + suivi des paiements.
+    </p>
+
+    <div class="subtabs" role="tablist" aria-label="Général">
+      <button class="subtab" id="tabGenInfos" type="button" aria-selected="true">📰 Infos</button>
+      <button class="subtab" id="tabGenPay" type="button" aria-selected="false">✅ Paiements</button>
+    </div>
+
+    <!-- ======================
+          ONGLET INFOS
+    ======================= -->
+    <div id="panelGenInfos" style="margin-top:12px;">
+      <h2 style="margin:0 0 10px;">📰 Infos (admin)</h2>
+
+      <form id="infoForm" class="form" autocomplete="off">
+        <div class="field">
+          <label for="infoTitle">Titre *</label>
+          <input id="infoTitle" name="infoTitle" required maxlength="80" placeholder="Ex : Inscriptions ouvertes ✅">
+        </div>
+
+        <div class="field">
+          <label for="infoText">Texte *</label>
+          <textarea id="infoText" name="infoText" rows="5" required maxlength="2000"
+            placeholder="Texte (emojis ok 😄)"></textarea>
+        </div>
+
+        <button class="btn" id="publishBtn" type="submit" style="font-weight:800; color:#111;">✅ Publier</button>
+        <p class="muted" id="adminStatus" role="status" aria-live="polite" style="margin:8px 0 0;"></p>
+      </form>
+
+      <hr class="sep" />
+
+      <p class="muted" id="infosCount" style="margin:0;">Chargement…</p>
+      <div id="infosList" style="display:grid; gap:10px; margin-top:10px;"></div>
+    </div>
+
+    <!-- ======================
+          ONGLET PAIEMENTS
+    ======================= -->
+    <div id="panelGenPay" style="display:none; margin-top:12px;">
+
+      <div class="admin-top">
+        <div>
+          <h2>✅ Paiements — Challenge</h2>
+          <p class="muted" style="margin:6px 0 0;">
+            Cliquez sur “Payé / Non payé” pour chaque joueur. (Enregistré en direct)
+          </p>
+        </div>
+        <div class="admin-actions">
+          <span class="pill" id="authState">Connexion…</span>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="infoText">Texte *</label>
-        <textarea id="infoText" name="infoText" rows="5" required maxlength="2000"
-          placeholder="Texte (emojis ok 😄)"></textarea>
+      <!-- Étapes (scroll) -->
+      <div class="stepbar-wrap" aria-label="Choix étape">
+        <div class="stepbar" id="stepbar">
+          <button class="step-pill" id="step_e1" type="button" aria-selected="true">🎾 Étape 1</button>
+          <button class="step-pill" id="step_e2" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 2 (bientôt)</button>
+          <button class="step-pill" id="step_e3" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 3 (bientôt)</button>
+          <button class="step-pill" id="step_e4" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 4 (bientôt)</button>
+          <button class="step-pill" id="step_e5" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🧪 Étape 5 (bientôt)</button>
+        </div>
+        <p class="muted" style="margin:8px 0 0;">
+          Étape active : <b id="stepLabel">Étape 1</b>
+        </p>
       </div>
 
-      <button class="btn" id="publishBtn" type="submit" style="font-weight:800; color:#111;">✅ Publier</button>
-      <p class="muted" id="adminStatus" role="status" aria-live="polite" style="margin:8px 0 0;"></p>
-    </form>
+      <div class="filters">
+        <div class="search">
+          <input id="q" type="search" placeholder="Rechercher équipe / prénom…" autocomplete="off">
+        </div>
 
-    <hr class="sep" />
+        <div class="stats">
+          <span class="badge"><span class="dot red"></span><span id="c0">0</span> non payé</span>
+          <span class="badge"><span class="dot orange"></span><span id="c1">0</span> partiel</span>
+          <span class="badge"><span class="dot green"></span><span id="c2">0</span> payé</span>
+        </div>
+      </div>
 
-    <p class="muted" id="infosCount" style="margin:0;">Chargement…</p>
-    <div id="infosList" style="display:grid; gap:10px; margin-top:10px;"></div>
+      <p class="muted" id="statusPay" style="margin:10px 0 0;">Chargement…</p>
+
+      <div class="pay-list" id="listPay" aria-label="Liste paiements"></div>
+    </div>
+
   </section>
 
 </main>
@@ -94,11 +390,26 @@
     doc, getDoc,
     collection, addDoc, deleteDoc, updateDoc,
     serverTimestamp,
-    query, orderBy, onSnapshot
+    query, orderBy, onSnapshot,
+    setDoc
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+  // =========================================
+  // CONFIG
+  // =========================================
   const COL_INFOS = "infos";
 
+  // Challenge — Étape 1
+  const COL_TEAMS_E1_PUBLIC = "equipes_etape1_public";
+
+  // Challenge — Paiements (toutes étapes)
+  // docId = "e1_<teamDocId>"
+  // fields = { p1Paid:boolean, p2Paid:boolean, updatedAt }
+  const COL_PAYMENTS = "paiements_challenge";
+
+  // =========================================
+  // DOM
+  // =========================================
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -108,6 +419,13 @@
 
   const panelGeneral = document.getElementById("panelGeneral");
 
+  // Sous-onglets général
+  const tabGenInfos = document.getElementById("tabGenInfos");
+  const tabGenPay   = document.getElementById("tabGenPay");
+  const panelGenInfos = document.getElementById("panelGenInfos");
+  const panelGenPay   = document.getElementById("panelGenPay");
+
+  // Infos
   const infoForm = document.getElementById("infoForm");
   const publishBtn = document.getElementById("publishBtn");
   const adminStatus = document.getElementById("adminStatus");
@@ -116,8 +434,29 @@
 
   let unsubscribeInfos = null;
 
-  const LS_SCOPE_KEY = "admin_scope_last";
+  // Paiements
+  const authState = document.getElementById("authState");
+  const stepLabel = document.getElementById("stepLabel");
+  const qInput = document.getElementById("q");
+  const statusPay = document.getElementById("statusPay");
+  const listPay = document.getElementById("listPay");
 
+  const c0 = document.getElementById("c0");
+  const c1 = document.getElementById("c1");
+  const c2 = document.getElementById("c2");
+
+  const step_e1 = document.getElementById("step_e1");
+
+  // =========================================
+  // LocalStorage keys
+  // =========================================
+  const LS_SCOPE_KEY = "admin_scope_last";
+  const LS_GENERAL_TAB = "admin_general_tab"; // infos | pay
+  const LS_PAY_STEP = "admin_pay_step"; // e1
+
+  // =========================================
+  // Helpers
+  // =========================================
   function esc(str){
     return (str || "")
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
@@ -133,6 +472,25 @@
         hour:"2-digit", minute:"2-digit"
       });
     }catch{ return "—"; }
+  }
+
+  function fmtUpdated(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }catch{
+      return "—";
+    }
+  }
+
+  function dotClass(paidCount){
+    if(paidCount >= 2) return "green";
+    if(paidCount === 1) return "orange";
+    return "red";
+  }
+  function label(paidCount){
+    return paidCount >= 2 ? "Payé" : paidCount === 1 ? "Partiel" : "Non payé";
   }
 
   function stopInfos(){
@@ -183,7 +541,6 @@
         infosList.appendChild(card);
       }
 
-      // delete
       infosList.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.del;
@@ -193,7 +550,6 @@
         };
       });
 
-      // edit via prompt (simple)
       infosList.querySelectorAll("button[data-edit]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.edit;
@@ -216,6 +572,34 @@
     });
   }
 
+  // =========================================
+  // Général — Sous-onglets
+  // =========================================
+  function showGeneralTab(which){
+    const isInfos = which === "infos";
+    tabGenInfos.setAttribute("aria-selected", isInfos ? "true" : "false");
+    tabGenPay.setAttribute("aria-selected", isInfos ? "false" : "true");
+
+    panelGenInfos.style.display = isInfos ? "block" : "none";
+    panelGenPay.style.display   = isInfos ? "none" : "block";
+
+    try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
+
+    if(isInfos){
+      startInfos();
+    }else{
+      stopInfos();
+      // Paiements: on render dès qu'on a les snapshots
+      renderPay();
+    }
+  }
+
+  tabGenInfos.addEventListener("click", ()=> showGeneralTab("infos"));
+  tabGenPay.addEventListener("click", ()=> showGeneralTab("pay"));
+
+  // =========================================
+  // Zone Tabs (scope)
+  // =========================================
   function makeDisabledBtn(label, reason){
     const a = document.createElement("a");
     a.className = "btn disabled";
@@ -231,21 +615,27 @@
     panelGeneral.style.display = "none";
     stopInfos();
 
-    // mémorise la zone
     try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
 
     if(scope === "general"){
-      hintEl.textContent = "🌐 Zone Général : gestion des infos (publication / modification / suppression).";
+      hintEl.textContent = "🌐 Zone Général : infos + paiements.";
       panelGeneral.style.display = "block";
 
+      // petit “onglet” zone (UI)
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "#";
-      a.textContent = "📰 Infos";
+      a.textContent = "🌐 Général";
       a.onclick = (e)=>{ e.preventDefault(); };
       tabsEl.appendChild(a);
 
-      startInfos();
+      // restore sous-onglet
+      let t = "infos";
+      try{
+        const saved = localStorage.getItem(LS_GENERAL_TAB);
+        if(saved === "pay" || saved === "infos") t = saved;
+      }catch(e){}
+      showGeneralTab(t);
       return;
     }
 
@@ -263,11 +653,9 @@
       ["🧨 RAZ",            "raz.html"],
     ];
 
-    // Repas : pas pour l’étape 5 (test)
     if(scope !== "etape5"){
       links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
     }else{
-      // on affiche quand même un bouton “Repas (plus tard)” pour éviter la confusion
       tabsEl.appendChild(
         makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test).")
       );
@@ -282,7 +670,9 @@
     }
   }
 
+  // =========================================
   // Publish infos
+  // =========================================
   infoForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
     publishBtn.disabled = true;
@@ -305,13 +695,18 @@
     }
   });
 
+  // =========================================
   // Logout
+  // =========================================
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
     window.location.href = "../index.html";
   };
 
+  // =========================================
+  // Guard
+  // =========================================
   async function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
@@ -323,7 +718,6 @@
     accessDenied.style.display = "none";
     adminUI.style.display = "block";
 
-    // restore scope
     try{
       const saved = localStorage.getItem(LS_SCOPE_KEY);
       if(saved && [...scopeEl.options].some(o => o.value === saved)){
@@ -335,7 +729,219 @@
     scopeEl.onchange = ()=> setTabs(scopeEl.value);
   }
 
-  // Guard (admin only)
+  // =========================================
+  // Paiements (Challenge) — DATA
+  // =========================================
+  let payStep = "e1"; // uniquement e1 pour l’instant
+  let queryText = "";
+
+  let snapTeams = null;
+  let snapPay = null;
+
+  // snapshots handles
+  let unsubTeams = null;
+  let unsubPay = null;
+
+  function setPayStep(next){
+    if(next !== "e1") return; // pour l’instant
+    payStep = next;
+
+    // UI
+    step_e1.setAttribute("aria-selected", payStep === "e1" ? "true" : "false");
+    stepLabel.textContent = "Étape 1";
+
+    try{ localStorage.setItem(LS_PAY_STEP, payStep); }catch(e){}
+
+    // (re)subscribe
+    subscribePay();
+  }
+
+  step_e1.addEventListener("click", ()=> setPayStep("e1"));
+
+  qInput.addEventListener("input", ()=>{
+    queryText = (qInput.value || "").trim().toLowerCase();
+    renderPay();
+  });
+
+  function buildRows(){
+    if(!snapTeams || !snapPay) return null;
+
+    const payMap = new Map();
+    snapPay.forEach(d=>{
+      const x = d.data() || {};
+      payMap.set(d.id, {
+        p1Paid: x.p1Paid === true,
+        p2Paid: x.p2Paid === true,
+        updatedAt: x.updatedAt || null
+      });
+    });
+
+    const rows = [];
+    snapTeams.forEach(d=>{
+      const x = d.data() || {};
+      const teamName = (x.teamName || "").trim();
+      if(!teamName) return;
+
+      const p1 = (x.p1FirstName || "").trim();
+      const p2 = (x.p2FirstName || "").trim();
+
+      const payId = `${payStep}_${d.id}`; // ex: e1_<teamDocId>
+      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false, updatedAt:null };
+      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
+
+      rows.push({
+        teamDocId: d.id,
+        payId,
+        teamName,
+        p1, p2,
+        p1Paid: pay.p1Paid,
+        p2Paid: pay.p2Paid,
+        paidCount,
+        updatedAt: pay.updatedAt
+      });
+    });
+
+    return rows;
+  }
+
+  function matches(r){
+    if(!queryText) return true;
+    const hay = `${r.teamName} ${r.p1} ${r.p2}`.toLowerCase();
+    return hay.includes(queryText);
+  }
+
+  async function setPaid(payId, who, paid){
+    const ref = doc(db, COL_PAYMENTS, payId);
+    const payload = { updatedAt: serverTimestamp() };
+    payload[who === "p1" ? "p1Paid" : "p2Paid"] = paid;
+    await setDoc(ref, payload, { merge: true });
+  }
+
+  function renderPay(){
+    // si pas visible, inutile de bosser
+    if(panelGenPay.style.display === "none") return;
+
+    const rows = buildRows();
+    if(!rows){
+      statusPay.textContent = "Chargement…";
+      return;
+    }
+
+    const filtered = rows.filter(matches);
+
+    // stats
+    let n0=0, n1=0, n2=0;
+    for(const r of filtered){
+      if(r.paidCount === 0) n0++;
+      else if(r.paidCount === 1) n1++;
+      else n2++;
+    }
+    c0.textContent = String(n0);
+    c1.textContent = String(n1);
+    c2.textContent = String(n2);
+
+    // tri
+    filtered.sort((a,b)=>{
+      if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
+      return (a.teamName||"").localeCompare((b.teamName||""), "fr");
+    });
+
+    statusPay.textContent = `🟢 En direct — ${filtered.length} équipe(s)`;
+
+    if(filtered.length === 0){
+      listPay.innerHTML = `<p class="muted" style="margin:0;">Aucun résultat.</p>`;
+      return;
+    }
+
+    listPay.innerHTML = filtered.map(r=>{
+      const dot = dotClass(r.paidCount);
+      const lab = label(r.paidCount);
+      const p1Name = r.p1 || "—";
+      const p2Name = r.p2 || "—";
+      const meta = `Dernière mise à jour : ${esc(fmtUpdated(r.updatedAt))}`;
+
+      return `
+        <div class="pay-card" data-payid="${esc(r.payId)}">
+          <div class="pay-head">
+            <div class="pay-team">${esc(r.teamName)}</div>
+            <div class="badge" title="${esc(lab)}">
+              <span class="dot ${dot}"></span>
+              ${esc(lab)}
+            </div>
+          </div>
+
+          <div class="players">
+            <div class="player-row">
+              <div class="player-name">${esc(p1Name)}</div>
+              <div class="toggle">
+                <button class="${r.p1Paid ? "paid" : "unpaid"}" data-who="p1" data-next="${r.p1Paid ? "0" : "1"}">
+                  ${r.p1Paid ? "✅ Payé" : "❌ Non payé"}
+                </button>
+              </div>
+            </div>
+
+            <div class="player-row">
+              <div class="player-name">${esc(p2Name)}</div>
+              <div class="toggle">
+                <button class="${r.p2Paid ? "paid" : "unpaid"}" data-who="p2" data-next="${r.p2Paid ? "0" : "1"}">
+                  ${r.p2Paid ? "✅ Payé" : "❌ Non payé"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="meta">
+            <small class="muted">Étape ${esc(payStep.toUpperCase())} • id: ${esc(r.teamDocId)}</small>
+            <small class="muted">${meta}</small>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // bind toggles
+    listPay.querySelectorAll("button[data-who]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const card = btn.closest(".pay-card");
+        const payId = card?.dataset?.payid;
+        const who = btn.dataset.who;
+        const next = btn.dataset.next === "1";
+
+        btn.disabled = true;
+        try{
+          await setPaid(payId, who, next);
+        }catch(e){
+          console.error(e);
+          alert("❌ Erreur : impossible d’enregistrer.");
+        }finally{
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function unsubscribePay(){
+    if(unsubTeams){ unsubTeams(); unsubTeams=null; }
+    if(unsubPay){ unsubPay(); unsubPay=null; }
+    snapTeams = null;
+    snapPay = null;
+  }
+
+  function subscribePay(){
+    unsubscribePay();
+
+    // Teams snapshot (selon étape)
+    const teamsCol = (payStep === "e1") ? COL_TEAMS_E1_PUBLIC : COL_TEAMS_E1_PUBLIC;
+
+    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
+    const qPay   = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+
+    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; renderPay(); }, (e)=>{ console.error(e); statusPay.textContent="🔴 Erreur équipes"; });
+    unsubPay   = onSnapshot(qPay,   (s)=>{ snapPay = s; renderPay(); }, (e)=>{ console.error(e); statusPay.textContent="🔴 Erreur paiements"; });
+  }
+
+  // =========================================
+  // INIT
+  // =========================================
   const g = await requireRole(["admin"]);
   if(!g.ok){ await showDenied(); }
   else { await showAdmin(); }
@@ -345,6 +951,23 @@
     const g2 = await requireRole(["admin"]);
     if(!g2.ok){ await showDenied(); return; }
   });
+
+  // Affichage “connecté”
+  onAuthStateChanged(auth, (user)=>{
+    authState.textContent = user ? ("🟢 Admin : " + user.email) : "Non connecté";
+  });
+
+  // Restore étape (paiements)
+  try{
+    const savedStep = localStorage.getItem(LS_PAY_STEP);
+    if(savedStep === "e1") payStep = "e1";
+  }catch(e){}
+  setPayStep(payStep);
+
+  // Subscriptions paiements : seulement si onglet Paiements visible.
+  // (Sinon on les lancera au moment d’ouvrir l’onglet)
+  // Ici, on laisse setPayStep() préparer, et showGeneralTab("pay") fera render.
+  subscribePay();
 </script>
 
 </body>
