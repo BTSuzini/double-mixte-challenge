@@ -3,37 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Repas — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
+  <title>Repas — Open BT Bricorama</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260224" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="container">
+
+    <!-- ✅ Bandeau index -->
     <div class="topbar-row topbar-row-step">
       <div class="brand-logo">
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ Image au centre -->
-      <div class="step-title-wrap" aria-label="Étape 1">
-        <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
+      <div class="step-title-wrap" aria-label="Open BT — BT250">
+        <img class="step-title-img" src="../assets/img/bt250.png" alt="Open BT Bricorama — BT250">
       </div>
 
       <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+        <img src="../assets/img/logo-openbt.png" alt="Logo Open BT Bricorama">
       </div>
     </div>
 
-    <!-- ✅ Nav Étape 1 (identique à équipes) -->
+    <!-- ✅ Nav générale (2 lignes sur téléphone) -->
     <nav class="nav nav-step">
-      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
-      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠 Accueil</a>
+      <a href="reglement.html">📘 Règlement</a>
+      <a href="infos.html">ℹ️ Infos</a>
       <a href="repas.html" aria-current="page">🍽️ Repas</a>
-      <a href="programmation.html">🗓️ Programmation</a>
-      <a href="equipes.html">👥 Équipes</a>
-      <a href="tirage.html">🎲 Tirage</a>
+      <a href="boutique.html">🛍️ Boutique</a>
+      <a href="contact.html">📩 Contact</a>
     </nav>
+
   </div>
 </header>
 
@@ -58,8 +60,8 @@
 
     <div style="text-align:center; margin-top:15px;">
       <img
-        src="../assets/img/flyer.jpeg"
-        alt="Flyer soirée italienne"
+        src="../assets/img/lasagnes.PNG"
+        alt="Flyer Lasagnes"
         style="max-width:100%; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.08);"
       >
     </div>
@@ -73,16 +75,16 @@
 
     <div style="margin-top:12px; line-height:1.6;">
       <p style="font-size:18px; font-weight:900; margin:0;">
-        🎾 Offre spéciale pour les beacheurs !
+        🎾 Offre repas (Open BT) !
       </p>
 
       <p style="margin:10px 0 0;">
-        Profitez d’un <strong>prix exclusif tournoi</strong> :<br>
-        <strong>3 arancini pour 10€</strong> 🇮🇹🔥
+        Réserve ton repas pour le tournoi 🍝<br>
+        <strong>Lasagnes — 11€ la part</strong> 🔥
       </p>
 
       <p style="margin:10px 0 0; font-weight:900;">
-        ⏳ Réservations possibles jusqu’au <span style="white-space:nowrap;">25/08</span>
+        ⏳ Réservations possibles jusqu’au <span style="white-space:nowrap;">25/02</span>
       </p>
 
       <hr class="sep" style="margin:14px 0;" />
@@ -99,7 +101,7 @@
       </div>
 
       <div class="field">
-        <label for="qtySelect">Nombre de repas (packs “3 arancini”) *</label>
+        <label for="qtySelect">Nombre de repas *</label>
         <select id="qtySelect" required>
           <option value="1" selected>1</option>
           <option value="2">2</option>
@@ -153,14 +155,14 @@
     <div id="ordersList" class="orders-list" aria-label="Commandes repas" style="margin-top:10px;"></div>
 
     <p class="muted" style="margin:10px 0 0;">
-      💡 La quantité correspond au nombre de <b>packs “3 arancini”</b>.
+      💡 La quantité correspond au nombre de <b>repas</b>.
     </p>
   </section>
 
 </main>
 
 <style>
-  /* ✅ Bandeau étape (identique à équipes) */
+  /* ✅ Bandeau index */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -179,42 +181,37 @@
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
 
+  /* ✅ Nav 2 lignes sur téléphone (6 items => 3 + 3) */
   .nav-step{
     gap:8px;
+    flex-wrap:wrap;
     justify-content:space-between;
   }
   .nav-step a{
+    padding:8px 12px;
     flex: 1 1 auto;
     text-align:center;
-    padding:8px 12px;
+    white-space:nowrap;
+    flex-basis: 33.333%;
   }
-
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
     box-shadow: 0 6px 14px rgba(0,0,0,.10);
   }
-
   @media (max-width: 420px){
-    .nav-step a{
-      padding:7px 10px;
-      font-size: 13px;
-    }
-    .step-title-img{ max-height: 74px; }
+    .nav-step a{ padding:7px 10px; font-size:13px; }
+    .step-title-img{ max-height:74px; }
   }
 
-  /* ======================================
-     SUBTABS — Flyer ligne 1, 2 boutons ligne 2
-  ======================================= */
+  /* ✅ Subtabs : Flyer ligne 1, les 2 autres ligne 2 */
   .subtabs{
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap:10px;
     margin-top:10px;
   }
-  #tabFlyer{
-    grid-column: 1 / -1; /* plein largeur */
-  }
+  #tabFlyer{ grid-column: 1 / -1; }
 
   .subtab{
     appearance:none;
@@ -231,40 +228,34 @@
     box-shadow: 0 6px 14px rgba(0,0,0,.06);
   }
 
-  /* ======================================
-     COMMANDES — Liste compacte (no scroll horizontal)
-  ======================================= */
+  /* ✅ Commandes : liste compacte (zéro scroll horizontal) */
   .orders-list{
     display:grid;
-    gap:8px; /* ✅ plus serré */
+    gap:8px;
   }
-
   .order-row{
     border:1px solid #eee;
     border-radius:14px;
     background:#fff;
-    padding:10px 10px; /* ✅ compact */
+    padding:10px 10px;
     box-shadow: 0 6px 16px rgba(0,0,0,.04);
     display:grid;
     grid-template-columns: 38px 1fr auto;
     gap:10px;
     align-items:center;
   }
-
   .order-num{
     color:#666;
     font-weight:900;
     font-variant-numeric: tabular-nums;
     white-space:nowrap;
   }
-
   .order-main{
     min-width:0;
     display:flex;
     flex-direction:column;
-    gap:2px; /* ✅ compact */
+    gap:2px;
   }
-
   .order-name{
     font-weight:900;
     white-space:nowrap;
@@ -272,27 +263,19 @@
     text-overflow:ellipsis;
     line-height:1.15;
   }
-
   .order-sub{
     font-size:12px;
     color:#666;
     line-height:1.15;
   }
-
   .order-right{
     display:flex;
     flex-direction:column;
     align-items:flex-end;
-    gap:2px; /* ✅ compact */
+    gap:2px;
     white-space:nowrap;
   }
-
-  .order-qty{
-    font-weight:900;
-  }
-  .order-total{
-    font-weight:900;
-  }
+  .order-total{ font-weight:900; }
 </style>
 
 <script type="module">
@@ -307,11 +290,16 @@
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ===== Collections (Challenge)
-  const COL_TEAMS_PUBLIC = "equipes_etape1_public"; // pour construire la liste des beacheurs (+ ranks)
-  const COL_ORDERS = "repas_etape1";                // 1 doc par beacheurKey (cumul)
+  // =========================================================
+  // Open BT — Collections
+  // =========================================================
+  const COL_TEAMS_DH_PUBLIC = "equipes_dh_public";
+  const COL_TEAMS_DD_PUBLIC = "equipes_dd_public";
 
-  const UNIT_PRICE = 10; // 1 pack "3 arancini"
+  // 1 doc par beacheurKey (cumul)
+  const COL_ORDERS = "repas_openbt";
+
+  const UNIT_PRICE = 11; // 1 repas = 11€
 
   // ===== Tabs
   const tabFlyer = document.getElementById("tabFlyer");
@@ -338,16 +326,18 @@
     show(panelFlyer);
     tabFlyer.setAttribute("aria-selected","true");
   };
-
   tabCommander.onclick = ()=>{
     show(panelCommander);
     tabCommander.setAttribute("aria-selected","true");
   };
-
   tabCommandes.onclick = ()=>{
     show(panelCommandes);
     tabCommandes.setAttribute("aria-selected","true");
   };
+
+  // init
+  show(panelFlyer);
+  tabFlyer.setAttribute("aria-selected","true");
 
   // ===== Commander UI
   const orderForm = document.getElementById("orderForm");
@@ -361,23 +351,13 @@
   const btnNewOrder = document.getElementById("btnNewOrder");
   const btnGoList = document.getElementById("btnGoList");
 
-  // ===== Commandes effectuées UI
+  // ===== Commandes UI
   const ordersStatus = document.getElementById("ordersStatus");
   const ordersList = document.getElementById("ordersList");
 
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-  }
-
-  function toNum(v){
-    if(v === null || v === undefined || v === "") return null;
-    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function fmtRank(n){
-    return (n === null || n === undefined) ? "—" : String(n);
   }
 
   function setOrderStatus(msg){ orderStatus.textContent = msg || ""; }
@@ -402,66 +382,57 @@
     tabCommandes.setAttribute("aria-selected","true");
   };
 
-  // ===== Charger les beacheurs (depuis les équipes)
-  // beacheurKey = "<teamDocId>_p1" | "<teamDocId>_p2"
+  // ===== Charger beacheurs depuis DH + DD
   function setBeacheurLoading(){
     beacheurSelect.innerHTML = `<option value="" selected disabled>Chargement…</option>`;
   }
   function setBeacheurError(){
     beacheurSelect.innerHTML = `<option value="" selected disabled>Impossible de charger la liste</option>`;
   }
-
   setBeacheurLoading();
 
-  // Map pour retrouver rapidement le classement côté "Commandes"
-  const beacheurMap = new Map(); // key -> { name, team, rank }
-
-  const teamsQ = query(collection(db, COL_TEAMS_PUBLIC), orderBy("createdAt", "asc"));
-
-  onSnapshot(teamsQ, (snap)=>{
-    const opts = [];
-    beacheurMap.clear();
-
+  function feedBeacheursFromSnap(prefix, snap, out){
     snap.forEach(d=>{
       const data = d.data() || {};
       const teamName = (data.teamName || "").trim();
-
       const p1 = (data.p1FirstName || "").trim();
       const p2 = (data.p2FirstName || "").trim();
 
-      const r1 = toNum(data.p1Rank ?? null);
-      const r2 = toNum(data.p2Rank ?? null);
-
-      if(teamName && p1){
-        const key = `${d.id}_p1`;
-        beacheurMap.set(key, { name: p1, team: teamName, rank: r1 });
-        opts.push({ key, name: p1, team: teamName });
-      }
-      if(teamName && p2){
-        const key = `${d.id}_p2`;
-        beacheurMap.set(key, { name: p2, team: teamName, rank: r2 });
-        opts.push({ key, name: p2, team: teamName });
-      }
+      if(teamName && p1) out.push({ key: `${prefix}_${d.id}_p1`, name: p1, team: teamName });
+      if(teamName && p2) out.push({ key: `${prefix}_${d.id}_p2`, name: p2, team: teamName });
     });
+  }
+
+  let snapDH = null;
+  let snapDD = null;
+
+  function rebuildBeacheurSelect(){
+    const opts = [];
+    if(snapDH) feedBeacheursFromSnap("dh", snapDH, opts);
+    if(snapDD) feedBeacheursFromSnap("dd", snapDD, opts);
+
+    opts.sort((a,b)=> (a.name||"").localeCompare((b.name||""), "fr")
+      || (a.team||"").localeCompare((b.team||""), "fr"));
 
     if(opts.length === 0){
       beacheurSelect.innerHTML = `<option value="" selected disabled>Aucun beacheur pour le moment</option>`;
       return;
     }
 
-    // tri prénom puis équipe (stable et agréable)
-    opts.sort((a,b)=> (a.name||"").localeCompare((b.name||""), "fr") || (a.team||"").localeCompare((b.team||""), "fr"));
-
     beacheurSelect.innerHTML =
       `<option value="" selected disabled>Choisir…</option>` +
-      opts.map(o => `<option value="${esc(o.key)}" data-name="${esc(o.name)}" data-team="${esc(o.team)}">${esc(o.name)} (${esc(o.team)})</option>`).join("");
+      opts.map(o =>
+        `<option value="${esc(o.key)}" data-name="${esc(o.name)}" data-team="${esc(o.team)}">${esc(o.name)} (${esc(o.team)})</option>`
+      ).join("");
+  }
 
-  }, (err)=>{
-    console.error(err);
-    setBeacheurError();
-  });
+  const qDH = query(collection(db, COL_TEAMS_DH_PUBLIC), orderBy("createdAt","asc"));
+  const qDD = query(collection(db, COL_TEAMS_DD_PUBLIC), orderBy("createdAt","asc"));
 
-  // ===== Enregistrer commande (cumul)
+  onSnapshot(qDH, (snap)=>{ snapDH = snap; rebuildBeacheurSelect(); }, (err)=>{ console.error(err); setBeacheurError(); });
+  onSnapshot(qDD, (snap)=>{ snapDD = snap; rebuildBeacheurSelect(); }, (err)=>{ console.error(err); setBeacheurError(); });
+
+  // ===== Transaction cumul
   async function upsertCumulativeOrder({ beacheurKey, beacheurName, teamName, addQty }){
     const ref = doc(db, COL_ORDERS, beacheurKey);
 
@@ -483,7 +454,7 @@
       if(!snap.exists()){
         payload.createdAt = serverTimestamp();
       } else {
-        payload.createdAt = snap.data().createdAt; // conserve
+        payload.createdAt = snap.data().createdAt;
       }
 
       tx.set(ref, payload, { merge: false });
@@ -507,12 +478,7 @@
     setOrderStatus("Enregistrement…");
 
     try{
-      await upsertCumulativeOrder({
-        beacheurKey: key,
-        beacheurName,
-        teamName,
-        addQty: qty
-      });
+      await upsertCumulativeOrder({ beacheurKey:key, beacheurName, teamName, addQty:qty });
 
       alert("Commande enregistrée ✅");
 
@@ -521,10 +487,9 @@
       orderDone.style.display = "block";
       orderDoneText.innerHTML = `
         <b>${esc(beacheurName)}</b> (${esc(teamName)})<br>
-        Ajout : <b>+${esc(String(qty))}</b> pack(s) — Total cumulé visible dans “Commandes”.
+        Ajout : <b>+${esc(String(qty))}</b> repas — Total cumulé visible dans “Commandes”.
       `;
       setOrderStatus("");
-
     }catch(err){
       console.error(err);
       setOrderEnabled(true);
@@ -532,7 +497,7 @@
     }
   });
 
-  // ===== Récap commandes (lecture en direct) — rendu sans scroll horizontal
+  // ===== Liste commandes (no horizontal scroll)
   const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
 
   onSnapshot(ordersQ, (snap)=>{
@@ -541,8 +506,8 @@
       const x = d.data() || {};
       rows.push({
         id: d.id,
-        beacheurKey: x.beacheurKey || d.id,
         beacheurName: x.beacheurName || "",
+        teamName: x.teamName || "",
         qty: Number.isFinite(x.qty) ? x.qty : (x.qty || 0),
         total: Number.isFinite(x.total) ? x.total : (x.total || 0)
       });
@@ -554,30 +519,18 @@
       return;
     }
 
-    ordersList.innerHTML = rows.map((r, i)=>{
-      const meta = beacheurMap.get(r.beacheurKey);
-      const rank = meta ? meta.rank : null;
-
-      const displayName = r.beacheurName || (meta?.name || "—");
-      const nameWithRank = (rank !== null && rank !== undefined && rank !== "")
-        ? `${displayName} (${fmtRank(rank)})`
-        : displayName;
-
-      return `
-        <div class="order-row">
-          <div class="order-num">#${i+1}</div>
-
-          <div class="order-main">
-            <div class="order-name">${esc(nameWithRank)}</div>
-            <div class="order-sub">Qté : <b>${esc(String(r.qty))}</b></div>
-          </div>
-
-          <div class="order-right">
-            <div class="order-total">${esc(String(r.total))} €</div>
-          </div>
+    ordersList.innerHTML = rows.map((r, i)=>`
+      <div class="order-row">
+        <div class="order-num">#${i+1}</div>
+        <div class="order-main">
+          <div class="order-name">${esc(r.beacheurName)} <span class="muted" style="font-weight:800;">(${esc(r.teamName)})</span></div>
+          <div class="order-sub">Qté : <b>${esc(String(r.qty))}</b></div>
         </div>
-      `;
-    }).join("");
+        <div class="order-right">
+          <div class="order-total">${esc(String(r.total))} €</div>
+        </div>
+      </div>
+    `).join("");
 
     ordersStatus.textContent = `🟢 En direct — ${rows.length} ligne(s)`;
   }, (err)=>{
