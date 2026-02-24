@@ -17,7 +17,7 @@
 
       <!-- ✅ Image au centre -->
       <div class="step-title-wrap" aria-label="Étape 1">
-        <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
+        <img class="step-title-img" src="../assets/img/etape1.PNG" alt="Étape 1">
       </div>
 
       <div class="brand-logo">
@@ -146,12 +146,20 @@
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
 
-  /* ✅ Nav étape : 6 boutons sur 2 lignes si besoin */
+  /* ✅ Nav étape : 6 onglets justifiés (2 lignes) */
   .nav-step{
-    gap:8px;
+    justify-content: space-between;
+    gap: 8px;
   }
+  .nav-step::after{
+    content:"";
+    flex:auto; /* aide à mieux "étaler" sur 2 lignes */
+  }
+
   .nav-step a{
     padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
   }
 
   /* ✅ Lien actif plus visible */
@@ -233,9 +241,10 @@
     white-space:nowrap;
   }
 
+  /* ✅ 2e ligne pas en gras */
   .team-line2{
     color:#222;
-    font-weight:800;
+    font-weight:400;
     line-height:1.25;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -344,7 +353,6 @@
     return r.stby ? `<span class="pill stby">STBY</span>` : `<span class="pill">OK</span>`;
   }
 
-  // ✅ INSCRITS : 2 lignes, statut à droite
   function cardInscritHtml(idx, r){
     return `
       <div class="team-card">
@@ -362,7 +370,6 @@
     `;
   }
 
-  // ✅ CLASSEES : ligne 1 = # + équipe + 🏷️ rank ; ligne 2 = p1(rank1) / p2(rank2) ; statut à droite
   function cardClasseeHtml(idx, r){
     const p1 = toNum(r.p1Rank);
     const p2 = toNum(r.p2Rank);
@@ -427,17 +434,14 @@
     mainCount2El.textContent = main.length;
     waitCount2El.textContent = wait.length;
 
-    // INSCRITS
     mainList.innerHTML = main.length
       ? main.map((r,i) => cardInscritHtml(i+1, r)).join("")
       : `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
 
-    // Wait index continue après main (comme avant)
     waitList.innerHTML = wait.length
       ? wait.map((r,i) => cardInscritHtml(main.length + i + 1, r)).join("")
       : `<p class="muted" style="margin:0;">Aucune équipe en liste d’attente.</p>`;
 
-    // CLASSÉES : seulement main, tri par teamRank asc (missing ranks => en bas)
     const ranked = [...main];
     ranked.sort((a,b)=>{
       const a1 = toNum(a.p1Rank), a2 = toNum(a.p2Rank);
@@ -455,7 +459,6 @@
       : `<p class="muted" style="margin:0;">Aucune équipe sur la liste principale.</p>`;
   }
 
-  // Tabs behavior
   function showInscrits(){
     tabInscrits.setAttribute("aria-selected", "true");
     tabClassees.setAttribute("aria-selected", "false");
@@ -474,7 +477,6 @@
   tabInscrits.addEventListener("click", showInscrits);
   tabClassees.addEventListener("click", showClassees);
 
-  // restore last view
   try{
     const saved = localStorage.getItem("etape1_equipes_view");
     if(saved === "classees") showClassees(); else showInscrits();
@@ -482,7 +484,6 @@
     showInscrits();
   }
 
-  // 🔴 SNAPSHOT
   const q = query(collection(db, COL_PUBLIC), orderBy("createdAt", "asc"));
 
   onSnapshot(q, (snap) => {
