@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
 </head>
 <body>
 
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <!-- ✅ Nav Étape 1 (identique à équipes) -->
+    <!-- ✅ Nav Étape 1 -->
     <nav class="nav nav-step">
       <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
       <a href="inscriptions.html">📝 Inscriptions</a>
@@ -40,35 +40,51 @@
 <main class="container">
 
   <section class="card">
-    <h2>🗓️ Programmation</h2>
-    <p class="muted" style="margin-top:0;">
-      À venir. Cette page affichera le planning des matchs (horaires + terrains) dès validation par l’organisation.
-    </p>
+    <h2 style="margin:0 0 10px;">📅 Programmation</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
-    <div class="grid">
-      <div class="card" style="margin:0;">
-        <h2 style="margin:0 0 8px;">📌 Prochainement</h2>
-        <p class="muted" style="margin:0;">
-          • Heure de convocation<br>
-          • Début des matchs<br>
-          • Ordre des rencontres<br>
-          • Tableau / phases
-        </p>
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chrono</button>
+      <button class="btn" id="tabTableau" style="font-weight:900; color:#111;">🧩 Tableau</button>
+    </div>
+
+    <p class="muted" id="subtitle" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelChrono" style="display:none;">
+    <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
+    <div id="chronoList"></div>
+  </section>
+
+  <section class="card" id="panelTableau" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧩 Tableau</h2>
+
+    <div class="grid" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label for="selBracket">Tableau</label>
+        <select id="selBracket">
+          <option value="main">Tableau principal</option>
+          <option value="5-8">Tableau 5–8</option>
+        </select>
       </div>
 
-      <div class="card" style="margin:0;">
-        <h2 style="margin:0 0 8px;">🔔 Conseil</h2>
-        <p class="muted" style="margin:0;">
-          Pense à consulter aussi l’onglet <b>Infos</b> (menu principal) pour les dernières annonces.
-        </p>
+      <div class="field" style="margin:0;">
+        <label for="selRound">Tour</label>
+        <select id="selRound"></select>
       </div>
     </div>
+
+    <div id="tableList"></div>
+
+    <p class="muted" style="margin-top:10px;">
+      Les équipes se “placent” automatiquement dès qu’un résultat est validé.
+    </p>
   </section>
 
 </main>
 
 <style>
-  /* ✅ Centre image du bandeau étape */
+  /* ✅ Bandeau étape (identique à equipes) */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -87,7 +103,6 @@
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
 
-  /* ✅ Nav étape : justifiée, 2 lignes si besoin */
   .nav-step{
     gap:8px;
     justify-content:space-between;
@@ -98,7 +113,6 @@
     padding:8px 12px;
   }
 
-  /* ✅ Lien actif plus visible */
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
@@ -112,7 +126,415 @@
     }
     .step-title-img{ max-height: 74px; }
   }
+
+  /* ===== Style prog (comme étape 5) */
+  .match-list{ display:flex; flex-direction:column; gap:14px; }
+
+  .match-card{
+    border-radius:18px;
+    border:2px solid rgba(0,0,0,.06);
+    padding:14px;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+  }
+  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
+
+  .match-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+
+  .m-time{
+    font-size:13px;
+    font-weight:900;
+    white-space:nowrap;
+    letter-spacing:.2px;
+  }
+
+  .m-court{
+    font-size:13px;
+    font-weight:400;
+    font-style:italic;
+    opacity:.95;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
+    flex:1;
+  }
+
+  .team-row{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns: 1fr 22px 22px 24px;
+    align-items:center;
+    gap:6px;
+  }
+
+  .team-block{ min-width:0; }
+  .team-title{
+    font-size:15px;
+    font-weight:900;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .team-sub{
+    margin-top:2px;
+    font-size:13px;
+    font-weight:800;
+    opacity:.85;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .sc{
+    text-align:right;
+    font-size:15px;
+    font-weight:900;
+    white-space:nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vs-line{
+    margin:10px 0 6px;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:2px;
+    opacity:.55;
+    font-size:12px;
+  }
+
+  @media (max-width: 380px){
+    .m-time{ font-size:13px; }
+    .m-court{ font-size:13px; }
+    .team-title{ font-size:14px; }
+    .team-sub{ font-size:12px; }
+    .sc{ font-size:14px; }
+  }
 </style>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import { doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const scope = "etape1";
+
+  const statusText = document.getElementById("statusText");
+  const subtitle = document.getElementById("subtitle");
+
+  const tabChrono = document.getElementById("tabChrono");
+  const tabTableau = document.getElementById("tabTableau");
+
+  const panelChrono = document.getElementById("panelChrono");
+  const panelTableau = document.getElementById("panelTableau");
+
+  const chronoList = document.getElementById("chronoList");
+
+  const selBracket = document.getElementById("selBracket");
+  const selRound = document.getElementById("selRound");
+  const tableList = document.getElementById("tableList");
+
+  const PROG_REF = doc(db, "programmations", scope);
+  const RESULTS_COL = collection(db, `resultats_${scope}`);
+
+  let currentProg = null;
+  let resultsByMatch = new Map();
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // ✅ Compat: schedule[mid] = number OR {slot,court}
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
+  function roundOptions(bracket){
+    if(bracket === "main"){
+      return [
+        ["QF", "Quarts de finale"],
+        ["SF", "Demi-finales"],
+        ["3rd", "Match 3e place"],
+        ["F", "Finale"]
+      ];
+    }
+    return [
+      ["SF", "Demi-finales (5–8)"],
+      ["7th", "Match 7e place"],
+      ["5th", "Match 5e place"]
+    ];
+  }
+
+  function setActiveTab(which){
+    const isChrono = which === "chrono";
+    panelChrono.style.display = isChrono ? "block" : "none";
+    panelTableau.style.display = isChrono ? "none" : "block";
+
+    tabChrono.style.fontWeight = isChrono ? "900" : "800";
+    tabTableau.style.fontWeight = isChrono ? "800" : "900";
+  }
+
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
+  }
+
+  function courtLabel(courtKey){
+    const c = currentProg?.courts || {};
+    const name = c[courtKey] || (courtKey || "—");
+    // (optionnel) emojis terrain
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
+    return emo ? `${emo} ${name} ${emo}` : name;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+  }
+
+  function fmt(x){
+    return (x === null || x === undefined) ? "—" : String(x);
+  }
+
+  function resolveTeamRef(ref){
+    if(!currentProg) return null;
+
+    const teams = currentProg.teams || {};
+    const matches = currentProg.matches || {};
+
+    if(!ref) return null;
+
+    if(ref.type === "team") return teams[ref.key] || null;
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = resultsByMatch.get(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return ref.type === "winner" ? winner : loser;
+    }
+
+    return null;
+  }
+
+  function renderMatchCard({ time, courtKey, teamA, teamB, res }){
+    const cls = courtClass(courtKey);
+    const court = courtLabel(courtKey);
+
+    const s1A = fmt(res?.s1A);
+    const s2A = fmt(res?.s2A);
+    const tbA = fmt(res?.s3A);
+
+    const s1B = fmt(res?.s1B);
+    const s2B = fmt(res?.s2B);
+    const tbB = fmt(res?.s3B);
+
+    const a = teamPartsFromTeam(teamA);
+    const b = teamPartsFromTeam(teamB);
+
+    return `
+      <div class="match-card ${esc(cls)}">
+        <div class="match-head">
+          <div class="m-time">${esc(time)}</div>
+          <div class="m-court">${esc(court)}</div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-title">${esc(a.title)}</div>
+            ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
+          </div>
+          <div class="sc">${esc(s1A)}</div>
+          <div class="sc">${esc(s2A)}</div>
+          <div class="sc">${esc(tbA)}</div>
+        </div>
+
+        <div class="vs-line">VS</div>
+
+        <div class="team-row">
+          <div class="team-block">
+            <div class="team-title">${esc(b.title)}</div>
+            ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
+          </div>
+          <div class="sc">${esc(s1B)}</div>
+          <div class="sc">${esc(s2B)}</div>
+          <div class="sc">${esc(tbB)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderChrono(){
+    if(!currentProg){ chronoList.innerHTML = ""; return; }
+
+    const matches = currentProg.matches || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+    const schedule = currentProg.schedule || {};
+
+    // slot -> mid (premier match trouvé)
+    const slotToMatch = new Map();
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
+      }
+    }
+
+    const cards = [];
+    for(const s of slots){
+      const mid = slotToMatch.get(Number(s.slot));
+      const m = mid ? matches[mid] : null;
+      if(!m) continue;
+
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
+
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+      const res = resultsByMatch.get(mid) || null;
+
+      cards.push(renderMatchCard({
+        time: s.time,
+        courtKey,
+        teamA, teamB,
+        res
+      }));
+    }
+
+    chronoList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match.</p>`;
+  }
+
+  function renderTableau(){
+    if(!currentProg){ tableList.innerHTML = ""; return; }
+
+    const bracket = selBracket.value;
+    const round = selRound.value;
+
+    const matches = currentProg.matches || {};
+    const list = Object.values(matches)
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a,b)=> (a.n||0) - (b.n||0));
+
+    const schedule = currentProg.schedule || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+
+    const cards = list.map(m=>{
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+      const res = resultsByMatch.get(m.id) || null;
+
+      let time = "—";
+      let courtKey = "A";
+
+      const entry = schedule[m.id];
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+
+      if(Number.isFinite(slotNum) && slotNum > 0){
+        const s = slots.find(x => Number(x.slot) === slotNum) || null;
+        const norm = normalizeScheduleEntry(entry, s);
+        courtKey = norm.court;
+        time = s?.time || "—";
+      }
+
+      return renderMatchCard({ time, courtKey, teamA, teamB, res });
+    });
+
+    tableList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match pour ce filtre.</p>`;
+  }
+
+  function refreshRounds(){
+    const opts = roundOptions(selBracket.value);
+    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
+  }
+
+  function renderAll(){
+    renderChrono();
+    renderTableau();
+  }
+
+  tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
+  tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
+
+  selBracket.onchange = ()=>{ refreshRounds(); renderTableau(); };
+  selRound.onchange = ()=> renderTableau();
+
+  setActiveTab("chrono");
+  refreshRounds();
+  selRound.value = "QF";
+
+  onSnapshot(RESULTS_COL, (snap)=>{
+    resultsByMatch = new Map();
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      resultsByMatch.set(d.id, {
+        winnerSide: x.winnerSide || null,
+        s1A: (x.s1A === undefined ? null : x.s1A),
+        s1B: (x.s1B === undefined ? null : x.s1B),
+        s2A: (x.s2A === undefined ? null : x.s2A),
+        s2B: (x.s2B === undefined ? null : x.s2B),
+        s3A: (x.s3A === undefined ? null : x.s3A),
+        s3B: (x.s3B === undefined ? null : x.s3B),
+        updatedAt: x.updatedAt || null
+      });
+    });
+    renderAll();
+  });
+
+  onSnapshot(PROG_REF, (snap)=>{
+    currentProg = snap.exists() ? (snap.data() || {}) : null;
+
+    if(!currentProg){
+      statusText.textContent = "⏳ Programmation non disponible (pas encore générée).";
+      subtitle.textContent = "";
+      panelChrono.style.display = "none";
+      panelTableau.style.display = "none";
+      return;
+    }
+
+    statusText.textContent = "✅ Programmation disponible.";
+    subtitle.textContent = "🧩 Tableau + 🕒 Chrono (mise à jour en direct).";
+    panelChrono.style.display = "block";
+    panelTableau.style.display = "none";
+    setActiveTab("chrono");
+    renderAll();
+  }, (err)=>{
+    console.error(err);
+    statusText.textContent = "🔴 Erreur de connexion à la programmation.";
+  });
+</script>
 
 </body>
 </html>
