@@ -89,7 +89,7 @@
 </main>
 
 <style>
-  /* ✅ Bandeau étape (identique à equipes) */
+  /* ✅ CSS bandeau étape (même ref que equipes/inscriptions) */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -109,14 +109,19 @@
   }
 
   .nav-step{
-    gap:8px;
-    justify-content:space-between;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
   }
   .nav-step a{
+    padding:8px 12px;
     flex: 1 1 auto;
     text-align:center;
-    padding:8px 12px;
   }
+
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
@@ -226,7 +231,6 @@
     min-width:0;
     overflow:hidden;
     text-overflow:ellipsis;
-    /* ✅ autorise le retour à la ligne si besoin */
     white-space:normal;
     word-break:break-word;
   }
@@ -389,8 +393,6 @@
     `;
   }
 
-  // ✅ IMPORTANT: on rend les matchs à partir de `revealedShownIds` (pas draw.revealed)
-  // => l'équipe n'apparait qu'après la fin de l'animation roulette.
   function renderMatchesFromShown(draw){
     panelMatches.style.display = "block";
 
@@ -478,14 +480,11 @@
     panelUrne.style.display = "block";
     panelSeeds.style.display = "block";
 
-    // idle: rendu statique + matches vides (à partir de shownTeams = [])
     if(st !== "running" && st !== "pending_validation" && st !== "validated"){
       wheel.textContent = "—";
       wheelSub.textContent = "—";
 
       renderSeeds(draw);
-
-      // ✅ matches basés sur revealedShownIds (donc vides en idle)
       renderMatchesFromShown(draw);
 
       const { remainingTeams } = computeLists(draw);
@@ -495,14 +494,10 @@
 
     const { revealedIds, remainingTeams } = computeLists(draw);
 
-    // urne / seeds à jour en continu
     renderSeeds(draw);
     renderUrne(remainingTeams, draw);
-
-    // matches basés sur shownTeams (pas sur draw.revealed)
     renderMatchesFromShown(draw);
 
-    // rien de nouveau
     if(revealedIds.length <= shownCount){
       return;
     }
@@ -512,17 +507,14 @@
     while(shownCount < revealedIds.length){
       const id = revealedIds[shownCount];
 
-      // 🔥 Animation roulette d'abord
       const poolById = new Map((draw?.pool || []).map(x => [x.id, x]));
       const t = poolById.get(id);
 
       await rouletteSpin(rouletteLabel(t), 1300);
 
-      // ✅ seulement APRÈS l'animation: on "valide" l'apparition
       revealedShownIds.push(id);
       shownCount++;
 
-      // re-render matches + urne après apparition
       renderMatchesFromShown(currentDraw);
       const { remainingTeams: rem2 } = computeLists(currentDraw);
       renderUrne(rem2, currentDraw);
@@ -545,7 +537,6 @@
 
     updateStatus(draw);
 
-    // reset affichage
     shownCount = 0;
     revealedShownIds = [];
     wheel.textContent = "—";
@@ -554,10 +545,10 @@
     panelRoulette.style.display = "block";
     panelMatches.style.display = "block";
     panelSeeds.style.display = "block";
-    panelUrne.style.display = "none"; // masque urne en replay
+    panelUrne.style.display = "none";
 
     renderSeeds(draw);
-    renderMatchesFromShown(draw); // vide
+    renderMatchesFromShown(draw);
 
     const order = draw.order || [];
     const revealed = Number(draw.revealed || 0);
@@ -572,7 +563,6 @@
 
       await rouletteSpin(rouletteLabel(t), 1300);
 
-      // ✅ apparition après animation
       revealedShownIds.push(id);
       shownCount = revealedShownIds.length;
       renderMatchesFromShown(draw);
@@ -589,7 +579,6 @@
 
     updateStatus(currentDraw);
 
-    // re-render réel
     const { remainingTeams } = computeLists(currentDraw);
     renderUrne(remainingTeams, currentDraw);
     renderSeeds(currentDraw);
@@ -631,7 +620,6 @@
 
     updateStatus(currentDraw);
 
-    // Replay visible uniquement si validated
     if(currentDraw.status === "validated"){
       if(!replayMode) btnReplay.style.display = "inline-flex";
     } else {
@@ -639,12 +627,10 @@
       btnStopReplay.style.display = "none";
     }
 
-    // render seeds/urne toujours
     renderSeeds(currentDraw);
     const { remainingTeams } = computeLists(currentDraw);
     renderUrne(remainingTeams, currentDraw);
 
-    // ✅ IDLE: reset "apparitions" + roulette
     if(!replayMode && currentDraw.status === "idle"){
       shownCount = 0;
       revealedShownIds = [];
@@ -654,18 +640,14 @@
       return;
     }
 
-    // ✅ IMPORTANT: si on passe direct en "validated" (sans animation live),
-    // on synchronise l'affichage avec l'état (sans tricher sur l'animation).
     if(!replayMode && (currentDraw.status === "pending_validation" || currentDraw.status === "validated")){
       const { revealedIds } = computeLists(currentDraw);
-      // on aligne shownIds sur revealed (affichage immédiat)
       revealedShownIds = revealedIds.slice(0);
       shownCount = revealedShownIds.length;
       renderMatchesFromShown(currentDraw);
       return;
     }
 
-    // LIVE
     if(!replayMode){
       await applyLiveRevealAnimation(currentDraw);
     }
