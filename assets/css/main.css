@@ -1,3 +1,7 @@
+/* =========================================================
+   main.css — Open BT / Challenge (base)
+   ========================================================= */
+
 :root{
   --max: 980px;
 
@@ -12,25 +16,28 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  /* Accent (pour lien actif) */
-  --accent1: #1f7a3f;  /* vert */
-  --accent2: #f2c200;  /* jaune */
+  /* Accent (lien actif) */
+  --accent1: #1f7a3f; /* vert */
+  --accent2: #f2c200; /* jaune */
 
-  /* Logos (recadrés => moins gros) */
+  /* Logos */
   --logo-size: clamp(74px, 14vw, 112px);
 
-  /* Bandeau */
+  /* Typo bandeau */
   --title-size: clamp(16px, 3.2vw, 23px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
+  /* Bandeau */
   --topbar-pad-y: 14px;
   --topbar-gap: 16px;
   --topbar-shadow: 0 8px 18px rgba(0,0,0,.10);
 
+  /* Pills nav */
   --pill-border: rgba(255,255,255,.25);
   --pill-bg: rgba(255,255,255,.10);
   --pill-bg-hover: rgba(255,255,255,.18);
 
+  /* UI */
   --radius-card: 16px;
   --radius-btn: 14px;
 }
@@ -47,7 +54,7 @@ body{
   background:var(--bg);
 }
 
-/* ✅ Anti “liens bleus iOS” + tap highlight */
+/* Anti “liens bleus iOS” + tap highlight */
 a, a:visited, a:hover, a:active{
   color:inherit;
   text-decoration:none;
@@ -62,9 +69,9 @@ a, button{
   padding:16px;
 }
 
-/* ======================================
+/* =========================================================
    BANDEAU
-====================================== */
+   ========================================================= */
 
 .topbar{
   position: sticky;
@@ -95,13 +102,11 @@ a, button{
   overflow:hidden;
 }
 
-/* ✅ Logos recadrés => on enlève l'ancienne "compensation" */
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
   display:block;
-  transform: scale(1);
 }
 
 .brand-title{
@@ -114,9 +119,9 @@ a, button{
   text-shadow: 0 1px 0 rgba(0,0,0,.15);
 }
 
-/* ======================================
+/* =========================================================
    NAV PILLS
-====================================== */
+   ========================================================= */
 
 .nav{
   margin-top:12px;
@@ -135,14 +140,14 @@ a, button{
   background: var(--pill-bg);
   transition:.18s ease;
   white-space:nowrap;
-  position: relative; /* utile pour l’indicateur actif */
+  position: relative;
 }
 
 .nav a:hover{
   background: var(--pill-bg-hover);
 }
 
-/* ✅ Lien actif (aria-current) : plus marqué visuellement */
+/* Lien actif (aria-current) */
 .nav a[aria-current="page"]{
   font-weight: 1000;
   background: rgba(255,255,255,.22);
@@ -150,7 +155,7 @@ a, button{
   box-shadow: 0 6px 14px rgba(0,0,0,.10);
 }
 
-/* Soulignement “Suzini” discret */
+/* Soulignement discret (par défaut) */
 .nav a[aria-current="page"]::after{
   content:"";
   position:absolute;
@@ -163,9 +168,59 @@ a, button{
   opacity:.95;
 }
 
-/* ======================================
+/* =========================================================
+   BANDEAU “ÉTAPE” (Challenge)
+   - centre = image (etape1.png, etc.)
+   - nav en 2 lignes (6 items)
+   ========================================================= */
+
+.topbar-row-step{
+  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+}
+
+.step-title-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height: calc(var(--logo-size) * 0.55);
+}
+
+.step-title-img{
+  width: min(520px, 100%);
+  max-height: 88px;
+  height: auto;
+  object-fit: contain;
+  display:block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+}
+
+/* Nav Étape : 6 onglets justifiés (2 lignes) */
+.nav.nav-step{
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nav.nav-step::after{
+  content:"";
+  flex:auto;
+}
+
+.nav.nav-step a{
+  padding:8px 12px;
+  flex: 1 1 auto;
+  text-align:center;
+}
+
+/* (Optionnel) active un peu plus visible sur nav-step */
+.nav.nav-step a[aria-current="page"]{
+  background: rgba(255,255,255,.26);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
+/* =========================================================
    CARTES / BOUTONS
-====================================== */
+   ========================================================= */
 
 .card{
   border:1px solid var(--border);
@@ -188,7 +243,7 @@ a, button{
   margin-top:12px;
 }
 
-/* ✅ Boutons : imposer style “bouton”, pas lien */
+/* Boutons */
 .btn, a.btn, a.btn:visited{
   display:block;
   padding:14px 16px;
@@ -196,16 +251,12 @@ a, button{
   border:1px solid #ddd;
   background:#fafafa;
   font-weight:700;
-
   color:var(--text) !important;
   text-decoration:none !important;
-
   transition:.18s ease;
 }
 
-.btn:hover, a.btn:hover{
-  background:#f0f0f0;
-}
+.btn:hover, a.btn:hover{ background:#f0f0f0; }
 
 .btn.disabled{
   opacity:.55;
@@ -218,9 +269,9 @@ a, button{
   margin-top:10px;
 }
 
-/* ======================================
+/* =========================================================
    FORMULAIRES
-====================================== */
+   ========================================================= */
 
 .form{ display:grid; gap:12px; }
 .field{ display:grid; gap:6px; }
@@ -239,15 +290,15 @@ input, select, textarea{
   margin:10px 0;
 }
 
-/* ======================================
+/* =========================================================
    RESPONSIVE
-====================================== */
+   ========================================================= */
 
 @media (min-width: 780px){
   .grid{ grid-template-columns: 1fr 1fr; }
 }
 
-/* très petits écrans */
+/* petits écrans */
 @media (max-width: 420px){
   .nav a{ padding:8px 14px; }
   .nav a[aria-current="page"]::after{
@@ -255,6 +306,12 @@ input, select, textarea{
     right:10px;
     bottom:-6px;
   }
+
+  .nav.nav-step a{
+    padding:7px 10px;
+    font-size: 13px;
+  }
+  .step-title-img{ max-height: 74px; }
 }
 
 @media (max-width: 360px){
@@ -262,7 +319,9 @@ input, select, textarea{
     --logo-size: clamp(66px, 15vw, 98px);
     --title-size: clamp(15px, 3.9vw, 20px);
   }
+
   .nav a{ padding:8px 12px; }
+
   .nav a[aria-current="page"]::after{
     left:9px;
     right:9px;
