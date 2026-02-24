@@ -82,7 +82,7 @@
 </main>
 
 <style>
-  /* ✅ CSS bandeau étape (même ref que equipes/inscriptions) */
+  /* ✅ CSS bandeau étape (référence) */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -253,53 +253,6 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // =========================
-  // ✅ NORMALISATION (bracket / round)
-  // =========================
-  function normBracket(b){
-    const x = (b ?? "").toString().trim().toLowerCase();
-    if(x === "main" || x === "principal" || x === "tableau_principal" || x === "tableau principal") return "main";
-    if(x === "5-8" || x === "5_8" || x === "5–8" || x === "5 to 8" || x === "5a8") return "5-8";
-    return x;
-  }
-
-  function stripAccents(s){
-    return (s ?? "")
-      .toString()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
-
-  function normRound(r){
-    const raw = (r ?? "").toString().trim();
-    const x = stripAccents(raw).toUpperCase().replaceAll("—","-").replaceAll("–","-");
-
-    // mapping large (tolérant)
-    if(x === "QF" || x.includes("QUART")) return "QF";
-    if(x === "SF" || x.includes("DEMI")) return "SF";
-    if(x === "F"  || x === "FINALE" || x.includes("FINAL")) return "F";
-    if(x === "3RD" || x.includes("3E") || x.includes("TROISIEME") || x.includes("3EME")) return "3rd";
-    if(x === "5TH" || x.includes("5E") || x.includes("CINQUIEME")) return "5th";
-    if(x === "7TH" || x.includes("7E") || x.includes("SEPTIEME")) return "7th";
-
-    // fallback (si tu as des codes custom: R1, R2...)
-    return raw;
-  }
-
-  function roundLabel(code){
-    const n = normRound(code);
-    const map = {
-      "QF": "Quarts de finale",
-      "SF": "Demi-finales",
-      "3rd": "Match 3e place",
-      "F": "Finale",
-      "7th": "Match 7e place",
-      "5th": "Match 5e place"
-    };
-    return map[n] || (code ?? "—");
-  }
-
-  // ✅ Compat: schedule[mid] = number OR {slot,court}
   function normalizeScheduleEntry(entry, slotObj){
     if(typeof entry === "number"){
       const slot = Number(entry);
@@ -315,6 +268,22 @@
     return { slot: fallbackSlot, court: slotObj?.court || "A" };
   }
 
+  function roundOptions(bracket){
+    if(bracket === "main"){
+      return [
+        ["QF", "Quarts de finale"],
+        ["SF", "Demi-finales"],
+        ["3rd", "Match 3e place"],
+        ["F", "Finale"]
+      ];
+    }
+    return [
+      ["SF", "Demi-finales (5–8)"],
+      ["7th", "Match 7e place"],
+      ["5th", "Match 5e place"]
+    ];
+  }
+
   function setActiveTab(which){
     const isChrono = which === "chrono";
     panelChrono.style.display = isChrono ? "block" : "none";
@@ -323,10 +292,7 @@
     tabChrono.style.fontWeight = isChrono ? "900" : "800";
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
 
-    if(!isChrono){
-      refreshRoundsFromProg();  // ✅ important
-      renderTableau();
-    }
+    if(!isChrono) renderTableau();
   }
 
   function teamPartsFromTeam(t){
@@ -428,8 +394,8 @@
     `;
   }
 
+  // ⚠️ Chrono : on ne touche pas à ta logique (inchangée)
   function renderChrono(){
-    // ⚠️ chrono inchangé
     if(!currentProg){ chronoList.innerHTML = ""; return; }
 
     const matches = currentProg.matches || {};
@@ -471,75 +437,54 @@
       : `<p class="muted">Aucun match.</p>`;
   }
 
-  // =========================
-  // ✅ TABLEAU (corrigé)
-  // - tours dynamiques depuis currentProg.matches
-  // - filtre normalisé (tolère "Quarts", "QF", etc.)
-  // =========================
-  function refreshRoundsFromProg(){
-    const prev = (selRound.value || "").trim();
-    const wantBracket = normBracket(selBracket.value);
+  // ✅ Fallback pour anciennes programmations (sans bracket/round)
+  function inferBracketRound(matchId, m){
+    const id = matchId || m?.id || "";
+    const n = Number(m?.n || 0);
 
-    const matches = currentProg?.matches || {};
-    const roundSet = new Map(); // normRound -> example label
-
-    for(const [id, m] of Object.entries(matches)){
-      if(normBracket(m?.bracket) !== wantBracket) continue;
-      const nr = normRound(m?.round);
-      if(!roundSet.has(nr)) roundSet.set(nr, m?.round ?? nr);
+    if(id === "M1" || id === "M2" || id === "M3" || id === "M4" || (n>=1 && n<=4)){
+      return { bracket:"main", round:"QF" };
     }
-
-    const preferredMain = ["QF","SF","3rd","F"];
-    const preferred58   = ["SF","7th","5th"];
-    const pref = (wantBracket === "main") ? preferredMain : preferred58;
-
-    const known = [];
-    const other = [];
-
-    for(const [nr, ex] of roundSet.entries()){
-      if(pref.includes(nr)) known.push([nr, ex]);
-      else other.push([nr, ex]);
+    if(id === "M5" || id === "M6" || (n===5 || n===6)){
+      return { bracket:"5-8", round:"SF" };
     }
-
-    known.sort((a,b)=> pref.indexOf(a[0]) - pref.indexOf(b[0]));
-    other.sort((a,b)=> String(a[0]).localeCompare(String(b[0]), "fr"));
-
-    const rounds = [...known, ...other];
-
-    if(!rounds.length){
-      selRound.innerHTML = `<option value="">Aucun tour</option>`;
-      selRound.disabled = true;
-      return;
+    if(id === "M7" || id === "M8" || (n===7 || n===8)){
+      return { bracket:"main", round:"SF" };
     }
-
-    selRound.disabled = false;
-    selRound.innerHTML = rounds
-      .map(([nr, ex]) => `<option value="${esc(nr)}">${esc(roundLabel(ex))}</option>`)
-      .join("");
-
-    // garder l'ancien choix si possible, sinon QF si dispo, sinon 1er
-    if(prev && rounds.some(([nr]) => nr === prev)){
-      selRound.value = prev;
-    } else if(rounds.some(([nr]) => nr === "QF")){
-      selRound.value = "QF";
-    } else {
-      selRound.value = rounds[0][0];
+    if(id === "M9" || n===9){
+      return { bracket:"5-8", round:"7th" };
     }
+    if(id === "M10" || n===10){
+      return { bracket:"5-8", round:"5th" };
+    }
+    if(id === "M11" || n===11){
+      return { bracket:"main", round:"3rd" };
+    }
+    if(id === "M12" || n===12){
+      return { bracket:"main", round:"F" };
+    }
+    return { bracket:"main", round:"QF" };
+  }
+
+  function normalizeMatchWithMeta(matchId, m){
+    const bracket = m?.bracket || inferBracketRound(matchId, m).bracket;
+    const round   = m?.round   || inferBracketRound(matchId, m).round;
+    return { id: matchId, ...(m || {}), bracket, round };
   }
 
   function renderTableau(){
     if(!currentProg){ tableList.innerHTML = ""; return; }
 
-    const wantBracket = normBracket(selBracket.value);
-    const wantRound = (selRound.value || "").trim();
+    const bracket = selBracket.value;
+    const round = selRound.value;
 
     const matches = currentProg.matches || {};
     const schedule = currentProg.schedule || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
 
     const list = Object.entries(matches)
-      .map(([id, m]) => ({ id, ...(m || {}) }))
-      .filter(m => normBracket(m.bracket) === wantBracket && normRound(m.round) === wantRound)
+      .map(([id, m]) => normalizeMatchWithMeta(id, m))
+      .filter(m => m.bracket === bracket && m.round === round)
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
@@ -568,6 +513,17 @@
       : `<p class="muted">Aucun match pour ce filtre.</p>`;
   }
 
+  function refreshRounds(){
+    const opts = roundOptions(selBracket.value);
+    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
+  }
+
+  function ensureRoundValue(){
+    const wanted = (selBracket.value === "main") ? "QF" : "SF";
+    const hasWanted = Array.from(selRound.options).some(o => o.value === wanted);
+    selRound.value = hasWanted ? wanted : (selRound.options[0]?.value || "");
+  }
+
   function renderAll(){
     renderChrono();
     renderTableau();
@@ -577,11 +533,15 @@
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
 
   selBracket.onchange = ()=>{
-    refreshRoundsFromProg();
+    refreshRounds();
+    ensureRoundValue();
     renderTableau();
   };
   selRound.onchange = ()=> renderTableau();
 
+  // init UI
+  refreshRounds();
+  ensureRoundValue();
   setActiveTab("chrono");
 
   onSnapshot(RESULTS_COL, (snap)=>{
@@ -620,8 +580,9 @@
     panelTableau.style.display = "none";
     setActiveTab("chrono");
 
-    // ✅ construit les tours à partir de la prog réelle
-    refreshRoundsFromProg();
+    // ✅ (re)remplit les tours (évite le select vide sur iPad si un script avait crash)
+    refreshRounds();
+    ensureRoundValue();
 
     renderAll();
   }, (err)=>{
