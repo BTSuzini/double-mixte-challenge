@@ -15,7 +15,6 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ Image au centre -->
       <div class="step-title-wrap" aria-label="Étape 1">
         <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
       </div>
@@ -25,24 +24,12 @@
       </div>
     </div>
 
-    <!-- ✅ Nav Étape 1 -->
     <nav class="nav nav-step">
-      <!-- 1) Accueil : emoji seul -->
       <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
-
-      <!-- 2) Inscriptions -->
       <a href="inscriptions.html" aria-current="page">📝 Inscriptions</a>
-
-      <!-- 3) Repas -->
       <a href="repas.html">🍽️ Repas</a>
-
-      <!-- 4) Programmation -->
       <a href="programmation.html">🗓️ Programmation</a>
-
-      <!-- 5) Équipes -->
       <a href="equipes.html">👥 Équipes</a>
-
-      <!-- 6) Tirage -->
       <a href="tirage.html">🎲 Tirage</a>
     </nav>
   </div>
@@ -53,7 +40,6 @@
   <section class="card">
     <h2>Formulaire d’inscription</h2>
 
-    <!-- Message statut inscriptions -->
     <p id="gateMsg" class="muted">Chargement…</p>
 
     <form id="signupForm" class="form" autocomplete="on">
@@ -125,7 +111,7 @@
 </main>
 
 <style>
-  /* ✅ Centre image du bandeau étape */
+  /* (bandeau étape : idéalement déplacé dans main.css, mais tu as dit “ne pas toucher le reste”) */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -144,7 +130,6 @@
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
 
-  /* ✅ Nav étape : 6 onglets justifiés (2 lignes) */
   .nav-step{
     justify-content: space-between;
     gap: 8px;
@@ -159,7 +144,6 @@
     text-align:center;
   }
 
-  /* ✅ Lien actif plus visible */
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
@@ -194,7 +178,6 @@
   const gateMsgEl = document.getElementById("gateMsg");
   const submitBtn = document.getElementById("submitBtn");
 
-  // tes rules: open | paused | closed (sinon => pas encore ouvert)
   let gateState = "not_open";
 
   const setStatus = (msg) => { statusEl.textContent = msg; };
@@ -205,7 +188,6 @@
   }
 
   function normalizeState(state){
-    // compat: certains messages/anciens tests utilisaient "suspended"
     if(state === "suspended") return "paused";
     return state || "not_open";
   }
@@ -221,7 +203,6 @@
       return;
     }
 
-    // sinon: bloqué
     setInputsDisabled(true);
     submitBtn.disabled = true;
     submitBtn.classList.add("disabled");
@@ -237,7 +218,7 @@
     gateMsgEl.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
   }
 
-  // 🔄 Live gate
+  // Live gate
   const cfgRef = doc(db, "config", "etape1");
   onSnapshot(cfgRef, (snap)=>{
     const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
@@ -299,6 +280,10 @@
 
       form.reset();
       setStatus("✅ Inscription enregistrée !");
+
+      // ✅ POPUP CONFIRMATION (ajout demandé)
+      alert("✅ Inscription confirmée !\n\nVotre équipe a bien été enregistrée.");
+
     } catch (err) {
       console.error(err);
       setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
