@@ -216,7 +216,9 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import {
+    doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
@@ -298,28 +300,30 @@
     return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
-  // ✅ LOGIQUE OFFICIELLE (fixe) — matchId ne change jamais
+  // ✅ Option A : bracket + round stockés dans matches (source de vérité)
   function buildMatches(){
     return {
-      // Quarts
-      M1:{id:"M1",n:1,  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
-      M2:{id:"M2",n:2,  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
-      M3:{id:"M3",n:3,  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
-      M4:{id:"M4",n:4,  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
+      // ===== Quarts (tableau principal)
+      M1:{ id:"M1", n:1,  bracket:"main", round:"QF",  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
+      M2:{ id:"M2", n:2,  bracket:"main", round:"QF",  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
+      M3:{ id:"M3", n:3,  bracket:"main", round:"QF",  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
+      M4:{ id:"M4", n:4,  bracket:"main", round:"QF",  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
 
-      // 5-8 (demi)
-      M5:{id:"M5",n:5,  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
-      M6:{id:"M6",n:6,  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
+      // ===== 5–8 (demi)
+      M5:{ id:"M5", n:5,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
+      M6:{ id:"M6", n:6,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
 
-      // Tableau principal (demi)
-      M7:{id:"M7",n:7,  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
-      M8:{id:"M8",n:8,  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
+      // ===== Tableau principal (demi)
+      M7:{ id:"M7", n:7,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
+      M8:{ id:"M8", n:8,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
 
-      // Classements
-      M9:{id:"M9",n:9,   A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
-      M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
-      M11:{id:"M11",n:11,A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
-      M12:{id:"M12",n:12,A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
+      // ===== Classements 5–8
+      M9:{  id:"M9",  n:9,  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
+      M10:{ id:"M10", n:10, bracket:"5-8", round:"5th", A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
+
+      // ===== Classements tableau principal
+      M11:{ id:"M11", n:11, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
+      M12:{ id:"M12", n:12, bracket:"main", round:"F",   A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
     };
   }
 
@@ -343,7 +347,6 @@
 
   // ✅ schedule normalization (compat: number OR {slot,court})
   function normalizeScheduleEntry(entry, slotObj){
-    // entry can be: 5 OR {slot:5,court:"A"}
     if(typeof entry === "number"){
       const slot = Number(entry);
       const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
@@ -388,7 +391,7 @@
     const slots = defaultSlots();
     const courts = defaultCourts();
 
-    // ✅ NEW schedule format: schedule[mid] = {slot, court}
+    // ✅ schedule[mid] = {slot, court}
     const schedule = {};
     for(const mid of Object.keys(matches)){
       const n = Number(matches[mid].n);
@@ -499,10 +502,10 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> mid (si collisions, on prend le premier trouvé)
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
-      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
       const norm = normalizeScheduleEntry(entry, sObj);
       if(!slotToMatch.has(norm.slot)){
         slotToMatch.set(norm.slot, mid);
@@ -554,10 +557,10 @@
     const slots = Array.isArray(prog.slots) ? prog.slots : [];
     const schedule = prog.schedule || {};
 
-    // Find match assigned to slotA and slotB (first match found)
     let mA = null, mB = null;
     for(const [mid, entry] of Object.entries(schedule)){
-      const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
       const norm = normalizeScheduleEntry(entry, sObj);
       if(norm.slot === Number(slotA) && !mA) mA = mid;
       if(norm.slot === Number(slotB) && !mB) mB = mid;
@@ -568,7 +571,7 @@
     function setEntry(mid, newSlot){
       if(!mid) return;
       const curEntry = newSchedule[mid];
-      const slotObj = slots.find(x => Number(x.slot) === Number(newSlot));
+      const slotObj = slots.find(x => Number(x.slot) === Number(newSlot)) || null;
       const norm = normalizeScheduleEntry(curEntry, slotObj);
       newSchedule[mid] = { slot: Number(newSlot), court: norm.court };
     }
@@ -589,7 +592,6 @@
     const schedule = prog.schedule || {};
 
     const entry = schedule[mid];
-    // derive slotObj
     const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
     const slotObj = slots.find(x => Number(x.slot) === slotNum) || null;
 
@@ -615,7 +617,6 @@
       renderAdminList();
     }, (err)=>{
       console.error(err);
-      // pas bloquant : on garde la prog
     });
   }
 
