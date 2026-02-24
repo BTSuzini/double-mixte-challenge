@@ -10,36 +10,39 @@
 
 <header class="topbar">
   <div class="container">
-    <div class="topbar-row">
+    <div class="topbar-row topbar-row-general">
       <div class="brand-logo">
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">Suzini BT — Double Mixte Challenge</h1>
+      <!-- ✅ Image au centre (remplace le texte) -->
+      <div class="general-title-wrap" aria-label="Suzini BT — Double Mixte Challenge">
+        <img class="general-title-img" src="assets/img/challenge-gen.png" alt="Suzini BT — Double Mixte Challenge">
+      </div>
 
       <div class="brand-logo">
         <img src="assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
-    <nav class="nav">
+    <nav class="nav nav-general">
       <!-- 1) Accueil : emoji seul -->
-      <a href="index.html" aria-current="page">🏠</a>
+      <a href="index.html" aria-current="page" title="Accueil" aria-label="Accueil">🏠</a>
 
-      <!-- 2) Règlement : emoji + texte -->
+      <!-- 2) Règlement -->
       <a href="pages/reglement.html">📘 Règlement</a>
 
-      <!-- 3) Classement : emoji + texte -->
+      <!-- 3) Classement -->
       <a href="pages/classement.html">🏆 Classement</a>
 
-      <!-- 4) Boutique : emoji + texte -->
+      <!-- 4) Boutique -->
       <a href="pages/boutique.html">🛍️ Boutique</a>
 
-      <!-- 5) Infos : emoji + texte -->
+      <!-- 5) Infos -->
       <a href="pages/infos.html">📰 Infos</a>
 
-      <!-- 6) Contact : 2 emojis, pas de texte -->
-      <a href="pages/contact.html">📩 📞</a>
+      <!-- 6) Contact -->
+      <a href="pages/contact.html" title="Contact" aria-label="Contact">📩 📞</a>
     </nav>
   </div>
 </header>
@@ -85,6 +88,58 @@
   </section>
 
 </main>
+
+<style>
+  /* ✅ Centre image du bandeau général */
+  .topbar-row-general{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+  }
+  .general-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+    overflow:hidden;
+  }
+  .general-title-img{
+    width: min(560px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  /* ✅ Nav général : 2 lignes + justifié (gauche/droite) */
+  .nav-general{
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-general::after{
+    content:"";
+    flex:auto; /* aide à “étaler” sur 2 lignes */
+  }
+  .nav-general a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  /* ✅ Lien actif plus visible */
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-general a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
+    .general-title-img{ max-height: 74px; }
+  }
+</style>
 
 <script type="module">
   import { auth } from "./assets/js/firebase.js";
