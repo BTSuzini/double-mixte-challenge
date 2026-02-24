@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
 
   <style>
-    /* =========================
-       Sous-onglets Général (Infos / Paiements)
-    ========================== */
+    /* Sous-onglets dans Général */
     .subtabs{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -33,60 +31,19 @@
       box-shadow: 0 6px 14px rgba(0,0,0,.06);
     }
 
-    /* =========================
-       Étapes : scroll horizontal (pills)
-    ========================== */
-    .stepbar-wrap{
+    /* Paiements (Général) */
+    .pay-top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-end;
+      justify-content:space-between;
       margin-top:10px;
     }
-    .stepbar{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding:6px 2px 2px;
-      scroll-snap-type:x mandatory;
-    }
-    .stepbar::-webkit-scrollbar{ display:none; }
-    .step-pill{
-      flex: 0 0 auto;
-      scroll-snap-align:start;
-      border:1px solid #ddd;
-      background:#fafafa;
-      color:#111;
-      border-radius:999px;
-      padding:9px 12px;
-      font-weight:950;
-      white-space:nowrap;
-      cursor:pointer;
-      user-select:none;
-    }
-    .step-pill[aria-selected="true"]{
-      background:#fff;
-      border-color:#cfcfcf;
-      box-shadow: 0 6px 14px rgba(0,0,0,.06);
-    }
-    .step-pill[aria-disabled="true"]{
-      opacity:.55;
-      cursor:not-allowed;
-    }
-
-    /* =========================
-       Paiements UI (list)
-    ========================== */
-    .admin-top{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .admin-top h2{ margin:0; }
-    .admin-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+    .pay-top .field{
+      margin:0;
+      flex: 1 1 240px;
+      min-width: 220px;
     }
 
     .filters{
@@ -143,6 +100,7 @@
     .dot.orange{ background:#f39c12; }
     .dot.green{ background:#2ecc71; }
 
+    /* list */
     .pay-list{
       display:grid;
       gap:10px;
@@ -167,7 +125,7 @@
       min-width:0;
     }
     .pay-team{
-      font-weight:950;
+      font-weight:900;
       font-size:16px;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -210,7 +168,7 @@
       background:#fff;
       border-radius:999px;
       padding:8px 10px;
-      font-weight:950;
+      font-weight:900;
       cursor:pointer;
     }
     .toggle button.paid{
@@ -268,7 +226,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone -->
+  <!-- Zone selector -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
@@ -288,23 +246,18 @@
     <p class="muted" id="hint" style="margin-top:10px;"></p>
   </section>
 
-  <!-- Zone: Général -->
+  <!-- PANEL GENERAL -->
   <section class="card" id="panelGeneral" style="display:none;">
 
     <h2 style="margin:0 0 6px;">🌐 Général</h2>
-    <p class="muted" style="margin:0;">
-      Sous-onglets : gestion des infos + suivi des paiements.
-    </p>
 
-    <div class="subtabs" role="tablist" aria-label="Général">
-      <button class="subtab" id="tabGenInfos" type="button" aria-selected="true">📰 Infos</button>
-      <button class="subtab" id="tabGenPay" type="button" aria-selected="false">✅ Paiements</button>
+    <div class="subtabs" role="tablist" aria-label="Général — onglets">
+      <button class="subtab" id="tabInfos" type="button" aria-selected="true">📰 Infos</button>
+      <button class="subtab" id="tabPayments" type="button" aria-selected="false">✅ Paiements</button>
     </div>
 
-    <!-- ======================
-          ONGLET INFOS
-    ======================= -->
-    <div id="panelGenInfos" style="margin-top:12px;">
+    <!-- ========= INFOS ========= -->
+    <div id="panelInfos" style="margin-top:14px;">
       <h2 style="margin:0 0 10px;">📰 Infos (admin)</h2>
 
       <form id="infoForm" class="form" autocomplete="off">
@@ -329,42 +282,34 @@
       <div id="infosList" style="display:grid; gap:10px; margin-top:10px;"></div>
     </div>
 
-    <!-- ======================
-          ONGLET PAIEMENTS
-    ======================= -->
-    <div id="panelGenPay" style="display:none; margin-top:12px;">
+    <!-- ========= PAIEMENTS ========= -->
+    <div id="panelPay" style="display:none; margin-top:14px;">
+      <h2 style="margin:0;">✅ Paiements — Administration</h2>
+      <p class="muted" style="margin:8px 0 0;">
+        Cliquez sur “Payé / Non payé” pour chaque joueur. Enregistrement en direct.
+      </p>
 
-      <div class="admin-top">
-        <div>
-          <h2>✅ Paiements — Challenge</h2>
-          <p class="muted" style="margin:6px 0 0;">
-            Cliquez sur “Payé / Non payé” pour chaque joueur. (Enregistré en direct)
-          </p>
+      <div class="pay-top">
+        <div class="field">
+          <label for="payEtape">Étape</label>
+          <select id="payEtape">
+            <option value="etape1">🎾 Étape 1</option>
+            <option value="etape2" disabled>🎾 Étape 2 (plus tard)</option>
+            <option value="etape3" disabled>🎾 Étape 3 (plus tard)</option>
+            <option value="etape4" disabled>🎾 Étape 4 (plus tard)</option>
+            <option value="etape5" disabled>🧪 Étape 5 (test) (plus tard)</option>
+          </select>
         </div>
-        <div class="admin-actions">
-          <span class="pill" id="authState">Connexion…</span>
-        </div>
-      </div>
 
-      <!-- Étapes (scroll) -->
-      <div class="stepbar-wrap" aria-label="Choix étape">
-        <div class="stepbar" id="stepbar">
-          <button class="step-pill" id="step_e1" type="button" aria-selected="true">🎾 Étape 1</button>
-          <button class="step-pill" id="step_e2" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 2 (bientôt)</button>
-          <button class="step-pill" id="step_e3" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 3 (bientôt)</button>
-          <button class="step-pill" id="step_e4" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🎾 Étape 4 (bientôt)</button>
-          <button class="step-pill" id="step_e5" type="button" aria-selected="false" aria-disabled="true" title="Bientôt">🧪 Étape 5 (bientôt)</button>
+        <div class="field">
+          <label for="q">Recherche</label>
+          <div class="search" style="margin-top:0;">
+            <input id="q" type="search" placeholder="Rechercher équipe / prénom…" autocomplete="off">
+          </div>
         </div>
-        <p class="muted" style="margin:8px 0 0;">
-          Étape active : <b id="stepLabel">Étape 1</b>
-        </p>
       </div>
 
       <div class="filters">
-        <div class="search">
-          <input id="q" type="search" placeholder="Rechercher équipe / prénom…" autocomplete="off">
-        </div>
-
         <div class="stats">
           <span class="badge"><span class="dot red"></span><span id="c0">0</span> non payé</span>
           <span class="badge"><span class="dot orange"></span><span id="c1">0</span> partiel</span>
@@ -372,9 +317,9 @@
         </div>
       </div>
 
-      <p class="muted" id="statusPay" style="margin:10px 0 0;">Chargement…</p>
+      <p class="muted" id="payStatus" style="margin:10px 0 0;">Chargement…</p>
 
-      <div class="pay-list" id="listPay" aria-label="Liste paiements"></div>
+      <div id="payList" class="pay-list" aria-label="Liste paiements"></div>
     </div>
 
   </section>
@@ -388,28 +333,31 @@
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, getDoc,
-    collection, addDoc, deleteDoc, updateDoc,
+    collection, addDoc, deleteDoc, updateDoc, setDoc,
     serverTimestamp,
-    query, orderBy, onSnapshot,
-    setDoc
+    query, orderBy, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // =========================================
+  // =========================
   // CONFIG
-  // =========================================
+  // =========================
   const COL_INFOS = "infos";
 
-  // Challenge — Étape 1
-  const COL_TEAMS_E1_PUBLIC = "equipes_etape1_public";
+  // Challenge Paiements
+  const COL_PAYMENTS = "paiements_challenge"; // docId = `${etapeId}_${teamDocId}`
 
-  // Challenge — Paiements (toutes étapes)
-  // docId = "e1_<teamDocId>"
-  // fields = { p1Paid:boolean, p2Paid:boolean, updatedAt }
-  const COL_PAYMENTS = "paiements_challenge";
+  // Mapping équipes par étape
+  const TEAM_COLLECTION_BY_ETAPE = {
+    etape1: "equipes_etape1_public",
+    etape2: "equipes_etape2_public",
+    etape3: "equipes_etape3_public",
+    etape4: "equipes_etape4_public",
+    etape5: "equipes_etape5_public",
+  };
 
-  // =========================================
+  // =========================
   // DOM
-  // =========================================
+  // =========================
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -419,44 +367,37 @@
 
   const panelGeneral = document.getElementById("panelGeneral");
 
-  // Sous-onglets général
-  const tabGenInfos = document.getElementById("tabGenInfos");
-  const tabGenPay   = document.getElementById("tabGenPay");
-  const panelGenInfos = document.getElementById("panelGenInfos");
-  const panelGenPay   = document.getElementById("panelGenPay");
+  // General subtabs
+  const tabInfos = document.getElementById("tabInfos");
+  const tabPayments = document.getElementById("tabPayments");
+  const panelInfos = document.getElementById("panelInfos");
+  const panelPay = document.getElementById("panelPay");
 
-  // Infos
+  // Infos form
   const infoForm = document.getElementById("infoForm");
   const publishBtn = document.getElementById("publishBtn");
   const adminStatus = document.getElementById("adminStatus");
   const infosCount = document.getElementById("infosCount");
   const infosList = document.getElementById("infosList");
 
-  let unsubscribeInfos = null;
-
-  // Paiements
-  const authState = document.getElementById("authState");
-  const stepLabel = document.getElementById("stepLabel");
+  // Payments UI
+  const payEtape = document.getElementById("payEtape");
   const qInput = document.getElementById("q");
-  const statusPay = document.getElementById("statusPay");
-  const listPay = document.getElementById("listPay");
-
+  const payStatus = document.getElementById("payStatus");
+  const payList = document.getElementById("payList");
   const c0 = document.getElementById("c0");
   const c1 = document.getElementById("c1");
   const c2 = document.getElementById("c2");
 
-  const step_e1 = document.getElementById("step_e1");
+  let unsubscribeInfos = null;
 
-  // =========================================
-  // LocalStorage keys
-  // =========================================
   const LS_SCOPE_KEY = "admin_scope_last";
-  const LS_GENERAL_TAB = "admin_general_tab"; // infos | pay
-  const LS_PAY_STEP = "admin_pay_step"; // e1
+  const LS_GENERAL_TAB = "challenge_admin_general_tab";
+  const LS_PAY_ETAPE = "challenge_admin_pay_etape";
 
-  // =========================================
+  // =========================
   // Helpers
-  // =========================================
+  // =========================
   function esc(str){
     return (str || "")
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
@@ -472,25 +413,6 @@
         hour:"2-digit", minute:"2-digit"
       });
     }catch{ return "—"; }
-  }
-
-  function fmtUpdated(ts){
-    try{
-      const d = ts?.toDate ? ts.toDate() : null;
-      if(!d) return "—";
-      return d.toLocaleString("fr-FR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }catch{
-      return "—";
-    }
-  }
-
-  function dotClass(paidCount){
-    if(paidCount >= 2) return "green";
-    if(paidCount === 1) return "orange";
-    return "red";
-  }
-  function label(paidCount){
-    return paidCount >= 2 ? "Payé" : paidCount === 1 ? "Partiel" : "Non payé";
   }
 
   function stopInfos(){
@@ -541,6 +463,7 @@
         infosList.appendChild(card);
       }
 
+      // delete
       infosList.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.del;
@@ -550,6 +473,7 @@
         };
       });
 
+      // edit via prompt (simple)
       infosList.querySelectorAll("button[data-edit]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.edit;
@@ -572,209 +496,110 @@
     });
   }
 
-  // =========================================
-  // Général — Sous-onglets
-  // =========================================
   function showGeneralTab(which){
     const isInfos = which === "infos";
-    tabGenInfos.setAttribute("aria-selected", isInfos ? "true" : "false");
-    tabGenPay.setAttribute("aria-selected", isInfos ? "false" : "true");
 
-    panelGenInfos.style.display = isInfos ? "block" : "none";
-    panelGenPay.style.display   = isInfos ? "none" : "block";
+    tabInfos.setAttribute("aria-selected", isInfos ? "true":"false");
+    tabPayments.setAttribute("aria-selected", !isInfos ? "true":"false");
+
+    panelInfos.style.display = isInfos ? "block" : "none";
+    panelPay.style.display = !isInfos ? "block" : "none";
 
     try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
 
-    if(isInfos){
-      startInfos();
-    }else{
-      stopInfos();
-      // Paiements: on render dès qu'on a les snapshots
-      renderPay();
-    }
+    // Infos live only when visible
+    if(isInfos) startInfos();
+    else stopInfos();
   }
 
-  tabGenInfos.addEventListener("click", ()=> showGeneralTab("infos"));
-  tabGenPay.addEventListener("click", ()=> showGeneralTab("pay"));
+  tabInfos.addEventListener("click", ()=>showGeneralTab("infos"));
+  tabPayments.addEventListener("click", ()=>showGeneralTab("pay"));
 
-  // =========================================
-  // Zone Tabs (scope)
-  // =========================================
-  function makeDisabledBtn(label, reason){
-    const a = document.createElement("a");
-    a.className = "btn disabled";
-    a.href = "#";
-    a.setAttribute("aria-disabled","true");
-    a.textContent = label;
-    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
-    return a;
-  }
-
-  function setTabs(scope){
-    tabsEl.innerHTML = "";
-    panelGeneral.style.display = "none";
-    stopInfos();
-
-    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
-
-    if(scope === "general"){
-      hintEl.textContent = "🌐 Zone Général : infos + paiements.";
-      panelGeneral.style.display = "block";
-
-      // petit “onglet” zone (UI)
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = "#";
-      a.textContent = "🌐 Général";
-      a.onclick = (e)=>{ e.preventDefault(); };
-      tabsEl.appendChild(a);
-
-      // restore sous-onglet
-      let t = "infos";
-      try{
-        const saved = localStorage.getItem(LS_GENERAL_TAB);
-        if(saved === "pay" || saved === "infos") t = saved;
-      }catch(e){}
-      showGeneralTab(t);
-      return;
-    }
-
-    // Zone Étape
-    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats / vérification / classement / RAZ.";
-
-    const links = [
-      ["👥 Équipes",        "equipes.html"],
-      ["📝 Inscriptions",   "inscriptions.html"],
-      ["🔎 Vérification",   "verification.html"],
-      ["🎲 Tirage",         "tirage.html"],
-      ["📅 Programmation",  "programmation.html"],
-      ["🏁 Résultats",      "resultats.html"],
-      ["🏆 Classement",     "classement.html"],
-      ["🧨 RAZ",            "raz.html"],
-    ];
-
-    if(scope !== "etape5"){
-      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
-    }else{
-      tabsEl.appendChild(
-        makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test).")
-      );
-    }
-
-    for(const [label, url] of links){
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
-      a.textContent = label;
-      tabsEl.appendChild(a);
-    }
-  }
-
-  // =========================================
-  // Publish infos
-  // =========================================
-  infoForm.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    publishBtn.disabled = true;
-    publishBtn.classList.add("disabled");
-    adminStatus.textContent = "Publication…";
-    try{
-      const title = (infoForm.infoTitle.value || "").trim();
-      const text  = (infoForm.infoText.value || "").trim();
-      if(!title || !text) throw new Error("Titre et texte obligatoires.");
-
-      await addDoc(collection(db, COL_INFOS), { title, text, createdAt: serverTimestamp() });
-      infoForm.reset();
-      adminStatus.textContent = "✅ Publié !";
-    }catch(err){
-      console.error(err);
-      adminStatus.textContent = "❌ Erreur : " + (err?.message || "Impossible de publier.");
-    }finally{
-      publishBtn.disabled = false;
-      publishBtn.classList.remove("disabled");
-    }
-  });
-
-  // =========================================
-  // Logout
-  // =========================================
-  document.getElementById("btnLogout").onclick = async (e)=>{
-    e.preventDefault();
-    await logout();
-    window.location.href = "../index.html";
-  };
-
-  // =========================================
-  // Guard
-  // =========================================
-  async function showDenied(){
-    accessDenied.style.display = "block";
-    adminUI.style.display = "none";
-    panelGeneral.style.display = "none";
-    stopInfos();
-  }
-
-  async function showAdmin(){
-    accessDenied.style.display = "none";
-    adminUI.style.display = "block";
-
-    try{
-      const saved = localStorage.getItem(LS_SCOPE_KEY);
-      if(saved && [...scopeEl.options].some(o => o.value === saved)){
-        scopeEl.value = saved;
-      }
-    }catch(e){}
-
-    setTabs(scopeEl.value);
-    scopeEl.onchange = ()=> setTabs(scopeEl.value);
-  }
-
-  // =========================================
-  // Paiements (Challenge) — DATA
-  // =========================================
-  let payStep = "e1"; // uniquement e1 pour l’instant
+  // =========================
+  // Paiements (Général)
+  // =========================
   let queryText = "";
-
   let snapTeams = null;
   let snapPay = null;
 
-  // snapshots handles
   let unsubTeams = null;
   let unsubPay = null;
 
-  function setPayStep(next){
-    if(next !== "e1") return; // pour l’instant
-    payStep = next;
-
-    // UI
-    step_e1.setAttribute("aria-selected", payStep === "e1" ? "true" : "false");
-    stepLabel.textContent = "Étape 1";
-
-    try{ localStorage.setItem(LS_PAY_STEP, payStep); }catch(e){}
-
-    // (re)subscribe
-    subscribePay();
+  function dotClass(paidCount){
+    if(paidCount >= 2) return "green";
+    if(paidCount === 1) return "orange";
+    return "red";
   }
 
-  step_e1.addEventListener("click", ()=> setPayStep("e1"));
+  function label(paidCount){
+    return paidCount >= 2 ? "Payé" : paidCount === 1 ? "Partiel" : "Non payé";
+  }
 
-  qInput.addEventListener("input", ()=>{
-    queryText = (qInput.value || "").trim().toLowerCase();
-    renderPay();
-  });
+  function fmtUpdated(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "—";
+      return d.toLocaleString("fr-FR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }catch{
+      return "—";
+    }
+  }
 
-  function buildRows(){
-    if(!snapTeams || !snapPay) return null;
+  function stopPaymentsSubs(){
+    if(unsubTeams){ unsubTeams(); unsubTeams = null; }
+    if(unsubPay){ unsubPay(); unsubPay = null; }
+    snapTeams = null;
+    snapPay = null;
+  }
+
+  function startPaymentsSubs(etapeId){
+    stopPaymentsSubs();
+
+    const teamsCol = TEAM_COLLECTION_BY_ETAPE[etapeId];
+    if(!teamsCol){
+      payStatus.textContent = "Étape inconnue.";
+      return;
+    }
+
+    payStatus.textContent = "Chargement…";
+    payList.innerHTML = "";
+
+    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
+    const qPays = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+
+    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; renderPayments(etapeId); },
+      (e)=>{ console.error(e); payStatus.textContent = "🔴 Erreur équipes"; });
+
+    // paiements peuvent être vides au début -> on accepte snapPay=null
+    unsubPay = onSnapshot(qPays, (s)=>{ snapPay = s; renderPayments(etapeId); },
+      (e)=>{ console.error(e); snapPay = null; renderPayments(etapeId); });
+  }
+
+  async function setPaid(etapeId, teamDocId, who, paid){
+    const payId = `${etapeId}_${teamDocId}`;
+    const ref = doc(db, COL_PAYMENTS, payId);
+    const payload = { updatedAt: serverTimestamp() };
+    payload[who === "p1" ? "p1Paid" : "p2Paid"] = paid;
+    await setDoc(ref, payload, { merge: true });
+  }
+
+  function renderPayments(etapeId){
+    if(!snapTeams){
+      payStatus.textContent = "Chargement…";
+      return;
+    }
 
     const payMap = new Map();
-    snapPay.forEach(d=>{
-      const x = d.data() || {};
-      payMap.set(d.id, {
-        p1Paid: x.p1Paid === true,
-        p2Paid: x.p2Paid === true,
-        updatedAt: x.updatedAt || null
+    if(snapPay){
+      snapPay.forEach(d=>{
+        const x = d.data() || {};
+        payMap.set(d.id, {
+          p1Paid: x.p1Paid === true,
+          p2Paid: x.p2Paid === true,
+          updatedAt: x.updatedAt || null
+        });
       });
-    });
+    }
 
     const rows = [];
     snapTeams.forEach(d=>{
@@ -785,13 +610,12 @@
       const p1 = (x.p1FirstName || "").trim();
       const p2 = (x.p2FirstName || "").trim();
 
-      const payId = `${payStep}_${d.id}`; // ex: e1_<teamDocId>
+      const payId = `${etapeId}_${d.id}`;
       const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false, updatedAt:null };
       const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
 
       rows.push({
         teamDocId: d.id,
-        payId,
         teamName,
         p1, p2,
         p1Paid: pay.p1Paid,
@@ -801,33 +625,11 @@
       });
     });
 
-    return rows;
-  }
-
-  function matches(r){
-    if(!queryText) return true;
-    const hay = `${r.teamName} ${r.p1} ${r.p2}`.toLowerCase();
-    return hay.includes(queryText);
-  }
-
-  async function setPaid(payId, who, paid){
-    const ref = doc(db, COL_PAYMENTS, payId);
-    const payload = { updatedAt: serverTimestamp() };
-    payload[who === "p1" ? "p1Paid" : "p2Paid"] = paid;
-    await setDoc(ref, payload, { merge: true });
-  }
-
-  function renderPay(){
-    // si pas visible, inutile de bosser
-    if(panelGenPay.style.display === "none") return;
-
-    const rows = buildRows();
-    if(!rows){
-      statusPay.textContent = "Chargement…";
-      return;
-    }
-
-    const filtered = rows.filter(matches);
+    const filtered = rows.filter(r=>{
+      if(!queryText) return true;
+      const hay = `${r.teamName} ${r.p1} ${r.p2}`.toLowerCase();
+      return hay.includes(queryText);
+    });
 
     // stats
     let n0=0, n1=0, n2=0;
@@ -840,28 +642,29 @@
     c1.textContent = String(n1);
     c2.textContent = String(n2);
 
-    // tri
+    // sort: 0 -> 1 -> 2 then teamName
     filtered.sort((a,b)=>{
       if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
       return (a.teamName||"").localeCompare((b.teamName||""), "fr");
     });
 
-    statusPay.textContent = `🟢 En direct — ${filtered.length} équipe(s)`;
+    payStatus.textContent = `🟢 En direct — ${filtered.length} équipe(s) — ${esc(etapeId)}`;
 
     if(filtered.length === 0){
-      listPay.innerHTML = `<p class="muted" style="margin:0;">Aucun résultat.</p>`;
+      payList.innerHTML = `<p class="muted" style="margin:0;">Aucun résultat.</p>`;
       return;
     }
 
-    listPay.innerHTML = filtered.map(r=>{
+    payList.innerHTML = filtered.map(r=>{
       const dot = dotClass(r.paidCount);
       const lab = label(r.paidCount);
+
       const p1Name = r.p1 || "—";
       const p2Name = r.p2 || "—";
       const meta = `Dernière mise à jour : ${esc(fmtUpdated(r.updatedAt))}`;
 
       return `
-        <div class="pay-card" data-payid="${esc(r.payId)}">
+        <div class="pay-card" data-teamid="${esc(r.teamDocId)}">
           <div class="pay-head">
             <div class="pay-team">${esc(r.teamName)}</div>
             <div class="badge" title="${esc(lab)}">
@@ -891,7 +694,7 @@
           </div>
 
           <div class="meta">
-            <small class="muted">Étape ${esc(payStep.toUpperCase())} • id: ${esc(r.teamDocId)}</small>
+            <small class="muted">id: ${esc(r.teamDocId)}</small>
             <small class="muted">${meta}</small>
           </div>
         </div>
@@ -899,19 +702,19 @@
     }).join("");
 
     // bind toggles
-    listPay.querySelectorAll("button[data-who]").forEach(btn=>{
+    payList.querySelectorAll("button[data-who]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         const card = btn.closest(".pay-card");
-        const payId = card?.dataset?.payid;
+        const teamId = card?.dataset?.teamid;
         const who = btn.dataset.who;
         const next = btn.dataset.next === "1";
 
         btn.disabled = true;
         try{
-          await setPaid(payId, who, next);
+          await setPaid(etapeId, teamId, who, next);
         }catch(e){
           console.error(e);
-          alert("❌ Erreur : impossible d’enregistrer.");
+          alert("❌ Erreur : impossible d’enregistrer (rules / droits ?).");
         }finally{
           btn.disabled = false;
         }
@@ -919,55 +722,188 @@
     });
   }
 
-  function unsubscribePay(){
-    if(unsubTeams){ unsubTeams(); unsubTeams=null; }
-    if(unsubPay){ unsubPay(); unsubPay=null; }
-    snapTeams = null;
-    snapPay = null;
+  qInput.addEventListener("input", ()=>{
+    queryText = (qInput.value || "").trim().toLowerCase();
+    renderPayments(payEtape.value);
+  });
+
+  payEtape.addEventListener("change", ()=>{
+    const eId = payEtape.value;
+    try{ localStorage.setItem(LS_PAY_ETAPE, eId); }catch(e){}
+    startPaymentsSubs(eId);
+  });
+
+  // =========================
+  // Tabs (Zone selector)
+  // =========================
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
   }
 
-  function subscribePay(){
-    unsubscribePay();
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+    panelGeneral.style.display = "none";
 
-    // Teams snapshot (selon étape)
-    const teamsCol = (payStep === "e1") ? COL_TEAMS_E1_PUBLIC : COL_TEAMS_E1_PUBLIC;
+    // mémorise la zone
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
 
-    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
-    const qPay   = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+    if(scope === "general"){
+      hintEl.textContent = "🌐 Zone Général : infos + paiements.";
+      panelGeneral.style.display = "block";
 
-    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; renderPay(); }, (e)=>{ console.error(e); statusPay.textContent="🔴 Erreur équipes"; });
-    unsubPay   = onSnapshot(qPay,   (s)=>{ snapPay = s; renderPay(); }, (e)=>{ console.error(e); statusPay.textContent="🔴 Erreur paiements"; });
+      // “onglet” actuel sur la ligne de boutons
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = "#";
+      a.textContent = "🌐 Général";
+      a.onclick = (e)=> e.preventDefault();
+      tabsEl.appendChild(a);
+
+      // restore subtabs (infos / pay)
+      try{
+        const savedTab = localStorage.getItem(LS_GENERAL_TAB);
+        showGeneralTab(savedTab === "pay" ? "pay" : "infos");
+      }catch(e){
+        showGeneralTab("infos");
+      }
+
+      // restore etape for payments + start subs if panel visible
+      try{
+        const savedEtape = localStorage.getItem(LS_PAY_ETAPE);
+        if(savedEtape && payEtape.querySelector(`option[value="${savedEtape}"]`) && !payEtape.querySelector(`option[value="${savedEtape}"]`).disabled){
+          payEtape.value = savedEtape;
+        }
+      }catch(e){}
+
+      // start payments listeners only if pay visible
+      if(panelPay.style.display !== "none"){
+        startPaymentsSubs(payEtape.value);
+      } else {
+        stopPaymentsSubs();
+      }
+
+      return;
+    }
+
+    // Zone Étape (liens)
+    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats / vérification / classement / RAZ.";
+
+    const links = [
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ["🔎 Vérification",   "verification.html"],
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
+      ["🧨 RAZ",            "raz.html"],
+    ];
+
+    if(scope !== "etape5"){
+      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
+    }else{
+      tabsEl.appendChild(
+        makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test).")
+      );
+    }
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+      tabsEl.appendChild(a);
+    }
+
+    // en quittant général, on coupe les subs infos/paiements
+    stopInfos();
+    stopPaymentsSubs();
   }
 
-  // =========================================
-  // INIT
-  // =========================================
-  const g = await requireRole(["admin"]);
+  // Publish infos
+  infoForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    publishBtn.disabled = true;
+    publishBtn.classList.add("disabled");
+    adminStatus.textContent = "Publication…";
+    try{
+      const title = (infoForm.infoTitle.value || "").trim();
+      const text  = (infoForm.infoText.value || "").trim();
+      if(!title || !text) throw new Error("Titre et texte obligatoires.");
+
+      await addDoc(collection(db, COL_INFOS), { title, text, createdAt: serverTimestamp() });
+      infoForm.reset();
+      adminStatus.textContent = "✅ Publié !";
+    }catch(err){
+      console.error(err);
+      adminStatus.textContent = "❌ Erreur : " + (err?.message || "Impossible de publier.");
+    }finally{
+      publishBtn.disabled = false;
+      publishBtn.classList.remove("disabled");
+    }
+  });
+
+  // Logout
+  document.getElementById("btnLogout").onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+    window.location.href = "../index.html";
+  };
+
+  async function showDenied(){
+    accessDenied.style.display = "block";
+    adminUI.style.display = "none";
+    panelGeneral.style.display = "none";
+    stopInfos();
+    stopPaymentsSubs();
+  }
+
+  async function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+
+    // restore scope
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved && [...scopeEl.options].some(o => o.value === saved)){
+        scopeEl.value = saved;
+      }
+    }catch(e){}
+
+    setTabs(scopeEl.value);
+    scopeEl.onchange = ()=> setTabs(scopeEl.value);
+  }
+
+  // Guard (admin only)
+  const g = await requireRole(["admin","jat"]);
   if(!g.ok){ await showDenied(); }
   else { await showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ await showDenied(); return; }
-    const g2 = await requireRole(["admin"]);
+    const g2 = await requireRole(["admin","jat"]);
     if(!g2.ok){ await showDenied(); return; }
   });
 
-  // Affichage “connecté”
-  onAuthStateChanged(auth, (user)=>{
-    authState.textContent = user ? ("🟢 Admin : " + user.email) : "Non connecté";
-  });
-
-  // Restore étape (paiements)
-  try{
-    const savedStep = localStorage.getItem(LS_PAY_STEP);
-    if(savedStep === "e1") payStep = "e1";
-  }catch(e){}
-  setPayStep(payStep);
-
-  // Subscriptions paiements : seulement si onglet Paiements visible.
-  // (Sinon on les lancera au moment d’ouvrir l’onglet)
-  // Ici, on laisse setPayStep() préparer, et showGeneralTab("pay") fera render.
-  subscribePay();
+  // Quand on bascule manuellement entre Infos/Paiements, on (re)branche les snapshots
+  const origShowGeneralTab = showGeneralTab;
+  function showGeneralTabPatched(which){
+    origShowGeneralTab(which);
+    if(which === "pay"){
+      startPaymentsSubs(payEtape.value);
+    }else{
+      stopPaymentsSubs();
+    }
+  }
+  // remplace les handlers pour inclure start/stop
+  tabInfos.onclick = ()=>showGeneralTabPatched("infos");
+  tabPayments.onclick = ()=>showGeneralTabPatched("pay");
 </script>
 
 </body>
