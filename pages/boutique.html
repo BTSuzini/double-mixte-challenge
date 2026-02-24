@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boutique — Double Mixte Challenge</title>
   <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+
   <style>
     .note{
       border:1px solid #eee;
@@ -14,6 +15,144 @@
       line-height:1.55;
     }
     .small{ font-size:14px; }
+
+    /* =========================
+       Subtabs (2 boutons)
+    ========================== */
+    .subtabs{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .subtab{
+      appearance:none;
+      border:1px solid #ddd;
+      background:#fafafa;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:900;
+      cursor:pointer;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .subtab[aria-selected="true"]{
+      background:#fff;
+      border-color:#cfcfcf;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+
+    /* =========================
+       Paiements
+    ========================== */
+    .pay-top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-end;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+    .pay-top .field{
+      margin:0;
+      flex: 1 1 240px;
+      min-width: 220px;
+    }
+
+    .pay-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .pay-card{
+      border:1px solid #eee;
+      border-radius:16px;
+      background:#fff;
+      padding:12px 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.04);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+    .pay-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-width:0;
+    }
+    .pay-team{
+      font-weight:900;
+      font-size:16px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:900;
+      border:1px solid #eee;
+      background:#fafafa;
+      white-space:nowrap;
+      flex: 0 0 auto;
+    }
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+      background:#bbb;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+    }
+    .dot.red{ background:#e74c3c; }
+    .dot.orange{ background:#f39c12; }
+    .dot.green{ background:#2ecc71; }
+
+    .players{
+      display:grid;
+      gap:8px;
+    }
+    .player-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid #f0f0f0;
+      background:#fbfbfb;
+      border-radius:12px;
+      padding:10px 10px;
+      min-width:0;
+    }
+    .player-name{
+      font-weight:800;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+    .player-right{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      flex: 0 0 auto;
+      font-weight:900;
+      color:#111;
+    }
+
+    .mutedline{ margin:10px 0 0; }
+
+    @media (max-width: 420px){
+      .player-row{ padding:9px 9px; }
+      .pay-team{ font-size:15px; }
+      .badge{ padding:6px 9px; font-size:13px; }
+    }
   </style>
 </head>
 <body>
@@ -33,32 +172,35 @@
     </div>
 
     <nav class="nav">
-      <!-- 1) Accueil : emoji seul -->
       <a href="../index.html">🏠</a>
-
-      <!-- 2) Règlement -->
       <a href="reglement.html">📘 Règlement</a>
-
-      <!-- 3) Classement -->
       <a href="classement.html">🏆 Classement</a>
-
-      <!-- 4) Boutique (actif) -->
       <a href="boutique.html" aria-current="page">🛍️ Boutique</a>
-
-      <!-- 5) Infos -->
       <a href="infos.html">📰 Infos</a>
-
-      <!-- 6) Contact -->
       <a href="contact.html">📩 📞</a>
     </nav>
   </div>
 </header>
-  
+
 <main class="container">
 
   <section class="card">
-    <h2>🛒 Boutique / Paiement</h2>
+    <h2 style="margin-bottom:6px;">🛒 Boutique / Paiement</h2>
 
+    <div class="subtabs" role="tablist" aria-label="Boutique / Paiements">
+      <button class="subtab" id="tabShop" type="button" aria-selected="true">🛍️ Boutique</button>
+      <button class="subtab" id="tabPaid" type="button" aria-selected="false">✅ Paiements effectués</button>
+    </div>
+
+    <p class="muted mutedline" id="paidHint" style="display:none;">
+      Affichage en direct. Le statut “payé / pas payé” est mis à jour par l’organisation.
+    </p>
+  </section>
+
+  <!-- ======================
+        ONGLET 1 — BOUTIQUE
+  ======================= -->
+  <section class="card" id="panelShop">
     <div class="note">
       <p style="margin:0 0 10px;">
         Paiement des inscriptions via <b>SumUp</b> (ouverture via le bouton ci-dessous).
@@ -68,7 +210,7 @@
         <li>ou <b>par personne : 10€</b></li>
       </ul>
       <p class="muted small" style="margin:0;">
-        Astuce : vérifiez avant que votre partenaire n'a pas déjà réglé 😜 
+        Astuce : vérifiez avant que votre partenaire n'a pas déjà réglé 😜
       </p>
     </div>
 
@@ -83,14 +225,279 @@
       >
         🔗 Ouvrir la boutique SumUp
       </a>
+    </div>
+  </section>
 
-      
+  <!-- ======================
+        ONGLET 2 — PAIEMENTS
+  ======================= -->
+  <section class="card" id="panelPaid" style="display:none;">
+    <h2 style="margin:0;">✅ Paiements effectués</h2>
+    <p class="muted" style="margin:8px 0 0;">
+      Tri : <b>non payé</b> → <b>partiel</b> → <b>payé</b>.
+    </p>
+
+    <div class="pay-top">
+      <div class="field">
+        <label for="paidEtape">Étape</label>
+        <select id="paidEtape">
+          <option value="etape1">🎾 Étape 1</option>
+          <option value="etape2" disabled>🎾 Étape 2 (plus tard)</option>
+          <option value="etape3" disabled>🎾 Étape 3 (plus tard)</option>
+          <option value="etape4" disabled>🎾 Étape 4 (plus tard)</option>
+          <option value="etape5" disabled>🧪 Étape 5 (test) (plus tard)</option>
+        </select>
+      </div>
     </div>
 
-   
+    <p class="muted" id="paidStatus" style="margin:10px 0 0;">Chargement…</p>
+    <div id="payList" class="pay-list" aria-label="Liste des paiements"></div>
   </section>
 
 </main>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // =========================
+  // CONFIG FIRESTORE
+  // =========================
+  const COL_PAYMENTS = "paiements_challenge"; // docId = `${etapeId}_${teamDocId}`
+
+  const TEAM_COLLECTION_BY_ETAPE = {
+    etape1: "equipes_etape1_public",
+    etape2: "equipes_etape2_public",
+    etape3: "equipes_etape3_public",
+    etape4: "equipes_etape4_public",
+    etape5: "equipes_etape5_public",
+  };
+
+  // =========================
+  // TABS
+  // =========================
+  const tabShop = document.getElementById("tabShop");
+  const tabPaid = document.getElementById("tabPaid");
+  const panelShop = document.getElementById("panelShop");
+  const panelPaid = document.getElementById("panelPaid");
+  const paidHint = document.getElementById("paidHint");
+
+  function showShop(){
+    tabShop.setAttribute("aria-selected","true");
+    tabPaid.setAttribute("aria-selected","false");
+    panelShop.style.display = "block";
+    panelPaid.style.display = "none";
+    paidHint.style.display = "none";
+    try{ localStorage.setItem("challenge_boutique_tab","shop"); }catch(e){}
+  }
+
+  function showPaid(){
+    tabShop.setAttribute("aria-selected","false");
+    tabPaid.setAttribute("aria-selected","true");
+    panelShop.style.display = "none";
+    panelPaid.style.display = "block";
+    paidHint.style.display = "block";
+    try{ localStorage.setItem("challenge_boutique_tab","paid"); }catch(e){}
+  }
+
+  tabShop.addEventListener("click", showShop);
+  tabPaid.addEventListener("click", showPaid);
+
+  try{
+    const saved = localStorage.getItem("challenge_boutique_tab");
+    if(saved === "paid") showPaid(); else showShop();
+  }catch(e){
+    showShop();
+  }
+
+  // =========================
+  // UI PAIEMENTS
+  // =========================
+  const payList = document.getElementById("payList");
+  const paidStatus = document.getElementById("paidStatus");
+  const paidEtape = document.getElementById("paidEtape");
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function statusDotClass(paidCount){
+    if(paidCount >= 2) return "green";
+    if(paidCount === 1) return "orange";
+    return "red";
+  }
+
+  function statusLabel(paidCount){
+    return paidCount >= 2 ? "Payé"
+      : paidCount === 1 ? "Partiel"
+      : "Non payé";
+  }
+
+  function paidIcon(isPaid){
+    return isPaid ? "✅" : "❌";
+  }
+
+  // =========================
+  // DATA (Teams + Payments)
+  // =========================
+  let snapTeams = null;
+  let snapPay = null;
+
+  let unsubTeams = null;
+  let unsubPay = null;
+
+  function stopSubs(){
+    if(unsubTeams){ unsubTeams(); unsubTeams = null; }
+    if(unsubPay){ unsubPay(); unsubPay = null; }
+    snapTeams = null;
+    snapPay = null;
+  }
+
+  function startSubs(etapeId){
+    stopSubs();
+
+    const teamsCol = TEAM_COLLECTION_BY_ETAPE[etapeId];
+    if(!teamsCol){
+      paidStatus.textContent = "Étape inconnue.";
+      return;
+    }
+
+    paidStatus.textContent = "Chargement…";
+    payList.innerHTML = "";
+
+    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
+    const qPay = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+
+    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; rebuild(etapeId); }, (e)=>{ console.error(e); paidStatus.textContent="🔴 Erreur équipes"; });
+    // paiements peut être vide => on tolère snapPay=null
+    unsubPay = onSnapshot(qPay, (s)=>{ snapPay = s; rebuild(etapeId); }, (e)=>{ console.error(e); snapPay = null; rebuild(etapeId); });
+  }
+
+  function rebuild(etapeId){
+    if(!snapTeams){
+      paidStatus.textContent = "Chargement…";
+      return;
+    }
+
+    const payMap = new Map(); // id -> {p1Paid,p2Paid}
+    if(snapPay){
+      snapPay.forEach(d=>{
+        const x = d.data() || {};
+        payMap.set(d.id, {
+          p1Paid: x.p1Paid === true,
+          p2Paid: x.p2Paid === true
+        });
+      });
+    }
+
+    const teams = [];
+
+    snapTeams.forEach(d=>{
+      const x = d.data() || {};
+      const teamName = (x.teamName || "").trim();
+      const p1 = (x.p1FirstName || "").trim();
+      const p2 = (x.p2FirstName || "").trim();
+      if(!teamName) return;
+
+      const payId = `${etapeId}_${d.id}`;
+      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false };
+
+      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
+
+      teams.push({
+        payId,
+        teamName,
+        p1, p2,
+        p1Paid: pay.p1Paid,
+        p2Paid: pay.p2Paid,
+        paidCount
+      });
+    });
+
+    teams.sort((a,b)=>{
+      if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
+      return (a.teamName||"").localeCompare((b.teamName||""), "fr");
+    });
+
+    paidStatus.textContent = `🟢 En direct — ${teams.length} équipe(s) — ${esc(etapeId)}`;
+
+    if(teams.length === 0){
+      payList.innerHTML = `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
+      return;
+    }
+
+    payList.innerHTML = teams.map(t=>{
+      const dot = statusDotClass(t.paidCount);
+      const label = statusLabel(t.paidCount);
+
+      const p1Name = t.p1 || "—";
+      const p2Name = t.p2 || "—";
+
+      return `
+        <div class="pay-card">
+          <div class="pay-head">
+            <div class="pay-team">${esc(t.teamName)}</div>
+            <div class="badge" title="${esc(label)}">
+              <span class="dot ${dot}"></span>
+              ${esc(label)}
+            </div>
+          </div>
+
+          <div class="players">
+            <div class="player-row">
+              <div class="player-name">${esc(p1Name)}</div>
+              <div class="player-right">${paidIcon(t.p1Paid)}</div>
+            </div>
+
+            <div class="player-row">
+              <div class="player-name">${esc(p2Name)}</div>
+              <div class="player-right">${paidIcon(t.p2Paid)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Restore étape selection
+  try{
+    const savedEtape = localStorage.getItem("challenge_boutique_paid_etape");
+    if(savedEtape && paidEtape.querySelector(`option[value="${savedEtape}"]`) && !paidEtape.querySelector(`option[value="${savedEtape}"]`).disabled){
+      paidEtape.value = savedEtape;
+    }
+  }catch(e){}
+
+  paidEtape.addEventListener("change", ()=>{
+    try{ localStorage.setItem("challenge_boutique_paid_etape", paidEtape.value); }catch(e){}
+    startSubs(paidEtape.value);
+  });
+
+  // Start watchers when Paid tab is visible
+  const origShowPaid = showPaid;
+  function showPaidPatched(){
+    origShowPaid();
+    startSubs(paidEtape.value);
+  }
+  tabPaid.removeEventListener("click", showPaid);
+  tabPaid.addEventListener("click", showPaidPatched);
+
+  // If page opens already on paid tab
+  try{
+    const saved = localStorage.getItem("challenge_boutique_tab");
+    if(saved === "paid"){
+      startSubs(paidEtape.value);
+    }
+  }catch(e){}
+
+</script>
 
 </body>
 </html>
