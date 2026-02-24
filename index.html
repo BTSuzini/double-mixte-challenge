@@ -30,14 +30,12 @@
 
     <!-- ===== NAVIGATION ===== -->
     <nav class="nav nav-general">
-
       <a href="index.html" aria-current="page">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
       <a href="pages/classement.html">🏆 Classement</a>
       <a href="pages/boutique.html">🛍️ Boutique</a>
       <a href="pages/infos.html">📰 Infos</a>
       <a href="pages/contact.html">📩 📞</a>
-
     </nav>
 
   </div>
@@ -121,33 +119,24 @@
   filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
 }
 
-/* ===== NAVIGATION RESPONSIVE JUSTIFIÉE ===== */
+/* ===== NAVIGATION 2 LIGNES FIXES ===== */
 
 .nav-general{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px 10px;
-  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .nav-general a{
-  flex: 1 1 calc(33.333% - 10px);
   text-align: center;
   padding: 10px 12px;
 }
 
-/* Mobile moyen */
-@media (max-width: 520px){
-  .nav-general a{
-    flex: 1 1 calc(50% - 10px);
-  }
-}
-
-/* Petit mobile */
-@media (max-width: 360px){
-  .nav-general a{
-    flex: 1 1 100%;
+/* Petit écran extrême */
+@media (max-width: 340px){
+  .nav-general{
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
