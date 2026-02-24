@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260223b" />
 </head>
 <body>
 
@@ -15,7 +15,6 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ Image au centre -->
       <div class="step-title-wrap" aria-label="Étape 1">
         <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
       </div>
@@ -25,7 +24,6 @@
       </div>
     </div>
 
-    <!-- ✅ Nav Étape 1 -->
     <nav class="nav nav-step">
       <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
       <a href="inscriptions.html">📝 Inscriptions</a>
@@ -39,7 +37,7 @@
 
 <main class="container">
 
-  <!-- 1) ✅ ÉTAT DU TIRAGE (inchangé dans l’esprit) -->
+  <!-- 1) État -->
   <section class="card">
     <h2 style="margin:0 0 10px;">🎲 Tirage au sort</h2>
     <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
@@ -53,44 +51,36 @@
     <p class="muted" id="validatedAt" style="margin-top:6px;"></p>
   </section>
 
-  <!-- 2) 🎰 ROULETTE -->
+  <!-- 2) Roulette -->
   <section class="card" id="panelRoulette" style="display:none;">
     <h2 style="margin:0 0 10px;">🎰 Roulette</h2>
     <div class="roulette-wheel" id="wheel">—</div>
     <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
   </section>
 
-  <!-- 3) 📋 MATCHS (QF) — 1 ligne par match, sans scroll horizontal -->
+  <!-- 3) Matchs -->
   <section class="card" id="panelMatches" style="display:none;">
-    <h2 style="margin:0 0 10px;">📋 Quarts de finale</h2>
-    <p class="muted" style="margin:0 0 10px;">
-      TS1 et TS2 sont placées. Les équipes révélées se placent au fil du tirage.
-    </p>
-
+    <h2 style="margin:0 0 8px;">📋 Quarts de finale</h2>
     <div id="matchesList" class="matches-list"></div>
-
-    <p class="muted" style="margin-top:10px;">
-      Rappel : 1ère tirée vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.
-    </p>
   </section>
 
-  <!-- 4) 📥 URNE -->
+  <!-- 4) Urne -->
   <section class="card" id="panelUrne" style="display:none;">
-    <h2 style="margin:0 0 10px;">📥 Urne (équipes restantes)</h2>
+    <h2 style="margin:0 0 10px;">📥 Urne</h2>
     <div id="urneList" style="display:grid; gap:8px;"></div>
   </section>
 
-  <!-- 5) 🏷️ TÊTES DE SÉRIE -->
+  <!-- 5) Seeds -->
   <section class="card" id="panelSeeds" style="display:none;">
     <h2 style="margin:0 0 10px;">🏷️ Têtes de série</h2>
 
     <div class="grid">
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ Tête de série #1</div>
+        <div style="font-weight:1000;">🏷️ TS #1</div>
         <div class="muted" id="seed1">—</div>
       </div>
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ Tête de série #2</div>
+        <div style="font-weight:1000;">🏷️ TS #2</div>
         <div class="muted" id="seed2">—</div>
       </div>
     </div>
@@ -141,23 +131,76 @@
     .step-title-img{ max-height: 74px; }
   }
 
-  /* Roulette */
+  /* ✅ Réduire verticalement les encarts (objectif: roulette + 4 matchs visibles) */
+  #panelRoulette.card, #panelMatches.card{
+    padding:12px;
+  }
+  #panelUrne.card, #panelSeeds.card{
+    padding:12px;
+  }
+  #panelMatches h2{ margin-bottom:8px !important; }
+  #panelRoulette h2{ margin-bottom:10px !important; }
+
+  /* Roulette plus compacte */
   .roulette-wheel{
-    height:68px;
+    height:58px;
     border-radius:14px;
     border:1px solid #e6e6e6;
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:1000;
-    font-size:18px;
+    font-size:17px;
     letter-spacing:.2px;
     background:linear-gradient(180deg,#fff,#fafafa);
     padding:0 10px;
     text-align:center;
   }
+  #wheelSub{ margin-top:6px !important; }
 
-  /* Urne / revealed pills */
+  /* ✅ Matchs compacts, 1 ligne */
+  .matches-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .match-line{
+    border:1px solid #eee;
+    border-radius:12px;
+    background:#fff;
+    padding:8px 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.03);
+  }
+  .match-row{
+    display:grid;
+    grid-template-columns: 1fr 34px 1fr;
+    gap:8px;
+    align-items:center;
+  }
+  .m-team{
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:14px;
+    line-height:1.15;
+  }
+  .m-vs{
+    text-align:center;
+    font-weight:1000;
+    letter-spacing:1px;
+    opacity:.55;
+    font-size:12px;
+  }
+  .m-team.right{ text-align:right; }
+
+  @media (max-width: 360px){
+    .match-row{ grid-template-columns: 1fr 30px 1fr; gap:7px; }
+    .m-team{ font-size:13px; }
+    .roulette-wheel{ height:54px; font-size:16px; }
+  }
+
+  /* ✅ Urne: pas de scroll horizontal (wrap + police adaptée) */
   .pill{
     display:inline-block;
     padding:4px 10px;
@@ -167,47 +210,25 @@
     background:#fafafa;
     white-space:nowrap;
   }
-
-  /* Matchs: 1 ligne, sans scroll */
-  .matches-list{
+  .urne-item{
+    margin:0;
+  }
+  .urne-row{
     display:flex;
-    flex-direction:column;
+    justify-content:space-between;
     gap:10px;
+    align-items:flex-start;
   }
-
-  .match-line{
-    border:1px solid #eee;
-    border-radius:14px;
-    background:#fff;
-    padding:12px;
-    box-shadow: 0 6px 14px rgba(0,0,0,.04);
-  }
-
-  .match-row{
-    display:grid;
-    grid-template-columns: 1fr 40px 1fr;
-    gap:10px;
-    align-items:center;
-  }
-
-  .m-team{
+  .urne-name{
     font-weight:900;
-    white-space:nowrap;
+    font-size:13px;
+    line-height:1.25;
+    min-width:0;
     overflow:hidden;
     text-overflow:ellipsis;
-  }
-
-  .m-vs{
-    text-align:center;
-    font-weight:1000;
-    letter-spacing:2px;
-    opacity:.55;
-  }
-
-  @media (max-width: 360px){
-    .match-row{ grid-template-columns: 1fr 34px 1fr; gap:8px; }
-    .m-vs{ letter-spacing:1px; }
-    .m-team{ font-size:14px; }
+    /* ✅ autorise le retour à la ligne si besoin */
+    white-space:normal;
+    word-break:break-word;
   }
 </style>
 
@@ -336,8 +357,6 @@
     }
 
     const revealed = Number(draw?.revealed || 0);
-
-    // Urne visible en idle + running, cachée quand 6/6
     if(revealed >= 6){
       urneList.innerHTML = `<div class="muted">✅ Urne vide.</div>`;
       return;
@@ -349,11 +368,9 @@
     }
 
     urneList.innerHTML = remainingTeams.map(t => `
-      <div class="card" style="margin:0;">
-        <div style="display:flex;justify-content:space-between;gap:10px; align-items:center;">
-          <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-            <b>${esc(rouletteLabel(t))}</b>
-          </div>
+      <div class="card urne-item">
+        <div class="urne-row">
+          <div class="urne-name">${esc(rouletteLabel(t))}</div>
           <span class="pill">urne</span>
         </div>
       </div>
@@ -363,30 +380,34 @@
   function matchLineHtml(n, A, B){
     return `
       <div class="match-line">
-        <div class="muted" style="margin:0 0 6px; font-weight:800;">Match #${esc(String(n))}</div>
         <div class="match-row">
           <div class="m-team">${esc(teamNameOnly(A))}</div>
           <div class="m-vs">VS</div>
-          <div class="m-team" style="text-align:right;">${esc(teamNameOnly(B))}</div>
+          <div class="m-team right">${esc(teamNameOnly(B))}</div>
         </div>
       </div>
     `;
   }
 
-  function renderMatches(draw){
+  // ✅ IMPORTANT: on rend les matchs à partir de `revealedShownIds` (pas draw.revealed)
+  // => l'équipe n'apparait qu'après la fin de l'animation roulette.
+  function renderMatchesFromShown(draw){
     panelMatches.style.display = "block";
 
     const seed1 = draw?.seed1 || null;
     const seed2 = draw?.seed2 || null;
-    const { revealedTeams } = computeLists(draw);
 
-    // positions (peu importe combien sont révélées)
-    const p1 = revealedTeams[0] || null;
-    const p2 = revealedTeams[1] || null;
-    const p3 = revealedTeams[2] || null;
-    const p4 = revealedTeams[3] || null;
-    const p5 = revealedTeams[4] || null;
-    const p6 = revealedTeams[5] || null;
+    const pool = draw?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+
+    const shownTeams = revealedShownIds.map(id => poolById.get(id)).filter(Boolean);
+
+    const p1 = shownTeams[0] || null;
+    const p2 = shownTeams[1] || null;
+    const p3 = shownTeams[2] || null;
+    const p4 = shownTeams[3] || null;
+    const p5 = shownTeams[4] || null;
+    const p6 = shownTeams[5] || null;
 
     const matches = [
       { n: 1, A: seed1, B: p1 },
@@ -431,7 +452,7 @@
     }
 
     if(st === "pending_validation"){
-      statusText.textContent = "🏁 Tirage fini — en attente de validation par le comité du tournoi.";
+      statusText.textContent = "🏁 Tirage fini — en attente de validation.";
       validatedAtEl.textContent = "";
       return;
     }
@@ -452,31 +473,34 @@
 
     const st = draw?.status || "idle";
 
-    // on affiche toujours nos 4 panneaux publics si draw existe
     panelRoulette.style.display = "block";
     panelMatches.style.display = "block";
     panelUrne.style.display = "block";
     panelSeeds.style.display = "block";
 
-    // idle : juste rendu statique
+    // idle: rendu statique + matches vides (à partir de shownTeams = [])
     if(st !== "running" && st !== "pending_validation" && st !== "validated"){
       wheel.textContent = "—";
       wheelSub.textContent = "—";
 
       renderSeeds(draw);
-      renderMatches(draw);
+
+      // ✅ matches basés sur revealedShownIds (donc vides en idle)
+      renderMatchesFromShown(draw);
 
       const { remainingTeams } = computeLists(draw);
       renderUrne(remainingTeams, draw);
       return;
     }
 
-    const { poolById, revealedIds, remainingTeams } = computeLists(draw);
+    const { revealedIds, remainingTeams } = computeLists(draw);
 
-    // urne toujours à jour
-    renderUrne(remainingTeams, draw);
+    // urne / seeds à jour en continu
     renderSeeds(draw);
-    renderMatches(draw);
+    renderUrne(remainingTeams, draw);
+
+    // matches basés sur shownTeams (pas sur draw.revealed)
+    renderMatchesFromShown(draw);
 
     // rien de nouveau
     if(revealedIds.length <= shownCount){
@@ -487,15 +511,19 @@
 
     while(shownCount < revealedIds.length){
       const id = revealedIds[shownCount];
+
+      // 🔥 Animation roulette d'abord
+      const poolById = new Map((draw?.pool || []).map(x => [x.id, x]));
       const t = poolById.get(id);
 
       await rouletteSpin(rouletteLabel(t), 1300);
 
+      // ✅ seulement APRÈS l'animation: on "valide" l'apparition
       revealedShownIds.push(id);
       shownCount++;
 
-      // re-render (matches se remplissent au fil des révélations)
-      renderMatches(currentDraw);
+      // re-render matches + urne après apparition
+      renderMatchesFromShown(currentDraw);
       const { remainingTeams: rem2 } = computeLists(currentDraw);
       renderUrne(rem2, currentDraw);
     }
@@ -517,27 +545,24 @@
 
     updateStatus(draw);
 
-    const { poolById, revealedIds } = computeLists(draw);
-
     // reset affichage
     shownCount = 0;
     revealedShownIds = [];
     wheel.textContent = "—";
     wheelSub.textContent = "Replay en cours…";
 
-    // en replay: on garde matches + seeds visibles, urne masquée
     panelRoulette.style.display = "block";
     panelMatches.style.display = "block";
     panelSeeds.style.display = "block";
-    panelUrne.style.display = "none";
+    panelUrne.style.display = "none"; // masque urne en replay
 
     renderSeeds(draw);
+    renderMatchesFromShown(draw); // vide
 
-    // matches doivent se remplir au fil des spins
-    // on simule revealed progressif en clonant le draw
-    let tempDraw = JSON.parse(JSON.stringify(draw));
-    tempDraw.revealed = 0;
-    renderMatches(tempDraw);
+    const order = draw.order || [];
+    const revealed = Number(draw.revealed || 0);
+    const revealedIds = order.slice(0, revealed);
+    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
 
     for(let i=0;i<revealedIds.length;i++){
       if(replayAbort) break;
@@ -547,8 +572,10 @@
 
       await rouletteSpin(rouletteLabel(t), 1300);
 
-      tempDraw.revealed = i + 1;
-      renderMatches(tempDraw);
+      // ✅ apparition après animation
+      revealedShownIds.push(id);
+      shownCount = revealedShownIds.length;
+      renderMatchesFromShown(draw);
     }
 
     btnStopReplay.style.display = "none";
@@ -559,12 +586,14 @@
 
     panelUrne.style.display = "block";
     wheelSub.textContent = "✅ Replay terminé";
+
     updateStatus(currentDraw);
 
-    // re-render “vrai” état
-    renderMatches(currentDraw);
+    // re-render réel
     const { remainingTeams } = computeLists(currentDraw);
     renderUrne(remainingTeams, currentDraw);
+    renderSeeds(currentDraw);
+    renderMatchesFromShown(currentDraw);
   }
 
   btnReplay.onclick = async (e)=>{
@@ -595,7 +624,6 @@
       return;
     }
 
-    // Toujours visible en public
     panelRoulette.style.display = "block";
     panelMatches.style.display = "block";
     panelUrne.style.display = "block";
@@ -611,22 +639,33 @@
       btnStopReplay.style.display = "none";
     }
 
-    // rendu statique (seeds/matches/urne)
+    // render seeds/urne toujours
     renderSeeds(currentDraw);
-    renderMatches(currentDraw);
     const { remainingTeams } = computeLists(currentDraw);
     renderUrne(remainingTeams, currentDraw);
 
-    // IDLE: reset roulette
+    // ✅ IDLE: reset "apparitions" + roulette
     if(!replayMode && currentDraw.status === "idle"){
       shownCount = 0;
       revealedShownIds = [];
       wheel.textContent = "—";
       wheelSub.textContent = "—";
+      renderMatchesFromShown(currentDraw);
       return;
     }
 
-    // LIVE animation
+    // ✅ IMPORTANT: si on passe direct en "validated" (sans animation live),
+    // on synchronise l'affichage avec l'état (sans tricher sur l'animation).
+    if(!replayMode && (currentDraw.status === "pending_validation" || currentDraw.status === "validated")){
+      const { revealedIds } = computeLists(currentDraw);
+      // on aligne shownIds sur revealed (affichage immédiat)
+      revealedShownIds = revealedIds.slice(0);
+      shownCount = revealedShownIds.length;
+      renderMatchesFromShown(currentDraw);
+      return;
+    }
+
+    // LIVE
     if(!replayMode){
       await applyLiveRevealAnimation(currentDraw);
     }
