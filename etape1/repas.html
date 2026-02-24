@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Repas — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260223" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260223-1" />
 </head>
 <body>
 
@@ -140,6 +140,30 @@
 </main>
 
 <style>
+  /* ✅ FIX : empêcher l'image étape de devenir gigantesque + couper tout débordement */
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+    align-items:center;
+  }
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+    overflow:hidden; /* ✅ important */
+  }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px; /* ✅ important */
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+  @media (max-width:420px){
+    .step-title-img{ max-height: 74px; }
+  }
+
   .subtabs{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -199,52 +223,168 @@
   const panelCommander = document.getElementById("panelCommander");
   const panelCommandes = document.getElementById("panelCommandes");
 
-  function show(panel){
+  function setSelected(btn){
+    tabFlyer.setAttribute("aria-selected", btn === tabFlyer ? "true" : "false");
+    tabCommander.setAttribute("aria-selected", btn === tabCommander ? "true" : "false");
+    tabCommandes.setAttribute("aria-selected", btn === tabCommandes ? "true" : "false");
+  }
+
+  function show(panel, btn){
     panelFlyer.style.display="none";
     panelCommander.style.display="none";
     panelCommandes.style.display="none";
     panel.style.display="block";
+    setSelected(btn);
   }
 
-  tabFlyer.onclick=()=>{show(panelFlyer)};
-  tabCommander.onclick=()=>{show(panelCommander)};
-  tabCommandes.onclick=()=>{show(panelCommandes)};
+  tabFlyer.onclick=()=>show(panelFlyer, tabFlyer);
+  tabCommander.onclick=()=>show(panelCommander, tabCommander);
+  tabCommandes.onclick=()=>show(panelCommandes, tabCommandes);
 
-  show(panelFlyer);
+  show(panelFlyer, tabFlyer);
 
-  const beacheurSelect=document.getElementById("beacheurSelect");
-  const ordersList=document.getElementById("ordersList");
-  const ordersStatus=document.getElementById("ordersStatus");
+  const orderForm = document.getElementById("orderForm");
+  const beacheurSelect = document.getElementById("beacheurSelect");
+  const qtySelect = document.getElementById("qtySelect");
+  const btnOrder = document.getElementById("btnOrder");
+  const orderStatus = document.getElementById("orderStatus");
 
-  const teamsQ=query(collection(db,COL_TEAMS),orderBy("createdAt","asc"));
+  const orderDone = document.getElementById("orderDone");
+  const orderDoneText = document.getElementById("orderDoneText");
+  const btnNewOrder = document.getElementById("btnNewOrder");
+  const btnGoList = document.getElementById("btnGoList");
+
+  const ordersList = document.getElementById("ordersList");
+  const ordersStatus = document.getElementById("ordersStatus");
+
+  function esc(s){
+    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function setOrderEnabled(enabled){
+    beacheurSelect.disabled = !enabled;
+    qtySelect.disabled = !enabled;
+    btnOrder.disabled = !enabled;
+    btnOrder.classList.toggle("disabled", !enabled);
+  }
+
+  function resetOrderUI(){
+    orderDone.style.display = "none";
+    orderForm.style.display = "block";
+    orderStatus.textContent = "";
+    setOrderEnabled(true);
+  }
+
+  btnNewOrder?.addEventListener("click", resetOrderUI);
+  btnGoList?.addEventListener("click", ()=>show(panelCommandes, tabCommandes));
+
+  // ===== Beacheurs (p1/p2)
+  const teamsQ = query(collection(db, COL_TEAMS), orderBy("createdAt","asc"));
   onSnapshot(teamsQ,(snap)=>{
     const opts=[];
     snap.forEach(d=>{
       const data=d.data()||{};
-      if(data.p1FirstName) opts.push({k:d.id+"_p1",n:data.p1FirstName});
-      if(data.p2FirstName) opts.push({k:d.id+"_p2",n:data.p2FirstName});
+      const teamName = (data.teamName || "").trim();
+
+      const p1 = (data.p1FirstName || "").trim();
+      const p2 = (data.p2FirstName || "").trim();
+
+      if(p1) opts.push({k:d.id+"_p1", n:p1, t: teamName});
+      if(p2) opts.push({k:d.id+"_p2", n:p2, t: teamName});
     });
-    beacheurSelect.innerHTML=`<option disabled selected>Choisir…</option>`+
-      opts.map(o=>`<option value="${o.k}">${o.n}</option>`).join("");
+
+    opts.sort((a,b)=>(a.n||"").localeCompare((b.n||""),"fr") || (a.t||"").localeCompare((b.t||""),"fr"));
+
+    beacheurSelect.innerHTML =
+      `<option value="" disabled selected>Choisir…</option>` +
+      opts.map(o=>`<option value="${esc(o.k)}" data-name="${esc(o.n)}" data-team="${esc(o.t)}">${esc(o.n)}${o.t ? " ("+esc(o.t)+")" : ""}</option>`).join("");
+  }, (e)=>{
+    console.error(e);
+    beacheurSelect.innerHTML = `<option value="" disabled selected>Impossible de charger</option>`;
   });
 
-  const ordersQ=query(collection(db,COL_ORDERS),orderBy("beacheurName","asc"));
+  async function upsertCumulativeOrder({ beacheurKey, beacheurName, teamName, addQty }){
+    const ref = doc(db, COL_ORDERS, beacheurKey);
+    await runTransaction(db, async (tx)=>{
+      const snap = await tx.get(ref);
+      const curQty = snap.exists() ? (snap.data().qty || 0) : 0;
+      const nextQty = curQty + addQty;
+
+      const payload = {
+        beacheurKey,
+        beacheurName,
+        teamName,
+        qty: nextQty,
+        unitPrice: UNIT_PRICE,
+        total: nextQty * UNIT_PRICE,
+        updatedAt: serverTimestamp()
+      };
+
+      if(!snap.exists()) payload.createdAt = serverTimestamp();
+      else payload.createdAt = snap.data().createdAt || snap.data().updatedAt || serverTimestamp();
+
+      tx.set(ref, payload, { merge:false });
+    });
+  }
+
+  orderForm?.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+
+    const key = (beacheurSelect.value || "").trim();
+    const qty = Number(qtySelect.value || "0");
+    if(!key){ orderStatus.textContent = "❌ Choisis un beacheur."; return; }
+    if(!Number.isFinite(qty) || qty < 1){ orderStatus.textContent = "❌ Quantité invalide."; return; }
+
+    const opt = beacheurSelect.selectedOptions?.[0];
+    const beacheurName = opt?.dataset?.name || opt?.textContent || "";
+    const teamName = opt?.dataset?.team || "";
+
+    setOrderEnabled(false);
+    orderStatus.textContent = "Enregistrement…";
+
+    try{
+      await upsertCumulativeOrder({ beacheurKey:key, beacheurName, teamName, addQty:qty });
+
+      orderForm.reset();
+      orderForm.style.display = "none";
+      orderDone.style.display = "block";
+      orderDoneText.innerHTML = `
+        <b>${esc(beacheurName)}</b>${teamName ? " ("+esc(teamName)+")" : ""}<br>
+        Ajout : <b>+${esc(String(qty))}</b> pack(s).
+      `;
+      orderStatus.textContent = "";
+    }catch(err){
+      console.error(err);
+      setOrderEnabled(true);
+      orderStatus.textContent = "❌ Erreur : impossible d’enregistrer la commande.";
+    }
+  });
+
+  // ===== Commandes
+  const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
   onSnapshot(ordersQ,(snap)=>{
     const rows=[];
-    snap.forEach(d=>rows.push(d.data()));
+    snap.forEach(d=> rows.push(d.data() || {}));
+
     if(!rows.length){
-      ordersList.innerHTML="<p class='muted'>Aucune commande.</p>";
-      ordersStatus.textContent="0 commande";
+      ordersList.innerHTML="<p class='muted' style='margin:0;'>Aucune commande.</p>";
+      ordersStatus.textContent="🟢 En direct — 0 commande";
       return;
     }
-    ordersList.innerHTML=rows.map((r,i)=>`
+
+    ordersList.innerHTML = rows.map((r,i)=>`
       <div class="order-row">
         <div class="order-num">#${i+1}</div>
-        <div class="order-name">${r.beacheurName}</div>
-        <div class="order-total">${r.total} €</div>
+        <div class="order-name">${esc(r.beacheurName || "—")}</div>
+        <div class="order-total">${esc(String(r.total ?? 0))} €</div>
       </div>
     `).join("");
-    ordersStatus.textContent=`${rows.length} commande(s)`;
+
+    ordersStatus.textContent = `🟢 En direct — ${rows.length} commande(s)`;
+  }, (e)=>{
+    console.error(e);
+    ordersStatus.textContent="🔴 Erreur de connexion";
+    ordersList.innerHTML="<p class='muted' style='margin:0;'>Erreur de connexion.</p>";
   });
 </script>
 
