@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260224" />
+  <link rel="stylesheet" href="assets/css/main.css?v=20260224-2" />
 </head>
 <body>
 
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- ===== NAVIGATION (2 lignes fixes, justifiée, largeur au texte) ===== -->
+    <!-- ===== NAVIGATION (même disposition que nav-step, mais largeur au texte) ===== -->
     <nav class="nav nav-general" aria-label="Navigation générale">
       <a href="index.html" aria-current="page" aria-label="Accueil" title="Accueil">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
@@ -103,7 +103,6 @@
 
   await ensurePersistence();
 
-  // ✅ neutralise les liens disabled proprement
   document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
     a.addEventListener("click", (e)=> e.preventDefault());
   });
