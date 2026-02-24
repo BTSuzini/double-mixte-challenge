@@ -140,30 +140,56 @@
 </main>
 
 <style>
-  /* ✅ FIX : empêcher l'image étape de devenir gigantesque + couper tout débordement */
+  /* ✅ CSS (bandeau étape) — identique référence équipes/inscriptions */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-    align-items:center;
   }
   .step-title-wrap{
     display:flex;
     align-items:center;
     justify-content:center;
     min-height: calc(var(--logo-size) * 0.55);
-    overflow:hidden; /* ✅ important */
   }
   .step-title-img{
     width: min(520px, 100%);
-    max-height: 88px; /* ✅ important */
+    max-height: 88px;
     height: auto;
     object-fit: contain;
     display:block;
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
-  @media (max-width:420px){
+
+  /* ✅ Nav étape : 6 onglets justifiés (2 lignes) */
+  .nav-step{
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
+  }
+  .nav-step a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  /* ✅ Lien actif plus visible */
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
     .step-title-img{ max-height: 74px; }
   }
 
+  /* (reste inchangé) */
   .subtabs{
     display:grid;
     grid-template-columns:1fr 1fr;
