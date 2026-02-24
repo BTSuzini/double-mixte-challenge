@@ -74,6 +74,7 @@
       </div>
     </div>
 
+    <!-- ✅ IMPORTANT : conteneur tableau -->
     <div id="tableList"></div>
 
     <p class="muted" style="margin-top:10px;">
@@ -84,7 +85,7 @@
 </main>
 
 <style>
-  /* ✅ Bandeau étape (identique à equipes) */
+  /* ✅ CSS bandeau étape (même ref que equipes/inscriptions) */
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
@@ -104,13 +105,17 @@
   }
 
   .nav-step{
-    gap:8px;
-    justify-content:space-between;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
   }
   .nav-step a{
+    padding:8px 12px;
     flex: 1 1 auto;
     text-align:center;
-    padding:8px 12px;
   }
 
   .nav a[aria-current="page"]{
@@ -127,7 +132,7 @@
     .step-title-img{ max-height: 74px; }
   }
 
-  /* ===== Style prog (comme étape 5) */
+  /* ===== Style prog (inchangé) */
   .match-list{ display:flex; flex-direction:column; gap:14px; }
 
   .match-card{
@@ -290,6 +295,9 @@
 
     tabChrono.style.fontWeight = isChrono ? "900" : "800";
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
+
+    // ✅ quand on bascule sur le tableau, on force un render
+    if(!isChrono) renderTableau();
   }
 
   function teamPartsFromTeam(t){
@@ -302,7 +310,6 @@
   function courtLabel(courtKey){
     const c = currentProg?.courts || {};
     const name = c[courtKey] || (courtKey || "—");
-    // (optionnel) emojis terrain
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
     return emo ? `${emo} ${name} ${emo}` : name;
   }
@@ -393,13 +400,13 @@
   }
 
   function renderChrono(){
+    // ⚠️ Ne pas toucher à la logique chrono (tu as dit nickel)
     if(!currentProg){ chronoList.innerHTML = ""; return; }
 
     const matches = currentProg.matches || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> mid (premier match trouvé)
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
       const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
@@ -435,6 +442,9 @@
       : `<p class="muted">Aucun match.</p>`;
   }
 
+  // ✅ FIX TABLEAU:
+  // - ton code faisait resultsByMatch.get(m.id) mais tes "matches" n'ont pas forcément "id" dans l'objet
+  // - on reconstruit la liste avec [matchId, match]
   function renderTableau(){
     if(!currentProg){ tableList.innerHTML = ""; return; }
 
@@ -442,12 +452,13 @@
     const round = selRound.value;
 
     const matches = currentProg.matches || {};
-    const list = Object.values(matches)
-      .filter(m => m.bracket === bracket && m.round === round)
-      .sort((a,b)=> (a.n||0) - (b.n||0));
-
     const schedule = currentProg.schedule || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+
+    const list = Object.entries(matches)
+      .map(([id, m]) => ({ id, ...(m || {}) }))
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
       const teamA = resolveTeamRef(m.A);
@@ -488,12 +499,19 @@
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
 
-  selBracket.onchange = ()=>{ refreshRounds(); renderTableau(); };
+  selBracket.onchange = ()=>{
+    refreshRounds();
+    // ✅ garde un tour cohérent (défaut = 1er de la liste)
+    const first = selRound.querySelector("option")?.value || "";
+    selRound.value = first;
+    renderTableau();
+  };
   selRound.onchange = ()=> renderTableau();
 
   setActiveTab("chrono");
   refreshRounds();
-  selRound.value = "QF";
+  // ✅ valeur par défaut si dispo
+  selRound.value = selRound.querySelector('option[value="QF"]') ? "QF" : (selRound.querySelector("option")?.value || "");
 
   onSnapshot(RESULTS_COL, (snap)=>{
     resultsByMatch = new Map();
@@ -529,6 +547,13 @@
     panelChrono.style.display = "block";
     panelTableau.style.display = "none";
     setActiveTab("chrono");
+
+    // ✅ important: rounds cohérents au chargement (si l’utilisateur avait changé le bracket)
+    refreshRounds();
+    if(!selRound.value || !selRound.querySelector(`option[value="${CSS.escape(selRound.value)}"]`)){
+      selRound.value = selRound.querySelector('option[value="QF"]') ? "QF" : (selRound.querySelector("option")?.value || "");
+    }
+
     renderAll();
   }, (err)=>{
     console.error(err);
