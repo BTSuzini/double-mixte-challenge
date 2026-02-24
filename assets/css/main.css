@@ -1,10 +1,11 @@
 /* =========================================================
-   main.css — Open BT / Challenge
+   main.css — Open BT / Challenge (base)
    ========================================================= */
 
 :root{
   --max: 980px;
 
+  /* Couleurs */
   --green: #1f7a3a;
   --green-dark: #16602d;
 
@@ -15,39 +16,56 @@
   --card: #fff;
   --bg: #f6f7f8;
 
-  --accent1: #1f7a3f;
-  --accent2: #f2c200;
+  /* Accent (lien actif) */
+  --accent1: #1f7a3f; /* vert */
+  --accent2: #f2c200; /* jaune */
 
+  /* Logos */
   --logo-size: clamp(74px, 14vw, 112px);
 
+  /* Typo bandeau */
+  --title-size: clamp(16px, 3.2vw, 23px);
   --nav-font: clamp(13px, 2.4vw, 15px);
 
+  /* Bandeau */
+  --topbar-pad-y: 14px;
+  --topbar-gap: 16px;
   --topbar-shadow: 0 8px 18px rgba(0,0,0,.10);
 
+  /* Pills nav */
+  --pill-border: rgba(255,255,255,.25);
+  --pill-bg: rgba(255,255,255,.10);
+  --pill-bg-hover: rgba(255,255,255,.18);
+
+  /* Nav général (plus fin) */
+  --nav-pill-pad-y: 8px;
+  --nav-pill-pad-x: 12px;
+  --nav-gap: 12px;
+
+  /* UI */
   --radius-card: 16px;
   --radius-btn: 14px;
 }
 
 *{ box-sizing:border-box; }
 
+html, body{ height:100%; }
+
 body{
   margin:0;
   font-family:-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-  background:var(--bg);
+  line-height:1.45;
   color:var(--text);
+  background:var(--bg);
 }
 
-/* =========================================================
-   BANDEAU
-   ========================================================= */
-
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  background: linear-gradient(180deg, var(--green), var(--green-dark));
-  color:#fff;
-  box-shadow: var(--topbar-shadow);
+/* Anti “liens bleus iOS” + tap highlight */
+a, a:visited, a:hover, a:active{
+  color:inherit;
+  text-decoration:none;
+}
+a, button{
+  -webkit-tap-highlight-color: transparent;
 }
 
 .container{
@@ -56,11 +74,28 @@ body{
   padding:16px;
 }
 
+/* =========================================================
+   BANDEAU
+   ========================================================= */
+
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: linear-gradient(180deg, var(--green), var(--green-dark));
+  color:#fff;
+  box-shadow: var(--topbar-shadow);
+}
+
+.topbar .container{
+  padding: var(--topbar-pad-y) 16px;
+}
+
 .topbar-row{
   display:grid;
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   align-items:center;
-  gap:16px;
+  gap: var(--topbar-gap);
 }
 
 .brand-logo{
@@ -69,114 +104,293 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  overflow:hidden;
 }
 
 .brand-logo img{
   width:100%;
   height:100%;
   object-fit:contain;
+  display:block;
 }
 
-/* Image centrale */
+.brand-title{
+  margin:0;
+  text-align:center;
+  font-weight:900;
+  font-size:var(--title-size);
+  line-height:1.18;
+  letter-spacing:.2px;
+  text-shadow: 0 1px 0 rgba(0,0,0,.15);
+}
+
+/* =========================================================
+   NAV PILLS (base)
+   ========================================================= */
+
+.nav{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.nav a{
+  color:#fff;
+  font-size:var(--nav-font);
+  padding:9px 16px;
+  border-radius:999px;
+  border:1px solid var(--pill-border);
+  background: var(--pill-bg);
+  transition:.18s ease;
+  white-space:nowrap;
+  position: relative;
+}
+
+.nav a:hover{
+  background: var(--pill-bg-hover);
+}
+
+/* Lien actif (aria-current) */
+.nav a[aria-current="page"]{
+  font-weight: 1000;
+  background: rgba(255,255,255,.22);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
+/* Soulignement discret (par défaut) */
+.nav a[aria-current="page"]::after{
+  content:"";
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:-7px;
+  height:3px;
+  border-radius:3px;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  opacity:.95;
+}
+
+/* =========================================================
+   BANDEAU “GÉNÉRAL”
+   - centre = image (challenge-gen.png)
+   - nav en 2 lignes fixes (6 items), justifiée, largeur au texte
+   ========================================================= */
+
+.topbar-row-general{
+  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+}
+
 .general-title-wrap{
   display:flex;
   align-items:center;
   justify-content:center;
+  min-height: calc(var(--logo-size) * 0.60);
 }
 
 .general-title-img{
-  width:min(560px,100%);
-  max-height:90px;
-  object-fit:contain;
+  width: min(560px, 100%);
+  max-height: 90px;
+  height: auto;
+  object-fit: contain;
+  display:block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+}
+
+/* ✅ Nav Général : 2 lignes fixes, “justifié” gauche/droite
+   - 3 items par ligne
+   - largeur AU TEXTE (pas tous égaux)
+   - boutons plus fins
+*/
+.nav.nav-general{
+  margin-top: 16px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  column-gap: var(--nav-gap);
+  row-gap: 10px;
+}
+
+/* 3 items par ligne sans forcer la même largeur */
+.nav.nav-general a{
+  padding: var(--nav-pill-pad-y) var(--nav-pill-pad-x);
+  flex: 0 1 auto;               /* taille au contenu */
+  max-width: calc(33.333% - (var(--nav-gap) * 2 / 3)); /* force 3/ligne => 2 lignes */
+  text-align:center;
+}
+
+/* (Optionnel) un poil plus marqué sur nav général */
+.nav.nav-general a[aria-current="page"]{
+  background: rgba(255,255,255,.26);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
 }
 
 /* =========================================================
-   NAV JUSTIFIÉE PRO
+   BANDEAU “ÉTAPE” (Challenge)
+   - centre = image (etape1.png, etc.)
+   - nav en 2 lignes (6 items)
    ========================================================= */
 
-.nav{
-  margin-top:16px;
+.topbar-row-step{
+  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
 }
 
-.nav.nav-general{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px 12px;
-  align-items:center;
-}
-
-.nav.nav-general a{
-  display:inline-flex;
+.step-title-wrap{
+  display:flex;
   align-items:center;
   justify-content:center;
-  width:fit-content;
-  padding:7px 12px;
-  border-radius:999px;
-  font-size:var(--nav-font);
-  border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.10);
-  color:#fff;
-  transition:.15s ease;
-  white-space:nowrap;
+  min-height: calc(var(--logo-size) * 0.55);
 }
 
-/* Justification */
-.nav.nav-general a:nth-child(3n+1){ justify-self:start; }
-.nav.nav-general a:nth-child(3n+2){ justify-self:center; }
-.nav.nav-general a:nth-child(3n){ justify-self:end; }
-
-.nav.nav-general a:hover{
-  background:rgba(255,255,255,.18);
+.step-title-img{
+  width: min(520px, 100%);
+  max-height: 88px;
+  height: auto;
+  object-fit: contain;
+  display:block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
 }
 
-.nav.nav-general a[aria-current="page"]{
-  background:rgba(255,255,255,.25);
-  border-color:rgba(255,255,255,.45);
+/* Nav Étape : 6 onglets justifiés (2 lignes) */
+.nav.nav-step{
+  justify-content: space-between;
+  gap: 8px;
+}
+.nav.nav-step::after{
+  content:"";
+  flex:auto;
+}
+.nav.nav-step a{
+  padding:8px 12px;
+  flex: 1 1 auto;
+  text-align:center;
+}
+.nav.nav-step a[aria-current="page"]{
+  background: rgba(255,255,255,.26);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
 }
 
 /* =========================================================
-   CARTES
+   CARTES / BOUTONS
    ========================================================= */
 
 .card{
   border:1px solid var(--border);
-  background:#fff;
+  background:var(--card);
   border-radius:var(--radius-card);
   padding:18px;
   margin:16px 0;
-  box-shadow:0 6px 16px rgba(0,0,0,.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,.05);
+}
+
+.card h2{
+  margin:0 0 10px;
+  font-size:20px;
 }
 
 .grid{
   display:grid;
+  grid-template-columns:1fr;
   gap:12px;
   margin-top:12px;
 }
 
-.btn{
+/* Boutons */
+.btn, a.btn, a.btn:visited{
   display:block;
-  padding:14px;
+  padding:14px 16px;
   border-radius:var(--radius-btn);
   border:1px solid #ddd;
   background:#fafafa;
   font-weight:700;
+  color:var(--text) !important;
+  text-decoration:none !important;
+  transition:.18s ease;
 }
 
-.btn:hover{ background:#f0f0f0; }
+.btn:hover, a.btn:hover{ background:#f0f0f0; }
+
+.btn.disabled{
+  opacity:.55;
+  pointer-events:none;
+}
 
 .muted{
   color:var(--muted);
   font-size:14px;
+  margin-top:10px;
 }
 
-/* Responsive */
-@media (min-width:780px){
-  .grid{ grid-template-columns:1fr 1fr; }
+/* =========================================================
+   FORMULAIRES
+   ========================================================= */
+
+.form{ display:grid; gap:12px; }
+.field{ display:grid; gap:6px; }
+
+input, select, textarea{
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font:inherit;
+  background:#fff;
 }
 
-@media (max-width:420px){
-  .nav.nav-general a{
-    padding:6px 10px;
-    font-size:13px;
+.sep{
+  border:0;
+  border-top:1px solid #eee;
+  margin:10px 0;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 780px){
+  .grid{ grid-template-columns: 1fr 1fr; }
+}
+
+/* petits écrans */
+@media (max-width: 420px){
+  .nav a{ padding:8px 14px; }
+  .nav a[aria-current="page"]::after{
+    left:10px;
+    right:10px;
+    bottom:-6px;
   }
+
+  /* général : un peu plus compact */
+  .nav.nav-general a{
+    padding: 8px 11px;
+    max-width: calc(33.333% - (var(--nav-gap) * 2 / 3));
+  }
+
+  .nav.nav-step a{
+    padding:7px 10px;
+    font-size: 13px;
+  }
+  .step-title-img{ max-height: 74px; }
+  .general-title-img{ max-height: 82px; }
+}
+
+@media (max-width: 360px){
+  :root{
+    --logo-size: clamp(66px, 15vw, 98px);
+    --title-size: clamp(15px, 3.9vw, 20px);
+    --nav-pill-pad-x: 10px;
+    --nav-gap: 10px;
+  }
+
+  .nav a{ padding:8px 12px; }
+
+  .nav a[aria-current="page"]::after{
+    left:9px;
+    right:9px;
+  }
+
+  .general-title-img{ max-height: 76px; }
 }
