@@ -10,14 +10,17 @@
 
 <header class="topbar">
   <div class="container">
+
+    <!-- ===== Bandeau haut ===== -->
     <div class="topbar-row topbar-row-general">
       <div class="brand-logo">
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ Image au centre (remplace le texte) -->
-      <div class="general-title-wrap" aria-label="Suzini BT — Double Mixte Challenge">
-        <img class="general-title-img" src="assets/img/challenge-gen.png" alt="Suzini BT — Double Mixte Challenge">
+      <div class="general-title-wrap">
+        <img class="general-title-img"
+             src="assets/img/challenge-gen.png"
+             alt="Suzini Beach Tennis Double Mixte Challenge">
       </div>
 
       <div class="brand-logo">
@@ -25,25 +28,18 @@
       </div>
     </div>
 
+    <!-- ===== NAVIGATION ===== -->
     <nav class="nav nav-general">
-      <!-- 1) Accueil : emoji seul -->
-      <a href="index.html" aria-current="page" title="Accueil" aria-label="Accueil">🏠</a>
 
-      <!-- 2) Règlement -->
+      <a href="index.html" aria-current="page">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
-
-      <!-- 3) Classement -->
       <a href="pages/classement.html">🏆 Classement</a>
-
-      <!-- 4) Boutique -->
       <a href="pages/boutique.html">🛍️ Boutique</a>
-
-      <!-- 5) Infos -->
       <a href="pages/infos.html">📰 Infos</a>
+      <a href="pages/contact.html">📩 📞</a>
 
-      <!-- 6) Contact -->
-      <a href="pages/contact.html" title="Contact" aria-label="Contact">📩 📞</a>
     </nav>
+
   </div>
 </header>
   
@@ -54,13 +50,26 @@
     <div class="grid">
       <a class="btn" href="etape1/equipes.html">🎾 Étape 1 — 27/02/2026 — BT250</a>
 
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 2 — 12/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 3 — 26/03/2026 — à venir</a>
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">⏳ Étape 4 — 09/04/2026 — à venir</a>
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
+        ⏳ Étape 2 — 12/03/2026 — à venir
+      </a>
 
-      <a class="btn" href="etape5/equipes.html">🧪 Étape 5 — 17/04/2026 — TEST</a>
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
+        ⏳ Étape 3 — 26/03/2026 — à venir
+      </a>
+
+      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
+        ⏳ Étape 4 — 09/04/2026 — à venir
+      </a>
+
+      <a class="btn" href="etape5/equipes.html">
+        🧪 Étape 5 — 17/04/2026 — TEST
+      </a>
     </div>
-    <p class="muted">📌 Le classement général est calculé par joueur (points + départages).</p>
+
+    <p class="muted">
+      📌 Le classement général est calculé par joueur (points + départages).
+    </p>
   </section>
 
   <section class="card">
@@ -89,56 +98,66 @@
 
 </main>
 
+<!-- ===== STYLE SPÉCIFIQUE AU BANDEAU GÉNÉRAL ===== -->
 <style>
-  /* ✅ Centre image du bandeau général */
-  .topbar-row-general{
-    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-  }
-  .general-title-wrap{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height: calc(var(--logo-size) * 0.55);
-    overflow:hidden;
-  }
-  .general-title-img{
-    width: min(560px, 100%);
-    max-height: 88px;
-    height: auto;
-    object-fit: contain;
-    display:block;
-    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-  }
 
-  /* ✅ Nav général : 2 lignes + justifié (gauche/droite) */
-  .nav-general{
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .nav-general::after{
-    content:"";
-    flex:auto; /* aide à “étaler” sur 2 lignes */
-  }
+/* Structure bandeau */
+.topbar-row-general{
+  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+}
+
+.general-title-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height: calc(var(--logo-size) * 0.6);
+}
+
+.general-title-img{
+  width: min(560px, 100%);
+  max-height: 90px;
+  object-fit: contain;
+  display:block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+}
+
+/* ===== NAVIGATION RESPONSIVE JUSTIFIÉE ===== */
+
+.nav-general{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 10px;
+  margin-top: 14px;
+}
+
+.nav-general a{
+  flex: 1 1 calc(33.333% - 10px);
+  text-align: center;
+  padding: 10px 12px;
+}
+
+/* Mobile moyen */
+@media (max-width: 520px){
   .nav-general a{
-    padding:8px 12px;
-    flex: 1 1 auto;
-    text-align:center;
+    flex: 1 1 calc(50% - 10px);
   }
+}
 
-  /* ✅ Lien actif plus visible */
-  .nav a[aria-current="page"]{
-    background: rgba(255,255,255,.26);
-    border-color: rgba(255,255,255,.45);
-    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+/* Petit mobile */
+@media (max-width: 360px){
+  .nav-general a{
+    flex: 1 1 100%;
   }
+}
 
-  @media (max-width: 420px){
-    .nav-general a{
-      padding:7px 10px;
-      font-size: 13px;
-    }
-    .general-title-img{ max-height: 74px; }
-  }
+/* Lien actif */
+.nav a[aria-current="page"]{
+  background: rgba(255,255,255,.26);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
 </style>
 
 <script type="module">
@@ -146,21 +165,15 @@
   import { autoLoginOrPrompt, logout, ensurePersistence } from "./assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-  // ✅ persistance (reste connecté sur le même appareil)
   await ensurePersistence();
 
-  // ✅ neutralise les liens disabled proprement
   document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
-    a.addEventListener("click", (e)=>{
-      e.preventDefault();
-    });
+    a.addEventListener("click", (e)=> e.preventDefault());
   });
 
-  async function goToRoleHome(roleHomePath){
-    // Si déjà connecté => redirige direct. Sinon => prompt login.
+  async function goToRoleHome(path){
     await autoLoginOrPrompt("general");
-    // si login ok (ou déjà connecté) -> on navigue
-    window.location.href = roleHomePath;
+    window.location.href = path;
   }
 
   document.getElementById("btnAdmin").onclick = async (e)=>{
