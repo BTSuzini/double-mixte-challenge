@@ -163,7 +163,7 @@
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
 
-  const pageSub = document.getElementById("pageSub");
+  const pageSub = document.getElementById("pageSub"); // peut être null selon la page
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelTeams = document.getElementById("panelTeams");
@@ -266,9 +266,12 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = (scope === "general")
-      ? "Général"
-      : `${stepLabel(scope)} — BT250`;
+    // ✅ FIX: pageSub peut être null => on évite le crash
+    if(pageSub){
+      pageSub.textContent = (scope === "general")
+        ? "Général"
+        : `${stepLabel(scope)} — BT250`;
+    }
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
