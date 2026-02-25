@@ -4,11 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Repas</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-repas-admin" />
 </head>
 <body>
 
-<!-- ✅ Bandeau admin uniforme -->
 <header class="topbar no-print">
   <div class="container">
     <div class="topbar-row">
@@ -16,13 +15,11 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
-
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -30,8 +27,8 @@
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -55,32 +52,42 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Zone (menu déroulant) présente partout -->
-  <section class="card" id="zoneUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+  <!-- ✅ Zone (identique aux autres pages admin) -->
+  <section class="card" id="adminUI" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general">Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px;"></p>
+    <!-- ✅ on garde l'élément pour compat, mais on n’affiche plus de texte -->
+    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
+  </section>
+
+  <!-- Si scope = general -->
+  <section class="card" id="panelNeedStep" style="display:none;">
+    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
+    <p class="muted" style="margin:0;">
+      Sélectionne une <b>Étape</b> dans “Zone” pour gérer les repas.
+      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
+    </p>
   </section>
 
   <!-- ✅ Contenu Repas -->
-  <section class="card" id="adminUI" style="display:none;">
+  <section class="card" id="panelHead" style="display:none;">
     <h2 style="margin:0 0 10px;">🍽️ Commandes repas — récap</h2>
 
-    <p class="muted" style="margin:0;">
-      Prix : <b>10€</b> par pack (3 arancini). — <b>1 ligne par beacheur</b> (cumul).
+    <p class="muted" id="priceHint" style="margin:0;">
+      Prix : <b>10€</b> par pack. — <b>1 ligne par beacheur</b>.
     </p>
 
     <div class="grid" style="margin-top:12px;">
@@ -88,12 +95,12 @@
       <button class="btn" id="btnRefresh" style="font-weight:900; color:#111;">🔄 Actualiser</button>
     </div>
 
-    <p class="muted" id="status" style="margin-top:10px;">Chargement…</p>
+    <p class="muted" id="status" style="margin-top:10px;">—</p>
   </section>
 
   <section class="card" id="panelTable" style="display:none;">
     <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px;">
-      <span>📋 Commandes (uniquement les joueurs ayant commandé)</span>
+      <span>📋 Commandes</span>
       <span class="muted" style="font-weight:900;">
         Total général : <span id="grandTotal">0</span> €
       </span>
@@ -106,7 +113,7 @@
             <th style="width:44px;">#</th>
             <th>Nom</th>
             <th>Prénom</th>
-            <th style="width:160px;">Qté (packs)</th>
+            <th style="width:160px;">Qté</th>
             <th style="width:140px;">Montant</th>
             <th class="no-print" style="width:140px;">Action</th>
           </tr>
@@ -180,37 +187,56 @@
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
-  import { logout, getRoleByEmail } from "../assets/js/session.js";
+  import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     collection, getDocs,
     doc, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (par défaut etape1)
-  const params = new URLSearchParams(location.search);
-  const scopeParam = params.get("scope") || "etape1";
+  const LS_SCOPE_KEY = "admin_scope_last";
 
-  // ---- UI Zone
+  // ---- scope (URL ?scope=etape1) + fallback localStorage
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope");
+
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape1";
+  }
+
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
+
+  // ---- dom
+  const accessDenied = document.getElementById("accessDenied");
+  const adminUI = document.getElementById("adminUI");
+
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
 
-  // ✅ Repas pour toutes les étapes
-  let scope = scopeParam;
-  let COL_ORDERS = `repas_${scope}`;
-
-  const PRICE = 10; // € par pack
-
-  // ---- dom
-  const accessDenied = document.getElementById("accessDenied");
-  const zoneUI = document.getElementById("zoneUI");
-  const adminUI = document.getElementById("adminUI");
+  const panelNeedStep = document.getElementById("panelNeedStep");
+  const panelHead = document.getElementById("panelHead");
   const panelTable = document.getElementById("panelTable");
 
+  const priceHint = document.getElementById("priceHint");
   const statusEl = document.getElementById("status");
   const tbody = document.getElementById("tbody");
   const grandTotalEl = document.getElementById("grandTotal");
+  const printSub = document.getElementById("printSub");
+
+  const btnPrint = document.getElementById("btnPrint");
+  const btnRefresh = document.getElementById("btnRefresh");
+
+  let currentScope = getInitialScope();
+  let COL_ORDERS = "";
+  let PRICE = 10;
 
   function esc(s){
     return (s ?? "").toString()
@@ -225,82 +251,91 @@
     return Number.isFinite(n) && n >= 0 && Math.floor(n) === n;
   }
 
-  function stepLabelFromScope(sc){
-    if(sc === "general") return "Général";
-    const num = sc.replace("etape","");
-    return `Étape ${num}`;
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    const n = scope.replace("etape","");
+    return `Étape ${n}`;
   }
 
-  async function ensureAdmin(){
-    const u = auth.currentUser;
-    if(!u) return false;
-    const r = await getRoleByEmail(u.email);
-    return r === "admin";
+  function ordersCollectionForScope(scope){
+    // ✅ ajuste ici si tu as des exceptions
+    // ex: étape 1 = repas_etape1
+    return `repas_${scope}`; // -> repas_etape1, repas_etape2, ...
   }
 
-  function setTabs(sc){
+  function priceForScope(scope){
+    // ✅ au besoin: switch selon étape
+    // ex: etape1=10, etape2=10...
+    return 10;
+  }
+
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
+  function setTabs(scope){
     tabsEl.innerHTML = "";
+    if(hintEl) hintEl.style.display = "none";
 
-    if(sc === "general"){
-      hintEl.textContent = "Zone Général : pages globales (infos, etc.).";
+    if(scope === "general"){
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
-      a.textContent = "🏠 Retour Admin (général)";
+      a.textContent = "📰 Aller à Admin — Gestion (infos)";
       tabsEl.appendChild(a);
       return;
     }
 
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / repas / résultats.";
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
 
     const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🍽️ Repas", "repas.html"],
-      ["🏁 Résultats", "resultats.html"],
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
     ];
 
     for(const [label, url] of links){
       const a = document.createElement("a");
       a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(sc)}`;
-
-      // petit highlight logique pour la page actuelle
-      if(url === "repas.html") a.style.fontWeight = "1000";
-
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
+
+      if(url === "repas.html"){
+        a.style.fontWeight = "900";
+      }
       tabsEl.appendChild(a);
     }
   }
 
-  function applyScope(sc){
-    scope = sc;
-    COL_ORDERS = `repas_${scope}`;
-
-    // Print subtitle
-    const printSub = document.getElementById("printSub");
-    printSub.textContent = `Repas — ${stepLabelFromScope(scope)}`;
-
-    setTabs(scope);
-
-    // si on est sur "general", on masque la table repas (logique)
+  function showPanelsForScope(scope){
     if(scope === "general"){
-      adminUI.style.display = "none";
+      panelNeedStep.style.display = "block";
+      panelHead.style.display = "none";
       panelTable.style.display = "none";
-      statusEl.textContent = "";
+      statusEl.textContent = "—";
+      tbody.innerHTML = "";
+      grandTotalEl.textContent = "0";
+      if(printSub) printSub.textContent = "Repas — Général";
       return;
     }
 
-    adminUI.style.display = "block";
+    panelNeedStep.style.display = "none";
+    panelHead.style.display = "block";
     panelTable.style.display = "block";
-    loadOrders();
   }
 
   function parseNameFallback(x){
-    // Supporte plusieurs schémas :
-    // - x.lastName / x.firstName
-    // - x.beacheurName (ex: "Jules")
-    // - x.beacheur (ex: "Jules (Les Lobstars)") -> on garde juste avant "("
     const lastName = (x.lastName || "").trim();
     const firstName = (x.firstName || "").trim();
     if(lastName || firstName) return { lastName, firstName };
@@ -308,10 +343,7 @@
     let raw = (x.beacheurName || x.beacheur || "").trim();
     if(!raw) return { lastName:"", firstName:"" };
 
-    // retire "(...)" si présent
     raw = raw.split("(")[0].trim();
-
-    // si "Prenom Nom" -> split simple (dernier mot = nom)
     const parts = raw.split(/\s+/).filter(Boolean);
     if(parts.length >= 2){
       return { firstName: parts.slice(0, -1).join(" "), lastName: parts.slice(-1).join(" ") };
@@ -325,14 +357,13 @@
     grandTotalEl.textContent = "0";
 
     try{
-      // ✅ zéro orderBy Firestore => zéro index requis
       const snap = await getDocs(collection(db, COL_ORDERS));
 
       const rows = [];
       snap.forEach(d=>{
         const x = d.data() || {};
         const qty = Number(x.qty || 0);
-        const total = Number(x.total || (qty * PRICE));
+        const total = Number(x.total ?? (qty * PRICE));
 
         const name = parseNameFallback(x);
 
@@ -345,10 +376,8 @@
         });
       });
 
-      // ✅ uniquement ceux qui ont commandé
       const filtered = rows.filter(r => (Number(r.qty) || 0) > 0);
 
-      // ✅ tri JS (Nom puis Prénom)
       filtered.sort((a,b)=>{
         const al = (a.lastName || "").toLowerCase();
         const bl = (b.lastName || "").toLowerCase();
@@ -371,7 +400,7 @@
       let grand = 0;
 
       tbody.innerHTML = filtered.map((r,i)=>{
-        const t = Number(r.total || (r.qty * PRICE)) || 0;
+        const t = Number(r.total ?? (r.qty * PRICE)) || 0;
         grand += t;
 
         return `
@@ -400,7 +429,7 @@
   }
 
   async function editLine(docId){
-    const typed = prompt("Nouvelle quantité (packs “3 arancini”) :", "1");
+    const typed = prompt("Nouvelle quantité :", "1");
     if(typed === null) return;
 
     const q = Number(String(typed).trim());
@@ -420,16 +449,40 @@
     alert("✅ Ligne corrigée.");
   }
 
+  function applyScope(scope){
+    currentScope = (scope || "general").toLowerCase();
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    persistScope(currentScope);
+
+    showPanelsForScope(currentScope);
+
+    if(currentScope === "general") return;
+
+    COL_ORDERS = ordersCollectionForScope(currentScope);
+    PRICE = priceForScope(currentScope);
+
+    if(priceHint){
+      priceHint.innerHTML = `Prix : <b>${esc(String(PRICE))}€</b> par pack. — <b>1 ligne par beacheur</b>.`;
+    }
+    if(printSub){
+      printSub.textContent = `Repas — ${stepLabel(currentScope)}`;
+    }
+
+    loadOrders();
+  }
+
   // Export PDF = print
-  document.getElementById("btnPrint").onclick = (e)=>{
+  btnPrint?.addEventListener("click", (e)=>{
     e.preventDefault();
     window.print();
-  };
+  });
 
-  document.getElementById("btnRefresh").onclick = async (e)=>{
+  btnRefresh?.addEventListener("click", async (e)=>{
     e.preventDefault();
     await loadOrders();
-  };
+  });
 
   tbody.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
@@ -456,41 +509,37 @@
     window.location.href = "../index.html";
   };
 
-  // Guard
-  onAuthStateChanged(auth, async (user)=>{
-    accessDenied.style.display = "none";
-    zoneUI.style.display = "none";
+  function showDenied(){
+    accessDenied.style.display = "block";
     adminUI.style.display = "none";
+    panelNeedStep.style.display = "none";
+    panelHead.style.display = "none";
     panelTable.style.display = "none";
+  }
 
-    if(!user){
-      accessDenied.style.display = "block";
-      return;
-    }
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminUI.style.display = "block";
+    applyScope(currentScope);
 
-    const ok = await ensureAdmin();
-    if(!ok){
-      accessDenied.style.display = "block";
-      return;
-    }
-
-    // show zone
-    zoneUI.style.display = "block";
-
-    // set dropdown
-    scopeEl.value = scopeParam || "etape1";
-    setTabs(scopeEl.value);
-
-    // apply initial
-    applyScope(scopeEl.value);
-
-    // change scope
     scopeEl.onchange = ()=>{
-      const sc = scopeEl.value;
-      // on navigue vers la même page avec scope (pour garder une URL propre)
-      const url = `repas.html?scope=${encodeURIComponent(sc)}`;
-      window.location.href = url;
+      applyScope(scopeEl.value || "general");
     };
+  }
+
+  // Guard (même logique que les autres pages)
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+  }
+
+  // robuste si session change
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
   });
 </script>
 
