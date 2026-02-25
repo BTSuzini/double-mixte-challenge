@@ -1,252 +1,489 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Repas — Étape 1</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-1" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row topbar-row-step">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <div class="step-title-wrap" aria-label="Étape 1">
+        <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
+      </div>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html" aria-current="page">🍽️ Repas</a>
+      <a href="programmation.html">🗓️ Programmation</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html">🎲 Tirage</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
+
+    <div class="subtabs" role="tablist">
+      <button class="subtab" id="tabFlyer" type="button" aria-selected="true">📄 Flyer</button>
+      <button class="subtab" id="tabCommander" type="button" aria-selected="false">🛒 Commander</button>
+      <button class="subtab" id="tabCommandes" type="button" aria-selected="false">📦 Commandes</button>
+    </div>
+
+    <p class="muted" id="pageStatus" style="margin:10px 0 0;">Chargement…</p>
+  </section>
+
+  <!-- FLYER -->
+  <section class="card" id="panelFlyer">
+    <h2>📄 Flyer officiel</h2>
+    <div style="text-align:center; margin-top:15px;">
+      <img
+        src="../assets/img/flyer.jpeg"
+        alt="Flyer soirée italienne"
+        style="max-width:100%; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.08);"
+      >
+    </div>
+  </section>
+
+  <!-- COMMANDER -->
+  <section class="card" id="panelCommander" style="display:none;">
+    <h2>🛒 Commander</h2>
+
+    <div style="margin-top:12px; line-height:1.6;">
+      <p style="font-size:18px; font-weight:900; margin:0;">🎾 Offre spéciale pour les beacheurs !</p>
+      <p style="margin:10px 0 0;"><strong>3 arancini pour 10€</strong> 🇮🇹🔥</p>
+      <p style="margin:10px 0 0; font-weight:900;">⏳ Réservations possibles jusqu’au 25/08</p>
+      <hr class="sep" style="margin:14px 0;" />
+    </div>
+
+    <form id="orderForm" class="form" autocomplete="off">
+      <div class="field">
+        <label for="beacheurSelect">Beacheur *</label>
+        <select id="beacheurSelect" required>
+          <option value="" selected disabled>Chargement…</option>
+        </select>
+        <p class="muted" style="margin:8px 0 0;">Sélection = <b>Prénom</b> + (<b>équipe</b>)</p>
+      </div>
+
+      <div class="field">
+        <label for="qtySelect">Nombre de packs *</label>
+        <select id="qtySelect" required>
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <button id="btnOrder" class="btn" type="submit" style="font-weight:900; color:#111;">
+        ✅ Valider la commande
+      </button>
+
+      <p id="orderStatus" class="muted" style="margin-top:10px;"></p>
+    </form>
+
+    <div id="orderDone" class="card" style="display:none; margin-top:14px;">
+      <h3>✅ Commande enregistrée</h3>
+      <p id="orderDoneText" class="muted"></p>
+      <div class="grid" style="margin-top:12px;">
+        <button class="btn" id="btnNewOrder" type="button" style="font-weight:900; color:#111;">➕ Autre commande</button>
+        <button class="btn" id="btnGoList" type="button" style="font-weight:900; color:#111;">📦 Voir commandes</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMANDES -->
+  <section class="card" id="panelCommandes" style="display:none;">
+    <h2>📦 Commandes</h2>
+
+    <p id="ordersStatus" class="muted">Chargement…</p>
+    <div id="ordersList" class="orders-list"></div>
+
+    <p class="muted" style="margin-top:10px;">
+      💡 Quantité = nombre de packs “3 arancini”.  
+      ✏️ Tu peux modifier ta quantité via le bouton “Modifier”.
+    </p>
+  </section>
+
+</main>
+
+<style>
+  .topbar-row-step{ grid-template-columns: var(--logo-size) 1fr var(--logo-size); }
+  .step-title-wrap{ display:flex; align-items:center; justify-content:center; min-height: calc(var(--logo-size) * 0.55); }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  .nav-step{ justify-content: space-between; gap: 8px; }
+  .nav-step::after{ content:""; flex:auto; }
+  .nav-step a{ padding:8px 12px; flex: 1 1 auto; text-align:center; }
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+  @media (max-width: 420px){
+    .nav-step a{ padding:7px 10px; font-size: 13px; }
+    .step-title-img{ max-height: 74px; }
+  }
+
+  .subtabs{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #tabFlyer{ grid-column:1/-1; }
+  .subtab{
+    border:1px solid #ddd;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:900;
+    background:#fafafa;
+    cursor:pointer;
+  }
+  .subtab[aria-selected="true"]{
+    background:#fff;
+    border-color:#cfcfcf;
+    box-shadow:0 6px 14px rgba(0,0,0,.06);
+  }
+
+  .orders-list{ display:grid; gap:8px; margin-top:10px; }
+  .order-row{
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:10px;
+    background:#fff;
+    display:grid;
+    grid-template-columns:38px 1fr auto;
+    gap:10px;
+    align-items:center;
+  }
+  .order-num{ font-weight:900; color:#666; }
+  .order-name{ font-weight:900; }
+  .order-total{ font-weight:900; text-align:right; }
+</style>
+
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    collection, query, orderBy, onSnapshot,
-    doc, getDoc, setDoc, updateDoc, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  const COL_TEAMS = "equipes_etape1_public";
-  const COL_ORDERS = "repas_etape1";
-  const UNIT_PRICE = 10;
-
-  const tabFlyer = document.getElementById("tabFlyer");
-  const tabCommander = document.getElementById("tabCommander");
-  const tabCommandes = document.getElementById("tabCommandes");
-  const panelFlyer = document.getElementById("panelFlyer");
-  const panelCommander = document.getElementById("panelCommander");
-  const panelCommandes = document.getElementById("panelCommandes");
-
-  function setSelected(btn){
-    tabFlyer.setAttribute("aria-selected", btn === tabFlyer ? "true" : "false");
-    tabCommander.setAttribute("aria-selected", btn === tabCommander ? "true" : "false");
-    tabCommandes.setAttribute("aria-selected", btn === tabCommandes ? "true" : "false");
+  // ⚠️ Robustesse iOS: si une erreur JS survient, on affiche un message au lieu d’une page "blanche"
+  const pageStatus = document.getElementById("pageStatus");
+  function fatal(msg, err){
+    console.error(err || msg);
+    pageStatus.textContent = "🔴 Erreur : " + msg;
   }
 
-  function show(panel, btn){
-    panelFlyer.style.display="none";
-    panelCommander.style.display="none";
-    panelCommandes.style.display="none";
-    panel.style.display="block";
-    setSelected(btn);
-  }
+  try{
+    import { db } from "../assets/js/firebase.js";
+    import {
+      collection, query, orderBy, onSnapshot,
+      doc, getDoc, setDoc, updateDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  tabFlyer.onclick=()=>show(panelFlyer, tabFlyer);
-  tabCommander.onclick=()=>show(panelCommander, tabCommander);
-  tabCommandes.onclick=()=>show(panelCommandes, tabCommandes);
+    const COL_TEAMS  = "equipes_etape1_public";
+    const COL_ORDERS = "repas_etape1";
+    const UNIT_PRICE = 10;
 
-  show(panelFlyer, tabFlyer);
+    // Tabs
+    const tabFlyer = document.getElementById("tabFlyer");
+    const tabCommander = document.getElementById("tabCommander");
+    const tabCommandes = document.getElementById("tabCommandes");
+    const panelFlyer = document.getElementById("panelFlyer");
+    const panelCommander = document.getElementById("panelCommander");
+    const panelCommandes = document.getElementById("panelCommandes");
 
-  const orderForm = document.getElementById("orderForm");
-  const beacheurSelect = document.getElementById("beacheurSelect");
-  const qtySelect = document.getElementById("qtySelect");
-  const btnOrder = document.getElementById("btnOrder");
-  const orderStatus = document.getElementById("orderStatus");
-
-  const orderDone = document.getElementById("orderDone");
-  const orderDoneText = document.getElementById("orderDoneText");
-  const btnNewOrder = document.getElementById("btnNewOrder");
-  const btnGoList = document.getElementById("btnGoList");
-
-  const ordersList = document.getElementById("ordersList");
-  const ordersStatus = document.getElementById("ordersStatus");
-
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-
-  function setOrderEnabled(enabled){
-    beacheurSelect.disabled = !enabled;
-    qtySelect.disabled = !enabled;
-    btnOrder.disabled = !enabled;
-    btnOrder.classList.toggle("disabled", !enabled);
-  }
-
-  function resetOrderUI(){
-    orderDone.style.display = "none";
-    orderForm.style.display = "block";
-    orderStatus.textContent = "";
-    setOrderEnabled(true);
-  }
-
-  btnNewOrder?.addEventListener("click", resetOrderUI);
-  btnGoList?.addEventListener("click", ()=>show(panelCommandes, tabCommandes));
-
-  // =========================
-  // Charger beacheurs
-  // =========================
-  const teamsQ = query(collection(db, COL_TEAMS), orderBy("createdAt","asc"));
-
-  onSnapshot(teamsQ,(snap)=>{
-    const opts=[];
-    snap.forEach(d=>{
-      const data=d.data()||{};
-      const teamName = (data.teamName || "").trim();
-      const p1 = (data.p1FirstName || "").trim();
-      const p2 = (data.p2FirstName || "").trim();
-
-      if(p1) opts.push({k:d.id+"_p1", n:p1, t: teamName});
-      if(p2) opts.push({k:d.id+"_p2", n:p2, t: teamName});
-    });
-
-    opts.sort((a,b)=>
-      (a.n||"").localeCompare((b.n||""),"fr") ||
-      (a.t||"").localeCompare((b.t||""),"fr")
-    );
-
-    beacheurSelect.innerHTML =
-      `<option value="" disabled selected>Choisir…</option>` +
-      opts.map(o=>`
-        <option value="${esc(o.k)}"
-          data-name="${esc(o.n)}"
-          data-team="${esc(o.t)}">
-          ${esc(o.n)}${o.t ? " ("+esc(o.t)+")" : ""}
-        </option>
-      `).join("");
-  });
-
-  // =========================
-  // Création unique
-  // =========================
-  async function createOrderOnce({ beacheurKey, beacheurName, teamName, qty }){
-    const ref = doc(db, COL_ORDERS, beacheurKey);
-    const snap = await getDoc(ref);
-
-    if(snap.exists()){
-      return { ok:false };
+    if(!tabFlyer || !tabCommander || !tabCommandes || !panelFlyer || !panelCommander || !panelCommandes){
+      throw new Error("DOM: onglets/panneaux introuvables");
     }
 
-    await setDoc(ref,{
-      beacheurKey,
-      beacheurName,
-      teamName,
-      qty,
-      unitPrice: UNIT_PRICE,
-      total: qty * UNIT_PRICE,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    function setSelected(btn){
+      tabFlyer.setAttribute("aria-selected", btn === tabFlyer ? "true" : "false");
+      tabCommander.setAttribute("aria-selected", btn === tabCommander ? "true" : "false");
+      tabCommandes.setAttribute("aria-selected", btn === tabCommandes ? "true" : "false");
+    }
+    function show(panel, btn){
+      panelFlyer.style.display="none";
+      panelCommander.style.display="none";
+      panelCommandes.style.display="none";
+      panel.style.display="block";
+      setSelected(btn);
+    }
+    tabFlyer.onclick=()=>show(panelFlyer, tabFlyer);
+    tabCommander.onclick=()=>show(panelCommander, tabCommander);
+    tabCommandes.onclick=()=>show(panelCommandes, tabCommandes);
 
-    return { ok:true };
-  }
+    show(panelFlyer, tabFlyer);
 
-  orderForm?.addEventListener("submit", async (e)=>{
-    e.preventDefault();
+    // Commander UI
+    const orderForm = document.getElementById("orderForm");
+    const beacheurSelect = document.getElementById("beacheurSelect");
+    const qtySelect = document.getElementById("qtySelect");
+    const btnOrder = document.getElementById("btnOrder");
+    const orderStatus = document.getElementById("orderStatus");
 
-    const key = beacheurSelect.value?.trim();
-    const qty = Number(qtySelect.value);
+    const orderDone = document.getElementById("orderDone");
+    const orderDoneText = document.getElementById("orderDoneText");
+    const btnNewOrder = document.getElementById("btnNewOrder");
+    const btnGoList = document.getElementById("btnGoList");
 
-    if(!key){
-      orderStatus.textContent="❌ Choisis un beacheur.";
-      return;
+    // Commandes UI
+    const ordersList = document.getElementById("ordersList");
+    const ordersStatus = document.getElementById("ordersStatus");
+
+    function esc(s){
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
     }
 
-    const opt = beacheurSelect.selectedOptions?.[0];
-    const name = opt?.dataset?.name || "";
-    const team = opt?.dataset?.team || "";
+    function setOrderEnabled(enabled){
+      beacheurSelect.disabled = !enabled;
+      qtySelect.disabled = !enabled;
+      btnOrder.disabled = !enabled;
+      btnOrder.classList.toggle("disabled", !enabled);
+    }
 
-    setOrderEnabled(false);
-    orderStatus.textContent="Enregistrement…";
+    function resetOrderUI(){
+      orderDone.style.display = "none";
+      orderForm.style.display = "block";
+      orderStatus.textContent = "";
+      setOrderEnabled(true);
+    }
+    btnNewOrder?.addEventListener("click", resetOrderUI);
+    btnGoList?.addEventListener("click", ()=>show(panelCommandes, tabCommandes));
 
-    try{
-      const res = await createOrderOnce({
-        beacheurKey:key,
-        beacheurName:name,
-        teamName:team,
-        qty
+    // =========================
+    // Charger beacheurs
+    // =========================
+    pageStatus.textContent = "🟢 En direct";
+
+    const teamsQ = query(collection(db, COL_TEAMS), orderBy("createdAt","asc"));
+
+    onSnapshot(teamsQ,(snap)=>{
+      const opts=[];
+      snap.forEach(d=>{
+        const data=d.data()||{};
+        const teamName = (data.teamName || "").trim();
+        const p1 = (data.p1FirstName || "").trim();
+        const p2 = (data.p2FirstName || "").trim();
+
+        if(p1) opts.push({k:d.id+"_p1", n:p1, t: teamName});
+        if(p2) opts.push({k:d.id+"_p2", n:p2, t: teamName});
       });
 
-      if(!res.ok){
-        alert("⚠️ Tu as déjà une commande.\n\nVa dans l’onglet “📦 Commandes” pour la modifier.");
-        setOrderEnabled(true);
-        orderStatus.textContent="";
-        show(panelCommandes, tabCommandes);
+      opts.sort((a,b)=>
+        (a.n||"").localeCompare((b.n||""),"fr") ||
+        (a.t||"").localeCompare((b.t||""),"fr")
+      );
+
+      if(opts.length === 0){
+        beacheurSelect.innerHTML = `<option value="" disabled selected>Aucun beacheur pour le moment</option>`;
         return;
       }
 
-      orderForm.reset();
-      orderForm.style.display="none";
-      orderDone.style.display="block";
-      orderDoneText.innerHTML=`
-        <b>${esc(name)}</b>${team ? " ("+esc(team)+")" : ""}<br>
-        Commande : <b>${qty}</b> pack(s).
-      `;
-
-      orderStatus.textContent="";
-    }catch(err){
+      beacheurSelect.innerHTML =
+        `<option value="" disabled selected>Choisir…</option>` +
+        opts.map(o=>`
+          <option value="${esc(o.k)}"
+            data-name="${esc(o.n)}"
+            data-team="${esc(o.t)}">
+            ${esc(o.n)}${o.t ? " ("+esc(o.t)+")" : ""}
+          </option>
+        `).join("");
+    }, (err)=>{
       console.error(err);
-      setOrderEnabled(true);
-      orderStatus.textContent="❌ Erreur.";
-    }
-  });
-
-  // =========================
-  // Modifier commande
-  // =========================
-  async function updateOrderQty(id,newQty){
-    await updateDoc(doc(db,COL_ORDERS,id),{
-      qty:newQty,
-      total:newQty*UNIT_PRICE,
-      updatedAt:serverTimestamp()
+      beacheurSelect.innerHTML = `<option value="" disabled selected>Impossible de charger</option>`;
+      pageStatus.textContent = "🔴 Erreur chargement équipes";
     });
-  }
 
-  const ordersQ=query(collection(db,COL_ORDERS),orderBy("beacheurName","asc"));
+    // =========================
+    // Création unique
+    // =========================
+    async function createOrderOnce({ beacheurKey, beacheurName, teamName, qty }){
+      const ref = doc(db, COL_ORDERS, beacheurKey);
+      const snap = await getDoc(ref);
 
-  onSnapshot(ordersQ,(snap)=>{
-    const rows=[];
-    snap.forEach(d=>{
-      const x=d.data()||{};
-      rows.push({
-        id:d.id,
-        name:x.beacheurName,
-        team:x.teamName,
-        qty:x.qty,
-        total:x.total
+      if(snap.exists()){
+        return { ok:false };
+      }
+
+      await setDoc(ref,{
+        beacheurKey,
+        beacheurName,
+        teamName,
+        qty,
+        unitPrice: UNIT_PRICE,
+        total: qty * UNIT_PRICE,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       });
-    });
 
-    if(!rows.length){
-      ordersList.innerHTML="<p class='muted'>Aucune commande.</p>";
-      ordersStatus.textContent="🟢 En direct — 0 commande";
-      return;
+      return { ok:true };
     }
 
-    ordersList.innerHTML=rows.map((r,i)=>`
-      <div class="order-row">
-        <div>#${i+1}</div>
-        <div>
-          <div style="font-weight:900;">
-            ${esc(r.name)}
-            ${r.team ? `<span class="muted">(${esc(r.team)})</span>` : ""}
-          </div>
-          <div class="muted">Qté : <b>${r.qty}</b></div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:900;">${r.total} €</div>
-          <button class="btn" data-edit="${r.id}" style="margin-top:6px;">
-            ✏️ Modifier
-          </button>
-        </div>
-      </div>
-    `).join("");
+    orderForm?.addEventListener("submit", async (e)=>{
+      e.preventDefault();
 
-    ordersStatus.textContent=`🟢 En direct — ${rows.length} commande(s)`;
+      const key = beacheurSelect.value?.trim();
+      const qty = Number(qtySelect.value);
 
-    ordersList.querySelectorAll("[data-edit]").forEach(btn=>{
-      btn.onclick=async ()=>{
-        const id=btn.dataset.edit;
-        const row=rows.find(r=>r.id===id);
-        const v=prompt("Nouvelle quantité :",row.qty);
-        if(v===null) return;
-        const n=Number(v);
-        if(!Number.isFinite(n)||n<1) return alert("Quantité invalide");
-        await updateOrderQty(id,n);
-        alert("✅ Commande modifiée");
-      };
+      if(!key){
+        orderStatus.textContent="❌ Choisis un beacheur.";
+        return;
+      }
+      if(!Number.isFinite(qty) || qty < 1){
+        orderStatus.textContent="❌ Quantité invalide.";
+        return;
+      }
+
+      const opt = beacheurSelect.selectedOptions?.[0];
+      const name = opt?.dataset?.name || "";
+      const team = opt?.dataset?.team || "";
+
+      setOrderEnabled(false);
+      orderStatus.textContent="Enregistrement…";
+
+      try{
+        const res = await createOrderOnce({
+          beacheurKey:key,
+          beacheurName:name,
+          teamName:team,
+          qty
+        });
+
+        if(!res.ok){
+          alert("⚠️ Tu as déjà une commande.\n\n👉 Celle-ci n’est PAS prise en compte.\n\nVa dans l’onglet “📦 Commandes” pour la modifier.");
+          setOrderEnabled(true);
+          orderStatus.textContent="";
+          show(panelCommandes, tabCommandes);
+          return;
+        }
+
+        orderForm.reset();
+        orderForm.style.display="none";
+        orderDone.style.display="block";
+        orderDoneText.innerHTML=`
+          <b>${esc(name)}</b>${team ? " ("+esc(team)+")" : ""}<br>
+          Commande : <b>${qty}</b> pack(s).
+        `;
+
+        orderStatus.textContent="";
+      }catch(err){
+        console.error(err);
+        setOrderEnabled(true);
+        orderStatus.textContent="❌ Erreur : impossible d’enregistrer.";
+        alert("❌ Erreur Firestore.\n\nOuvre la console si besoin.");
+      }
     });
 
-  });
+    // =========================
+    // Modifier commande (onglet Commandes)
+    // =========================
+    async function updateOrderQty(id,newQty){
+      await updateDoc(doc(db,COL_ORDERS,id),{
+        qty:newQty,
+        total:newQty*UNIT_PRICE,
+        updatedAt:serverTimestamp()
+      });
+    }
+
+    const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+
+    onSnapshot(ordersQ,(snap)=>{
+      const rows=[];
+      snap.forEach(d=>{
+        const x=d.data()||{};
+        rows.push({
+          id:d.id,
+          name:x.beacheurName || "",
+          team:x.teamName || "",
+          qty: (typeof x.qty === "number" ? x.qty : Number(x.qty || 0)),
+          total: (typeof x.total === "number" ? x.total : Number(x.total || 0))
+        });
+      });
+
+      if(!rows.length){
+        ordersList.innerHTML="<p class='muted' style='margin:0;'>Aucune commande.</p>";
+        ordersStatus.textContent="🟢 En direct — 0 commande";
+        return;
+      }
+
+      ordersList.innerHTML = rows.map((r,i)=>`
+        <div class="order-row">
+          <div class="order-num">#${i+1}</div>
+          <div>
+            <div class="order-name">
+              ${esc(r.name)}
+              ${r.team ? `<span class="muted" style="font-weight:800;">(${esc(r.team)})</span>` : ""}
+            </div>
+            <div class="muted" style="margin-top:2px;">Qté : <b>${esc(String(r.qty))}</b></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="order-total">${esc(String(r.total))} €</div>
+            <button class="btn" data-edit="${esc(r.id)}" style="margin-top:6px; font-weight:900; color:#111;">
+              ✏️ Modifier
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      ordersStatus.textContent = `🟢 En direct — ${rows.length} commande(s)`;
+
+      ordersList.querySelectorAll("button[data-edit]").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const id = btn.dataset.edit;
+          const row = rows.find(x=>x.id===id);
+          if(!row) return;
+
+          const v = prompt("Nouvelle quantité (>=1) :", String(row.qty));
+          if(v === null) return;
+
+          const n = Number(String(v).replace(",", ".").trim());
+          if(!Number.isFinite(n) || n < 1 || !Number.isInteger(n)){
+            alert("Quantité invalide (entier >= 1).");
+            return;
+          }
+
+          btn.disabled = true;
+          try{
+            await updateOrderQty(id, n);
+            alert("✅ Commande modifiée");
+          }catch(err){
+            console.error(err);
+            alert("❌ Impossible de modifier (vérifie les rules).");
+          }finally{
+            btn.disabled = false;
+          }
+        };
+      });
+
+    }, (err)=>{
+      console.error(err);
+      ordersStatus.textContent="🔴 Erreur de connexion";
+      ordersList.innerHTML="<p class='muted' style='margin:0;'>Erreur de connexion.</p>";
+    });
+
+  }catch(err){
+    fatal("script repas (module) a échoué", err);
+  }
 </script>
+
+</body>
+</html>
