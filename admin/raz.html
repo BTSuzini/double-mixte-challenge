@@ -124,6 +124,14 @@
   }
   .k{ font-weight:900; }
   .v{ text-align:right; font-variant-numeric: tabular-nums; }
+
+  /* ✅ Onglet actif dans la Zone */
+  #tabs .btn.is-active{
+    background:#111;
+    color:#fff !important;
+    border-color:#111;
+    box-shadow: 0 10px 18px rgba(0,0,0,.16);
+  }
 </style>
 
 <script type="module">
@@ -148,7 +156,7 @@
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub");
+  const pageSub = document.getElementById("pageSub"); // peut être null selon la page
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelRaz = document.getElementById("panelRaz");
@@ -220,7 +228,13 @@
       a.className = "btn";
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
-      if(url === "raz.html") a.style.fontWeight = "900";
+
+      // ✅ Onglet actif (couleur)
+      if(url === "raz.html"){
+        a.classList.add("is-active");
+        a.style.fontWeight = "900";
+      }
+
       tabsEl.appendChild(a);
     }
   }
@@ -235,9 +249,8 @@
   function classementDoc(scope){ return doc(db, "classements", scope); }
 
   async function countSome(colRef){
-    // cheap peek: read up to 50 docs to show an estimate without heavy cost
     const snap = await getDocs(query(colRef, limit(50)));
-    return snap.size; // "at least" value if > 50 not known, but ok for preview
+    return snap.size;
   }
 
   async function existsDoc(ref){
@@ -285,8 +298,6 @@
   }
 
   async function deleteAllDocsInCollection(colRef){
-    // ⚠️ Cette approche lit puis supprime chaque doc : OK pour petits volumes.
-    // Pour gros volumes : utiliser une fonction Cloud / batch côté serveur.
     const snap = await getDocs(colRef);
     const tasks = [];
     snap.forEach(d => tasks.push(deleteDoc(d.ref)));
@@ -325,7 +336,6 @@
     const ok = await doubleConfirm(labelMap[which] || "RAZ");
     if(!ok) return;
 
-    // lock UI
     for(const b of [btnRazAll,btnRazInscriptions,btnRazResults,btnRazProg,btnRazDraw,btnRazClassement,btnRazVerification]){
       b.disabled = true;
     }
@@ -365,13 +375,12 @@
       };
 
       if(which === "all"){
-        // ordre logique : résultats -> classement -> prog -> tirage -> inscriptions -> vérif
-        await doResults().catch(e=> logs.push("🏁 Résultats : (déjà vide ou erreur)"));
-        await doClassement().catch(e=> logs.push("🏆 Classement : (déjà vide ou erreur)"));
-        await doProg().catch(e=> logs.push("📅 Programmation : (déjà vide ou erreur)"));
-        await doDraw().catch(e=> logs.push("🎲 Tirage : (déjà vide ou erreur)"));
-        await doInscriptions().catch(e=> logs.push("📝 Inscriptions : (déjà vide ou erreur)"));
-        await doVerification().catch(e=> logs.push("🔎 Vérification : (déjà vide ou erreur)"));
+        await doResults().catch(()=> logs.push("🏁 Résultats : (déjà vide ou erreur)"));
+        await doClassement().catch(()=> logs.push("🏆 Classement : (déjà vide ou erreur)"));
+        await doProg().catch(()=> logs.push("📅 Programmation : (déjà vide ou erreur)"));
+        await doDraw().catch(()=> logs.push("🎲 Tirage : (déjà vide ou erreur)"));
+        await doInscriptions().catch(()=> logs.push("📝 Inscriptions : (déjà vide ou erreur)"));
+        await doVerification().catch(()=> logs.push("🔎 Vérification : (déjà vide ou erreur)"));
       }else{
         if(which === "inscriptions") await doInscriptions();
         if(which === "results") await doResults();
@@ -396,7 +405,10 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+    // ✅ FIX: pageSub peut être null => on évite le crash
+    if(pageSub){
+      pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+    }
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
@@ -409,7 +421,6 @@
     refreshState();
   }
 
-  // ---- UI guards
   function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
