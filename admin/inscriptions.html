@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Inscriptions</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-fix" />
 </head>
 <body>
 
@@ -15,20 +15,17 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
 
-
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
-    <!-- ✅ Bandeau identique partout -->
     <nav class="nav">
       <a href="../index.html">🏠 Accueil public</a>
       <a href="#" id="btnLogout">🚪 Déconnexion</a>
@@ -43,7 +40,7 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (identique partout) -->
+  <!-- ✅ Encart Zone (identique à equipes) -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
@@ -60,14 +57,12 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px;"></p>
+
+    <!-- ✅ On garde l’élément pour compat, mais on n’affiche plus de texte -->
+    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
-  <!-- =========================
-       CONTENU PAGE (après Zone)
-       => Statut + RAZ
-  ========================== -->
-
+  <!-- Si scope = general -->
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
@@ -151,6 +146,7 @@
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
 
+  // ✅ peut être absent : on ne doit jamais planter si null
   const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
@@ -179,8 +175,8 @@
     return `Étape ${n}`;
   }
 
-  // Compat : certains écrans utilisaient paused, d'autres suspended
   function normalizeState(state){
+    // compat : certains écrans utilisaient paused
     if(state === "paused") return "suspended";
     return state || "not_open";
   }
@@ -233,9 +229,9 @@
 
   function setTabs(scope){
     tabsEl.innerHTML = "";
+    if(hintEl) hintEl.style.display = "none"; // ✅ plus de texte sous les onglets
 
     if(scope === "general"){
-      hintEl.textContent = "🌐 Zone Général : gestion des infos dans admin/index.html.";
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
@@ -243,8 +239,6 @@
       tabsEl.appendChild(a);
       return;
     }
-
-    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
 
     if(scope === "etape5"){
       tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
@@ -273,9 +267,12 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = (scope === "general")
-      ? "Général"
-      : `${stepLabel(scope)} — BT250`;
+    // ✅ FIX CRITIQUE : ne jamais planter si pageSub absent
+    if(pageSub){
+      pageSub.textContent = (scope === "general")
+        ? "Général"
+        : `${stepLabel(scope)} — BT250`;
+    }
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
@@ -291,7 +288,7 @@
 
     stopGateListener();
 
-    const cfgRef = doc(db, "config", scope); // ex: config/etape5
+    const cfgRef = doc(db, "config", scope);
     unsubGate = onSnapshot(cfgRef, (snap)=>{
       const raw = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
       const state = normalizeState(raw);
@@ -331,7 +328,6 @@
     statusMsgEl.textContent = "Mise à jour…";
 
     try{
-      // merge:true => crée le doc si absent
       await setDoc(cfgRef, {
         inscriptionsState: next,
         updatedAt: serverTimestamp()
@@ -346,15 +342,12 @@
     }
   }
 
-  // actions
   btnNotOpen.onclick = ()=> setState("not_open");
   btnOpen.onclick = ()=> setState("open");
-
   btnSuspend.onclick = ()=>{
     if(currentState === "suspended") setState("open");
     else setState("suspended");
   };
-
   btnClose.onclick = ()=> setState("closed");
 
   // ---- RAZ helper: delete a collection in batches
