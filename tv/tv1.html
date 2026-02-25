@@ -1,1 +1,850 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TV — Double Mixte Challenge</title>
+  <link rel="stylesheet" href="./assets/css/main.css?v=20260225-tv1" />
 
+  <style>
+    /* ===== Layout TV (16:9) ===== */
+    body{
+      background:#0b0f0c;
+      color:#111;
+    }
+
+    .tv-wrap{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* ===== Top bar (bandeau vert) ===== */
+    .tv-top{
+      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .tv-top .container{
+      max-width: 1400px;
+      width: 100%;
+    }
+    .tv-top-row{
+      display:grid;
+      grid-template-columns: 120px 1fr 120px;
+      align-items:center;
+      gap:16px;
+      padding: 14px 0;
+    }
+    .tv-logo{
+      width:120px;
+      height:120px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .tv-logo img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
+    }
+    .tv-title{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      color:#fff;
+      text-align:center;
+      padding: 6px 10px;
+      min-height: 120px;
+    }
+    .tv-title h1{
+      margin:0;
+      font-size: 34px;
+      letter-spacing:.2px;
+      font-weight: 1000;
+      text-shadow: 0 2px 0 rgba(0,0,0,.22);
+    }
+    .tv-title .sub{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      font-weight:900;
+      opacity:.95;
+    }
+    .tv-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.24);
+      background: rgba(255,255,255,.12);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+      white-space:nowrap;
+    }
+
+    /* ===== Main split ===== */
+    .tv-main{
+      flex:1;
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:14px;
+      padding: 14px;
+      max-width: 1400px;
+      width:100%;
+      margin: 0 auto;
+      box-sizing:border-box;
+    }
+
+    .panel{
+      background:#fff;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 18px 45px rgba(0,0,0,.28);
+      overflow:hidden;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
+    }
+    .panel-head{
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: #fbfbfb;
+    }
+    .panel-head h2{
+      margin:0;
+      font-size:18px;
+      font-weight:1000;
+    }
+    .muted{ color:#666; font-weight:800; }
+    .kpis{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    /* ===== Left: match cards ===== */
+    .left-body{
+      padding: 12px 12px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .block-title{
+      font-weight:1000;
+      font-size:16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin: 2px 0 6px;
+    }
+
+    .match-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+
+    .mcard{
+      border:1px solid #eee;
+      border-radius:16px;
+      padding:12px 12px;
+      background:#fff;
+      box-shadow: 0 10px 26px rgba(0,0,0,.05);
+      display:grid;
+      grid-template-columns: 110px 1fr 160px;
+      gap:12px;
+      align-items:center;
+    }
+
+    .m-meta{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .court{
+      font-weight:1000;
+      font-size:16px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .time{
+      font-weight:900;
+      color:#666;
+      white-space:nowrap;
+    }
+
+    .m-main{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .teams{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .team{
+      font-weight:1000;
+      font-size:18px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .team small{
+      font-weight:900;
+      color:#666;
+      margin-left:8px;
+      font-size:14px;
+    }
+
+    .m-right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .state{
+      font-weight:1000;
+      border-radius:999px;
+      padding:8px 10px;
+      border:1px solid #eee;
+      background:#fafafa;
+    }
+    .state.live{
+      border-color:#bfe9c8;
+      background:#ecfff0;
+    }
+    .state.done{
+      border-color:#cfe3ff;
+      background:#eef5ff;
+    }
+    .score{
+      font-weight:1000;
+      font-size:22px;
+      letter-spacing:.3px;
+    }
+
+    /* ===== Right: tableaux rotator ===== */
+    .right-body{
+      padding: 12px 12px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+    .rot-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:1000;
+    }
+    .rot-box{
+      flex:1;
+      border:1px solid #eee;
+      background:#fff;
+      border-radius:16px;
+      padding:10px;
+      overflow:auto;
+      box-shadow: 0 10px 26px rgba(0,0,0,.05);
+    }
+
+    /* tableau render fallback (simple table) */
+    .tv-table{
+      width:100%;
+      border-collapse:collapse;
+      font-weight:900;
+    }
+    .tv-table th, .tv-table td{
+      border:1px solid #eee;
+      padding:8px 8px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .tv-table th{
+      background:#fafafa;
+      font-weight:1000;
+    }
+
+    /* ===== Sponsors bandeau ===== */
+    .tv-bottom{
+      background:#0d1310;
+      border-top:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      padding: 10px 0;
+      overflow:hidden;
+    }
+    .sponsor-track{
+      display:flex;
+      gap:22px;
+      align-items:center;
+      white-space:nowrap;
+      will-change: transform;
+      animation: marquee 22s linear infinite;
+      padding-left: 100%;
+    }
+    .sponsor-item{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight:1000;
+    }
+    .sponsor-item img{
+      height:28px;
+      width:auto;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25));
+    }
+    @keyframes marquee{
+      0%{ transform: translateX(0); }
+      100%{ transform: translateX(-200%); }
+    }
+
+    /* TV: hide scrollbars where possible */
+    ::-webkit-scrollbar{ width:10px; height:10px; }
+    ::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.14); border-radius:999px; }
+  </style>
+</head>
+
+<body>
+<div class="tv-wrap">
+
+  <!-- TOP -->
+  <header class="tv-top">
+    <div class="container">
+      <div class="tv-top-row">
+        <div class="tv-logo">
+          <img src="./assets/img/logo-suzini.png" alt="Suzini">
+        </div>
+
+        <div class="tv-title">
+          <h1 id="tvTitle">Double Mixte Challenge — TV</h1>
+          <div class="sub">
+            <span class="tv-pill" id="tvEtape">Étape : —</span>
+            <span class="tv-pill" id="tvClock">⏱️ —</span>
+            <span class="tv-pill" id="tvStatus">🟢 En direct</span>
+          </div>
+        </div>
+
+        <div class="tv-logo">
+          <img src="./assets/img/logo-challenge.png" alt="Challenge">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="tv-main">
+
+    <!-- LEFT 2/3 -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>🎾 Matchs — Terminés / En cours / À venir</h2>
+        <div class="kpis">
+          <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
+          <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
+          <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
+        </div>
+      </div>
+
+      <div class="left-body">
+
+        <div>
+          <div class="block-title">✅ Derniers matchs terminés <span class="muted" id="doneHint">—</span></div>
+          <div class="match-grid" id="doneList"></div>
+        </div>
+
+        <div>
+          <div class="block-title">🟠 Matchs en cours <span class="muted" id="liveHint">—</span></div>
+          <div class="match-grid" id="liveList"></div>
+        </div>
+
+        <div>
+          <div class="block-title">⏭️ Prochains matchs <span class="muted" id="nextHint">—</span></div>
+          <div class="match-grid" id="nextList"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT 1/3 -->
+    <aside class="panel">
+      <div class="panel-head">
+        <h2>📋 Tableaux</h2>
+        <div class="kpis">
+          <span class="tv-pill" id="rotInfo">⏲️ 10s</span>
+        </div>
+      </div>
+
+      <div class="right-body">
+        <div class="rot-title">
+          <div id="rotTitle">—</div>
+          <div class="muted" id="rotIndex">—</div>
+        </div>
+        <div class="rot-box" id="rotBox">
+          <p class="muted" style="margin:0;">Chargement…</p>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- BOTTOM sponsors -->
+  <footer class="tv-bottom">
+    <div class="container">
+      <div class="sponsor-track" id="sponsorTrack" aria-label="Sponsors">
+        <!-- rempli en JS -->
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script type="module">
+  import { db } from "./assets/js/firebase.js";
+  import {
+    collection, doc, getDoc, onSnapshot,
+    query, orderBy, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  // =========================================================
+  // PARAMS
+  // URL TV : .../tv.html?etape=etape1
+  // =========================================================
+  const params = new URLSearchParams(location.search);
+  const etapeId = (params.get("etape") || "etape1").toLowerCase();
+
+  // =========================================================
+  // COLLECTIONS (challenge)
+  // - programmation : programmations/{etapeId}   (doc)
+  // - resultats     : resultats_etape1/{matchId} (collection)
+  // - tableaux      : tirages/{etapeId} (doc) OU programmations/{etapeId} (doc)
+  // =========================================================
+  const DOC_PROGRAMMATION = ["programmations", etapeId]; // doc path
+  const DOC_TIRAGE        = ["tirages", etapeId];        // doc path
+
+  // ⚠️ Résultats : adapte ici si ton nom de collection est différent
+  // (tu as déjà resultats_etape1 dans tes rules challenge)
+  const COL_RESULTS = `resultats_${etapeId}`; // ex: resultats_etape1
+
+  // =========================================================
+  // UI refs
+  // =========================================================
+  const tvEtape = document.getElementById("tvEtape");
+  const tvClock = document.getElementById("tvClock");
+  const tvStatus = document.getElementById("tvStatus");
+
+  const kpiDone = document.getElementById("kpiDone");
+  const kpiLive = document.getElementById("kpiLive");
+  const kpiNext = document.getElementById("kpiNext");
+
+  const doneList = document.getElementById("doneList");
+  const liveList = document.getElementById("liveList");
+  const nextList = document.getElementById("nextList");
+
+  const doneHint = document.getElementById("doneHint");
+  const liveHint = document.getElementById("liveHint");
+  const nextHint = document.getElementById("nextHint");
+
+  const rotTitle = document.getElementById("rotTitle");
+  const rotIndex = document.getElementById("rotIndex");
+  const rotBox   = document.getElementById("rotBox");
+
+  const sponsorTrack = document.getElementById("sponsorTrack");
+
+  tvEtape.textContent = "Étape : " + etapeId.toUpperCase();
+
+  // Clock
+  function tickClock(){
+    const d = new Date();
+    tvClock.textContent = d.toLocaleString("fr-FR", {
+      weekday:"short", day:"2-digit", month:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  function esc(s){
+    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // =========================================================
+  // Sponsors (hardcode simple)
+  // -> remplace / ajoute tes logos ici
+  // =========================================================
+  const SPONSORS = [
+    { name:"PSK Café", img:"./assets/img/sponsors/psk.png" },
+    { name:"Atelier Matoque", img:"./assets/img/sponsors/matoque.png" },
+    { name:"Bricorama", img:"./assets/img/sponsors/bricorama.png" },
+    { name:"TC Suzini", img:"./assets/img/logo-suzini.png" }
+  ];
+  sponsorTrack.innerHTML = (SPONSORS.concat(SPONSORS)).map(s => `
+    <span class="sponsor-item">
+      <img src="${esc(s.img)}" alt="${esc(s.name)}">
+      <span>${esc(s.name)}</span>
+    </span>
+  `).join("");
+
+  // =========================================================
+  // DATA STATE
+  // =========================================================
+  let prog = null;                // programmation doc
+  let resultsMap = new Map();     // matchId -> result
+  let tableaux = [];              // array for rotator
+  let rotPtr = 0;
+
+  // =========================================================
+  // Adapter: match format
+  // We expect prog.matches (or prog.matchs) array:
+  // [
+  //   {
+  //     id: "m1" (optional, else we build one),
+  //     court: "Court 1" (or terrain),
+  //     order: 1 (optional),
+  //     time: "19:10" (optional),
+  //     a: "Equipe A" OR teamA,
+  //     b: "Equipe B" OR teamB
+  //   }
+  // ]
+  // =========================================================
+  function getMatchesFromProg(p){
+    if(!p) return [];
+    const arr = Array.isArray(p.matches) ? p.matches
+              : Array.isArray(p.matchs) ? p.matchs
+              : Array.isArray(p.programmation) ? p.programmation
+              : [];
+    return arr.map((m, idx)=>{
+      const court = m.court || m.terrain || m.courtName || "Court ?";
+      const order = Number.isFinite(m.order) ? m.order : (Number.isFinite(m.index) ? m.index : idx+1);
+      const time  = m.time || m.heure || m.horaire || "";
+      const a     = m.a || m.teamA || m.equipeA || m.pairA || m.team1 || m.equipe1 || "";
+      const b     = m.b || m.teamB || m.equipeB || m.pairB || m.team2 || m.equipe2 || "";
+      const id    = m.id || m.matchId || `${court.replace(/\s+/g,'_').toLowerCase()}_${order}`;
+      return { id, court, order, time, a, b, raw:m };
+    });
+  }
+
+  function getResultForMatch(id){
+    return resultsMap.get(id) || null;
+  }
+
+  function hasResult(id){
+    const r = getResultForMatch(id);
+    // accepte plusieurs formats
+    if(!r) return false;
+    if(typeof r.score === "string" && r.score.trim()) return true;
+    if(Number.isFinite(r.a) && Number.isFinite(r.b)) return true;
+    if(Number.isFinite(r.scoreA) && Number.isFinite(r.scoreB)) return true;
+    return false;
+  }
+
+  function fmtScore(r){
+    if(!r) return "—";
+    if(typeof r.score === "string" && r.score.trim()) return r.score.trim();
+    const a = Number.isFinite(r.a) ? r.a : (Number.isFinite(r.scoreA) ? r.scoreA : null);
+    const b = Number.isFinite(r.b) ? r.b : (Number.isFinite(r.scoreB) ? r.scoreB : null);
+    if(a === null || b === null) return "—";
+    return `${a}–${b}`;
+  }
+
+  function fmtShortTime(m){
+    return m.time ? `🕘 ${m.time}` : "";
+  }
+
+  function mCard(m, state, score){
+    const cls = state === "live" ? "state live" : state === "done" ? "state done" : "state";
+    const lab = state === "live" ? "EN COURS" : state === "done" ? "TERMINÉ" : "À VENIR";
+    return `
+      <div class="mcard">
+        <div class="m-meta">
+          <div class="court">🎾 ${esc(m.court)}</div>
+          <div class="time">${esc(fmtShortTime(m))}</div>
+        </div>
+
+        <div class="m-main">
+          <div class="teams">
+            <div class="team">${esc(m.a || "—")}</div>
+            <div class="team">${esc(m.b || "—")}</div>
+          </div>
+        </div>
+
+        <div class="m-right">
+          <div class="${cls}">${esc(lab)}</div>
+          <div class="score">${esc(score || "—")}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // =========================================================
+  // Compute: done / live / next
+  // - done: last 6 finished (based on results updatedAt desc if available)
+  // - live: first non-finished match per court
+  // - next: next match after live per court (1 each) -> then keep 2 total (like you asked)
+  // =========================================================
+  function computeView(){
+    const matches = getMatchesFromProg(prog);
+
+    if(matches.length === 0){
+      doneList.innerHTML = `<p class="muted" style="margin:0;">Aucun match trouvé dans la programmation.</p>`;
+      liveList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
+      nextList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
+      kpiDone.textContent = "✅ Terminés : 0";
+      kpiLive.textContent = "🟠 En cours : 0";
+      kpiNext.textContent = "⏭️ À venir : 0";
+      doneHint.textContent = "—";
+      liveHint.textContent = "—";
+      nextHint.textContent = "—";
+      return;
+    }
+
+    // Group per court ordered by order
+    const byCourt = new Map();
+    for(const m of matches){
+      const key = m.court;
+      if(!byCourt.has(key)) byCourt.set(key, []);
+      byCourt.get(key).push(m);
+    }
+    for(const [k, arr] of byCourt){
+      arr.sort((x,y)=> (x.order||0) - (y.order||0));
+    }
+
+    // Live = first match without result per court
+    const live = [];
+    const nextCandidates = [];
+    for(const [court, arr] of byCourt){
+      const firstPendingIdx = arr.findIndex(mm => !hasResult(mm.id));
+      if(firstPendingIdx >= 0){
+        live.push(arr[firstPendingIdx]);
+        if(arr[firstPendingIdx + 1]) nextCandidates.push(arr[firstPendingIdx + 1]);
+      }else{
+        // all finished -> no live on this court
+      }
+    }
+
+    // Next = 2 matches max (1 per court already) then keep 2 by earliest order/time
+    nextCandidates.sort((a,b)=>{
+      // order first; if same, compare court string
+      return (a.order||0)-(b.order||0) || (a.court||"").localeCompare((b.court||""), "fr");
+    });
+    const next = nextCandidates.slice(0, 2);
+
+    // Done = matches with result, sorted by updatedAt desc if provided, else by order desc
+    const doneAll = matches.filter(m => hasResult(m.id)).map(m=>{
+      const r = getResultForMatch(m.id) || {};
+      const ts = r.updatedAt || r.createdAt || null;
+      return { m, ts };
+    });
+
+    doneAll.sort((x,y)=>{
+      const dx = x.ts?.toDate ? x.ts.toDate().getTime() : (x.ts instanceof Date ? x.ts.getTime() : 0);
+      const dy = y.ts?.toDate ? y.ts.toDate().getTime() : (y.ts instanceof Date ? y.ts.getTime() : 0);
+      if(dy !== dx) return dy - dx;
+      return (y.m.order||0) - (x.m.order||0);
+    });
+
+    const done = doneAll.slice(0, 6).map(x=>x.m);
+
+    // Render
+    doneList.innerHTML = done.length
+      ? done.map(m => mCard(m, "done", fmtScore(getResultForMatch(m.id)))).join("")
+      : `<p class="muted" style="margin:0;">Aucun match terminé pour le moment.</p>`;
+
+    liveList.innerHTML = live.length
+      ? live.map(m => mCard(m, "live", "—")).join("")
+      : `<p class="muted" style="margin:0;">Aucun match en cours (tout est terminé ?).</p>`;
+
+    nextList.innerHTML = next.length
+      ? next.map(m => mCard(m, "next", "—")).join("")
+      : `<p class="muted" style="margin:0;">Pas de match “à venir” détecté.</p>`;
+
+    kpiDone.textContent = `✅ Terminés : ${doneAll.length}`;
+    kpiLive.textContent = `🟠 En cours : ${live.length}`;
+    kpiNext.textContent = `⏭️ À venir : ${next.length}`;
+
+    doneHint.textContent = done.length ? "Derniers résultats saisis" : "—";
+    liveHint.textContent = live.length ? "1er match sans résultat par court" : "—";
+    nextHint.textContent = next.length ? "Match suivant (max 2)" : "—";
+  }
+
+  // =========================================================
+  // Tableaux rotator
+  // Supporte :
+  // - programmations/{etapeId}.tableaux = [{title, html} | {title, rows:[...]} | {title, imageUrl}]
+  // - tirages/{etapeId}.tableaux = idem
+  // =========================================================
+  function normalizeTableaux(obj){
+    const arr = Array.isArray(obj?.tableaux) ? obj.tableaux
+              : Array.isArray(obj?.tables) ? obj.tables
+              : [];
+    return arr.map((t, idx)=>{
+      const title = t.title || t.name || `Tableau ${idx+1}`;
+      const html = t.html || null;
+      const imageUrl = t.imageUrl || t.img || null;
+      const rows = Array.isArray(t.rows) ? t.rows : null; // rows = array of arrays OR array of objects
+      return { title, html, imageUrl, rows };
+    }).filter(x=>x.title);
+  }
+
+  function renderTableau(t){
+    if(!t){
+      rotTitle.textContent = "—";
+      rotIndex.textContent = "—";
+      rotBox.innerHTML = `<p class="muted" style="margin:0;">Aucun tableau.</p>`;
+      return;
+    }
+
+    rotTitle.textContent = t.title;
+
+    if(t.html){
+      rotBox.innerHTML = t.html;
+      return;
+    }
+
+    if(t.imageUrl){
+      rotBox.innerHTML = `
+        <div style="text-align:center;">
+          <img src="${esc(t.imageUrl)}" alt="${esc(t.title)}" style="max-width:100%; height:auto; border-radius:12px;">
+        </div>
+      `;
+      return;
+    }
+
+    if(t.rows){
+      // rows can be array of arrays or objects
+      if(t.rows.length && Array.isArray(t.rows[0])){
+        const head = t.rows[0];
+        const body = t.rows.slice(1);
+        rotBox.innerHTML = `
+          <table class="tv-table">
+            <thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>
+            <tbody>
+              ${body.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          </table>
+        `;
+        return;
+      }
+
+      if(t.rows.length && typeof t.rows[0] === "object"){
+        const cols = Object.keys(t.rows[0]);
+        rotBox.innerHTML = `
+          <table class="tv-table">
+            <thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
+            <tbody>
+              ${t.rows.map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}
+            </tbody>
+          </table>
+        `;
+        return;
+      }
+    }
+
+    rotBox.innerHTML = `<p class="muted" style="margin:0;">Tableau non lisible (format inconnu).</p>`;
+  }
+
+  function startRotator(){
+    if(!tableaux.length){
+      rotTitle.textContent = "Tableaux";
+      rotIndex.textContent = "—";
+      rotBox.innerHTML = `<p class="muted" style="margin:0;">Tableaux non disponibles.</p>`;
+      return;
+    }
+
+    function showIdx(i){
+      rotPtr = i % tableaux.length;
+      rotIndex.textContent = `${rotPtr+1}/${tableaux.length}`;
+      renderTableau(tableaux[rotPtr]);
+    }
+
+    showIdx(rotPtr);
+
+    setInterval(()=>{
+      if(!tableaux.length) return;
+      showIdx(rotPtr + 1);
+    }, 10000);
+  }
+
+  // =========================================================
+  // Subscriptions
+  // =========================================================
+  // 1) Programmation doc live
+  onSnapshot(doc(db, ...DOC_PROGRAMMATION), (snap)=>{
+    prog = snap.exists() ? (snap.data() || {}) : null;
+    computeView();
+
+    // try tableaux from prog first
+    const fromProg = normalizeTableaux(prog || {});
+    if(fromProg.length){
+      tableaux = fromProg;
+      renderTableau(tableaux[rotPtr]);
+      rotIndex.textContent = `${rotPtr+1}/${tableaux.length}`;
+    }
+  }, (err)=>{
+    console.error(err);
+    tvStatus.textContent = "🔴 Erreur programmation";
+  });
+
+  // 2) Résultats (dernier N, puis on reconstruit map)
+  // -> on prend large (300) pour ne pas rater
+  const qRes = query(collection(db, COL_RESULTS), orderBy("updatedAt","desc"), limit(300));
+  onSnapshot(qRes, (snap)=>{
+    resultsMap = new Map();
+    snap.forEach(d=>{
+      resultsMap.set(d.id, d.data() || {});
+    });
+    computeView();
+    tvStatus.textContent = "🟢 En direct";
+  }, (err)=>{
+    console.error(err);
+    tvStatus.textContent = "🔴 Erreur résultats";
+  });
+
+  // 3) Tableaux depuis tirage doc (fallback)
+  (async function loadTirageOnce(){
+    try{
+      const s = await getDoc(doc(db, ...DOC_TIRAGE));
+      const obj = s.exists() ? s.data() : {};
+      const fromTirage = normalizeTableaux(obj || {});
+      if(fromTirage.length && !tableaux.length){
+        tableaux = fromTirage;
+      }
+      startRotator();
+    }catch(e){
+      console.error(e);
+      startRotator();
+    }
+  })();
+
+  // Auto refresh de la page (sécurité TV) toutes les 30 min
+  setTimeout(()=> location.reload(), 30 * 60 * 1000);
+</script>
+
+</body>
+</html>
