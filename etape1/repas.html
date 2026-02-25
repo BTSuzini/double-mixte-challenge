@@ -1,241 +1,8 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Repas — Étape 1</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260223-1" />
-</head>
-<body>
-
-<header class="topbar">
-  <div class="container">
-    <div class="topbar-row topbar-row-step">
-      <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
-      </div>
-
-      <!-- ✅ Image au centre -->
-      <div class="step-title-wrap" aria-label="Étape 1">
-        <img class="step-title-img" src="../assets/img/etape1.png" alt="Étape 1">
-      </div>
-
-      <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
-      </div>
-    </div>
-
-    <!-- ✅ Nav Étape 1 -->
-    <nav class="nav nav-step">
-      <a href="../index.html" title="Accueil">🏠</a>
-      <a href="inscriptions.html">📝 Inscriptions</a>
-      <a href="repas.html" aria-current="page">🍽️ Repas</a>
-      <a href="programmation.html">🗓️ Programmation</a>
-      <a href="equipes.html">👥 Équipes</a>
-      <a href="tirage.html">🎲 Tirage</a>
-    </nav>
-  </div>
-</header>
-
-<main class="container">
-
-  <!-- Sous-onglets -->
-  <section class="card">
-    <h2 style="margin-bottom:6px;">🍽️ Espace repas</h2>
-
-    <div class="subtabs" role="tablist">
-      <button class="subtab" id="tabFlyer" type="button" aria-selected="true">📄 Flyer</button>
-      <button class="subtab" id="tabCommander" type="button" aria-selected="false">🛒 Commander</button>
-      <button class="subtab" id="tabCommandes" type="button" aria-selected="false">📦 Commandes</button>
-    </div>
-  </section>
-
-  <!-- ======================
-        FLYER
-  ======================= -->
-  <section class="card" id="panelFlyer">
-    <h2>📄 Flyer officiel</h2>
-
-    <div style="text-align:center; margin-top:15px;">
-      <img
-        src="../assets/img/flyer.jpeg"
-        alt="Flyer soirée italienne"
-        style="max-width:100%; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.08);"
-      >
-    </div>
-  </section>
-
-  <!-- ======================
-        COMMANDER
-  ======================= -->
-  <section class="card" id="panelCommander" style="display:none;">
-    <h2>🛒 Commander</h2>
-
-    <div style="margin-top:12px; line-height:1.6;">
-      <p style="font-size:18px; font-weight:900; margin:0;">
-        🎾 Offre spéciale pour les beacheurs !
-      </p>
-
-      <p style="margin:10px 0 0;">
-        <strong>3 arancini pour 10€</strong> 🇮🇹🔥
-      </p>
-
-      <p style="margin:10px 0 0; font-weight:900;">
-        ⏳ Réservations possibles jusqu’au 25/08
-      </p>
-
-      <hr class="sep" style="margin:14px 0;" />
-    </div>
-
-    <form id="orderForm" class="form" autocomplete="off">
-      <div class="field">
-        <label for="beacheurSelect">Beacheur *</label>
-        <select id="beacheurSelect" required>
-          <option value="" selected disabled>Chargement…</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="qtySelect">Nombre de packs *</label>
-        <select id="qtySelect" required>
-          <option value="1" selected>1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-      </div>
-
-      <button id="btnOrder" class="btn" type="submit">
-        ✅ Valider la commande
-      </button>
-
-      <p id="orderStatus" class="muted" style="margin-top:10px;"></p>
-    </form>
-
-    <div id="orderDone" class="card" style="display:none; margin-top:14px;">
-      <h3>✅ Commande enregistrée</h3>
-      <p id="orderDoneText" class="muted"></p>
-      <div class="grid" style="margin-top:12px;">
-        <button class="btn" id="btnNewOrder" type="button">➕ Autre commande</button>
-        <button class="btn" id="btnGoList" type="button">📦 Voir commandes</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================
-        COMMANDES
-  ======================= -->
-  <section class="card" id="panelCommandes" style="display:none;">
-    <h2>📦 Commandes</h2>
-
-    <p id="ordersStatus" class="muted">Chargement…</p>
-    <div id="ordersList" class="orders-list"></div>
-
-    <p class="muted" style="margin-top:10px;">
-      💡 Quantité = nombre de packs “3 arancini”.
-    </p>
-  </section>
-
-</main>
-
-<style>
-  /* ✅ CSS (bandeau étape) — identique référence équipes/inscriptions */
-  .topbar-row-step{
-    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-  }
-  .step-title-wrap{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height: calc(var(--logo-size) * 0.55);
-  }
-  .step-title-img{
-    width: min(520px, 100%);
-    max-height: 88px;
-    height: auto;
-    object-fit: contain;
-    display:block;
-    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-  }
-
-  /* ✅ Nav étape : 6 onglets justifiés (2 lignes) */
-  .nav-step{
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .nav-step::after{
-    content:"";
-    flex:auto;
-  }
-  .nav-step a{
-    padding:8px 12px;
-    flex: 1 1 auto;
-    text-align:center;
-  }
-
-  /* ✅ Lien actif plus visible */
-  .nav a[aria-current="page"]{
-    background: rgba(255,255,255,.26);
-    border-color: rgba(255,255,255,.45);
-    box-shadow: 0 6px 14px rgba(0,0,0,.10);
-  }
-
-  @media (max-width: 420px){
-    .nav-step a{
-      padding:7px 10px;
-      font-size: 13px;
-    }
-    .step-title-img{ max-height: 74px; }
-  }
-
-  /* (reste inchangé) */
-  .subtabs{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-  #tabFlyer{ grid-column:1/-1; }
-
-  .subtab{
-    border:1px solid #ddd;
-    border-radius:999px;
-    padding:10px 14px;
-    font-weight:900;
-    background:#fafafa;
-    cursor:pointer;
-  }
-  .subtab[aria-selected="true"]{
-    background:#fff;
-    border-color:#cfcfcf;
-    box-shadow:0 6px 14px rgba(0,0,0,.06);
-  }
-
-  .orders-list{
-    display:grid;
-    gap:8px;
-    margin-top:10px;
-  }
-  .order-row{
-    border:1px solid #eee;
-    border-radius:14px;
-    padding:10px;
-    background:#fff;
-    display:grid;
-    grid-template-columns:38px 1fr auto;
-    gap:10px;
-    align-items:center;
-  }
-  .order-num{ font-weight:900; }
-  .order-name{ font-weight:900; }
-  .order-total{ font-weight:900; }
-</style>
-
 <script type="module">
   import { db } from "../assets/js/firebase.js";
   import {
     collection, query, orderBy, onSnapshot,
-    doc, runTransaction, serverTimestamp
+    doc, getDoc, setDoc, updateDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const COL_TEAMS = "equipes_etape1_public";
@@ -284,7 +51,10 @@
   const ordersStatus = document.getElementById("ordersStatus");
 
   function esc(s){
-    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   function setOrderEnabled(enabled){
@@ -304,14 +74,16 @@
   btnNewOrder?.addEventListener("click", resetOrderUI);
   btnGoList?.addEventListener("click", ()=>show(panelCommandes, tabCommandes));
 
-  // ===== Beacheurs (p1/p2)
+  // =========================
+  // Charger beacheurs
+  // =========================
   const teamsQ = query(collection(db, COL_TEAMS), orderBy("createdAt","asc"));
+
   onSnapshot(teamsQ,(snap)=>{
     const opts=[];
     snap.forEach(d=>{
       const data=d.data()||{};
       const teamName = (data.teamName || "").trim();
-
       const p1 = (data.p1FirstName || "").trim();
       const p2 = (data.p2FirstName || "").trim();
 
@@ -319,100 +91,162 @@
       if(p2) opts.push({k:d.id+"_p2", n:p2, t: teamName});
     });
 
-    opts.sort((a,b)=>(a.n||"").localeCompare((b.n||""),"fr") || (a.t||"").localeCompare((b.t||""),"fr"));
+    opts.sort((a,b)=>
+      (a.n||"").localeCompare((b.n||""),"fr") ||
+      (a.t||"").localeCompare((b.t||""),"fr")
+    );
 
     beacheurSelect.innerHTML =
       `<option value="" disabled selected>Choisir…</option>` +
-      opts.map(o=>`<option value="${esc(o.k)}" data-name="${esc(o.n)}" data-team="${esc(o.t)}">${esc(o.n)}${o.t ? " ("+esc(o.t)+")" : ""}</option>`).join("");
-  }, (e)=>{
-    console.error(e);
-    beacheurSelect.innerHTML = `<option value="" disabled selected>Impossible de charger</option>`;
+      opts.map(o=>`
+        <option value="${esc(o.k)}"
+          data-name="${esc(o.n)}"
+          data-team="${esc(o.t)}">
+          ${esc(o.n)}${o.t ? " ("+esc(o.t)+")" : ""}
+        </option>
+      `).join("");
   });
 
-  async function upsertCumulativeOrder({ beacheurKey, beacheurName, teamName, addQty }){
+  // =========================
+  // Création unique
+  // =========================
+  async function createOrderOnce({ beacheurKey, beacheurName, teamName, qty }){
     const ref = doc(db, COL_ORDERS, beacheurKey);
-    await runTransaction(db, async (tx)=>{
-      const snap = await tx.get(ref);
-      const curQty = snap.exists() ? (snap.data().qty || 0) : 0;
-      const nextQty = curQty + addQty;
+    const snap = await getDoc(ref);
 
-      const payload = {
-        beacheurKey,
-        beacheurName,
-        teamName,
-        qty: nextQty,
-        unitPrice: UNIT_PRICE,
-        total: nextQty * UNIT_PRICE,
-        updatedAt: serverTimestamp()
-      };
+    if(snap.exists()){
+      return { ok:false };
+    }
 
-      if(!snap.exists()) payload.createdAt = serverTimestamp();
-      else payload.createdAt = snap.data().createdAt || snap.data().updatedAt || serverTimestamp();
-
-      tx.set(ref, payload, { merge:false });
+    await setDoc(ref,{
+      beacheurKey,
+      beacheurName,
+      teamName,
+      qty,
+      unitPrice: UNIT_PRICE,
+      total: qty * UNIT_PRICE,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
+
+    return { ok:true };
   }
 
   orderForm?.addEventListener("submit", async (e)=>{
     e.preventDefault();
 
-    const key = (beacheurSelect.value || "").trim();
-    const qty = Number(qtySelect.value || "0");
-    if(!key){ orderStatus.textContent = "❌ Choisis un beacheur."; return; }
-    if(!Number.isFinite(qty) || qty < 1){ orderStatus.textContent = "❌ Quantité invalide."; return; }
+    const key = beacheurSelect.value?.trim();
+    const qty = Number(qtySelect.value);
+
+    if(!key){
+      orderStatus.textContent="❌ Choisis un beacheur.";
+      return;
+    }
 
     const opt = beacheurSelect.selectedOptions?.[0];
-    const beacheurName = opt?.dataset?.name || opt?.textContent || "";
-    const teamName = opt?.dataset?.team || "";
+    const name = opt?.dataset?.name || "";
+    const team = opt?.dataset?.team || "";
 
     setOrderEnabled(false);
-    orderStatus.textContent = "Enregistrement…";
+    orderStatus.textContent="Enregistrement…";
 
     try{
-      await upsertCumulativeOrder({ beacheurKey:key, beacheurName, teamName, addQty:qty });
+      const res = await createOrderOnce({
+        beacheurKey:key,
+        beacheurName:name,
+        teamName:team,
+        qty
+      });
+
+      if(!res.ok){
+        alert("⚠️ Tu as déjà une commande.\n\nVa dans l’onglet “📦 Commandes” pour la modifier.");
+        setOrderEnabled(true);
+        orderStatus.textContent="";
+        show(panelCommandes, tabCommandes);
+        return;
+      }
 
       orderForm.reset();
-      orderForm.style.display = "none";
-      orderDone.style.display = "block";
-      orderDoneText.innerHTML = `
-        <b>${esc(beacheurName)}</b>${teamName ? " ("+esc(teamName)+")" : ""}<br>
-        Ajout : <b>+${esc(String(qty))}</b> pack(s).
+      orderForm.style.display="none";
+      orderDone.style.display="block";
+      orderDoneText.innerHTML=`
+        <b>${esc(name)}</b>${team ? " ("+esc(team)+")" : ""}<br>
+        Commande : <b>${qty}</b> pack(s).
       `;
-      orderStatus.textContent = "";
+
+      orderStatus.textContent="";
     }catch(err){
       console.error(err);
       setOrderEnabled(true);
-      orderStatus.textContent = "❌ Erreur : impossible d’enregistrer la commande.";
+      orderStatus.textContent="❌ Erreur.";
     }
   });
 
-  // ===== Commandes
-  const ordersQ = query(collection(db, COL_ORDERS), orderBy("beacheurName","asc"));
+  // =========================
+  // Modifier commande
+  // =========================
+  async function updateOrderQty(id,newQty){
+    await updateDoc(doc(db,COL_ORDERS,id),{
+      qty:newQty,
+      total:newQty*UNIT_PRICE,
+      updatedAt:serverTimestamp()
+    });
+  }
+
+  const ordersQ=query(collection(db,COL_ORDERS),orderBy("beacheurName","asc"));
+
   onSnapshot(ordersQ,(snap)=>{
     const rows=[];
-    snap.forEach(d=> rows.push(d.data() || {}));
+    snap.forEach(d=>{
+      const x=d.data()||{};
+      rows.push({
+        id:d.id,
+        name:x.beacheurName,
+        team:x.teamName,
+        qty:x.qty,
+        total:x.total
+      });
+    });
 
     if(!rows.length){
-      ordersList.innerHTML="<p class='muted' style='margin:0;'>Aucune commande.</p>";
+      ordersList.innerHTML="<p class='muted'>Aucune commande.</p>";
       ordersStatus.textContent="🟢 En direct — 0 commande";
       return;
     }
 
-    ordersList.innerHTML = rows.map((r,i)=>`
+    ordersList.innerHTML=rows.map((r,i)=>`
       <div class="order-row">
-        <div class="order-num">#${i+1}</div>
-        <div class="order-name">${esc(r.beacheurName || "—")}</div>
-        <div class="order-total">${esc(String(r.total ?? 0))} €</div>
+        <div>#${i+1}</div>
+        <div>
+          <div style="font-weight:900;">
+            ${esc(r.name)}
+            ${r.team ? `<span class="muted">(${esc(r.team)})</span>` : ""}
+          </div>
+          <div class="muted">Qté : <b>${r.qty}</b></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:900;">${r.total} €</div>
+          <button class="btn" data-edit="${r.id}" style="margin-top:6px;">
+            ✏️ Modifier
+          </button>
+        </div>
       </div>
     `).join("");
 
-    ordersStatus.textContent = `🟢 En direct — ${rows.length} commande(s)`;
-  }, (e)=>{
-    console.error(e);
-    ordersStatus.textContent="🔴 Erreur de connexion";
-    ordersList.innerHTML="<p class='muted' style='margin:0;'>Erreur de connexion.</p>";
+    ordersStatus.textContent=`🟢 En direct — ${rows.length} commande(s)`;
+
+    ordersList.querySelectorAll("[data-edit]").forEach(btn=>{
+      btn.onclick=async ()=>{
+        const id=btn.dataset.edit;
+        const row=rows.find(r=>r.id===id);
+        const v=prompt("Nouvelle quantité :",row.qty);
+        if(v===null) return;
+        const n=Number(v);
+        if(!Number.isFinite(n)||n<1) return alert("Quantité invalide");
+        await updateOrderQty(id,n);
+        alert("✅ Commande modifiée");
+      };
+    });
+
   });
 </script>
-
-</body>
-</html>
