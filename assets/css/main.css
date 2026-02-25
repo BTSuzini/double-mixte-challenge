@@ -115,6 +115,8 @@ a, button{
   display:block;
 }
 
+/* Par défaut, le centre est un titre texte.
+   (Sur le bandeau “général” on mettra une image dans ce bloc, et ça marchera pareil.) */
 .brand-title{
   margin:0;
   text-align:center;
@@ -175,9 +177,10 @@ a, button{
 }
 
 /* =========================================================
-   BANDEAU “GÉNÉRAL”
-   - centre = image (challenge-gen.png)
-   - nav: 2 lignes fixes (3x2), aligné gauche/centre/droite
+   BANDEAU “GÉNÉRAL” (référence)
+   - centre = image (challenge-gen.png) dans le bloc .brand-title
+   - nav: 2 lignes fixes (3x2)
+   - 1 & 4 alignés gauche, 2 & 5 centrés, 3 & 6 alignés droite
    - pills largeur au texte (pas uniformes)
    ========================================================= */
 
@@ -185,6 +188,7 @@ a, button{
   grid-template-columns: var(--logo-size) 1fr var(--logo-size);
 }
 
+/* Optionnel si tu utilises un wrapper dédié (sinon tu peux juste mettre l'image dans .brand-title) */
 .general-title-wrap{
   display:flex;
   align-items:center;
@@ -201,16 +205,11 @@ a, button{
   filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
 }
 
-/* ✅ LA NAV QUE TU VEUX :
-   - 2 lignes fixes (6 items)
-   - 3 colonnes qui remplissent toute la largeur
-   - items: col1 gauche, col2 centre, col3 droite
-   - pills: largeur au texte
-*/
+/* ✅ NAV GÉNÉRAL : 2 lignes fixes, justifiée gauche/centre/droite */
 .nav.nav-general{
   margin-top:16px;
   display:grid;
-  grid-template-columns: 1fr 1fr 1fr; /* force 3 items par ligne => 2 lignes */
+  grid-template-columns: 1fr 1fr 1fr; /* 3 items par ligne => 2 lignes */
   column-gap: var(--nav-general-gap-x);
   row-gap: var(--nav-general-gap-y);
   align-items:center;
@@ -218,12 +217,12 @@ a, button{
 
 .nav.nav-general a{
   padding: var(--nav-general-pad-y) var(--nav-general-pad-x);
-  width: fit-content;         /* ✅ pas de largeur égale */
+  width: fit-content;     /* ✅ largeur au texte */
   max-width: 100%;
   text-align:center;
 }
 
-/* Alignement colonne 1 / 2 / 3 (et donc 4 / 5 / 6 pareil) */
+/* Alignement par colonne : 1/4 gauche, 2/5 centre, 3/6 droite */
 .nav.nav-general a:nth-child(3n+1){ justify-self:start; }  /* 1,4 */
 .nav.nav-general a:nth-child(3n+2){ justify-self:center; } /* 2,5 */
 .nav.nav-general a:nth-child(3n){   justify-self:end; }    /* 3,6 */
