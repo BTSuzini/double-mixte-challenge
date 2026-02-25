@@ -325,30 +325,59 @@
     `;
   }
 
+  // ✅ FIX: la liste principale est TOUJOURS limitée à 8.
+  // Si quelqu’un a mis "list=main" sur trop d’équipes, le surplus bascule en attente.
+  // "list=wait" force l’attente (même si l’équipe fait partie des 8 premières).
   function computeLists(rows){
     rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
 
-    const forcedMain = rows.filter(r => r.list === "main");
     const forcedWait = rows.filter(r => r.list === "wait");
+    const forcedMain = rows.filter(r => r.list === "main");
     const auto = rows.filter(r => !r.list);
 
+    const waitIds = new Set(forcedWait.map(r => r.id)); // priorité absolue
+
     const main = [];
+    const wait = [];
     const used = new Set();
 
-    for(const r of forcedMain){
-      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
-    }
-    for(const r of auto){
-      if(main.length >= MAX_MAIN) break;
-      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
+    // 1) Wait forcée
+    for(const r of forcedWait){
+      if(!used.has(r.id)){
+        wait.push(r);
+        used.add(r.id);
+      }
     }
 
-    const wait = [];
-    for(const r of forcedWait){
-      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+    // 2) Main forcée (mais cap à 8 et exclut ceux forcés en wait)
+    for(const r of forcedMain){
+      if(waitIds.has(r.id)) continue;
+      if(used.has(r.id)) continue;
+      if(main.length < MAX_MAIN){
+        main.push(r);
+      }else{
+        wait.push(r); // surplus -> attente
+      }
+      used.add(r.id);
     }
+
+    // 3) Auto (par ordre d’inscription) jusqu’à 8
+    for(const r of auto){
+      if(used.has(r.id)) continue;
+      if(main.length < MAX_MAIN){
+        main.push(r);
+      }else{
+        wait.push(r);
+      }
+      used.add(r.id);
+    }
+
+    // 4) Filet de sécurité : tout le reste non utilisé -> attente
     for(const r of rows){
-      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+      if(!used.has(r.id)){
+        wait.push(r);
+        used.add(r.id);
+      }
     }
 
     return { main, wait };
