@@ -20,6 +20,8 @@
       box-shadow: 0 12px 30px rgba(0,0,0,.25);
     }
     .tv-top .container{ max-width: 1400px; width: 100%; }
+
+    /* ✅ TOP: uniquement des images (pas de texte) */
     .tv-top-row{
       display:grid;
       grid-template-columns: 120px 1fr 120px;
@@ -27,20 +29,55 @@
       gap:16px;
       padding: 14px 0;
     }
-    .tv-logo{ width:120px; height:120px; display:flex; align-items:center; justify-content:center; }
+    .tv-logo{
+      width:120px; height:120px;
+      display:flex; align-items:center; justify-content:center;
+    }
     .tv-logo img{
-      width:100%; height:100%; object-fit:contain;
+      width:100%; height:100%;
+      object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
     }
-    .tv-title{
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:6px; color:#fff; text-align:center; padding: 6px 10px; min-height: 120px;
+    .tv-center{
+      min-height:120px;
+      display:grid;
+      grid-template-columns: 1fr 140px 1fr;
+      align-items:center;
+      gap:14px;
+      padding: 6px 10px;
     }
-    .tv-title h1{
-      margin:0; font-size: 34px; letter-spacing:.2px; font-weight: 1000;
-      text-shadow: 0 2px 0 rgba(0,0,0,.22);
+    .tv-center .mid{
+      display:flex; align-items:center; justify-content:center;
     }
-    .tv-title .sub{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-weight:900; opacity:.95; }
+    .tv-center .mid img{
+      width:min(520px, 100%);
+      max-height:110px;
+      height:auto;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
+    }
+    .tv-center .side{
+      display:flex; align-items:center; justify-content:center;
+      height:100%;
+    }
+    .tv-center .side img{
+      width:120px; height:120px;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
+      opacity:.98;
+    }
+
+    /* ✅ Rangée KPI/horloge sous les images */
+    .tv-subrow{
+      padding: 0 0 14px;
+    }
+    .tv-subrow-inner{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      color:#fff;
+    }
     .tv-pill{
       display:inline-flex; align-items:center; gap:8px;
       padding:8px 12px; border-radius:999px;
@@ -48,6 +85,8 @@
       background: rgba(255,255,255,.12);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
       white-space:nowrap;
+      font-weight:900;
+      opacity:.98;
     }
 
     /* ===== Main split ===== */
@@ -86,7 +125,7 @@
     .muted{ color:#666; font-weight:800; }
     .kpis{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
-    /* ===== Left: match cards ===== */
+    /* ===== LEFT 2/3 : Split par court ===== */
     .left-body{
       padding: 12px 12px;
       overflow:auto;
@@ -94,59 +133,118 @@
       flex-direction:column;
       gap:12px;
     }
-    .block-title{
-      font-weight:1000;
-      font-size:16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin: 2px 0 6px;
+    .courts-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      align-items:stretch;
+      min-height:0;
     }
-    .match-grid{ display:grid; grid-template-columns: 1fr; gap:10px; }
-    .mcard{
+    .court-col{
       border:1px solid #eee;
       border-radius:16px;
-      padding:12px 12px;
       background:#fff;
       box-shadow: 0 10px 26px rgba(0,0,0,.05);
-      display:grid;
-      grid-template-columns: 110px 1fr 160px;
-      gap:12px;
-      align-items:center;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
     }
-    .m-meta{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-    .court{ font-weight:1000; font-size:16px; display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .time{ font-weight:900; color:#666; white-space:nowrap; }
-    .m-main{ min-width:0; display:flex; flex-direction:column; gap:6px; }
-    .teams{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-    .team{
+    .court-head{
+      padding:12px 12px;
+      background:#fbfbfb;
+      border-bottom:1px solid #eee;
       font-weight:1000;
       font-size:18px;
-      line-height:1.15;
+      display:flex;
+      align-items:center;
+      gap:10px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .m-right{
+    .court-body{
+      padding:10px 10px 12px;
       display:flex;
       flex-direction:column;
-      align-items:flex-end;
+      gap:10px;
+      min-height:0;
+    }
+
+    /* ===== Match card (par court) ===== */
+    .mcard2{
+      border:1px solid #eee;
+      border-radius:14px;
+      padding:10px 10px;
+      background:#fff;
+      display:grid;
+      grid-template-columns: 86px 1fr 140px;
+      gap:10px;
+      align-items:stretch;
+    }
+    .m-time{
+      font-weight:1000;
+      color:#111;
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      font-size:18px;
+    }
+    .m-teams{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
       gap:8px;
+      justify-content:center;
+    }
+    .trow{
+      display:grid;
+      grid-template-columns: 1fr 46px;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .tname{
+      font-weight:1000;
+      font-size:18px;
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tpts{
+      font-weight:1000;
+      font-size:18px;
+      text-align:right;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+      color:#111;
+    }
+    .m-sets{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+      font-weight:1000;
+      font-size:18px;
+      color:#111;
       white-space:nowrap;
     }
-    .state{
-      font-weight:1000;
+    .setbox{
+      padding:6px 10px;
       border-radius:999px;
-      padding:8px 10px;
       border:1px solid #eee;
       background:#fafafa;
+      font-variant-numeric: tabular-nums;
     }
-    .state.live{ border-color:#bfe9c8; background:#ecfff0; }
-    .state.done{ border-color:#cfe3ff; background:#eef5ff; }
-    .score{ font-weight:1000; font-size:22px; letter-spacing:.3px; }
+    .placeholder{
+      color:#777;
+      font-weight:900;
+      padding:10px 4px;
+    }
 
-    /* ===== Right: tableaux rotator (inchangé) ===== */
+    /* ===== Right: tableaux rotator ===== */
     .right-body{
       padding: 12px 12px;
       overflow:hidden;
@@ -169,7 +267,7 @@
     .tv-table th, .tv-table td{ border:1px solid #eee; padding:8px 8px; text-align:left; vertical-align:top; }
     .tv-table th{ background:#fafafa; font-weight:1000; }
 
-    /* ===== Sponsors bandeau ===== */
+    /* ===== Sponsors bandeau (sans cadre, taille max) ===== */
     .tv-bottom{
       background:#0d1310;
       border-top:1px solid rgba(255,255,255,.10);
@@ -179,7 +277,7 @@
     }
     .sponsor-track{
       display:flex;
-      gap:22px;
+      gap:36px;
       align-items:center;
       white-space:nowrap;
       will-change: transform;
@@ -189,19 +287,18 @@
     .sponsor-item{
       display:inline-flex;
       align-items:center;
-      gap:10px;
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-weight:1000;
+      justify-content:center;
+      padding:0;
+      border:none;
+      background:transparent;
     }
     .sponsor-item img{
-      height:28px;
+      height:42px; /* ✅ taille max */
       width:auto;
       object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25));
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.35));
     }
+
     @keyframes marquee{
       0%{ transform: translateX(0); }
       100%{ transform: translateX(-200%); }
@@ -222,17 +319,34 @@
           <img src="../assets/img/logo-suzini.png" alt="Suzini">
         </div>
 
-        <div class="tv-title">
-          <h1 id="tvTitle">Double Mixte Challenge — TV</h1>
-          <div class="sub">
-            <span class="tv-pill" id="tvEtape">Étape : —</span>
-            <span class="tv-pill" id="tvClock">⏱️ —</span>
-            <span class="tv-pill" id="tvStatus">🟢 En direct</span>
+        <!-- ✅ centre : challenge / étape / challenge (images) -->
+        <div class="tv-center" aria-label="Bandeau images">
+          <div class="side">
+            <img src="../assets/img/logo-challenge.png" alt="Challenge">
+          </div>
+
+          <div class="mid">
+            <img src="../assets/img/etape1.png" alt="Étape 1">
+          </div>
+
+          <div class="side">
+            <img src="../assets/img/logo-challenge.png" alt="Challenge">
           </div>
         </div>
 
         <div class="tv-logo">
           <img src="../assets/img/logo-challenge.png" alt="Challenge">
+        </div>
+      </div>
+
+      <!-- ✅ KPI / horloge (compteurs = totaux) -->
+      <div class="tv-subrow">
+        <div class="tv-subrow-inner">
+          <span class="tv-pill" id="tvClock">⏱️ —</span>
+          <span class="tv-pill" id="tvStatus">🟢 En direct</span>
+          <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
+          <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
+          <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
         </div>
       </div>
     </div>
@@ -244,28 +358,23 @@
     <!-- LEFT 2/3 -->
     <section class="panel">
       <div class="panel-head">
-        <h2>🎾 Matchs — Terminés / En cours / À venir</h2>
+        <h2>🎾 Matchs par court</h2>
         <div class="kpis">
-          <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
-          <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
-          <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
+          <span class="tv-pill" id="hintTotals">Totaux (tous matchs)</span>
         </div>
       </div>
 
       <div class="left-body">
-        <div>
-          <div class="block-title">✅ Derniers matchs terminés <span class="muted" id="doneHint">—</span></div>
-          <div class="match-grid" id="doneList"></div>
-        </div>
+        <div class="courts-grid">
+          <div class="court-col">
+            <div class="court-head" id="courtLeftTitle">—</div>
+            <div class="court-body" id="courtLeftBody"></div>
+          </div>
 
-        <div>
-          <div class="block-title">🟠 Matchs en cours <span class="muted" id="liveHint">—</span></div>
-          <div class="match-grid" id="liveList"></div>
-        </div>
-
-        <div>
-          <div class="block-title">⏭️ Prochains matchs <span class="muted" id="nextHint">—</span></div>
-          <div class="match-grid" id="nextList"></div>
+          <div class="court-col">
+            <div class="court-head" id="courtRightTitle">—</div>
+            <div class="court-body" id="courtRightBody"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -308,31 +417,19 @@
     query, orderBy, limit
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // =========================================================
-  // PARAMS
-  // URL TV : .../tv/tv1.html?etape=etape1
-  // default = etape1
-  // =========================================================
   const params = new URLSearchParams(location.search);
   const etapeId = (params.get("etape") || "etape1").toLowerCase();
 
-  // ✅ Programmation PUBLIC (on tente plusieurs emplacements)
-  // 1) programmations_public/{etape}
-  // 2) programmationsPublic/{etape}
-  // 3) programmations/{etape} (fallback)
+  // Programmation PUBLIC (fallbacks)
   const PROG_REFS = [
     doc(db, "programmations_public", etapeId),
     doc(db, "programmationsPublic", etapeId),
     doc(db, "programmations", etapeId),
   ];
-
   const DOC_TIRAGE = doc(db, "tirages", etapeId);
-
-  // ✅ Résultats
   const COL_RESULTS = `resultats_${etapeId}`;
 
   // UI refs
-  const tvEtape = document.getElementById("tvEtape");
   const tvClock = document.getElementById("tvClock");
   const tvStatus = document.getElementById("tvStatus");
 
@@ -340,21 +437,15 @@
   const kpiLive = document.getElementById("kpiLive");
   const kpiNext = document.getElementById("kpiNext");
 
-  const doneList = document.getElementById("doneList");
-  const liveList = document.getElementById("liveList");
-  const nextList = document.getElementById("nextList");
-
-  const doneHint = document.getElementById("doneHint");
-  const liveHint = document.getElementById("liveHint");
-  const nextHint = document.getElementById("nextHint");
+  const courtLeftTitle  = document.getElementById("courtLeftTitle");
+  const courtRightTitle = document.getElementById("courtRightTitle");
+  const courtLeftBody   = document.getElementById("courtLeftBody");
+  const courtRightBody  = document.getElementById("courtRightBody");
 
   const rotTitle = document.getElementById("rotTitle");
   const rotIndex = document.getElementById("rotIndex");
   const rotBox   = document.getElementById("rotBox");
-
   const sponsorTrack = document.getElementById("sponsorTrack");
-
-  tvEtape.textContent = "Étape : " + etapeId.toUpperCase();
 
   // Clock
   function tickClock(){
@@ -372,44 +463,74 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // =========================================================
-  // Sponsors bandeau (ordre EXACT demandé)
-  // =========================================================
+  // Sponsors (ordre demandé) — sans cadre
   const SPONSOR_LOGOS = [
-    "../assets/img/brico.png",
-    "../assets/img/bt-fft.png",
-    "../assets/img/matoque.png",
-    "../assets/img/tcs.png",
-    "../assets/img/brico.png",
+    "../assets/img/sponsors/bricolage.png",
+    "../assets/img/sponsors/BT-FFT.png",
+    "../assets/img/sponsors/matoque.png",
+    "../assets/img/sponsors/tcs.png",
+    "../assets/img/sponsors/brico.png",
     "../assets/img/logo-suzini.png",
-    "../assets/img/psk.png",
-    "../assets/img/lobstars.png",
+    "../assets/img/sponsors/psk.png",
   ];
   sponsorTrack.innerHTML = (SPONSOR_LOGOS.concat(SPONSOR_LOGOS)).map((src)=>`
-    <span class="sponsor-item">
-      <img src="${esc(src)}" alt="sponsor">
-    </span>
+    <span class="sponsor-item"><img src="${esc(src)}" alt="sponsor"></span>
   `).join("");
 
-  // =========================================================
-  // DATA STATE
-  // =========================================================
-  let prog = null;                 // programmation PUBLIC
-  let resultsMap = new Map();      // matchId -> result doc
+  // Data state
+  let prog = null;
+  let resultsMap = new Map();
   let tableaux = [];
   let rotPtr = 0;
   let rotTimer = null;
 
-  // =========================================================
-  // Helpers: programme (format V3) => matches ordonnés
-  // =========================================================
+  // ===== Programmation V3 helpers =====
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
+  function courtLabel(p, courtKey){
+    const name = p?.courts?.[courtKey] || courtKey || "—";
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name}`;
+  }
+
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    return { title: t.teamName || "Équipe", sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}` };
+  }
+  function teamRefParts(p, ref){
+    if(!ref) return { title:"—", sub:"" };
+    if(ref.type === "team"){
+      const t = p?.teams?.[ref.key] || null;
+      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
+    }
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+    return { title:"—", sub:"" };
+  }
+  function teamLine(x){
+    if(!x) return "—";
+    return x.sub ? `${x.title} (${x.sub})` : x.title;
+  }
+
   function getProgMatchesV3(p){
     if(!p) return [];
     const matches = p.matches || {};
     const slots = Array.isArray(p.slots) ? p.slots : [];
     const schedule = p.schedule || {};
 
-    // slot -> matchId
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
       const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
@@ -444,57 +565,9 @@
     return out;
   }
 
-  function normalizeScheduleEntry(entry, slotObj){
-    if(typeof entry === "number"){
-      const slot = Number(entry);
-      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
-      return { slot, court };
-    }
-    if(entry && typeof entry === "object"){
-      const slot = Number(entry.slot);
-      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
-      return { slot, court };
-    }
-    const fallbackSlot = Number(slotObj?.slot || 1);
-    return { slot: fallbackSlot, court: slotObj?.court || "A" };
-  }
-
-  function courtLabel(p, courtKey){
-    const name = p?.courts?.[courtKey] || courtKey || "—";
-    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
-    return `${emo} ${name}`;
-  }
-
-  function teamPartsFromTeam(t){
-    if(!t) return { title:"—", sub:"" };
-    return { title: t.teamName || "Équipe", sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}` };
-  }
-
-  function teamRefParts(p, ref){
-    if(!ref) return { title:"—", sub:"" };
-    if(ref.type === "team"){
-      const t = p?.teams?.[ref.key] || null;
-      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
-    }
-    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
-    return { title:"—", sub:"" };
-  }
-
-  function teamLine(x){
-    if(!x) return "—";
-    return x.sub ? `${x.title} (${x.sub})` : x.title;
-  }
-
-  // =========================================================
-  // Résultats: validé = winnerSide A/B (ton modèle admin)
-  // Score = sets (s1/s2/s3) si présents
-  // =========================================================
+  // ===== Résultats helpers (validé = winnerSide A/B) =====
   function getResultForMatch(id){ return resultsMap.get(id) || null; }
-
-  function isValidatedResult(r){
-    return !!r && (r.winnerSide === "A" || r.winnerSide === "B");
-  }
+  function isValidatedResult(r){ return !!r && (r.winnerSide === "A" || r.winnerSide === "B"); }
 
   function setPair(a,b){
     const A = (a === null || a === undefined || a === "") ? null : String(a).trim();
@@ -503,172 +576,161 @@
     return `${A}-${B}`;
   }
 
-  function fmtScoreFromSets(r){
-    if(!r) return "—";
-    // accepte anciens champs éventuels "score"
-    if(typeof r.score === "string" && r.score.trim()) return r.score.trim();
-
-    const s1 = setPair(r.s1A, r.s1B);
-    const s2 = setPair(r.s2A, r.s2B);
-    const s3 = setPair(r.s3A, r.s3B);
-    const parts = [s1,s2,s3].filter(Boolean);
-    return parts.length ? parts.join("  ") : "—";
+  // ✅ points par équipe (sets gagnés) + chips set
+  function computeSets(r){
+    const pairs = [
+      { A:r?.s1A, B:r?.s1B },
+      { A:r?.s2A, B:r?.s2B },
+      { A:r?.s3A, B:r?.s3B },
+    ];
+    let ptsA = 0, ptsB = 0;
+    const chips = [];
+    for(const p of pairs){
+      const a = Number(p.A);
+      const b = Number(p.B);
+      if(!Number.isFinite(a) || !Number.isFinite(b)) continue;
+      if(a > b) ptsA++;
+      if(b > a) ptsB++;
+      chips.push(`${a}-${b}`);
+    }
+    return { ptsA, ptsB, chips };
   }
 
-  // =========================================================
-  // UI cards
-  // =========================================================
-  function fmtShortTime(m){ return m.time ? `🕘 ${m.time}` : ""; }
+  function fmtTime(m){ return m.time || "—"; }
 
-  function mCard(m, state, score){
-    const cls = state === "live" ? "state live" : state === "done" ? "state done" : "state";
-    const lab = state === "live" ? "EN COURS" : state === "done" ? "TERMINÉ" : "À VENIR";
+  function matchCardPerCourt(m, kind){ // kind: done|live|next (utilisé seulement pour logique)
+    const r = getResultForMatch(m.id);
+    const validated = isValidatedResult(r);
+
+    const { ptsA, ptsB, chips } = validated ? computeSets(r) : { ptsA:"—", ptsB:"—", chips:[] };
+
     return `
-      <div class="mcard">
-        <div class="m-meta">
-          <div class="court">${esc(m.court)}</div>
-          <div class="time">${esc(fmtShortTime(m))}</div>
-        </div>
+      <div class="mcard2">
+        <div class="m-time">🕘 ${esc(fmtTime(m))}</div>
 
-        <div class="m-main">
-          <div class="teams">
-            <div class="team">${esc(m.aLabel || "—")}</div>
-            <div class="team">${esc(m.bLabel || "—")}</div>
+        <div class="m-teams">
+          <div class="trow">
+            <div class="tname">${esc(m.aLabel || "—")}</div>
+            <div class="tpts">${esc(ptsA)}</div>
+          </div>
+          <div class="trow">
+            <div class="tname">${esc(m.bLabel || "—")}</div>
+            <div class="tpts">${esc(ptsB)}</div>
           </div>
         </div>
 
-        <div class="m-right">
-          <div class="${cls}">${esc(lab)}</div>
-          <div class="score">${esc(score || "—")}</div>
+        <div class="m-sets">
+          ${
+            chips.length
+              ? chips.map(s => `<span class="setbox">${esc(s)}</span>`).join("")
+              : `<span class="setbox">—</span>`
+          }
         </div>
       </div>
     `;
   }
 
-  // =========================================================
-  // Filtrage demandé:
-  // - 2 matchs VALIDÉS (avec résultat) => "terminés"
-  // - 4 matchs NON validés:
-  //    * 2 premiers = matchs en cours
-  //    * 2 suivants = matchs à venir
-  // =========================================================
-  function computeView(){
+  // ===== KPI totaux (pas la vue filtrée) =====
+  function computeTotals(allMatches){
+    const total = allMatches.length;
+    const validated = allMatches.filter(m => isValidatedResult(getResultForMatch(m.id))).length;
+    const remaining = total - validated;
+
+    // ✅ en cours = 2 sauf cas (reste 1 => 1, reste 0 => 0)
+    const live = remaining <= 0 ? 0 : (remaining === 1 ? 1 : 2);
+    const next = Math.max(0, remaining - live);
+
+    kpiDone.textContent = `✅ Terminés : ${validated}`;
+    kpiLive.textContent = `🟠 En cours : ${live}`;
+    kpiNext.textContent = `⏭️ À venir : ${next}`;
+  }
+
+  // ===== Rendu par court: 1 terminé + 1 en cours + 1 à venir =====
+  function computeCourtBlocks(){
     const matches = getProgMatchesV3(prog);
 
-    if(matches.length === 0){
-      doneList.innerHTML = `<p class="muted" style="margin:0;">Programmation publique introuvable / vide.</p>`;
-      liveList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      nextList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
-      kpiDone.textContent = "✅ Terminés : 0";
-      kpiLive.textContent = "🟠 En cours : 0";
-      kpiNext.textContent = "⏭️ À venir : 0";
-      doneHint.textContent = "—";
-      liveHint.textContent = "—";
-      nextHint.textContent = "—";
+    if(!matches.length){
+      courtLeftTitle.textContent = "—";
+      courtRightTitle.textContent = "—";
+      courtLeftBody.innerHTML = `<div class="placeholder">Programmation publique introuvable / vide.</div>`;
+      courtRightBody.innerHTML = `<div class="placeholder">—</div>`;
+      computeTotals([]);
       return;
     }
 
-    // enrich match with result flags
-    const enriched = matches.map(m=>{
-      const r = getResultForMatch(m.id);
-      const validated = isValidatedResult(r);
-      const score = validated ? fmtScoreFromSets(r) : "—";
-      const ts = r?.updatedAt || r?.createdAt || null;
-      return { ...m, r, validated, score, ts };
-    });
+    // titres courts (avec emojis inclus)
+    const courtAName = courtLabel(prog, "A");
+    const courtBName = courtLabel(prog, "B");
 
-    // DONE = 2 derniers validés (tri updatedAt desc fallback slot desc)
-    const doneAll = enriched.filter(x => x.validated);
-    doneAll.sort((a,b)=>{
-      const ta = a.ts?.toDate ? a.ts.toDate().getTime() : 0;
-      const tb = b.ts?.toDate ? b.ts.toDate().getTime() : 0;
-      if(tb !== ta) return tb - ta;
-      return (b.slot||0) - (a.slot||0);
-    });
-    const done2 = doneAll.slice(0, 2);
+    // Placement demandé:
+    // Lisa à gauche, Manon à droite (conforme à ta consigne)
+    // Or dans ton defaultCourts: A=Manon, B=Lisa. Donc:
+    // Left = court B, Right = court A.
+    courtLeftTitle.textContent = courtBName;
+    courtRightTitle.textContent = courtAName;
 
-    // PENDING = non validés
-    const pending = enriched.filter(x => !x.validated);
+    // Totaux
+    computeTotals(matches);
 
-    // "en cours" = 1er match pending par courtKey (A/B), max 2
-    const byCourt = new Map();
-    for(const m of pending){
-      const k = m.courtKey || "X";
-      if(!byCourt.has(k)) byCourt.set(k, []);
-      byCourt.get(k).push(m);
+    // group by courtKey
+    const byCourt = new Map([["A",[]],["B",[]]]);
+    for(const m of matches){
+      if(!byCourt.has(m.courtKey)) byCourt.set(m.courtKey, []);
+      byCourt.get(m.courtKey).push(m);
     }
     for(const [k, arr] of byCourt){
-      arr.sort((a,b)=> (a.slot||0) - (b.slot||0));
+      arr.sort((x,y)=> (x.slot||0) - (y.slot||0));
     }
 
-    const live = [];
-    const usedIds = new Set();
+    function pickForCourt(courtKey){
+      const arr = byCourt.get(courtKey) || [];
+      const done = arr.filter(m => isValidatedResult(getResultForMatch(m.id)));
+      const pending = arr.filter(m => !isValidatedResult(getResultForMatch(m.id)));
 
-    // ordre A puis B (si existe)
-    const courtOrder = ["A","B"];
-    for(const k of courtOrder){
-      const arr = byCourt.get(k) || [];
-      if(arr[0]){
-        live.push(arr[0]);
-        usedIds.add(arr[0].id);
-      }
-    }
-    // si pas assez (cas edge), complète avec les plus tôt
-    if(live.length < 2){
-      const rest = pending.filter(x=>!usedIds.has(x.id)).sort((a,b)=>(a.slot||0)-(b.slot||0));
-      for(const x of rest){
-        if(live.length >= 2) break;
-        live.push(x); usedIds.add(x.id);
-      }
-    }
+      // 1 terminé = dernier validé (par updatedAt/createdAt sinon slot)
+      done.sort((a,b)=>{
+        const ra = getResultForMatch(a.id) || {};
+        const rb = getResultForMatch(b.id) || {};
+        const ta = ra.updatedAt || ra.createdAt || null;
+        const tb = rb.updatedAt || rb.createdAt || null;
+        const da = ta?.toDate ? ta.toDate().getTime() : 0;
+        const db = tb?.toDate ? tb.toDate().getTime() : 0;
+        if(db !== da) return db - da;
+        return (b.slot||0)-(a.slot||0);
+      });
+      const done1 = done[0] || null;
 
-    // "à venir" = 2 suivants après les live (priorité: même court, puis global)
-    const next = [];
-    // 1) suivant dans chaque court (après le live de ce court)
-    for(const x of live){
-      const arr = byCourt.get(x.courtKey) || [];
-      const idx = arr.findIndex(z => z.id === x.id);
-      const cand = (idx >= 0) ? arr[idx+1] : null;
-      if(cand && !usedIds.has(cand.id) && next.length < 2){
-        next.push(cand);
-        usedIds.add(cand.id);
-      }
-    }
-    // 2) complète globalement si besoin
-    if(next.length < 2){
-      const rest = pending.filter(x=>!usedIds.has(x.id)).sort((a,b)=>(a.slot||0)-(b.slot||0));
-      for(const x of rest){
-        if(next.length >= 2) break;
-        next.push(x); usedIds.add(x.id);
-      }
+      // 1 en cours = premier pending
+      const live1 = pending[0] || null;
+
+      // 1 à venir = suivant après live
+      const next1 = pending[1] || null;
+
+      return { done1, live1, next1 };
     }
 
-    // Render (2 / 2 / 2)
-    doneList.innerHTML = done2.length
-      ? done2.map(m => mCard(m, "done", m.score)).join("")
-      : `<p class="muted" style="margin:0;">Aucun match terminé (validé).</p>`;
+    const left = pickForCourt("B");  // Lisa
+    const right = pickForCourt("A"); // Manon
 
-    liveList.innerHTML = live.length
-      ? live.slice(0,2).map(m => mCard(m, "live", "—")).join("")
-      : `<p class="muted" style="margin:0;">Aucun match en cours.</p>`;
+    function renderBlock(x){
+      const parts = [];
+      if(x.done1) parts.push(matchCardPerCourt(x.done1, "done"));
+      else parts.push(`<div class="placeholder">Aucun match terminé.</div>`);
 
-    nextList.innerHTML = next.length
-      ? next.slice(0,2).map(m => mCard(m, "next", "—")).join("")
-      : `<p class="muted" style="margin:0;">Aucun match à venir.</p>`;
+      if(x.live1) parts.push(matchCardPerCourt(x.live1, "live"));
+      else parts.push(`<div class="placeholder">Aucun match en cours.</div>`);
 
-    // KPIs (selon la vue filtrée demandée)
-    kpiDone.textContent = `✅ Terminés : ${done2.length}`;
-    kpiLive.textContent = `🟠 En cours : ${Math.min(2, live.length)}`;
-    kpiNext.textContent = `⏭️ À venir : ${Math.min(2, next.length)}`;
+      if(x.next1) parts.push(matchCardPerCourt(x.next1, "next"));
+      else parts.push(`<div class="placeholder">Aucun match à venir.</div>`);
 
-    doneHint.textContent = done2.length ? "2 derniers validés" : "—";
-    liveHint.textContent = live.length ? "2 premiers non validés" : "—";
-    nextHint.textContent = next.length ? "2 suivants" : "—";
+      return parts.join("");
+    }
+
+    courtLeftBody.innerHTML = renderBlock(left);
+    courtRightBody.innerHTML = renderBlock(right);
   }
 
-  // =========================================================
-  // Tableaux rotator (inchangé)
-  // =========================================================
+  // ===== Tableaux rotator (inchangé) =====
   function normalizeTableaux(obj){
     const arr = Array.isArray(obj?.tableaux) ? obj.tableaux
               : Array.isArray(obj?.tables) ? obj.tables
@@ -692,10 +754,7 @@
 
     rotTitle.textContent = t.title;
 
-    if(t.html){
-      rotBox.innerHTML = t.html;
-      return;
-    }
+    if(t.html){ rotBox.innerHTML = t.html; return; }
 
     if(t.imageUrl){
       rotBox.innerHTML = `
@@ -754,15 +813,14 @@
     }
 
     showIdx(rotPtr);
+
     rotTimer = setInterval(()=>{
       if(!tableaux.length) return;
       showIdx(rotPtr + 1);
     }, 10000);
   }
 
-  // =========================================================
-  // WATCH: prend la première programmation PUBLIC disponible
-  // =========================================================
+  // ===== WATCH programmation: première trouvée =====
   function watchFirstAvailableProgram(refs){
     let decided = false;
     const unsubs = [];
@@ -771,16 +829,15 @@
       if(decided) return;
       decided = true;
 
-      // stop others
       for(let i=0;i<unsubs.length;i++){
         if(i !== whichIdx && typeof unsubs[i] === "function"){
           try{ unsubs[i](); }catch(e){}
         }
       }
+
       tvStatus.textContent = "🟢 En direct";
       prog = data || null;
 
-      // tableaux depuis prog (si dispo)
       const fromProg = normalizeTableaux(prog || {});
       if(fromProg.length){
         tableaux = fromProg;
@@ -789,25 +846,20 @@
         startRotator();
       }
 
-      computeView();
+      computeCourtBlocks();
     }
 
     refs.forEach((ref, idx)=>{
       const u = onSnapshot(ref, (snap)=>{
         if(snap.exists()){
           settleWith(snap.data() || {}, idx);
-        } else {
-          // si aucun ref n'existe, on laisse un fallback (plus bas)
-          if(!decided && idx === refs.length - 1){
-            // dernière tentative non trouvée
-            prog = null;
-            tvStatus.textContent = "🟠 Programmation non trouvée";
-            computeView();
-          }
+        } else if(!decided && idx === refs.length - 1){
+          prog = null;
+          tvStatus.textContent = "🟠 Programmation non trouvée";
+          computeCourtBlocks();
         }
       }, (err)=>{
         console.error(err);
-        // erreur possible sur un ref (rules) => on laisse les autres tenter
       });
       unsubs[idx] = u;
     });
@@ -815,23 +867,20 @@
     return () => { unsubs.forEach(fn => { try{ fn && fn(); }catch(e){} }); };
   }
 
-  // =========================================================
-  // LISTENERS
-  // =========================================================
+  // ===== Subscriptions =====
   watchFirstAvailableProgram(PROG_REFS);
 
   const qRes = query(collection(db, COL_RESULTS), orderBy("updatedAt","desc"), limit(300));
   onSnapshot(qRes, (snap)=>{
     resultsMap = new Map();
     snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
-    computeView();
+    computeCourtBlocks();
     if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
   }, (err)=>{
     console.error(err);
     tvStatus.textContent = "🔴 Erreur résultats";
   });
 
-  // tableaux depuis tirage si prog n'en contient pas
   (async function loadTirageOnce(){
     try{
       const s = await getDoc(DOC_TIRAGE);
