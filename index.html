@@ -11,36 +11,46 @@
 <header class="topbar">
   <div class="container">
 
-    <!-- ===== Bandeau haut (GÉNÉRAL) ===== -->
-    <div class="topbar-row topbar-row-general">
+    <!-- ✅ BANDEAU STANDARD (identique règlement) -->
+    <div class="topbar-row">
+
       <div class="brand-logo">
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <div class="general-title-wrap">
-        <img class="general-title-img"
-             src="assets/img/challenge-gen.png"
-             alt="Suzini Beach Tennis Double Mixte Challenge">
+      <div class="brand-title"
+           style="display:flex;align-items:center;justify-content:center;">
+        <img
+          src="assets/img/challenge-gen.png"
+          alt="Suzini Beach Tennis Double Mixte Challenge"
+          style="
+            width:min(560px,100%);
+            max-height:90px;
+            height:auto;
+            object-fit:contain;
+            display:block;
+            filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));
+          ">
       </div>
 
       <div class="brand-logo">
         <img src="assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
+
     </div>
 
-    <!-- ===== NAVIGATION (référence nav-general) ===== -->
-    <nav class="nav nav-general" aria-label="Navigation générale">
-      <a href="index.html" aria-current="page" aria-label="Accueil" title="Accueil">🏠</a>
+    <!-- NAV identique -->
+    <nav class="nav">
+      <a href="index.html" aria-current="page">🏠</a>
       <a href="pages/reglement.html">📘 Règlement</a>
       <a href="pages/classement.html">🏆 Classement</a>
       <a href="pages/boutique.html">🛍️ Boutique</a>
       <a href="pages/infos.html">📰 Infos</a>
-      <a href="pages/contact.html" aria-label="Contact" title="Contact">📩 📞</a>
+      <a href="pages/contact.html">📩 📞</a>
     </nav>
 
   </div>
 </header>
-
 <main class="container">
 
   <section class="card">
