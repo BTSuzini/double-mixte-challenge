@@ -6,11 +6,12 @@
   <title>TV — Étape 1 — Double Mixte Challenge</title>
 
   <!-- tv/ est 1 niveau plus bas -->
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-tv1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260226-tv1" />
 
   <style>
     /* ===== Layout TV (16:9) ===== */
-    body{ background:#0b0f0c; color:#111; }
+    html, body{ height:100%; }
+    body{ margin:0; background:#0b0f0c; color:#111; overflow-x:hidden; }
     .tv-wrap{ min-height:100vh; display:flex; flex-direction:column; }
 
     /* ===== Top bar (bandeau vert) ===== */
@@ -21,51 +22,33 @@
     }
     .tv-top .container{ max-width: 1400px; width: 100%; }
 
-    /* ✅ TOP: uniquement des images (pas de texte) */
+    /* ✅ TOP: 5 images alignées : logo-suzini / challenge-gen / etape1 / challenge-gen / logo-challenge */
     .tv-top-row{
       display:grid;
-      grid-template-columns: 120px 1fr 120px;
+      grid-template-columns: 120px 120px 1fr 120px 120px;
       align-items:center;
-      gap:16px;
-      padding: 14px 0;
+      gap:12px;
+      padding: 14px 0 10px;
     }
-    .tv-logo{
-      width:120px; height:120px;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .tv-logo img{
-      width:100%; height:100%;
-      object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
-    }
-
-    /* ✅ centre : challenge-gen / etape1 / challenge-gen (images) */
-    .tv-center{
-      min-height:120px;
-      display:grid;
-      grid-template-columns: 140px 1fr 140px; /* côtés fixes, centre flexible */
+    .tv-top-cell{
+      height:120px;
+      display:flex;
       align-items:center;
-      gap:14px;
-      padding: 6px 10px;
+      justify-content:center;
+      min-width:0;
     }
-    .tv-center .mid,
-    .tv-center .side{
-      display:flex; align-items:center; justify-content:center;
-      height:100%;
-    }
-    .tv-center .side img{
-      width:120px; height:120px;
-      object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
-      opacity:.98;
-    }
-    /* ✅ Étape: même HAUTEUR que les logos => largeur auto (plus grand) */
-    .tv-center .mid img{
+    .tv-top-cell img{
+      max-height:120px;
       height:120px;
       width:auto;
       max-width:100%;
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
+    }
+    /* ✅ Etape: même hauteur, largeur auto (plus grand) */
+    .tv-top-cell.mid img{
+      height:120px;
+      width:auto;
     }
 
     /* ✅ Rangée KPI/horloge sous les images */
@@ -99,6 +82,7 @@
       width:100%;
       margin: 0 auto;
       box-sizing:border-box;
+      min-height:0;
     }
 
     .panel{
@@ -122,7 +106,6 @@
     }
     .panel-head h2{ margin:0; font-size:18px; font-weight:1000; }
     .muted{ color:#666; font-weight:800; }
-    .kpis{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
     /* ===== LEFT 2/3 : Split par court (FULL) ===== */
     .left-body{
@@ -131,6 +114,7 @@
       display:flex;
       flex-direction:column;
       gap:12px;
+      min-height:0;
     }
     .courts-grid{
       display:grid;
@@ -191,7 +175,12 @@
       opacity:.95;
     }
 
-    /* ✅ Match card (par court) : heure petite en haut, puis 2 lignes équipes+score */
+    /* ✅ Match card (par court) :
+       - heure petite en haut
+       - 2 lignes équipe A : (nom en gras) puis (prénoms)
+       - idem équipe B
+       - scores (jeux) alignés par set à droite de chaque équipe
+    */
     .mcard2{
       border:1px solid rgba(0,0,0,.10);
       border-radius:16px;
@@ -207,15 +196,22 @@
       font-weight:1000;
       color:#111;
       white-space:nowrap;
-      font-size:14px; /* ✅ réduit */
+      font-size:14px;
       opacity:.85;
     }
-    .trow{
+
+    .teamline{
       display:grid;
-      grid-template-columns: 1fr 54px;
-      gap:12px;
+      grid-template-columns: 1fr 26px 26px 26px;
+      gap:10px;
       align-items:center;
       min-width:0;
+    }
+    .tmeta{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
     }
     .tname{
       font-weight:1000;
@@ -225,30 +221,31 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .tpts{
+    .tsub{
+      font-weight:800;
+      font-size:14px;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .g{
+      text-align:right;
       font-weight:1000;
       font-size:18px;
-      text-align:right;
+      font-variant-numeric: tabular-nums;
       white-space:nowrap;
-      font-variant-numeric: tabular-nums;
-      color:#111;
     }
-    .setline{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-top:2px;
-    }
-    .setbox{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.85);
-      font-variant-numeric: tabular-nums;
+    .sethdr{
+      display:grid;
+      grid-template-columns: 1fr 26px 26px 26px;
+      gap:10px;
+      align-items:end;
+      opacity:.55;
       font-weight:1000;
-      font-size:14px;
-      opacity:.95;
+      font-size:12px;
+      letter-spacing:.4px;
+      margin-top:-2px;
     }
     .placeholder{
       color:#333;
@@ -275,14 +272,88 @@
       padding:10px;
       overflow:auto;
       box-shadow: 0 10px 26px rgba(0,0,0,.05);
+      min-height:0;
     }
-    .tv-table{ width:100%; border-collapse:collapse; font-weight:900; }
-    .tv-table th, .tv-table td{ border:1px solid #eee; padding:8px 8px; text-align:left; vertical-align:top; }
-    .tv-table th{ background:#fafafa; font-weight:1000; }
 
-    /* ===== Sponsors bandeau (sans cadre, taille XXL) ===== */
+    /* ✅ Style “tableau” dans le rotator (reprend l’esprit de la page programmation) */
+    .tv-match-list{ display:flex; flex-direction:column; gap:12px; }
+    .tv-match-card{
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.08);
+      padding:12px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .tv-match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .30); }
+    .tv-match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .22); }
+
+    .tv-m-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .tv-m-time{
+      font-size:13px;
+      font-weight:1000;
+      white-space:nowrap;
+      letter-spacing:.2px;
+    }
+    .tv-m-court{
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+      flex:1;
+    }
+    .tv-teamline{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 22px 22px 24px;
+      gap:8px;
+      align-items:center;
+      min-width:0;
+    }
+    .tv-team-block{ min-width:0; }
+    .tv-team-title{
+      font-size:15px;
+      font-weight:1000;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tv-team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:900;
+      opacity:.75;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tv-sc{
+      text-align:right;
+      font-size:15px;
+      font-weight:1000;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .tv-vs{
+      margin:10px 0 6px;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:2px;
+      opacity:.45;
+      font-size:12px;
+    }
+
+    /* ===== Sponsors bandeau (fond vert comme top, taille XXL) ===== */
     .tv-bottom{
-      background:#0d1310;
+      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
       border-top:1px solid rgba(255,255,255,.10);
       color:#fff;
       padding: 10px 0;
@@ -306,7 +377,7 @@
       background:transparent;
     }
     .sponsor-item img{
-      height:84px; /* ✅ x2 vs 42px */
+      height:84px;
       width:auto;
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
@@ -327,27 +398,26 @@
   <!-- TOP -->
   <header class="tv-top">
     <div class="container">
-      <div class="tv-top-row">
-        <div class="tv-logo">
+
+      <!-- ✅ 5 images -->
+      <div class="tv-top-row" aria-label="Bandeau images">
+        <div class="tv-top-cell">
           <img src="../assets/img/logo-suzini.png" alt="Suzini">
         </div>
 
-        <!-- ✅ centre : challenge-gen / etape1 / challenge-gen -->
-        <div class="tv-center" aria-label="Bandeau images">
-          <div class="side">
-            <img src="../assets/img/challenge-gen.png" alt="Challenge">
-          </div>
-
-          <div class="mid">
-            <img src="../assets/img/etape1.png" alt="Étape 1">
-          </div>
-
-          <div class="side">
-            <img src="../assets/img/challenge-gen.png" alt="Challenge">
-          </div>
+        <div class="tv-top-cell">
+          <img src="../assets/img/challenge-gen.png" alt="Challenge">
         </div>
 
-        <div class="tv-logo">
+        <div class="tv-top-cell mid">
+          <img src="../assets/img/etape1.png" alt="Étape 1">
+        </div>
+
+        <div class="tv-top-cell">
+          <img src="../assets/img/challenge-gen.png" alt="Challenge">
+        </div>
+
+        <div class="tv-top-cell">
           <img src="../assets/img/logo-challenge.png" alt="Challenge">
         </div>
       </div>
@@ -370,7 +440,6 @@
 
     <!-- LEFT 2/3 -->
     <section class="panel">
-      <!-- ✅ on supprime le texte "Matchs par court" et "totaux" -->
       <div class="left-body">
         <div class="courts-grid">
           <div class="court-col lisa">
@@ -470,28 +539,64 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // Sponsors (ordre demandé) — ✅ dans ../assets/img/ (sans sous-dossier)
-  const SPONSOR_LOGOS = [
-    "../assets/img/bricolage.png",
-    "../assets/img/BT-FFT.png",
-    "../assets/img/matoque.png",
-    "../assets/img/tcs.png",
-    "../assets/img/brico.png",
-    "../assets/img/logo-suzini.png",
-    "../assets/img/psk.png",
+  // ✅ Sponsors : on essaie plusieurs noms (car tes fichiers réels sont en minuscules, parfois avec espace)
+  // Ordre demandé : bricolage, bt-fft, matoque, tcs, brico, logo-suzini, psk
+  const SPONSOR_SLOTS = [
+    { alts: ["../assets/img/bricolage.png", "../assets/img/ligue.png", "../assets/img/brico.png"] },
+    { alts: ["../assets/img/BT-FFT.png", "../assets/img/bt-fft.png"] },
+    { alts: ["../assets/img/matoque.png", "../assets/img/matoque .png", "../assets/img/matoque%20.png"] },
+    { alts: ["../assets/img/tcs.png"] },
+    { alts: ["../assets/img/brico.png"] },
+    { alts: ["../assets/img/logo-suzini.png"] },
+    { alts: ["../assets/img/psk.png"] },
   ];
-  sponsorTrack.innerHTML = (SPONSOR_LOGOS.concat(SPONSOR_LOGOS)).map((src)=>`
-    <span class="sponsor-item"><img src="${esc(src)}" alt="sponsor"></span>
-  `).join("");
+
+  function sponsorImgHTML(slot){
+    const safe = slot.alts.map(a=>String(a));
+    const first = safe[0] || "";
+    const data = esc(JSON.stringify(safe));
+    return `<span class="sponsor-item">
+      <img src="${esc(first)}" data-alts="${data}" alt="sponsor">
+    </span>`;
+  }
+
+  sponsorTrack.innerHTML = (SPONSOR_SLOTS.concat(SPONSOR_SLOTS))
+    .map(sponsorImgHTML)
+    .join("");
+
+  // fallback loader
+  function wireSponsorFallbacks(){
+    const imgs = sponsorTrack.querySelectorAll("img[data-alts]");
+    imgs.forEach(img=>{
+      img.addEventListener("error", ()=>{
+        try{
+          const alts = JSON.parse(img.getAttribute("data-alts") || "[]");
+          const cur = img.getAttribute("src");
+          const idx = alts.indexOf(cur);
+          const next = alts[idx+1];
+          if(next){
+            img.setAttribute("src", next);
+          } else {
+            img.style.opacity = "0.15";
+          }
+        }catch(e){
+          img.style.opacity = "0.15";
+        }
+      }, { once:false });
+    });
+  }
+  wireSponsorFallbacks();
 
   // Data state
   let prog = null;
   let resultsMap = new Map();
-  let tableaux = [];
+
+  // Rotator state
+  let tableaux = [];     // [{title, html}]
   let rotPtr = 0;
   let rotTimer = null;
 
-  // ===== Programmation V3 helpers =====
+  // ===== Programmation helpers =====
   function normalizeScheduleEntry(entry, slotObj){
     if(typeof entry === "number"){
       const slot = Number(entry);
@@ -510,28 +615,73 @@
   function courtLabel(p, courtKey){
     const name = p?.courts?.[courtKey] || courtKey || "—";
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
-    return `${emo} ${name}`;
+    return `${emo} ${name} ${emo}`;
   }
 
+  // ===== Résultats helpers =====
+  function getResultForMatch(id){ return resultsMap.get(id) || null; }
+  function isValidatedResult(r){ return !!r && (r.winnerSide === "A" || r.winnerSide === "B"); }
+
+  function fmtScoreCell(x){
+    return (x === null || x === undefined || x === "") ? "—" : String(x);
+  }
+
+  // ===== Team resolution (comme la page programmation) =====
   function teamPartsFromTeam(t){
     if(!t) return { title:"—", sub:"" };
-    return { title: t.teamName || "Équipe", sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}` };
-  }
-  function teamRefParts(p, ref){
-    if(!ref) return { title:"—", sub:"" };
-    if(ref.type === "team"){
-      const t = p?.teams?.[ref.key] || null;
-      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
-    }
-    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
-    return { title:"—", sub:"" };
-  }
-  function teamLine(x){
-    if(!x) return "—";
-    return x.sub ? `${x.title} (${x.sub})` : x.title;
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
   }
 
+  function resolveTeamRef(ref, guard=new Set()){
+    if(!prog) return null;
+
+    const teams = prog.teams || {};
+    const matches = prog.matches || {};
+
+    if(!ref) return null;
+
+    if(ref.type === "team"){
+      return teams[ref.key] || null;
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      if(!mid || guard.has(mid)) return null;
+      guard.add(mid);
+
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = getResultForMatch(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(m.A, guard);
+      const teamB = resolveTeamRef(m.B, guard);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return (ref.type === "winner") ? winner : loser;
+    }
+
+    return null;
+  }
+
+  function teamPartsFromRef(ref){
+    // si résolu => vrai nom + prénoms ; sinon fallback Vx/Px
+    const t = resolveTeamRef(ref);
+    if(t) return teamPartsFromTeam(t);
+
+    if(ref?.type === "winner" && ref?.matchId) return { title:`V${String(ref.matchId).slice(1)}`, sub:"" };
+    if(ref?.type === "loser"  && ref?.matchId) return { title:`P${String(ref.matchId).slice(1)}`, sub:"" };
+    if(ref?.type === "team"   && ref?.key)     return { title:String(ref.key), sub:"" };
+
+    return { title:"—", sub:"" };
+  }
+
+  // ===== Matches list (slots) =====
   function getProgMatchesV3(p){
     if(!p) return [];
     const matches = p.matches || {};
@@ -556,8 +706,8 @@
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
-      const a = teamRefParts(p, m.A);
-      const b = teamRefParts(p, m.B);
+      const aParts = teamPartsFromRef(m.A);
+      const bParts = teamPartsFromRef(m.B);
 
       out.push({
         id: mid,
@@ -565,68 +715,14 @@
         time: s.time || "",
         courtKey,
         court: courtLabel(p, courtKey),
-        aLabel: teamLine(a),
-        bLabel: teamLine(b),
+        aParts,
+        bParts,
       });
     }
     return out;
   }
 
-  // ===== Résultats helpers (validé = winnerSide A/B) =====
-  function getResultForMatch(id){ return resultsMap.get(id) || null; }
-  function isValidatedResult(r){ return !!r && (r.winnerSide === "A" || r.winnerSide === "B"); }
-
-  function computeSets(r){
-    const pairs = [
-      { A:r?.s1A, B:r?.s1B },
-      { A:r?.s2A, B:r?.s2B },
-      { A:r?.s3A, B:r?.s3B },
-    ];
-    let ptsA = 0, ptsB = 0;
-    const chips = [];
-    for(const p of pairs){
-      const a = Number(p.A);
-      const b = Number(p.B);
-      if(!Number.isFinite(a) || !Number.isFinite(b)) continue;
-      if(a > b) ptsA++;
-      if(b > a) ptsB++;
-      chips.push(`${a}-${b}`);
-    }
-    return { ptsA, ptsB, chips };
-  }
-
-  function fmtTime(m){ return m.time || "—"; }
-
-  function matchCardPerCourt(m){
-    const r = getResultForMatch(m.id);
-    const validated = isValidatedResult(r);
-    const { ptsA, ptsB, chips } = validated ? computeSets(r) : { ptsA:"—", ptsB:"—", chips:[] };
-
-    return `
-      <div class="mcard2">
-        <div class="m-time">🕘 ${esc(fmtTime(m))}</div>
-
-        <div class="trow">
-          <div class="tname">${esc(m.aLabel || "—")}</div>
-          <div class="tpts">${esc(ptsA)}</div>
-        </div>
-        <div class="trow">
-          <div class="tname">${esc(m.bLabel || "—")}</div>
-          <div class="tpts">${esc(ptsB)}</div>
-        </div>
-
-        <div class="setline">
-          ${
-            chips.length
-              ? chips.map(s => `<span class="setbox">${esc(s)}</span>`).join("")
-              : `<span class="setbox">—</span>`
-          }
-        </div>
-      </div>
-    `;
-  }
-
-  // ===== KPI totaux (pas la vue filtrée) =====
+  // ===== KPI totaux (sur tous les matchs) =====
   function computeTotals(allMatches){
     const total = allMatches.length;
     const validated = allMatches.filter(m => isValidatedResult(getResultForMatch(m.id))).length;
@@ -638,6 +734,53 @@
     kpiDone.textContent = `✅ Terminés : ${validated}`;
     kpiLive.textContent = `🟠 En cours : ${live}`;
     kpiNext.textContent = `⏭️ À venir : ${next}`;
+  }
+
+  function fmtTime(m){ return m.time || "—"; }
+
+  function matchCardPerCourt(m){
+    const r = getResultForMatch(m.id) || null;
+
+    const s1A = fmtScoreCell(r?.s1A);
+    const s2A = fmtScoreCell(r?.s2A);
+    const s3A = fmtScoreCell(r?.s3A);
+
+    const s1B = fmtScoreCell(r?.s1B);
+    const s2B = fmtScoreCell(r?.s2B);
+    const s3B = fmtScoreCell(r?.s3B);
+
+    const a = m.aParts || { title:"—", sub:"" };
+    const b = m.bParts || { title:"—", sub:"" };
+
+    return `
+      <div class="mcard2">
+        <div class="m-time">🕘 ${esc(fmtTime(m))}</div>
+
+        <div class="sethdr">
+          <div></div><div>S1</div><div>S2</div><div>S3</div>
+        </div>
+
+        <div class="teamline">
+          <div class="tmeta">
+            <div class="tname">${esc(a.title)}</div>
+            ${a.sub ? `<div class="tsub">${esc(a.sub)}</div>` : `<div class="tsub"></div>`}
+          </div>
+          <div class="g">${esc(s1A)}</div>
+          <div class="g">${esc(s2A)}</div>
+          <div class="g">${esc(s3A)}</div>
+        </div>
+
+        <div class="teamline">
+          <div class="tmeta">
+            <div class="tname">${esc(b.title)}</div>
+            ${b.sub ? `<div class="tsub">${esc(b.sub)}</div>` : `<div class="tsub"></div>`}
+          </div>
+          <div class="g">${esc(s1B)}</div>
+          <div class="g">${esc(s2B)}</div>
+          <div class="g">${esc(s3B)}</div>
+        </div>
+      </div>
+    `;
   }
 
   // ===== Rendu par court: 1 terminé + 1 en cours + 1 à venir =====
@@ -676,7 +819,7 @@
       const done = arr.filter(m => isValidatedResult(getResultForMatch(m.id)));
       const pending = arr.filter(m => !isValidatedResult(getResultForMatch(m.id)));
 
-      // dernier validé
+      // dernier validé (updatedAt/createdAt sinon slot)
       done.sort((a,b)=>{
         const ra = getResultForMatch(a.id) || {};
         const rb = getResultForMatch(b.id) || {};
@@ -687,6 +830,7 @@
         if(db !== da) return db - da;
         return (b.slot||0)-(a.slot||0);
       });
+
       return {
         done1: done[0] || null,
         live1: pending[0] || null,
@@ -720,85 +864,175 @@
     courtRightBody.innerHTML = renderBlock(right);
   }
 
-  // ===== Tableaux rotator (corrigé: supporte prog.tableaux au root ET prog.tirage.tableaux) =====
-  function normalizeTableaux(obj){
-    const direct = Array.isArray(obj?.tableaux) ? obj.tableaux
-                : Array.isArray(obj?.tables) ? obj.tables
-                : null;
-
-    if(direct) return direct.map((t, idx)=>{
-      const title = t.title || t.name || `Tableau ${idx+1}`;
-      const html = t.html || null;
-      const imageUrl = t.imageUrl || t.img || null;
-      const rows = Array.isArray(t.rows) ? t.rows : null;
-      return { title, html, imageUrl, rows };
-    }).filter(x=>x.title);
-
-    // fallback: si la prog encapsule dans un champ (ex: prog.public.tableaux / prog.draw.tableaux)
-    const nested =
-      obj?.tirage?.tableaux || obj?.draw?.tableaux || obj?.data?.tableaux || null;
-
-    return Array.isArray(nested)
-      ? nested.map((t, idx)=>{
-          const title = t.title || t.name || `Tableau ${idx+1}`;
-          const html = t.html || null;
-          const imageUrl = t.imageUrl || t.img || null;
-          const rows = Array.isArray(t.rows) ? t.rows : null;
-          return { title, html, imageUrl, rows };
-        }).filter(x=>x.title)
-      : [];
+  // =========================================================
+  // ✅ TABLEAUX: on “fait défiler toutes les combinaisons des 2 menus”
+  // (reprend la logique de ta page programmation)
+  // =========================================================
+  function roundOptions(bracket){
+    if(bracket === "main"){
+      return [
+        ["QF", "Quarts de finale"],
+        ["SF", "Demi-finales"],
+        ["3rd", "Match 3e place"],
+        ["F", "Finale"]
+      ];
+    }
+    return [
+      ["SF", "Demi-finales (5–8)"],
+      ["7th", "Match 7e place"],
+      ["5th", "Match 5e place"]
+    ];
   }
 
-  function renderTableau(t){
+  function inferBracketRound(matchId, m){
+    const id = matchId || m?.id || "";
+    const n = Number(m?.n || 0);
+
+    if(id === "M1" || id === "M2" || id === "M3" || id === "M4" || (n>=1 && n<=4)){
+      return { bracket:"main", round:"QF" };
+    }
+    if(id === "M5" || id === "M6" || (n===5 || n===6)){
+      return { bracket:"5-8", round:"SF" };
+    }
+    if(id === "M7" || id === "M8" || (n===7 || n===8)){
+      return { bracket:"main", round:"SF" };
+    }
+    if(id === "M9" || n===9){
+      return { bracket:"5-8", round:"7th" };
+    }
+    if(id === "M10" || n===10){
+      return { bracket:"5-8", round:"5th" };
+    }
+    if(id === "M11" || n===11){
+      return { bracket:"main", round:"3rd" };
+    }
+    if(id === "M12" || n===12){
+      return { bracket:"main", round:"F" };
+    }
+    return { bracket:"main", round:"QF" };
+  }
+
+  function normalizeMatchWithMeta(matchId, m){
+    const inferred = inferBracketRound(matchId, m);
+    const bracket = m?.bracket || inferred.bracket;
+    const round   = m?.round   || inferred.round;
+    return { id: matchId, ...(m || {}), bracket, round };
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+  }
+
+  function renderTableauMatchCard({ time, courtKey, teamARef, teamBRef, res }){
+    const cls = courtClass(courtKey);
+    const court = courtLabel(prog, courtKey);
+
+    const aTeam = resolveTeamRef(teamARef) || null;
+    const bTeam = resolveTeamRef(teamBRef) || null;
+
+    const a = aTeam ? teamPartsFromTeam(aTeam) : teamPartsFromRef(teamARef);
+    const b = bTeam ? teamPartsFromTeam(bTeam) : teamPartsFromRef(teamBRef);
+
+    const s1A = fmtScoreCell(res?.s1A);
+    const s2A = fmtScoreCell(res?.s2A);
+    const s3A = fmtScoreCell(res?.s3A);
+
+    const s1B = fmtScoreCell(res?.s1B);
+    const s2B = fmtScoreCell(res?.s2B);
+    const s3B = fmtScoreCell(res?.s3B);
+
+    return `
+      <div class="tv-match-card ${esc(cls)}">
+        <div class="tv-m-head">
+          <div class="tv-m-time">${esc(time || "—")}</div>
+          <div class="tv-m-court">${esc(court)}</div>
+        </div>
+
+        <div class="tv-teamline">
+          <div class="tv-team-block">
+            <div class="tv-team-title">${esc(a.title)}</div>
+            ${a.sub ? `<div class="tv-team-sub">${esc(a.sub)}</div>` : ``}
+          </div>
+          <div class="tv-sc">${esc(s1A)}</div>
+          <div class="tv-sc">${esc(s2A)}</div>
+          <div class="tv-sc">${esc(s3A)}</div>
+        </div>
+
+        <div class="tv-vs">VS</div>
+
+        <div class="tv-teamline">
+          <div class="tv-team-block">
+            <div class="tv-team-title">${esc(b.title)}</div>
+            ${b.sub ? `<div class="tv-team-sub">${esc(b.sub)}</div>` : ``}
+          </div>
+          <div class="tv-sc">${esc(s1B)}</div>
+          <div class="tv-sc">${esc(s2B)}</div>
+          <div class="tv-sc">${esc(s3B)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildTableauxFromCombos(){
+    if(!prog) return [];
+
+    const combos = [];
+    // ordre : main QF/SF/3rd/F puis 5-8 SF/7th/5th
+    for(const [round, lbl] of roundOptions("main")) combos.push({ bracket:"main", round, label: `Tableau principal — ${lbl}` });
+    for(const [round, lbl] of roundOptions("5-8")) combos.push({ bracket:"5-8", round, label: `Tableau 5–8 — ${lbl}` });
+
+    const matches = prog.matches || {};
+    const schedule = prog.schedule || {};
+    const slots = Array.isArray(prog.slots) ? prog.slots : [];
+
+    return combos.map(c=>{
+      const list = Object.entries(matches)
+        .map(([id, m]) => normalizeMatchWithMeta(id, m))
+        .filter(m => m.bracket === c.bracket && m.round === c.round)
+        .sort((a,b)=> (a.n||0) - (b.n||0));
+
+      const cards = list.map(m=>{
+        const res = getResultForMatch(m.id) || null;
+
+        let time = "—";
+        let courtKey = "A";
+
+        const entry = schedule[m.id];
+        const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+
+        if(Number.isFinite(slotNum) && slotNum > 0){
+          const s = slots.find(x => Number(x.slot) === slotNum) || null;
+          const norm = normalizeScheduleEntry(entry, s);
+          courtKey = norm.court;
+          time = s?.time || "—";
+        }
+
+        return renderTableauMatchCard({
+          time,
+          courtKey,
+          teamARef: m.A,
+          teamBRef: m.B,
+          res
+        });
+      });
+
+      const html = cards.length
+        ? `<div class="tv-match-list">${cards.join("")}</div>`
+        : `<p class="muted" style="margin:0;">Aucun match pour ce filtre.</p>`;
+
+      return { title: `🧩 ${c.label}`, html };
+    });
+  }
+
+  function renderRotItem(t){
     if(!t){
       rotTitle.textContent = "—";
       rotIndex.textContent = "—";
       rotBox.innerHTML = `<p class="muted" style="margin:0;">Aucun tableau.</p>`;
       return;
     }
-
-    rotTitle.textContent = t.title;
-
-    if(t.html){ rotBox.innerHTML = t.html; return; }
-
-    if(t.imageUrl){
-      rotBox.innerHTML = `
-        <div style="text-align:center;">
-          <img src="${esc(t.imageUrl)}" alt="${esc(t.title)}" style="max-width:100%; height:auto; border-radius:12px;">
-        </div>
-      `;
-      return;
-    }
-
-    if(t.rows){
-      if(t.rows.length && Array.isArray(t.rows[0])){
-        const head = t.rows[0];
-        const body = t.rows.slice(1);
-        rotBox.innerHTML = `
-          <table class="tv-table">
-            <thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>
-            <tbody>
-              ${body.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}
-            </tbody>
-          </table>
-        `;
-        return;
-      }
-      if(t.rows.length && typeof t.rows[0] === "object"){
-        const cols = Object.keys(t.rows[0]);
-        rotBox.innerHTML = `
-          <table class="tv-table">
-            <thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
-            <tbody>
-              ${t.rows.map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c])}</td>`).join("")}</tr>`).join("")}
-            </tbody>
-          </table>
-        `;
-        return;
-      }
-    }
-
-    rotBox.innerHTML = `<p class="muted" style="margin:0;">Tableau non lisible (format inconnu).</p>`;
+    rotTitle.textContent = t.title || "—";
+    rotBox.innerHTML = t.html || `<p class="muted" style="margin:0;">Aucun contenu.</p>`;
   }
 
   function startRotator(){
@@ -814,15 +1048,16 @@
     function showIdx(i){
       rotPtr = i % tableaux.length;
       rotIndex.textContent = `${rotPtr+1}/${tableaux.length}`;
-      renderTableau(tableaux[rotPtr]);
+      renderRotItem(tableaux[rotPtr]);
     }
 
     showIdx(rotPtr);
+    rotTimer = setInterval(()=> showIdx(rotPtr + 1), 10000);
+  }
 
-    rotTimer = setInterval(()=>{
-      if(!tableaux.length) return;
-      showIdx(rotPtr + 1);
-    }, 10000);
+  function refreshTableaux(){
+    tableaux = buildTableauxFromCombos();
+    startRotator();
   }
 
   // ===== WATCH programmation: première trouvée =====
@@ -843,16 +1078,8 @@
       tvStatus.textContent = "🟢 En direct";
       prog = data || null;
 
-      // ✅ tableaux depuis prog (si dispo)
-      const fromProg = normalizeTableaux(prog || {});
-      if(fromProg.length){
-        tableaux = fromProg;
-        startRotator();
-      } else if(!rotTimer){
-        startRotator();
-      }
-
       computeCourtBlocks();
+      refreshTableaux();
     }
 
     refs.forEach((ref, idx)=>{
@@ -863,6 +1090,8 @@
           prog = null;
           tvStatus.textContent = "🟠 Programmation non trouvée";
           computeCourtBlocks();
+          tableaux = [];
+          startRotator();
         }
       }, (err)=>{
         console.error(err);
@@ -880,16 +1109,10 @@
   onSnapshot(qRes, (snap)=>{
     resultsMap = new Map();
     snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
-    computeCourtBlocks();
 
-    // ✅ Si tableaux étaient "vides" au moment de la prog, retente sur chaque update résultats
-    if(!tableaux.length && prog){
-      const fromProg = normalizeTableaux(prog || {});
-      if(fromProg.length){
-        tableaux = fromProg;
-        startRotator();
-      }
-    }
+    computeCourtBlocks();
+    // tableaux dépendent des résultats (winner/loser)
+    if(prog) refreshTableaux();
 
     if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
   }, (err)=>{
@@ -897,21 +1120,12 @@
     tvStatus.textContent = "🔴 Erreur résultats";
   });
 
-  // tableaux depuis tirage si prog n'en contient pas
+  // (optionnel) on garde ton tirage doc, mais seulement si jamais tu veux l'exploiter plus tard
   (async function loadTirageOnce(){
     try{
-      const s = await getDoc(DOC_TIRAGE);
-      const obj = s.exists() ? (s.data() || {}) : {};
-      const fromTirage = normalizeTableaux(obj || {});
-      if(fromTirage.length && !tableaux.length){
-        tableaux = fromTirage;
-        startRotator();
-      } else if(!rotTimer){
-        startRotator();
-      }
+      await getDoc(DOC_TIRAGE);
     }catch(e){
-      console.error(e);
-      if(!rotTimer) startRotator();
+      // noop
     }
   })();
 
