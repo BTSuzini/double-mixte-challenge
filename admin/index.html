@@ -4,9 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-admin-index" />
 
   <style>
+    /* ✅ Onglet actif (Zone tabs) noir/blanc */
+    .btn.is-active{
+      background:#111 !important;
+      border-color:#111 !important;
+      color:#fff !important;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+
     /* Sous-onglets dans Général */
     .subtabs{
       display:grid;
@@ -24,11 +32,14 @@
       cursor:pointer;
       text-align:center;
       white-space:nowrap;
+      color:#111;
     }
+    /* ✅ Bonus : sous-onglet actif noir/blanc */
     .subtab[aria-selected="true"]{
-      background:#fff;
-      border-color:#cfcfcf;
-      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      background:#111;
+      border-color:#111;
+      color:#fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,.14);
     }
 
     /* Paiements (Général) */
@@ -133,10 +144,7 @@
       min-width:0;
     }
 
-    .players{
-      display:grid;
-      gap:8px;
-    }
+    .players{ display:grid; gap:8px; }
     .player-row{
       border:1px solid #f0f0f0;
       background:#fbfbfb;
@@ -196,6 +204,7 @@
     }
   </style>
 </head>
+
 <body>
 
 <header class="topbar">
@@ -205,13 +214,11 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
-
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -249,7 +256,8 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px;"></p>
+    <!-- ✅ tu veux supprimer le texte explicatif -->
+    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
   <!-- PANEL GENERAL -->
@@ -300,10 +308,10 @@
           <label for="payEtape">Étape</label>
           <select id="payEtape">
             <option value="etape1">🎾 Étape 1</option>
-            <option value="etape2" disabled>🎾 Étape 2 (plus tard)</option>
-            <option value="etape3" disabled>🎾 Étape 3 (plus tard)</option>
-            <option value="etape4" disabled>🎾 Étape 4 (plus tard)</option>
-            <option value="etape5" disabled>🧪 Étape 5 (test) (plus tard)</option>
+            <option value="etape2">🎾 Étape 2</option>
+            <option value="etape3">🎾 Étape 3</option>
+            <option value="etape4">🎾 Étape 4</option>
+            <option value="etape5">🧪 Étape 5 (test)</option>
           </select>
         </div>
 
@@ -335,7 +343,6 @@
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
-
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, getDoc,
@@ -348,11 +355,8 @@
   // CONFIG
   // =========================
   const COL_INFOS = "infos";
-
-  // Challenge Paiements
   const COL_PAYMENTS = "paiements_challenge"; // docId = `${etapeId}_${teamDocId}`
 
-  // Mapping équipes par étape
   const TEAM_COLLECTION_BY_ETAPE = {
     etape1: "equipes_etape1_public",
     etape2: "equipes_etape2_public",
@@ -360,6 +364,10 @@
     etape4: "equipes_etape4_public",
     etape5: "equipes_etape5_public",
   };
+
+  const LS_SCOPE_KEY    = "admin_scope_last";
+  const LS_GENERAL_TAB  = "challenge_admin_general_tab"; // "infos" | "pay"
+  const LS_PAY_ETAPE    = "challenge_admin_pay_etape";
 
   // =========================
   // DOM
@@ -369,7 +377,6 @@
 
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
-  const hintEl  = document.getElementById("hint");
 
   const panelGeneral = document.getElementById("panelGeneral");
 
@@ -395,17 +402,11 @@
   const c1 = document.getElementById("c1");
   const c2 = document.getElementById("c2");
 
-  let unsubscribeInfos = null;
-
-  const LS_SCOPE_KEY = "admin_scope_last";
-  const LS_GENERAL_TAB = "challenge_admin_general_tab";
-  const LS_PAY_ETAPE = "challenge_admin_pay_etape";
-
   // =========================
   // Helpers
   // =========================
   function esc(str){
-    return (str || "")
+    return (str ?? "").toString()
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
@@ -421,11 +422,28 @@
     }catch{ return "—"; }
   }
 
+  function getInitialScope(){
+    const p = new URLSearchParams(location.search);
+    const s = p.get("scope");
+    if(s) return s;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "general";
+  }
+
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
+
+  // =========================
+  // Infos (Général)
+  // =========================
+  let unsubscribeInfos = null;
+
   function stopInfos(){
-    if(unsubscribeInfos){
-      unsubscribeInfos();
-      unsubscribeInfos = null;
-    }
+    if(unsubscribeInfos){ unsubscribeInfos(); unsubscribeInfos = null; }
   }
 
   function startInfos(){
@@ -457,7 +475,7 @@
           <div style="display:flex; gap:12px; justify-content:space-between; align-items:flex-start;">
             <div style="min-width:0;">
               <div style="font-weight:900;">${title}</div>
-              <div class="muted" style="margin-top:6px;">🗓️ ${date}</div>
+              <div class="muted" style="margin-top:6px;">🗓️ ${esc(date)}</div>
               <div style="margin-top:8px; line-height:1.45;">${text}</div>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px; flex:0 0 auto;">
@@ -469,7 +487,6 @@
         infosList.appendChild(card);
       }
 
-      // delete
       infosList.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.del;
@@ -479,7 +496,6 @@
         };
       });
 
-      // edit via prompt (simple)
       infosList.querySelectorAll("button[data-edit]").forEach(btn=>{
         btn.onclick = async ()=>{
           const id = btn.dataset.edit;
@@ -496,30 +512,12 @@
           await updateDoc(ref, { title: newTitle.trim(), text: newText.trim() });
         };
       });
+
     }, (err)=>{
       console.error(err);
       infosCount.textContent = "❌ Impossible de charger les infos.";
     });
   }
-
-  function showGeneralTab(which){
-    const isInfos = which === "infos";
-
-    tabInfos.setAttribute("aria-selected", isInfos ? "true":"false");
-    tabPayments.setAttribute("aria-selected", !isInfos ? "true":"false");
-
-    panelInfos.style.display = isInfos ? "block" : "none";
-    panelPay.style.display = !isInfos ? "block" : "none";
-
-    try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
-
-    // Infos live only when visible
-    if(isInfos) startInfos();
-    else stopInfos();
-  }
-
-  tabInfos.addEventListener("click", ()=>showGeneralTab("infos"));
-  tabPayments.addEventListener("click", ()=>showGeneralTab("pay"));
 
   // =========================
   // Paiements (Général)
@@ -527,7 +525,6 @@
   let queryText = "";
   let snapTeams = null;
   let snapPay = null;
-
   let unsubTeams = null;
   let unsubPay = null;
 
@@ -536,19 +533,15 @@
     if(paidCount === 1) return "orange";
     return "red";
   }
-
   function label(paidCount){
     return paidCount >= 2 ? "Payé" : paidCount === 1 ? "Partiel" : "Non payé";
   }
-
   function fmtUpdated(ts){
     try{
       const d = ts?.toDate ? ts.toDate() : null;
       if(!d) return "—";
       return d.toLocaleString("fr-FR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }catch{
-      return "—";
-    }
+    }catch{ return "—"; }
   }
 
   function stopPaymentsSubs(){
@@ -571,12 +564,11 @@
     payList.innerHTML = "";
 
     const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
-    const qPays = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+    const qPays  = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
 
     unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; renderPayments(etapeId); },
       (e)=>{ console.error(e); payStatus.textContent = "🔴 Erreur équipes"; });
 
-    // paiements peuvent être vides au début -> on accepte snapPay=null
     unsubPay = onSnapshot(qPays, (s)=>{ snapPay = s; renderPayments(etapeId); },
       (e)=>{ console.error(e); snapPay = null; renderPayments(etapeId); });
   }
@@ -621,8 +613,7 @@
       const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
 
       rows.push({
-        teamDocId: d.id,
-        teamName,
+        teamDocId: d.id, teamName,
         p1, p2,
         p1Paid: pay.p1Paid,
         p2Paid: pay.p2Paid,
@@ -637,7 +628,6 @@
       return hay.includes(queryText);
     });
 
-    // stats
     let n0=0, n1=0, n2=0;
     for(const r of filtered){
       if(r.paidCount === 0) n0++;
@@ -648,7 +638,6 @@
     c1.textContent = String(n1);
     c2.textContent = String(n2);
 
-    // sort: 0 -> 1 -> 2 then teamName
     filtered.sort((a,b)=>{
       if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
       return (a.teamName||"").localeCompare((b.teamName||""), "fr");
@@ -664,9 +653,6 @@
     payList.innerHTML = filtered.map(r=>{
       const dot = dotClass(r.paidCount);
       const lab = label(r.paidCount);
-
-      const p1Name = r.p1 || "—";
-      const p2Name = r.p2 || "—";
       const meta = `Dernière mise à jour : ${esc(fmtUpdated(r.updatedAt))}`;
 
       return `
@@ -681,7 +667,7 @@
 
           <div class="players">
             <div class="player-row">
-              <div class="player-name">${esc(p1Name)}</div>
+              <div class="player-name">${esc(r.p1 || "—")}</div>
               <div class="toggle">
                 <button class="${r.p1Paid ? "paid" : "unpaid"}" data-who="p1" data-next="${r.p1Paid ? "0" : "1"}">
                   ${r.p1Paid ? "✅ Payé" : "❌ Non payé"}
@@ -690,7 +676,7 @@
             </div>
 
             <div class="player-row">
-              <div class="player-name">${esc(p2Name)}</div>
+              <div class="player-name">${esc(r.p2 || "—")}</div>
               <div class="toggle">
                 <button class="${r.p2Paid ? "paid" : "unpaid"}" data-who="p2" data-next="${r.p2Paid ? "0" : "1"}">
                   ${r.p2Paid ? "✅ Payé" : "❌ Non payé"}
@@ -707,14 +693,12 @@
       `;
     }).join("");
 
-    // bind toggles
     payList.querySelectorAll("button[data-who]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         const card = btn.closest(".pay-card");
         const teamId = card?.dataset?.teamid;
         const who = btn.dataset.who;
         const next = btn.dataset.next === "1";
-
         btn.disabled = true;
         try{
           await setPaid(etapeId, teamId, who, next);
@@ -736,11 +720,44 @@
   payEtape.addEventListener("change", ()=>{
     const eId = payEtape.value;
     try{ localStorage.setItem(LS_PAY_ETAPE, eId); }catch(e){}
-    startPaymentsSubs(eId);
+    if(panelPay.style.display !== "none") startPaymentsSubs(eId);
   });
 
   // =========================
-  // Tabs (Zone selector)
+  // Général tabs (infos / pay)
+  // =========================
+  function showGeneralTab(which){
+    const isInfos = which === "infos";
+
+    tabInfos.setAttribute("aria-selected", isInfos ? "true" : "false");
+    tabPayments.setAttribute("aria-selected", isInfos ? "false" : "true");
+
+    panelInfos.style.display = isInfos ? "block" : "none";
+    panelPay.style.display   = isInfos ? "none" : "block";
+
+    try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
+
+    if(isInfos){
+      startInfos();
+      stopPaymentsSubs();
+    }else{
+      stopInfos();
+      // restore last pay etape
+      try{
+        const savedEtape = localStorage.getItem(LS_PAY_ETAPE);
+        if(savedEtape && payEtape.querySelector(`option[value="${savedEtape}"]`)){
+          payEtape.value = savedEtape;
+        }
+      }catch(e){}
+      startPaymentsSubs(payEtape.value);
+    }
+  }
+
+  tabInfos.onclick = ()=> showGeneralTab("infos");
+  tabPayments.onclick = ()=> showGeneralTab("pay");
+
+  // =========================
+  // Zone tabs
   // =========================
   function makeDisabledBtn(label, reason){
     const a = document.createElement("a");
@@ -756,67 +773,40 @@
     tabsEl.innerHTML = "";
     panelGeneral.style.display = "none";
 
-    // mémorise la zone
-    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+    persistScope(scope);
 
     if(scope === "general"){
-      hintEl.textContent = "🌐 Zone Général : infos + paiements.";
-      panelGeneral.style.display = "block";
-
-      // “onglet” actuel sur la ligne de boutons
+      // ✅ onglet "Général" noir/blanc
       const a = document.createElement("a");
-      a.className = "btn";
+      a.className = "btn is-active";
       a.href = "#";
       a.textContent = "🌐 Général";
       a.onclick = (e)=> e.preventDefault();
       tabsEl.appendChild(a);
 
-      // restore subtabs (infos / pay)
-      try{
-        const savedTab = localStorage.getItem(LS_GENERAL_TAB);
-        showGeneralTab(savedTab === "pay" ? "pay" : "infos");
-      }catch(e){
-        showGeneralTab("infos");
-      }
+      panelGeneral.style.display = "block";
 
-      // restore etape for payments + start subs if panel visible
-      try{
-        const savedEtape = localStorage.getItem(LS_PAY_ETAPE);
-        if(savedEtape && payEtape.querySelector(`option[value="${savedEtape}"]`) && !payEtape.querySelector(`option[value="${savedEtape}"]`).disabled){
-          payEtape.value = savedEtape;
-        }
-      }catch(e){}
-
-      // start payments listeners only if pay visible
-      if(panelPay.style.display !== "none"){
-        startPaymentsSubs(payEtape.value);
-      } else {
-        stopPaymentsSubs();
-      }
-
+      // restore general tab
+      let saved = "infos";
+      try{ saved = localStorage.getItem(LS_GENERAL_TAB) || "infos"; }catch(e){}
+      showGeneralTab(saved === "pay" ? "pay" : "infos");
       return;
     }
 
-    // Zone Étape (liens)
-    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats / classement / RAZ.";
+    // Zone Étape
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
 
     const links = [
       ["👥 Équipes",        "equipes.html"],
       ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
       ["🎲 Tirage",         "tirage.html"],
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
       ["🏆 Classement",     "classement.html"],
-      ["🧨 RAZ",            "raz.html"],
     ];
-
-    if(scope !== "etape5"){
-      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
-    }else{
-      tabsEl.appendChild(
-        makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test).")
-      );
-    }
 
     for(const [label, url] of links){
       const a = document.createElement("a");
@@ -826,7 +816,7 @@
       tabsEl.appendChild(a);
     }
 
-    // en quittant général, on coupe les subs infos/paiements
+    // en quittant général : coupe les listeners
     stopInfos();
     stopPaymentsSubs();
   }
@@ -861,7 +851,7 @@
     window.location.href = "../index.html";
   };
 
-  async function showDenied(){
+  function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
     panelGeneral.style.display = "none";
@@ -869,46 +859,30 @@
     stopPaymentsSubs();
   }
 
-  async function showAdmin(){
+  function showAdmin(){
     accessDenied.style.display = "none";
     adminUI.style.display = "block";
 
-    // restore scope
-    try{
-      const saved = localStorage.getItem(LS_SCOPE_KEY);
-      if(saved && [...scopeEl.options].some(o => o.value === saved)){
-        scopeEl.value = saved;
-      }
-    }catch(e){}
+    const initScope = getInitialScope();
+    scopeEl.value = initScope;
 
-    setTabs(scopeEl.value);
-    scopeEl.onchange = ()=> setTabs(scopeEl.value);
+    setTabs(initScope);
+
+    scopeEl.onchange = ()=>{
+      setTabs(scopeEl.value || "general");
+    };
   }
 
-  // Guard (admin only)
+  // Guard
   const g = await requireRole(["admin","jat"]);
-  if(!g.ok){ await showDenied(); }
-  else { await showAdmin(); }
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
-    if(!user){ await showDenied(); return; }
+    if(!user){ showDenied(); return; }
     const g2 = await requireRole(["admin","jat"]);
-    if(!g2.ok){ await showDenied(); return; }
+    if(!g2.ok){ showDenied(); return; }
   });
-
-  // Quand on bascule manuellement entre Infos/Paiements, on (re)branche les snapshots
-  const origShowGeneralTab = showGeneralTab;
-  function showGeneralTabPatched(which){
-    origShowGeneralTab(which);
-    if(which === "pay"){
-      startPaymentsSubs(payEtape.value);
-    }else{
-      stopPaymentsSubs();
-    }
-  }
-  // remplace les handlers pour inclure start/stop
-  tabInfos.onclick = ()=>showGeneralTabPatched("infos");
-  tabPayments.onclick = ()=>showGeneralTabPatched("pay");
 </script>
 
 </body>
