@@ -4,8 +4,132 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Programmation</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-admin-prog" />
+
+  <style>
+    /* ✅ Onglet actif noir/blanc (tabs Zone) */
+    .btn.is-active{
+      background:#111 !important;
+      border-color:#111 !important;
+      color:#fff !important;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+
+    .match-list{ display:flex; flex-direction:column; gap:14px; }
+
+    .match-card{
+      border-radius:18px;
+      border:2px solid rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+    .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .m-slot{
+      font-size:12px;
+      font-weight:900;
+      opacity:.7;
+      white-space:nowrap;
+    }
+
+    .m-time{
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+      letter-spacing:.2px;
+    }
+
+    .m-court{
+      font-size:13px;
+      font-weight:400;
+      font-style:italic;
+      opacity:.95;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+      flex:1;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .btnx{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid #ddd;
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .btnx:hover{ background:#f5f5f5; }
+    .btnx:disabled{ opacity:.5; cursor:not-allowed; }
+
+    .team-row{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 22px 22px 24px;
+      align-items:center;
+      gap:6px;
+    }
+
+    .team-block{ min-width:0; }
+    .team-title{
+      font-size:15px;
+      font-weight:900;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .sc{
+      text-align:right;
+      font-size:15px;
+      font-weight:900;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vs-line{
+      margin:10px 0 6px;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
+    @media (max-width: 380px){
+      .m-time{ font-size:13px; }
+      .m-court{ font-size:13px; }
+      .team-title{ font-size:14px; }
+      .team-sub{ font-size:12px; }
+      .sc{ font-size:14px; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="topbar">
@@ -15,13 +139,11 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
-
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -29,8 +151,8 @@
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -42,29 +164,31 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+  <!-- ✅ Zone -->
+  <section class="card" id="adminZone" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general">Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px;"></p>
+    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
       Sélectionne une <b>Étape</b> dans “Zone” pour gérer la programmation.
+      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
     </p>
   </section>
 
@@ -77,9 +201,9 @@
         🧩 Générer la programmation depuis le tirage VALIDÉ
       </button>
 
-      <button class="btn" id="btnOpenPublic" style="font-weight:900; color:#111;">
+      <a class="btn" id="btnOpenPublic" href="#" style="font-weight:900; color:#111; text-align:center;">
         👀 Ouvrir la programmation (public)
-      </button>
+      </a>
     </div>
 
     <p class="muted" style="margin-top:12px;">
@@ -100,121 +224,6 @@
 
 </main>
 
-<style>
-  .match-list{ display:flex; flex-direction:column; gap:14px; }
-
-  .match-card{
-    border-radius:18px;
-    border:2px solid rgba(0,0,0,.06);
-    padding:14px;
-    background:#fff;
-    box-shadow:0 1px 0 rgba(0,0,0,.03);
-  }
-  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
-  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
-
-  .match-head{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
-  }
-  .m-slot{
-    font-size:12px;
-    font-weight:900;
-    opacity:.7;
-    white-space:nowrap;
-  }
-
-  .m-time{
-    font-size:13px;
-    font-weight:900;
-    white-space:nowrap;
-    letter-spacing:.2px;
-  }
-
-  .m-court{
-    font-size:13px;
-    font-weight:400;
-    font-style:italic;
-    opacity:.95;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    min-width:0;
-    flex:1;
-  }
-
-  .actions{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    white-space:nowrap;
-  }
-  .btnx{
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid #ddd;
-    background:#fff;
-    cursor:pointer;
-    font-weight:900;
-  }
-  .btnx:hover{ background:#f5f5f5; }
-  .btnx:disabled{ opacity:.5; cursor:not-allowed; }
-
-  .team-row{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns: 1fr 22px 22px 24px;
-    align-items:center;
-    gap:6px;
-  }
-
-  .team-block{ min-width:0; }
-  .team-title{
-    font-size:15px;
-    font-weight:900;
-    line-height:1.15;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .team-sub{
-    margin-top:2px;
-    font-size:13px;
-    font-weight:800;
-    opacity:.85;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .sc{
-    text-align:right;
-    font-size:15px;
-    font-weight:900;
-    white-space:nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .vs-line{
-    margin:10px 0 6px;
-    text-align:center;
-    font-weight:900;
-    letter-spacing:2px;
-    opacity:.55;
-    font-size:12px;
-  }
-
-  @media (max-width: 380px){
-    .m-time{ font-size:13px; }
-    .m-court{ font-size:13px; }
-    .team-title{ font-size:14px; }
-    .team-sub{ font-size:12px; }
-    .sc{ font-size:14px; }
-  }
-</style>
-
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
@@ -223,16 +232,29 @@
     doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+  const LS_SCOPE_KEY = "admin_scope_last";
+
+  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
-  const scopeFromUrl = params.get("scope") || "etape5";
+  const scopeFromUrl = params.get("scope");
 
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape1";
+  }
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
+
+  // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
-  const adminUI = document.getElementById("adminUI");
-
+  const adminZone = document.getElementById("adminZone");
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
-  const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelBuild = document.getElementById("panelBuild");
@@ -245,7 +267,8 @@
   const btnGenerate = document.getElementById("btnGenerate");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
-  let currentScope = scopeFromUrl;
+  // ---- state
+  let currentScope = getInitialScope();
   let unsubProg = null;
   let unsubRes = null;
 
@@ -262,27 +285,40 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
   function setTabs(scope){
     tabsEl.innerHTML = "";
 
     if(scope === "general"){
-      hintEl.textContent = "Zone Général : se gère depuis admin/index.html (infos).";
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
-      a.textContent = "📰 Aller aux infos (Général)";
+      a.textContent = "📰 Aller à Admin — Général";
       tabsEl.appendChild(a);
       return;
     }
 
-    hintEl.textContent = "Zone Étape : équipes / inscriptions / tirage / programmation / résultats.";
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
 
     const links = [
-      ["👥 Équipes", "equipes.html"],
-      ["📝 Inscriptions", "inscriptions.html"],
-      ["🎲 Tirage", "tirage.html"],
-      ["📅 Programmation", "programmation.html"],
-      ["🏁 Résultats", "resultats.html"],
+      ["👥 Équipes",        "equipes.html"],
+      ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage",         "tirage.html"],
+      ["📅 Programmation",  "programmation.html"],
+      ["🏁 Résultats",      "resultats.html"],
+      ["🏆 Classement",     "classement.html"],
     ];
 
     for(const [label, url] of links){
@@ -290,9 +326,17 @@
       a.className = "btn";
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
-      if(url === "programmation.html") a.style.fontWeight = "900";
+
+      if(url === "programmation.html"){
+        a.classList.add("is-active"); // ✅ onglet actif noir/blanc
+      }
       tabsEl.appendChild(a);
     }
+  }
+
+  function stopListeners(){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    if(unsubRes){ unsubRes(); unsubRes = null; }
   }
 
   function progRef(scope){ return doc(db, "programmations", scope); }
@@ -303,34 +347,23 @@
     return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
-  // ✅ Option A : bracket + round stockés dans matches (source de vérité)
   function buildMatches(){
     return {
-      // ===== Quarts (tableau principal)
       M1:{ id:"M1", n:1,  bracket:"main", round:"QF",  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
       M2:{ id:"M2", n:2,  bracket:"main", round:"QF",  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
       M3:{ id:"M3", n:3,  bracket:"main", round:"QF",  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
       M4:{ id:"M4", n:4,  bracket:"main", round:"QF",  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
-
-      // ===== 5–8 (demi)
       M5:{ id:"M5", n:5,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
       M6:{ id:"M6", n:6,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
-
-      // ===== Tableau principal (demi)
       M7:{ id:"M7", n:7,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
       M8:{ id:"M8", n:8,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
-
-      // ===== Classements 5–8
       M9:{  id:"M9",  n:9,  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
       M10:{ id:"M10", n:10, bracket:"5-8", round:"5th", A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
-
-      // ===== Classements tableau principal
       M11:{ id:"M11", n:11, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
       M12:{ id:"M12", n:12, bracket:"main", round:"F",   A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
     };
   }
 
-  // Slots = créneaux "heure (+ note)". On garde court en legacy mais il n’est plus “source de vérité”.
   function defaultSlots(){
     return [
       { slot:1,  time:"18:00", court:"A" },
@@ -348,7 +381,6 @@
     ];
   }
 
-  // ✅ schedule normalization (compat: number OR {slot,court})
   function normalizeScheduleEntry(entry, slotObj){
     if(typeof entry === "number"){
       const slot = Number(entry);
@@ -394,11 +426,10 @@
     const slots = defaultSlots();
     const courts = defaultCourts();
 
-    // ✅ schedule[mid] = {slot, court}
     const schedule = {};
     for(const mid of Object.keys(matches)){
       const n = Number(matches[mid].n);
-      const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court: (n%2? "A":"B") };
+      const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court:(n%2? "A":"B") };
       schedule[mid] = normalizeScheduleEntry({ slot:n, court: slotObj.court }, slotObj);
     }
 
@@ -421,9 +452,8 @@
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
     return `${emo} ${name} ${emo}`;
   }
-
   function courtClass(courtKey){
-    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "";
   }
 
   function teamPartsFromTeam(t){
@@ -452,7 +482,7 @@
 
   function renderAdminCard({slot, time, courtKey, note, teamA, teamB, mid, stored, isDone}){
     return `
-      <div class="match-card ${esc(courtClass(courtKey))}">
+      <div class="match-card ${esc(courtKey === "A" ? "courtA" : (courtKey === "B" ? "courtB" : ""))}">
         <div class="match-head">
           <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
           <div class="m-time">${esc(time)}</div>
@@ -605,11 +635,6 @@
     await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
   }
 
-  function stopListeners(){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-    if(unsubRes){ unsubRes(); unsubRes = null; }
-  }
-
   function startResultsListener(scope){
     if(unsubRes){ unsubRes(); unsubRes = null; }
     resultsByMatch = new Map();
@@ -650,8 +675,6 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
-
     if(scope === "general"){
       panelNeedStep.style.display = "block";
       panelBuild.style.display = "none";
@@ -668,6 +691,7 @@
     startResultsListener(scope);
   }
 
+  // actions
   btnGenerate.onclick = async (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -731,7 +755,7 @@
 
   function showDenied(){
     accessDenied.style.display = "block";
-    adminUI.style.display = "none";
+    adminZone.style.display = "none";
     panelNeedStep.style.display = "none";
     panelBuild.style.display = "none";
     panelSchedule.style.display = "none";
@@ -740,21 +764,25 @@
 
   function showAdmin(){
     accessDenied.style.display = "none";
-    adminUI.style.display = "block";
+    adminZone.style.display = "block";
 
     scopeEl.value = currentScope;
     setTabs(currentScope);
     showPanelsForScope(currentScope);
+    persistScope(currentScope);
 
     scopeEl.onchange = ()=>{
       currentScope = scopeEl.value || "general";
       setTabs(currentScope);
       showPanelsForScope(currentScope);
+      persistScope(currentScope);
     };
   }
 
+  // Guard
   const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); } else { showAdmin(); }
+  if(!g.ok){ showDenied(); }
+  else { showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
