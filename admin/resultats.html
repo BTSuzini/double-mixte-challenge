@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="../assets/css/main.css?v=20260225-admin-resultats" />
 
   <style>
+    /* ✅ pas de scroll horizontal */
+    html, body{ max-width:100%; overflow-x:hidden; }
+
     /* ✅ Onglet actif = gris clair (tabs Zone) */
     .btn.is-active{
       background:#f1f1f1 !important;
@@ -32,6 +35,7 @@
       align-items:center;
       gap:10px;
       min-width:0;
+      flex-wrap:wrap; /* ✅ évite les débordements */
     }
     .m-slot{
       font-size:12px;
@@ -57,13 +61,14 @@
       flex:1;
     }
 
-    .row{
+    /* ✅ 2 lignes (équipe A / équipe B), cases en face */
+    .score-grid{
       margin-top:10px;
       display:grid;
-      grid-template-columns: 1fr auto;
-      gap:10px;
+      grid-template-columns: minmax(0,1fr) 48px 48px 48px;
+      gap:8px 8px;
       align-items:center;
-      min-width:0;
+      max-width:100%;
     }
 
     .team{
@@ -87,15 +92,8 @@
       text-overflow:ellipsis;
     }
 
-    .scoreline{
-      display:flex;
-      gap:6px;
-      align-items:center;
-      flex: 0 0 auto;
-      white-space:nowrap;
-    }
     .sc{
-      width:44px;
+      width:48px;
       height:38px;
       border-radius:12px;
       border:1px solid #ddd;
@@ -104,8 +102,16 @@
       text-align:center;
       outline:none;
       font-variant-numeric: tabular-nums;
+      padding:0;
     }
-    .dash{ opacity:.55; font-weight:900; }
+
+    .hdr{
+      font-size:11px;
+      font-weight:1000;
+      opacity:.6;
+      text-align:center;
+      white-space:nowrap;
+    }
 
     .actions{
       margin-top:12px;
@@ -115,18 +121,8 @@
       align-items:center;
       justify-content:space-between;
     }
-    .left-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
 
-    .mini{
-      font-size:12px;
-      font-weight:900;
-      opacity:.75;
-    }
+    .mini{ font-size:12px; font-weight:900; opacity:.75; }
 
     .pill{
       display:inline-flex;
@@ -150,18 +146,10 @@
     .dot.orange{ background:#f39c12; }
     .dot.green{ background:#2ecc71; }
 
-    .warn{
-      border:1px solid rgba(176,0,32,.25);
-      background:rgba(176,0,32,.06);
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:900;
-      margin-top:10px;
-    }
-
     @media (max-width: 380px){
       .team-title{ font-size:14px; }
       .team-sub{ font-size:12px; }
+      .score-grid{ grid-template-columns: minmax(0,1fr) 42px 42px 42px; }
       .sc{ width:42px; height:36px; }
     }
   </style>
@@ -218,9 +206,9 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
+  <!-- ✅ dessous Zone : panneaux -->
   <section class="card" id="panelNeedStep" style="display:none;">
     <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
     <p class="muted" style="margin:0;">
@@ -229,7 +217,6 @@
     </p>
   </section>
 
-  <!-- Résultats -->
   <section class="card" id="panelResults" style="display:none;">
     <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; justify-content:space-between;">
       <div>
@@ -242,14 +229,7 @@
       </a>
     </div>
 
-    <div id="warningBox" class="warn" style="display:none;"></div>
-
     <div id="adminList" style="margin-top:12px;"></div>
-
-    <p class="muted" style="margin-top:10px;">
-      💡 Saisie : 2 sets gagnants = résultat validé automatiquement (winnerSide A/B).
-      Les cases vides = “non joué”.
-    </p>
   </section>
 
 </main>
@@ -258,13 +238,11 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection } from
+    "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const LS_SCOPE_KEY = "admin_scope_last";
 
-  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope");
 
@@ -280,7 +258,7 @@
     try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
   }
 
-  // ---- DOM
+  // DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminZone = document.getElementById("adminZone");
   const scopeEl = document.getElementById("scope");
@@ -290,11 +268,10 @@
   const panelResults = document.getElementById("panelResults");
 
   const statusText = document.getElementById("statusText");
-  const warningBox = document.getElementById("warningBox");
   const adminList  = document.getElementById("adminList");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
-  // ---- state
+  // state
   let currentScope = getInitialScope();
   let unsubProg = null;
   let unsubRes  = null;
@@ -348,10 +325,7 @@
       a.className = "btn";
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
-
-      if(url === "resultats.html"){
-        a.classList.add("is-active"); // ✅ actif gris clair
-      }
+      if(url === "resultats.html") a.classList.add("is-active"); // ✅ gris clair
       tabsEl.appendChild(a);
     }
   }
@@ -363,119 +337,10 @@
     resultsByMatch = new Map();
   }
 
-  // ---- Firestore refs
+  // refs
   function progRef(scope){ return doc(db, "programmations", scope); }
   function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
 
-  // ---- Helpers teams display (compatible avec refs winner/loser)
-  function teamPartsFromTeam(t){
-    if(!t) return { title:"—", sub:"" };
-    const title = t.teamName || "Équipe";
-    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
-    return { title, sub };
-  }
-
-  function normalizeWinnerSide(x){
-    return (x === "A" || x === "B") ? x : null;
-  }
-
-  function resolveTeamRef(ref){
-    if(!currentProg) return null;
-
-    const teams = currentProg.teams || {};
-    const matches = currentProg.matches || {};
-
-    if(!ref) return null;
-
-    if(ref.type === "team"){
-      return teams[ref.key] || null;
-    }
-
-    if(ref.type === "winner" || ref.type === "loser"){
-      const mid = ref.matchId;
-      const m = matches[mid];
-      if(!m) return null;
-
-      const res = resultsByMatch.get(mid);
-      const w = normalizeWinnerSide(res?.winnerSide);
-      if(!w) return null;
-
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
-      if(!teamA || !teamB) return null;
-
-      const winner = (w === "A") ? teamA : teamB;
-      const loser  = (w === "A") ? teamB : teamA;
-
-      return ref.type === "winner" ? winner : loser;
-    }
-
-    return null;
-  }
-
-  function teamRefParts(ref){
-    if(!ref) return { title:"—", sub:"" };
-
-    if(ref.type === "team"){
-      const t = resolveTeamRef(ref);
-      return t ? teamPartsFromTeam(t) : { title: ref.key || "—", sub:"" };
-    }
-    if(ref.type === "winner") return { title: `V${String(ref.matchId || "").slice(1)}`, sub:"" };
-    if(ref.type === "loser")  return { title: `P${String(ref.matchId || "").slice(1)}`, sub:"" };
-    return { title:"—", sub:"" };
-  }
-
-  // ---- score / winner calc
-  function toInt(v){
-    if(v === null || v === undefined) return null;
-    const s = String(v).trim();
-    if(!s) return null;
-    const n = Number(s.replace(",", "."));
-    if(!Number.isFinite(n)) return null;
-    // scores must be integers (0-99)
-    const i = Math.round(n);
-    if(String(i) !== String(n) && !Number.isInteger(n)) return null;
-    if(i < 0 || i > 99) return null;
-    return i;
-  }
-
-  function calcWinnerSide(s){
-    // s = {s1A,s1B,s2A,s2B,s3A,s3B} numbers or null
-    const sets = [
-      [s.s1A, s.s1B],
-      [s.s2A, s.s2B],
-      [s.s3A, s.s3B],
-    ];
-
-    let aWon = 0, bWon = 0;
-    for(const [a,b] of sets){
-      const A = toInt(a), B = toInt(b);
-      if(A === null || B === null) continue; // set not complete
-      if(A === B) continue; // ignore invalid ties
-      if(A > B) aWon++;
-      else bWon++;
-    }
-    if(aWon >= 2 && aWon > bWon) return "A";
-    if(bWon >= 2 && bWon > aWon) return "B";
-    return null;
-  }
-
-  function dotClass(winnerSide){
-    if(winnerSide === "A" || winnerSide === "B") return "green";
-    // if some scores entered but not decided => orange
-    return "red";
-  }
-
-  function statusLabel(stored){
-    const w = normalizeWinnerSide(stored?.winnerSide);
-    if(w) return "Validé";
-    const any =
-      [stored?.s1A,stored?.s1B,stored?.s2A,stored?.s2B,stored?.s3A,stored?.s3B]
-        .some(v => String(v ?? "").trim() !== "");
-    return any ? "En cours" : "Non saisi";
-  }
-
-  // ---- rendering
   function courtLabel(prog, courtKey){
     const name = prog?.courts?.[courtKey] || courtKey || "—";
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
@@ -500,21 +365,73 @@
     return { slot: fallbackSlot, court: slotObj?.court || "A" };
   }
 
-  function fmtUpdated(ts){
-    try{
-      const d = ts?.toDate ? ts.toDate() : null;
-      if(!d) return "—";
-      return d.toLocaleString("fr-FR", {
-        year:"numeric", month:"2-digit", day:"2-digit",
-        hour:"2-digit", minute:"2-digit"
-      });
-    }catch{ return "—"; }
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    return {
+      title: t.teamName || "Équipe",
+      sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`
+    };
+  }
+
+  function teamRefParts(prog, ref){
+    if(!ref) return { title:"—", sub:"" };
+
+    if(ref.type === "team"){
+      const t = prog?.teams?.[ref.key] || null;
+      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
+    }
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+
+    return { title:"—", sub:"" };
+  }
+
+  function readCardScores(card){
+    const get = (k)=>{
+      const el = card.querySelector(`input[data-k="${k}"]`);
+      return el ? (el.value || "").trim() : "";
+    };
+    return {
+      s1A: get("s1A"), s2A: get("s2A"), s3A: get("s3A"),
+      s1B: get("s1B"), s2B: get("s2B"), s3B: get("s3B"),
+    };
+  }
+
+  function sanitize(v){
+    const s = String(v ?? "").trim();
+    return s === "" ? null : s;
+  }
+
+  function winnerFromScores(x){
+    // x are strings or null
+    const sets = [
+      [x.s1A, x.s1B],
+      [x.s2A, x.s2B],
+      [x.s3A, x.s3B],
+    ];
+
+    let a=0,b=0;
+    for(const [A,B] of sets){
+      const nA = (A === null) ? null : Number(A);
+      const nB = (B === null) ? null : Number(B);
+      if(!Number.isFinite(nA) || !Number.isFinite(nB)) continue;
+      if(nA === nB) continue;
+      if(nA > nB) a++; else b++;
+    }
+    if(a >= 2 && a > b) return "A";
+    if(b >= 2 && b > a) return "B";
+    return null;
+  }
+
+  function statusBadge(stored){
+    const w = stored?.winnerSide;
+    const any = ["s1A","s1B","s2A","s2B","s3A","s3B"].some(k => stored?.[k] !== null && stored?.[k] !== undefined && String(stored?.[k]).trim() !== "");
+    if(w === "A" || w === "B") return { label:"Validé", dot:"green" };
+    if(any) return { label:"En cours", dot:"orange" };
+    return { label:"Non saisi", dot:"red" };
   }
 
   function render(){
-    warningBox.style.display = "none";
-    warningBox.textContent = "";
-
     if(currentScope === "general"){
       statusText.textContent = "Choisis une étape.";
       adminList.innerHTML = "";
@@ -524,10 +441,8 @@
     btnOpenPublic.href = `../${currentScope}/resultats.html`;
 
     if(!currentProg){
-      statusText.textContent = "ℹ️ Programmation introuvable. Génère d’abord la programmation.";
+      statusText.textContent = "ℹ️ Programmation introuvable. Génère-la d’abord dans “Programmation”.";
       adminList.innerHTML = "";
-      warningBox.style.display = "block";
-      warningBox.textContent = "⚠️ Pas de programmation : impossible d’afficher les matchs. Va sur “Programmation” puis génère-la depuis le tirage VALIDÉ.";
       return;
     }
 
@@ -535,7 +450,7 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // map slot -> matchId
+    // slot -> matchId
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
       const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
@@ -546,32 +461,26 @@
       }
     }
 
-    // list in slot order
     const cards = [];
-    let nOk=0, nTotal=0;
+    let done = 0, total = 0;
 
     for(const s of slots){
       const mid = slotToMatch.get(Number(s.slot));
       const m = mid ? matches[mid] : null;
       if(!m) continue;
 
-      nTotal++;
+      total++;
 
-      const a = teamRefParts(m.A);
-      const b = teamRefParts(m.B);
+      const a = teamRefParts(currentProg, m.A);
+      const b = teamRefParts(currentProg, m.B);
 
       const entry = schedule[mid];
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
       const stored = resultsByMatch.get(mid) || {};
-      const winnerSide = normalizeWinnerSide(stored?.winnerSide);
-      if(winnerSide) nOk++;
-
-      const badge = statusLabel(stored);
-      const dot = dotClass(winnerSide);
-
-      const meta = `Dernière maj : ${esc(fmtUpdated(stored?.updatedAt))} · ${esc(stored?.updatedBy || "—")}`;
+      const badge = statusBadge(stored);
+      if(badge.dot === "green") done++;
 
       cards.push(`
         <div class="match-card ${esc(courtClass(courtKey))}" data-mid="${esc(mid)}">
@@ -579,172 +488,95 @@
             <div class="m-slot">#${esc(s.slot)} · ${esc(mid)}</div>
             <div class="m-time">${esc(s.time || "—")}</div>
             <div class="m-court">${esc(courtLabel(currentProg, courtKey))}</div>
-            <div class="pill" title="${esc(badge)}"><span class="dot ${dot}"></span>${esc(badge)}</div>
+            <div class="pill"><span class="dot ${esc(badge.dot)}"></span>${esc(badge.label)}</div>
           </div>
 
-          ${s.note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(s.note)}</div>` : ""}
+          <div class="score-grid" aria-label="Saisie scores">
+            <div class="hdr"></div>
+            <div class="hdr">S1</div>
+            <div class="hdr">S2</div>
+            <div class="hdr">S3</div>
 
-          <div class="row">
+            <!-- ✅ Équipe A (ligne 1) -->
             <div class="team">
               <div class="team-title">${esc(a.title)}</div>
               ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
             </div>
-            <div class="scoreline">
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s1A" value="${esc(stored?.s1A ?? "")}">
-              <span class="dash">-</span>
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s1B" value="${esc(stored?.s1B ?? "")}">
-              <span class="dash">|</span>
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s2A" value="${esc(stored?.s2A ?? "")}">
-              <span class="dash">-</span>
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s2B" value="${esc(stored?.s2B ?? "")}">
-              <span class="dash">|</span>
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s3A" value="${esc(stored?.s3A ?? "")}">
-              <span class="dash">-</span>
-              <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="—" data-k="s3B" value="${esc(stored?.s3B ?? "")}">
-            </div>
-          </div>
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s1A" value="${esc(stored.s1A ?? "")}">
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s2A" value="${esc(stored.s2A ?? "")}">
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s3A" value="${esc(stored.s3A ?? "")}">
 
-          <div class="row" style="margin-top:10px;">
+            <!-- ✅ Équipe B (ligne 2) -->
             <div class="team">
               <div class="team-title">${esc(b.title)}</div>
               ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
             </div>
-            <div class="mini" style="text-align:right;">
-              winnerSide: <b data-winner>${esc(winnerSide || "—")}</b>
-            </div>
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s1B" value="${esc(stored.s1B ?? "")}">
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s2B" value="${esc(stored.s2B ?? "")}">
+            <input class="sc" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-k="s3B" value="${esc(stored.s3B ?? "")}">
           </div>
 
           <div class="actions">
-            <div class="left-actions">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn" data-act="save" style="font-weight:900; color:#111;">💾 Enregistrer</button>
               <button class="btn" data-act="clear" style="font-weight:900; color:#111; border-color:#f1b2b2;">🧽 Effacer</button>
             </div>
-            <div class="mini muted">${meta}</div>
+            <div class="mini muted">winnerSide: <b data-winner>${esc(stored.winnerSide || "—")}</b></div>
           </div>
         </div>
       `);
     }
 
-    statusText.textContent = `🟢 En direct — ${nOk}/${nTotal} match(s) validé(s)`;
+    statusText.textContent = `🟢 En direct — ${done}/${total} match(s) validé(s)`;
     adminList.innerHTML = cards.length
       ? `<div class="match-list">${cards.join("")}</div>`
       : `<p class="muted">Aucun match.</p>`;
   }
 
-  // ---- Firestore listeners
-  function startProgListener(scope){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-    statusText.textContent = "Chargement…";
-    adminList.innerHTML = "";
-
-    unsubProg = onSnapshot(progRef(scope), (snap)=>{
-      currentProg = snap.exists() ? (snap.data() || {}) : null;
-      render();
-    }, (err)=>{
-      console.error(err);
-      currentProg = null;
-      statusText.textContent = "❌ Erreur Firestore (programmation).";
-      render();
-    });
-  }
-
-  function startResultsListener(scope){
-    if(unsubRes){ unsubRes(); unsubRes = null; }
-    resultsByMatch = new Map();
-
-    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
-      resultsByMatch = new Map();
-      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
-      render();
-    }, (err)=>{
-      console.error(err);
-    });
-  }
-
-  function showPanelsForScope(scope){
-    if(scope === "general"){
-      panelNeedStep.style.display = "block";
-      panelResults.style.display = "none";
-      stopListeners();
-      return;
-    }
-
-    panelNeedStep.style.display = "none";
-    panelResults.style.display = "block";
-
-    startProgListener(scope);
-    startResultsListener(scope);
-  }
-
-  // ---- Save/Clear per match
-  function readCardScores(card){
-    const get = (k)=>{
-      const el = card.querySelector(`input[data-k="${k}"]`);
-      return el ? (el.value || "").trim() : "";
-    };
-    return {
-      s1A: get("s1A"), s1B: get("s1B"),
-      s2A: get("s2A"), s2B: get("s2B"),
-      s3A: get("s3A"), s3B: get("s3B"),
-    };
-  }
-
-  function normalizeForStore(raw){
-    // store "" as null for cleanliness
-    const out = {};
-    for(const k of ["s1A","s1B","s2A","s2B","s3A","s3B"]){
-      const v = (raw[k] ?? "").toString().trim();
-      out[k] = v === "" ? null : v;
-    }
-    // compute winnerSide from ints (only if enough complete sets)
-    const w = calcWinnerSide(out);
-    out.winnerSide = w; // "A" | "B" | null
-    return out;
-  }
-
   async function saveMatch(mid, card){
-    const userEmail = auth.currentUser?.email || null;
     const raw = readCardScores(card);
-    const data = normalizeForStore(raw);
+    const data = {
+      s1A: sanitize(raw.s1A), s2A: sanitize(raw.s2A), s3A: sanitize(raw.s3A),
+      s1B: sanitize(raw.s1B), s2B: sanitize(raw.s2B), s3B: sanitize(raw.s3B),
+    };
+    data.winnerSide = winnerFromScores(data); // "A" | "B" | null
 
-    // minimal guard: if there is a tie inside a completed set, ignore (still saves)
     await setDoc(doc(resultsCol(currentScope), mid), {
       ...data,
       updatedAt: serverTimestamp(),
-      updatedBy: userEmail
+      updatedBy: auth.currentUser?.email || null
     }, { merge:true });
   }
 
   async function clearMatch(mid){
-    const userEmail = auth.currentUser?.email || null;
     await setDoc(doc(resultsCol(currentScope), mid), {
-      s1A:null,s1B:null,s2A:null,s2B:null,s3A:null,s3B:null,
-      winnerSide: null,
+      s1A:null,s2A:null,s3A:null,
+      s1B:null,s2B:null,s3B:null,
+      winnerSide:null,
       updatedAt: serverTimestamp(),
-      updatedBy: userEmail
+      updatedBy: auth.currentUser?.email || null
     }, { merge:true });
   }
 
-  // live winnerSide display as you type (without saving)
   function updateWinnerPreview(card){
     const raw = readCardScores(card);
-    const data = normalizeForStore(raw);
-    const wEl = card.querySelector("[data-winner]");
-    if(wEl) wEl.textContent = data.winnerSide || "—";
+    const data = {
+      s1A: sanitize(raw.s1A), s2A: sanitize(raw.s2A), s3A: sanitize(raw.s3A),
+      s1B: sanitize(raw.s1B), s2B: sanitize(raw.s2B), s3B: sanitize(raw.s3B),
+    };
+    const w = winnerFromScores(data);
+    const el = card.querySelector("[data-winner]");
+    if(el) el.textContent = w || "—";
   }
 
   adminList.addEventListener("input", (e)=>{
     const card = e.target.closest(".match-card");
-    if(!card) return;
-    updateWinnerPreview(card);
+    if(card) updateWinnerPreview(card);
   });
 
   adminList.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
-
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
-    if(!currentProg){ alert("Pas de programmation."); return; }
 
     const card = btn.closest(".match-card");
     const mid = card?.dataset?.mid;
@@ -770,7 +602,43 @@
     }
   });
 
-  // Logout
+  // listeners
+  function startProgListener(scope){
+    if(unsubProg){ unsubProg(); unsubProg = null; }
+    unsubProg = onSnapshot(progRef(scope), (snap)=>{
+      currentProg = snap.exists() ? (snap.data() || {}) : null;
+      render();
+    }, (err)=>{
+      console.error(err);
+      currentProg = null;
+      render();
+    });
+  }
+
+  function startResultsListener(scope){
+    if(unsubRes){ unsubRes(); unsubRes = null; }
+    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
+      resultsByMatch = new Map();
+      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
+      render();
+    }, (err)=> console.error(err));
+  }
+
+  function showPanelsForScope(scope){
+    if(scope === "general"){
+      panelNeedStep.style.display = "block";
+      panelResults.style.display = "none";
+      stopListeners();
+      return;
+    }
+
+    panelNeedStep.style.display = "none";
+    panelResults.style.display = "block";
+    startProgListener(scope);
+    startResultsListener(scope);
+  }
+
+  // logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -804,8 +672,7 @@
 
   // Guard
   const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
+  if(!g.ok){ showDenied(); } else { showAdmin(); }
 
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
