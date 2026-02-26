@@ -38,24 +38,17 @@
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
     }
+
+    /* ✅ centre : challenge-gen / etape1 / challenge-gen (images) */
     .tv-center{
       min-height:120px;
       display:grid;
-      grid-template-columns: 1fr 140px 1fr;
+      grid-template-columns: 140px 1fr 140px; /* côtés fixes, centre flexible */
       align-items:center;
       gap:14px;
       padding: 6px 10px;
     }
-    .tv-center .mid{
-      display:flex; align-items:center; justify-content:center;
-    }
-    .tv-center .mid img{
-      width:min(520px, 100%);
-      max-height:110px;
-      height:auto;
-      object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
-    }
+    .tv-center .mid,
     .tv-center .side{
       display:flex; align-items:center; justify-content:center;
       height:100%;
@@ -66,11 +59,17 @@
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
       opacity:.98;
     }
+    /* ✅ Étape: même HAUTEUR que les logos => largeur auto (plus grand) */
+    .tv-center .mid img{
+      height:120px;
+      width:auto;
+      max-width:100%;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
+    }
 
     /* ✅ Rangée KPI/horloge sous les images */
-    .tv-subrow{
-      padding: 0 0 14px;
-    }
+    .tv-subrow{ padding: 0 0 14px; }
     .tv-subrow-inner{
       display:flex;
       justify-content:center;
@@ -125,7 +124,7 @@
     .muted{ color:#666; font-weight:800; }
     .kpis{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
-    /* ===== LEFT 2/3 : Split par court ===== */
+    /* ===== LEFT 2/3 : Split par court (FULL) ===== */
     .left-body{
       padding: 12px 12px;
       overflow:auto;
@@ -140,68 +139,81 @@
       align-items:stretch;
       min-height:0;
     }
+
+    /* ✅ Couleurs de fond par court */
     .court-col{
-      border:1px solid #eee;
-      border-radius:16px;
-      background:#fff;
-      box-shadow: 0 10px 26px rgba(0,0,0,.05);
+      border-radius:18px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
       min-width:0;
+      border: 1px solid rgba(0,0,0,.06);
+      box-shadow: 0 18px 45px rgba(0,0,0,.14);
     }
+    .court-col.lisa{
+      background: #FFE6EA;
+      border-color: rgba(255,0,60,.20);
+    }
+    .court-col.manon{
+      background: #FFF6D6;
+      border-color: rgba(255,196,0,.25);
+    }
+
     .court-head{
-      padding:12px 12px;
-      background:#fbfbfb;
-      border-bottom:1px solid #eee;
+      padding:14px 14px;
+      border-bottom:1px solid rgba(0,0,0,.08);
       font-weight:1000;
-      font-size:18px;
+      font-size:20px;
       display:flex;
       align-items:center;
       gap:10px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      background: rgba(255,255,255,.45);
+      backdrop-filter: blur(2px);
     }
+
     .court-body{
-      padding:10px 10px 12px;
+      padding:12px 12px 14px;
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:12px;
       min-height:0;
     }
 
-    /* ===== Match card (par court) ===== */
+    /* ✅ Section titres (Terminés / En cours / À venir) */
+    .sec-title{
+      font-weight:1000;
+      font-size:16px;
+      letter-spacing:.2px;
+      margin:0 0 6px;
+      opacity:.95;
+    }
+
+    /* ✅ Match card (par court) : heure petite en haut, puis 2 lignes équipes+score */
     .mcard2{
-      border:1px solid #eee;
-      border-radius:14px;
-      padding:10px 10px;
-      background:#fff;
-      display:grid;
-      grid-template-columns: 86px 1fr 140px;
+      border:1px solid rgba(0,0,0,.10);
+      border-radius:16px;
+      padding:12px 12px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 10px 26px rgba(0,0,0,.08);
+      display:flex;
+      flex-direction:column;
       gap:10px;
-      align-items:stretch;
+      min-width:0;
     }
     .m-time{
       font-weight:1000;
       color:#111;
       white-space:nowrap;
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      font-size:18px;
-    }
-    .m-teams{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      justify-content:center;
+      font-size:14px; /* ✅ réduit */
+      opacity:.85;
     }
     .trow{
       display:grid;
-      grid-template-columns: 1fr 46px;
-      gap:10px;
+      grid-template-columns: 1fr 54px;
+      gap:12px;
       align-items:center;
       min-width:0;
     }
@@ -221,27 +233,28 @@
       font-variant-numeric: tabular-nums;
       color:#111;
     }
-    .m-sets{
+    .setline{
       display:flex;
-      align-items:center;
-      justify-content:flex-end;
       gap:8px;
-      font-weight:1000;
-      font-size:18px;
-      color:#111;
-      white-space:nowrap;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top:2px;
     }
     .setbox{
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid #eee;
-      background:#fafafa;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.85);
       font-variant-numeric: tabular-nums;
+      font-weight:1000;
+      font-size:14px;
+      opacity:.95;
     }
     .placeholder{
-      color:#777;
+      color:#333;
       font-weight:900;
       padding:10px 4px;
+      opacity:.75;
     }
 
     /* ===== Right: tableaux rotator ===== */
@@ -267,7 +280,7 @@
     .tv-table th, .tv-table td{ border:1px solid #eee; padding:8px 8px; text-align:left; vertical-align:top; }
     .tv-table th{ background:#fafafa; font-weight:1000; }
 
-    /* ===== Sponsors bandeau (sans cadre, taille max) ===== */
+    /* ===== Sponsors bandeau (sans cadre, taille XXL) ===== */
     .tv-bottom{
       background:#0d1310;
       border-top:1px solid rgba(255,255,255,.10);
@@ -277,7 +290,7 @@
     }
     .sponsor-track{
       display:flex;
-      gap:36px;
+      gap:54px;
       align-items:center;
       white-space:nowrap;
       will-change: transform;
@@ -293,10 +306,10 @@
       background:transparent;
     }
     .sponsor-item img{
-      height:42px; /* ✅ taille max */
+      height:84px; /* ✅ x2 vs 42px */
       width:auto;
       object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.35));
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
     }
 
     @keyframes marquee{
@@ -319,10 +332,10 @@
           <img src="../assets/img/logo-suzini.png" alt="Suzini">
         </div>
 
-        <!-- ✅ centre : challenge / étape / challenge (images) -->
+        <!-- ✅ centre : challenge-gen / etape1 / challenge-gen -->
         <div class="tv-center" aria-label="Bandeau images">
           <div class="side">
-            <img src="../assets/img/logo-challenge.png" alt="Challenge">
+            <img src="../assets/img/challenge-gen.png" alt="Challenge">
           </div>
 
           <div class="mid">
@@ -330,7 +343,7 @@
           </div>
 
           <div class="side">
-            <img src="../assets/img/logo-challenge.png" alt="Challenge">
+            <img src="../assets/img/challenge-gen.png" alt="Challenge">
           </div>
         </div>
 
@@ -339,7 +352,7 @@
         </div>
       </div>
 
-      <!-- ✅ KPI / horloge (compteurs = totaux) -->
+      <!-- KPI / horloge -->
       <div class="tv-subrow">
         <div class="tv-subrow-inner">
           <span class="tv-pill" id="tvClock">⏱️ —</span>
@@ -357,21 +370,15 @@
 
     <!-- LEFT 2/3 -->
     <section class="panel">
-      <div class="panel-head">
-        <h2>🎾 Matchs par court</h2>
-        <div class="kpis">
-          <span class="tv-pill" id="hintTotals">Totaux (tous matchs)</span>
-        </div>
-      </div>
-
+      <!-- ✅ on supprime le texte "Matchs par court" et "totaux" -->
       <div class="left-body">
         <div class="courts-grid">
-          <div class="court-col">
+          <div class="court-col lisa">
             <div class="court-head" id="courtLeftTitle">—</div>
             <div class="court-body" id="courtLeftBody"></div>
           </div>
 
-          <div class="court-col">
+          <div class="court-col manon">
             <div class="court-head" id="courtRightTitle">—</div>
             <div class="court-body" id="courtRightBody"></div>
           </div>
@@ -463,15 +470,15 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // Sponsors (ordre demandé) — sans cadre
+  // Sponsors (ordre demandé) — ✅ dans ../assets/img/ (sans sous-dossier)
   const SPONSOR_LOGOS = [
-    "../assets/img/sponsors/bricolage.png",
-    "../assets/img/sponsors/BT-FFT.png",
-    "../assets/img/sponsors/matoque.png",
-    "../assets/img/sponsors/tcs.png",
-    "../assets/img/sponsors/brico.png",
+    "../assets/img/bricolage.png",
+    "../assets/img/BT-FFT.png",
+    "../assets/img/matoque.png",
+    "../assets/img/tcs.png",
+    "../assets/img/brico.png",
     "../assets/img/logo-suzini.png",
-    "../assets/img/sponsors/psk.png",
+    "../assets/img/psk.png",
   ];
   sponsorTrack.innerHTML = (SPONSOR_LOGOS.concat(SPONSOR_LOGOS)).map((src)=>`
     <span class="sponsor-item"><img src="${esc(src)}" alt="sponsor"></span>
@@ -569,14 +576,6 @@
   function getResultForMatch(id){ return resultsMap.get(id) || null; }
   function isValidatedResult(r){ return !!r && (r.winnerSide === "A" || r.winnerSide === "B"); }
 
-  function setPair(a,b){
-    const A = (a === null || a === undefined || a === "") ? null : String(a).trim();
-    const B = (b === null || b === undefined || b === "") ? null : String(b).trim();
-    if(!A || !B) return null;
-    return `${A}-${B}`;
-  }
-
-  // ✅ points par équipe (sets gagnés) + chips set
   function computeSets(r){
     const pairs = [
       { A:r?.s1A, B:r?.s1B },
@@ -598,28 +597,25 @@
 
   function fmtTime(m){ return m.time || "—"; }
 
-  function matchCardPerCourt(m, kind){ // kind: done|live|next (utilisé seulement pour logique)
+  function matchCardPerCourt(m){
     const r = getResultForMatch(m.id);
     const validated = isValidatedResult(r);
-
     const { ptsA, ptsB, chips } = validated ? computeSets(r) : { ptsA:"—", ptsB:"—", chips:[] };
 
     return `
       <div class="mcard2">
         <div class="m-time">🕘 ${esc(fmtTime(m))}</div>
 
-        <div class="m-teams">
-          <div class="trow">
-            <div class="tname">${esc(m.aLabel || "—")}</div>
-            <div class="tpts">${esc(ptsA)}</div>
-          </div>
-          <div class="trow">
-            <div class="tname">${esc(m.bLabel || "—")}</div>
-            <div class="tpts">${esc(ptsB)}</div>
-          </div>
+        <div class="trow">
+          <div class="tname">${esc(m.aLabel || "—")}</div>
+          <div class="tpts">${esc(ptsA)}</div>
+        </div>
+        <div class="trow">
+          <div class="tname">${esc(m.bLabel || "—")}</div>
+          <div class="tpts">${esc(ptsB)}</div>
         </div>
 
-        <div class="m-sets">
+        <div class="setline">
           ${
             chips.length
               ? chips.map(s => `<span class="setbox">${esc(s)}</span>`).join("")
@@ -636,7 +632,6 @@
     const validated = allMatches.filter(m => isValidatedResult(getResultForMatch(m.id))).length;
     const remaining = total - validated;
 
-    // ✅ en cours = 2 sauf cas (reste 1 => 1, reste 0 => 0)
     const live = remaining <= 0 ? 0 : (remaining === 1 ? 1 : 2);
     const next = Math.max(0, remaining - live);
 
@@ -658,21 +653,15 @@
       return;
     }
 
-    // titres courts (avec emojis inclus)
     const courtAName = courtLabel(prog, "A");
     const courtBName = courtLabel(prog, "B");
 
-    // Placement demandé:
-    // Lisa à gauche, Manon à droite (conforme à ta consigne)
-    // Or dans ton defaultCourts: A=Manon, B=Lisa. Donc:
-    // Left = court B, Right = court A.
+    // Lisa gauche, Manon droite
     courtLeftTitle.textContent = courtBName;
     courtRightTitle.textContent = courtAName;
 
-    // Totaux
     computeTotals(matches);
 
-    // group by courtKey
     const byCourt = new Map([["A",[]],["B",[]]]);
     for(const m of matches){
       if(!byCourt.has(m.courtKey)) byCourt.set(m.courtKey, []);
@@ -687,7 +676,7 @@
       const done = arr.filter(m => isValidatedResult(getResultForMatch(m.id)));
       const pending = arr.filter(m => !isValidatedResult(getResultForMatch(m.id)));
 
-      // 1 terminé = dernier validé (par updatedAt/createdAt sinon slot)
+      // dernier validé
       done.sort((a,b)=>{
         const ra = getResultForMatch(a.id) || {};
         const rb = getResultForMatch(b.id) || {};
@@ -698,50 +687,66 @@
         if(db !== da) return db - da;
         return (b.slot||0)-(a.slot||0);
       });
-      const done1 = done[0] || null;
-
-      // 1 en cours = premier pending
-      const live1 = pending[0] || null;
-
-      // 1 à venir = suivant après live
-      const next1 = pending[1] || null;
-
-      return { done1, live1, next1 };
+      return {
+        done1: done[0] || null,
+        live1: pending[0] || null,
+        next1: pending[1] || null,
+      };
     }
 
     const left = pickForCourt("B");  // Lisa
     const right = pickForCourt("A"); // Manon
 
     function renderBlock(x){
-      const parts = [];
-      if(x.done1) parts.push(matchCardPerCourt(x.done1, "done"));
-      else parts.push(`<div class="placeholder">Aucun match terminé.</div>`);
+      return `
+        <div>
+          <div class="sec-title">✅ Match terminé</div>
+          ${x.done1 ? matchCardPerCourt(x.done1) : `<div class="placeholder">Aucun match terminé.</div>`}
+        </div>
 
-      if(x.live1) parts.push(matchCardPerCourt(x.live1, "live"));
-      else parts.push(`<div class="placeholder">Aucun match en cours.</div>`);
+        <div>
+          <div class="sec-title">🟠 Match en cours</div>
+          ${x.live1 ? matchCardPerCourt(x.live1) : `<div class="placeholder">Aucun match en cours.</div>`}
+        </div>
 
-      if(x.next1) parts.push(matchCardPerCourt(x.next1, "next"));
-      else parts.push(`<div class="placeholder">Aucun match à venir.</div>`);
-
-      return parts.join("");
+        <div>
+          <div class="sec-title">⏭️ Match à venir</div>
+          ${x.next1 ? matchCardPerCourt(x.next1) : `<div class="placeholder">Aucun match à venir.</div>`}
+        </div>
+      `;
     }
 
     courtLeftBody.innerHTML = renderBlock(left);
     courtRightBody.innerHTML = renderBlock(right);
   }
 
-  // ===== Tableaux rotator (inchangé) =====
+  // ===== Tableaux rotator (corrigé: supporte prog.tableaux au root ET prog.tirage.tableaux) =====
   function normalizeTableaux(obj){
-    const arr = Array.isArray(obj?.tableaux) ? obj.tableaux
-              : Array.isArray(obj?.tables) ? obj.tables
-              : [];
-    return arr.map((t, idx)=>{
+    const direct = Array.isArray(obj?.tableaux) ? obj.tableaux
+                : Array.isArray(obj?.tables) ? obj.tables
+                : null;
+
+    if(direct) return direct.map((t, idx)=>{
       const title = t.title || t.name || `Tableau ${idx+1}`;
       const html = t.html || null;
       const imageUrl = t.imageUrl || t.img || null;
       const rows = Array.isArray(t.rows) ? t.rows : null;
       return { title, html, imageUrl, rows };
     }).filter(x=>x.title);
+
+    // fallback: si la prog encapsule dans un champ (ex: prog.public.tableaux / prog.draw.tableaux)
+    const nested =
+      obj?.tirage?.tableaux || obj?.draw?.tableaux || obj?.data?.tableaux || null;
+
+    return Array.isArray(nested)
+      ? nested.map((t, idx)=>{
+          const title = t.title || t.name || `Tableau ${idx+1}`;
+          const html = t.html || null;
+          const imageUrl = t.imageUrl || t.img || null;
+          const rows = Array.isArray(t.rows) ? t.rows : null;
+          return { title, html, imageUrl, rows };
+        }).filter(x=>x.title)
+      : [];
   }
 
   function renderTableau(t){
@@ -838,6 +843,7 @@
       tvStatus.textContent = "🟢 En direct";
       prog = data || null;
 
+      // ✅ tableaux depuis prog (si dispo)
       const fromProg = normalizeTableaux(prog || {});
       if(fromProg.length){
         tableaux = fromProg;
@@ -875,12 +881,23 @@
     resultsMap = new Map();
     snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
     computeCourtBlocks();
+
+    // ✅ Si tableaux étaient "vides" au moment de la prog, retente sur chaque update résultats
+    if(!tableaux.length && prog){
+      const fromProg = normalizeTableaux(prog || {});
+      if(fromProg.length){
+        tableaux = fromProg;
+        startRotator();
+      }
+    }
+
     if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
   }, (err)=>{
     console.error(err);
     tvStatus.textContent = "🔴 Erreur résultats";
   });
 
+  // tableaux depuis tirage si prog n'en contient pas
   (async function loadTirageOnce(){
     try{
       const s = await getDoc(DOC_TIRAGE);
