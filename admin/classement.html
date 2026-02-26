@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Classement</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-classement-admin" />
 </head>
 <body>
 
@@ -15,13 +15,11 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
-
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
@@ -29,8 +27,8 @@
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil public</a>
-      <a href="#" id="btnLogout">Déconnexion</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
   </div>
 </header>
@@ -42,24 +40,24 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Encart Zone (même partout) -->
+  <!-- ✅ Zone (même partout) -->
   <section class="card" id="adminUI" style="display:none;">
-    <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
     <div class="field">
       <label for="scope">Choisir</label>
       <select id="scope">
-        <option value="general">Général</option>
-        <option value="etape1">Étape 1</option>
-        <option value="etape2">Étape 2</option>
-        <option value="etape3">Étape 3</option>
-        <option value="etape4">Étape 4</option>
-        <option value="etape5">Étape 5</option>
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
       </select>
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px;"></p>
+    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
   <section class="card" id="panelNeedStep" style="display:none;">
@@ -100,11 +98,15 @@
 </main>
 
 <style>
-  .list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+  /* ✅ Bonus : onglet courant (tabs) en NOIR avec écriture BLANCHE */
+  .btn.is-active{
+    background:#111 !important;
+    border-color:#111 !important;
+    color:#fff !important;
+    box-shadow: 0 10px 22px rgba(0,0,0,.18);
   }
+
+  .list{ display:flex; flex-direction:column; gap:10px; }
 
   .rank-card{
     border-radius:16px;
@@ -119,38 +121,18 @@
   }
 
   .rk{
-    width:42px;
-    height:42px;
-    border-radius:14px;
+    width:42px; height:42px; border-radius:14px;
     border:1px solid rgba(0,0,0,.10);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:1000;
-    font-size:16px;
-    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:1000; font-size:16px; flex:0 0 auto;
   }
 
-  .rmain{
-    min-width:0;
-    flex:1 1 auto;
-  }
-
+  .rmain{ min-width:0; flex:1 1 auto; }
   .rtitle{
-    font-weight:1000;
-    line-height:1.15;
-    margin:0;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    font-weight:1000; line-height:1.15; margin:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-
-  .rsub{
-    margin-top:6px;
-    font-size:12px;
-    opacity:.8;
-    line-height:1.35;
-  }
+  .rsub{ margin-top:6px; font-size:12px; opacity:.8; line-height:1.35; }
 
   .tag{
     border:1px solid rgba(0,0,0,.12);
@@ -162,30 +144,35 @@
     opacity:.9;
     flex:0 0 auto;
   }
-
-  .warn{
-    border:1px solid rgba(176,0,32,.25);
-    background:rgba(176,0,32,.06);
-    padding:10px 12px;
-    border-radius:14px;
-    font-weight:900;
-    margin-top:10px;
-  }
 </style>
 
 <script type="module">
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
-
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, onSnapshot, collection,
     setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ---- scope (URL ?scope=etape5)
+  const LS_SCOPE_KEY = "admin_scope_last";
+
+  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
-  const scopeFromUrl = params.get("scope") || "etape5";
+  const scopeFromUrl = params.get("scope");
+
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "etape1";
+  }
+
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+  }
 
   // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
@@ -193,8 +180,6 @@
 
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
-  const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelRank     = document.getElementById("panelRank");
@@ -207,7 +192,7 @@
   const playerList    = document.getElementById("playerList");
 
   // ---- state
-  let currentScope = scopeFromUrl;
+  let currentScope = getInitialScope();
   let currentProg = null;
   let resultsByMatch = new Map();
   let currentClassementDoc = null;
@@ -215,11 +200,6 @@
   let unsubProg = null;
   let unsubRes  = null;
   let unsubCls  = null;
-
-  function stepLabel(scope){
-    if(!scope || scope === "general") return "Général";
-    return `Étape ${scope.replace("etape","")}`;
-  }
 
   function esc(s){
     return (s ?? "").toString()
@@ -234,50 +214,54 @@
     }catch{ return "—"; }
   }
 
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
   function setTabs(scope){
     tabsEl.innerHTML = "";
 
     if(scope === "general"){
-      hintEl.textContent = "Zone Général : pas de classement ici (choisis une étape).";
-
       const a = document.createElement("a");
       a.className = "btn";
       a.href = "index.html";
-      a.textContent = "📰 Aller aux infos (Général)";
+      a.textContent = "📰 Aller à Admin — Gestion (infos)";
       tabsEl.appendChild(a);
       return;
     }
 
-    hintEl.textContent = "🎾 Zone Étape : équipes / inscriptions / tirage / programmation / résultats / classement / RAZ.";
+    // même liste que les autres pages admin
+    if(scope === "etape5"){
+      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+    }
 
     const links = [
       ["👥 Équipes",        "equipes.html"],
       ["📝 Inscriptions",   "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
       ["🎲 Tirage",         "tirage.html"],
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
       ["🏆 Classement",     "classement.html"],
-      ["🧨 RAZ",            "raz.html"],
     ];
-
-    if(scope !== "etape5"){
-      links.splice(3, 0, ["🍽️ Repas", "repas.html"]);
-    }else{
-      const fake = document.createElement("a");
-      fake.className = "btn disabled";
-      fake.href = "#";
-      fake.setAttribute("aria-disabled","true");
-      fake.textContent = "🍽️ Repas (plus tard)";
-      fake.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
-      tabsEl.appendChild(fake);
-    }
 
     for(const [label, url] of links){
       const a = document.createElement("a");
       a.className = "btn";
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
-      if(url === "classement.html") a.style.fontWeight = "900";
+
+      // ✅ bouton courant noir/blanc
+      if(url === "classement.html"){
+        a.classList.add("is-active");
+        a.style.fontWeight = "1000";
+      }
       tabsEl.appendChild(a);
     }
   }
@@ -288,18 +272,23 @@
     if(unsubCls){ unsubCls(); unsubCls = null; }
   }
 
-  // ---- Firestore refs
+  // ---- Firestore refs (inchangés)
   function progRef(scope){ return doc(db, "programmations", scope); }
   function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
   function classementRef(scope){ return doc(db, "classements", scope); }
 
-  // ---- Resolver (team / winner / loser)
+  function teamParts(t){
+    if(!t) return { teamName:"—", p1:"—", p2:"—" };
+    const teamName = t.teamName || "Équipe";
+    const p1 = `${t.p1LastName || ""} ${t.p1FirstName || ""}`.trim() || "—";
+    const p2 = `${t.p2LastName || ""} ${t.p2FirstName || ""}`.trim() || "—";
+    return { teamName, p1, p2 };
+  }
+
   function resolveTeamRef(ref){
     if(!currentProg) return null;
-
     const teams = currentProg.teams || {};
     const matches = currentProg.matches || {};
-
     if(!ref) return null;
 
     if(ref.type === "team"){
@@ -354,19 +343,10 @@
     return (res.winnerSide === "A") ? teamB : teamA;
   }
 
-  function teamParts(t){
-    if(!t) return { teamName:"—", p1:"—", p2:"—" };
-    const teamName = t.teamName || "Équipe";
-    const p1 = `${t.p1LastName || ""} ${t.p1FirstName || ""}`.trim() || "—";
-    const p2 = `${t.p2LastName || ""} ${t.p2FirstName || ""}`.trim() || "—";
-    return { teamName, p1, p2 };
-  }
-
   function buildFinalRanking(){
-    // need M9,M10,M11,M12
     const needed = ["M9","M10","M11","M12"];
-
     const missing = [];
+
     for(const mid of needed){
       const r = resultsByMatch.get(mid);
       if(!r || (r.winnerSide !== "A" && r.winnerSide !== "B")){
@@ -374,7 +354,6 @@
       }
     }
 
-    // even if results exist, we also need resolution of teams to not be null
     const positions = [
       { pos: 1, from: () => getWinnerTeam("M12"), label:"🥇 1er" },
       { pos: 2, from: () => getLoserTeam("M12"),  label:"🥈 2e"  },
@@ -387,9 +366,7 @@
     ];
 
     const resolved = positions.map(x => ({ ...x, team: x.from() }));
-
     const unresolved = resolved.filter(x => !x.team).map(x => x.pos);
-
     const complete = (missing.length === 0 && unresolved.length === 0);
 
     return { complete, missing, unresolved, resolved };
@@ -405,10 +382,10 @@
       return;
     }
 
-    // validated status
     if(currentClassementDoc?.validatedAt){
       validatedBox.style.display = "block";
-      validatedBox.innerHTML = `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
+      validatedBox.innerHTML =
+        `✅ Classement validé le <b>${esc(fmtDate(currentClassementDoc.validatedAt))}</b> par <b>${esc(currentClassementDoc.validatedBy || "—")}</b>.`;
     }else{
       validatedBox.style.display = "none";
       validatedBox.innerHTML = "";
@@ -425,10 +402,8 @@
       statusText.textContent = "✅ Classement complet (prêt à valider).";
     }
 
-    // enable validate if complete AND not already validated
     btnValidate.disabled = !(complete && !currentClassementDoc?.validatedAt);
 
-    // teams list
     const teamCards = resolved.map(x=>{
       const t = teamParts(x.team);
       return `
@@ -443,11 +418,8 @@
       `;
     });
 
-    teamList.innerHTML = teamCards.length
-      ? `<div class="list">${teamCards.join("")}</div>`
-      : `<p class="muted">—</p>`;
+    teamList.innerHTML = teamCards.length ? `<div class="list">${teamCards.join("")}</div>` : `<p class="muted">—</p>`;
 
-    // players list (flatten)
     const players = [];
     for(const x of resolved){
       const t = teamParts(x.team);
@@ -455,22 +427,18 @@
       players.push({ pos:x.pos, name:t.p2, team:t.teamName });
     }
 
-    const playerCards = players.map(p=>{
-      return `
-        <div class="rank-card">
-          <div class="rk">${esc(String(p.pos))}</div>
-          <div class="rmain">
-            <div class="rtitle">${esc(p.name)}</div>
-            <div class="rsub muted">${esc(p.team)}</div>
-          </div>
-          <div class="tag">Position ${esc(String(p.pos))}</div>
+    const playerCards = players.map(p=>`
+      <div class="rank-card">
+        <div class="rk">${esc(String(p.pos))}</div>
+        <div class="rmain">
+          <div class="rtitle">${esc(p.name)}</div>
+          <div class="rsub muted">${esc(p.team)}</div>
         </div>
-      `;
-    });
+        <div class="tag">Position ${esc(String(p.pos))}</div>
+      </div>
+    `);
 
-    playerList.innerHTML = playerCards.length
-      ? `<div class="list">${playerCards.join("")}</div>`
-      : `<p class="muted">—</p>`;
+    playerList.innerHTML = playerCards.length ? `<div class="list">${playerCards.join("")}</div>` : `<p class="muted">—</p>`;
   }
 
   function startProgListener(scope){
@@ -488,10 +456,11 @@
     if(unsubRes){ unsubRes(); unsubRes = null; }
     unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
       resultsByMatch = new Map();
-      snap.forEach(d=>{
-        resultsByMatch.set(d.id, d.data() || {});
-      });
+      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
       render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "🔴 Erreur résultats.";
     });
   }
 
@@ -500,6 +469,9 @@
     unsubCls = onSnapshot(classementRef(scope), (snap)=>{
       currentClassementDoc = snap.exists() ? (snap.data() || {}) : null;
       render();
+    }, (err)=>{
+      console.error(err);
+      statusText.textContent = "🔴 Erreur lecture classement.";
     });
   }
 
@@ -544,8 +516,6 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
-
     if(scope === "general"){
       panelNeedStep.style.display = "block";
       panelRank.style.display = "none";
@@ -561,7 +531,22 @@
     startClassementListener(scope);
   }
 
-  // ---- UI guards
+  function applyScope(scope){
+    currentScope = (scope || "general").toLowerCase();
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    persistScope(currentScope);
+    showPanelsForScope(currentScope);
+
+    // reset UI text
+    statusText.textContent = "Chargement…";
+    btnValidate.disabled = true;
+    validatedBox.style.display = "none";
+    teamList.innerHTML = "";
+    playerList.innerHTML = "";
+  }
+
   function showDenied(){
     accessDenied.style.display = "block";
     adminUI.style.display = "none";
@@ -574,18 +559,14 @@
     accessDenied.style.display = "none";
     adminUI.style.display = "block";
 
-    scopeEl.value = currentScope;
-    setTabs(currentScope);
-    showPanelsForScope(currentScope);
+    applyScope(currentScope);
 
     scopeEl.onchange = ()=>{
-      currentScope = scopeEl.value || "general";
-      setTabs(currentScope);
-      showPanelsForScope(currentScope);
+      applyScope(scopeEl.value || "general");
     };
   }
 
-  // ---- events
+  // Events
   btnValidate.onclick = async (e)=>{
     e.preventDefault();
     if(btnValidate.disabled) return;
@@ -601,7 +582,6 @@
       console.error(err);
       alert("Erreur Firestore ❌");
     }finally{
-      // re-render will re-enable if needed
       render();
     }
   };
@@ -614,9 +594,13 @@
 
   // Guard
   const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+  }
 
+  // robuste si session change
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ showDenied(); return; }
     const g2 = await requireRole(["admin"]);
