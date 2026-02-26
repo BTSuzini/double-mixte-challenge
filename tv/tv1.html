@@ -10,15 +10,8 @@
 
   <style>
     /* ===== Layout TV (16:9) ===== */
-    body{
-      background:#0b0f0c;
-      color:#111;
-    }
-    .tv-wrap{
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-    }
+    body{ background:#0b0f0c; color:#111; }
+    .tv-wrap{ min-height:100vh; display:flex; flex-direction:column; }
 
     /* ===== Top bar (bandeau vert) ===== */
     .tv-top{
@@ -26,10 +19,7 @@
       border-bottom: 1px solid rgba(255,255,255,.14);
       box-shadow: 0 12px 30px rgba(0,0,0,.25);
     }
-    .tv-top .container{
-      max-width: 1400px;
-      width: 100%;
-    }
+    .tv-top .container{ max-width: 1400px; width: 100%; }
     .tv-top-row{
       display:grid;
       grid-template-columns: 120px 1fr 120px;
@@ -37,51 +27,23 @@
       gap:16px;
       padding: 14px 0;
     }
-    .tv-logo{
-      width:120px;
-      height:120px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
+    .tv-logo{ width:120px; height:120px; display:flex; align-items:center; justify-content:center; }
     .tv-logo img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
+      width:100%; height:100%; object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
     }
     .tv-title{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      color:#fff;
-      text-align:center;
-      padding: 6px 10px;
-      min-height: 120px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px; color:#fff; text-align:center; padding: 6px 10px; min-height: 120px;
     }
     .tv-title h1{
-      margin:0;
-      font-size: 34px;
-      letter-spacing:.2px;
-      font-weight: 1000;
+      margin:0; font-size: 34px; letter-spacing:.2px; font-weight: 1000;
       text-shadow: 0 2px 0 rgba(0,0,0,.22);
     }
-    .tv-title .sub{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-      font-weight:900;
-      opacity:.95;
-    }
+    .tv-title .sub{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-weight:900; opacity:.95; }
     .tv-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px;
       border:1px solid rgba(255,255,255,.24);
       background: rgba(255,255,255,.12);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
@@ -120,18 +82,9 @@
       gap:12px;
       background: #fbfbfb;
     }
-    .panel-head h2{
-      margin:0;
-      font-size:18px;
-      font-weight:1000;
-    }
+    .panel-head h2{ margin:0; font-size:18px; font-weight:1000; }
     .muted{ color:#666; font-weight:800; }
-    .kpis{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .kpis{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
     /* ===== Left: match cards ===== */
     .left-body{
@@ -150,11 +103,7 @@
       gap:10px;
       margin: 2px 0 6px;
     }
-    .match-grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-    }
+    .match-grid{ display:grid; grid-template-columns: 1fr; gap:10px; }
     .mcard{
       border:1px solid #eee;
       border-radius:16px;
@@ -166,37 +115,11 @@
       gap:12px;
       align-items:center;
     }
-    .m-meta{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-width:0;
-    }
-    .court{
-      font-weight:1000;
-      font-size:16px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-    }
-    .time{
-      font-weight:900;
-      color:#666;
-      white-space:nowrap;
-    }
-    .m-main{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .teams{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-width:0;
-    }
+    .m-meta{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .court{ font-weight:1000; font-size:16px; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .time{ font-weight:900; color:#666; white-space:nowrap; }
+    .m-main{ min-width:0; display:flex; flex-direction:column; gap:6px; }
+    .teams{ display:flex; flex-direction:column; gap:6px; min-width:0; }
     .team{
       font-weight:1000;
       font-size:18px;
@@ -221,13 +144,9 @@
     }
     .state.live{ border-color:#bfe9c8; background:#ecfff0; }
     .state.done{ border-color:#cfe3ff; background:#eef5ff; }
-    .score{
-      font-weight:1000;
-      font-size:22px;
-      letter-spacing:.3px;
-    }
+    .score{ font-weight:1000; font-size:22px; letter-spacing:.3px; }
 
-    /* ===== Right: tableaux rotator ===== */
+    /* ===== Right: tableaux rotator (inchangé) ===== */
     .right-body{
       padding: 12px 12px;
       overflow:hidden;
@@ -236,13 +155,7 @@
       gap:10px;
       min-height:0;
     }
-    .rot-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      font-weight:1000;
-    }
+    .rot-title{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-weight:1000; }
     .rot-box{
       flex:1;
       border:1px solid #eee;
@@ -252,21 +165,9 @@
       overflow:auto;
       box-shadow: 0 10px 26px rgba(0,0,0,.05);
     }
-    .tv-table{
-      width:100%;
-      border-collapse:collapse;
-      font-weight:900;
-    }
-    .tv-table th, .tv-table td{
-      border:1px solid #eee;
-      padding:8px 8px;
-      text-align:left;
-      vertical-align:top;
-    }
-    .tv-table th{
-      background:#fafafa;
-      font-weight:1000;
-    }
+    .tv-table{ width:100%; border-collapse:collapse; font-weight:900; }
+    .tv-table th, .tv-table td{ border:1px solid #eee; padding:8px 8px; text-align:left; vertical-align:top; }
+    .tv-table th{ background:#fafafa; font-weight:1000; }
 
     /* ===== Sponsors bandeau ===== */
     .tv-bottom{
@@ -352,7 +253,6 @@
       </div>
 
       <div class="left-body">
-
         <div>
           <div class="block-title">✅ Derniers matchs terminés <span class="muted" id="doneHint">—</span></div>
           <div class="match-grid" id="doneList"></div>
@@ -367,7 +267,6 @@
           <div class="block-title">⏭️ Prochains matchs <span class="muted" id="nextHint">—</span></div>
           <div class="match-grid" id="nextList"></div>
         </div>
-
       </div>
     </section>
 
@@ -417,12 +316,20 @@
   const params = new URLSearchParams(location.search);
   const etapeId = (params.get("etape") || "etape1").toLowerCase();
 
-  // Docs / collections Challenge
-  const DOC_PROGRAMMATION = ["programmations", etapeId];
-  const DOC_TIRAGE        = ["tirages", etapeId];
+  // ✅ Programmation PUBLIC (on tente plusieurs emplacements)
+  // 1) programmations_public/{etape}
+  // 2) programmationsPublic/{etape}
+  // 3) programmations/{etape} (fallback)
+  const PROG_REFS = [
+    doc(db, "programmations_public", etapeId),
+    doc(db, "programmationsPublic", etapeId),
+    doc(db, "programmations", etapeId),
+  ];
 
-  // ✅ Résultats (rules: resultats_etape1 existe)
-  const COL_RESULTS       = `resultats_${etapeId}`; // resultats_etape1
+  const DOC_TIRAGE = doc(db, "tirages", etapeId);
+
+  // ✅ Résultats
+  const COL_RESULTS = `resultats_${etapeId}`;
 
   // UI refs
   const tvEtape = document.getElementById("tvEtape");
@@ -466,69 +373,151 @@
   }
 
   // =========================================================
-  // Sponsors (à adapter à tes vrais logos)
+  // Sponsors bandeau (ordre EXACT demandé)
   // =========================================================
-  const SPONSORS = [
-    { name:"PSK Café", img:"../assets/img/sponsors/psk.png" },
-    { name:"Atelier Matoque", img:"../assets/img/sponsors/matoque.png" },
-    { name:"TC Suzini", img:"../assets/img/logo-suzini.png" }
+  const SPONSOR_LOGOS = [
+    "../assets/img/brico.png",
+    "../assets/img/bt-fft.png",
+    "../assets/img/matoque.png",
+    "../assets/img/tcs.png",
+    "../assets/img/brico.png",
+    "../assets/img/logo-suzini.png",
+    "../assets/img/psk.png",
+    "../assets/img/lobstars.png",
   ];
-  sponsorTrack.innerHTML = (SPONSORS.concat(SPONSORS)).map(s => `
+  sponsorTrack.innerHTML = (SPONSOR_LOGOS.concat(SPONSOR_LOGOS)).map((src)=>`
     <span class="sponsor-item">
-      <img src="${esc(s.img)}" alt="${esc(s.name)}">
-      <span>${esc(s.name)}</span>
+      <img src="${esc(src)}" alt="sponsor">
     </span>
   `).join("");
 
   // =========================================================
   // DATA STATE
   // =========================================================
-  let prog = null;
-  let resultsMap = new Map();
+  let prog = null;                 // programmation PUBLIC
+  let resultsMap = new Map();      // matchId -> result doc
   let tableaux = [];
   let rotPtr = 0;
   let rotTimer = null;
 
   // =========================================================
-  // Adapter: lecture programmation
+  // Helpers: programme (format V3) => matches ordonnés
   // =========================================================
-  function getMatchesFromProg(p){
+  function getProgMatchesV3(p){
     if(!p) return [];
-    const arr = Array.isArray(p.matches) ? p.matches
-              : Array.isArray(p.matchs) ? p.matchs
-              : Array.isArray(p.programmation) ? p.programmation
-              : [];
-    return arr.map((m, idx)=>{
-      const court = m.court || m.terrain || m.courtName || "Court ?";
-      const order = Number.isFinite(m.order) ? m.order : (Number.isFinite(m.index) ? m.index : idx+1);
-      const time  = m.time || m.heure || m.horaire || "";
-      const a     = m.a || m.teamA || m.equipeA || m.pairA || m.team1 || m.equipe1 || "";
-      const b     = m.b || m.teamB || m.equipeB || m.pairB || m.team2 || m.equipe2 || "";
-      const id    = m.id || m.matchId || `${court.replace(/\s+/g,'_').toLowerCase()}_${order}`;
-      return { id, court, order, time, a, b };
-    });
+    const matches = p.matches || {};
+    const slots = Array.isArray(p.slots) ? p.slots : [];
+    const schedule = p.schedule || {};
+
+    // slot -> matchId
+    const slotToMatch = new Map();
+    for(const [mid, entry] of Object.entries(schedule)){
+      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
+      const norm = normalizeScheduleEntry(entry, sObj);
+      if(!slotToMatch.has(norm.slot)) slotToMatch.set(norm.slot, mid);
+    }
+
+    const out = [];
+    for(const s of slots){
+      const mid = slotToMatch.get(Number(s.slot));
+      const m = mid ? matches[mid] : null;
+      if(!m) continue;
+
+      const entry = schedule[mid];
+      const norm = normalizeScheduleEntry(entry, s);
+      const courtKey = norm.court;
+
+      const a = teamRefParts(p, m.A);
+      const b = teamRefParts(p, m.B);
+
+      out.push({
+        id: mid,
+        slot: Number(s.slot),
+        time: s.time || "",
+        courtKey,
+        court: courtLabel(p, courtKey),
+        aLabel: teamLine(a),
+        bLabel: teamLine(b),
+      });
+    }
+    return out;
   }
 
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
+  function courtLabel(p, courtKey){
+    const name = p?.courts?.[courtKey] || courtKey || "—";
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name}`;
+  }
+
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    return { title: t.teamName || "Équipe", sub: `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}` };
+  }
+
+  function teamRefParts(p, ref){
+    if(!ref) return { title:"—", sub:"" };
+    if(ref.type === "team"){
+      const t = p?.teams?.[ref.key] || null;
+      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
+    }
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+    return { title:"—", sub:"" };
+  }
+
+  function teamLine(x){
+    if(!x) return "—";
+    return x.sub ? `${x.title} (${x.sub})` : x.title;
+  }
+
+  // =========================================================
+  // Résultats: validé = winnerSide A/B (ton modèle admin)
+  // Score = sets (s1/s2/s3) si présents
+  // =========================================================
   function getResultForMatch(id){ return resultsMap.get(id) || null; }
 
-  function hasResult(id){
-    const r = getResultForMatch(id);
-    if(!r) return false;
-    if(typeof r.score === "string" && r.score.trim()) return true;
-    if(Number.isFinite(r.a) && Number.isFinite(r.b)) return true;
-    if(Number.isFinite(r.scoreA) && Number.isFinite(r.scoreB)) return true;
-    return false;
+  function isValidatedResult(r){
+    return !!r && (r.winnerSide === "A" || r.winnerSide === "B");
   }
 
-  function fmtScore(r){
+  function setPair(a,b){
+    const A = (a === null || a === undefined || a === "") ? null : String(a).trim();
+    const B = (b === null || b === undefined || b === "") ? null : String(b).trim();
+    if(!A || !B) return null;
+    return `${A}-${B}`;
+  }
+
+  function fmtScoreFromSets(r){
     if(!r) return "—";
+    // accepte anciens champs éventuels "score"
     if(typeof r.score === "string" && r.score.trim()) return r.score.trim();
-    const a = Number.isFinite(r.a) ? r.a : (Number.isFinite(r.scoreA) ? r.scoreA : null);
-    const b = Number.isFinite(r.b) ? r.b : (Number.isFinite(r.scoreB) ? r.scoreB : null);
-    if(a === null || b === null) return "—";
-    return `${a}–${b}`;
+
+    const s1 = setPair(r.s1A, r.s1B);
+    const s2 = setPair(r.s2A, r.s2B);
+    const s3 = setPair(r.s3A, r.s3B);
+    const parts = [s1,s2,s3].filter(Boolean);
+    return parts.length ? parts.join("  ") : "—";
   }
 
+  // =========================================================
+  // UI cards
+  // =========================================================
   function fmtShortTime(m){ return m.time ? `🕘 ${m.time}` : ""; }
 
   function mCard(m, state, score){
@@ -537,14 +526,14 @@
     return `
       <div class="mcard">
         <div class="m-meta">
-          <div class="court">🎾 ${esc(m.court)}</div>
+          <div class="court">${esc(m.court)}</div>
           <div class="time">${esc(fmtShortTime(m))}</div>
         </div>
 
         <div class="m-main">
           <div class="teams">
-            <div class="team">${esc(m.a || "—")}</div>
-            <div class="team">${esc(m.b || "—")}</div>
+            <div class="team">${esc(m.aLabel || "—")}</div>
+            <div class="team">${esc(m.bLabel || "—")}</div>
           </div>
         </div>
 
@@ -557,13 +546,17 @@
   }
 
   // =========================================================
-  // Compute: done / live / next
+  // Filtrage demandé:
+  // - 2 matchs VALIDÉS (avec résultat) => "terminés"
+  // - 4 matchs NON validés:
+  //    * 2 premiers = matchs en cours
+  //    * 2 suivants = matchs à venir
   // =========================================================
   function computeView(){
-    const matches = getMatchesFromProg(prog);
+    const matches = getProgMatchesV3(prog);
 
     if(matches.length === 0){
-      doneList.innerHTML = `<p class="muted" style="margin:0;">Aucun match trouvé dans la programmation.</p>`;
+      doneList.innerHTML = `<p class="muted" style="margin:0;">Programmation publique introuvable / vide.</p>`;
       liveList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
       nextList.innerHTML = `<p class="muted" style="margin:0;">—</p>`;
       kpiDone.textContent = "✅ Terminés : 0";
@@ -575,67 +568,106 @@
       return;
     }
 
+    // enrich match with result flags
+    const enriched = matches.map(m=>{
+      const r = getResultForMatch(m.id);
+      const validated = isValidatedResult(r);
+      const score = validated ? fmtScoreFromSets(r) : "—";
+      const ts = r?.updatedAt || r?.createdAt || null;
+      return { ...m, r, validated, score, ts };
+    });
+
+    // DONE = 2 derniers validés (tri updatedAt desc fallback slot desc)
+    const doneAll = enriched.filter(x => x.validated);
+    doneAll.sort((a,b)=>{
+      const ta = a.ts?.toDate ? a.ts.toDate().getTime() : 0;
+      const tb = b.ts?.toDate ? b.ts.toDate().getTime() : 0;
+      if(tb !== ta) return tb - ta;
+      return (b.slot||0) - (a.slot||0);
+    });
+    const done2 = doneAll.slice(0, 2);
+
+    // PENDING = non validés
+    const pending = enriched.filter(x => !x.validated);
+
+    // "en cours" = 1er match pending par courtKey (A/B), max 2
     const byCourt = new Map();
-    for(const m of matches){
-      const key = m.court;
-      if(!byCourt.has(key)) byCourt.set(key, []);
-      byCourt.get(key).push(m);
+    for(const m of pending){
+      const k = m.courtKey || "X";
+      if(!byCourt.has(k)) byCourt.set(k, []);
+      byCourt.get(k).push(m);
     }
     for(const [k, arr] of byCourt){
-      arr.sort((x,y)=> (x.order||0) - (y.order||0));
+      arr.sort((a,b)=> (a.slot||0) - (b.slot||0));
     }
 
     const live = [];
-    const nextCandidates = [];
-    for(const [court, arr] of byCourt){
-      const firstPendingIdx = arr.findIndex(mm => !hasResult(mm.id));
-      if(firstPendingIdx >= 0){
-        live.push(arr[firstPendingIdx]);
-        if(arr[firstPendingIdx + 1]) nextCandidates.push(arr[firstPendingIdx + 1]);
+    const usedIds = new Set();
+
+    // ordre A puis B (si existe)
+    const courtOrder = ["A","B"];
+    for(const k of courtOrder){
+      const arr = byCourt.get(k) || [];
+      if(arr[0]){
+        live.push(arr[0]);
+        usedIds.add(arr[0].id);
+      }
+    }
+    // si pas assez (cas edge), complète avec les plus tôt
+    if(live.length < 2){
+      const rest = pending.filter(x=>!usedIds.has(x.id)).sort((a,b)=>(a.slot||0)-(b.slot||0));
+      for(const x of rest){
+        if(live.length >= 2) break;
+        live.push(x); usedIds.add(x.id);
       }
     }
 
-    nextCandidates.sort((a,b)=> (a.order||0)-(b.order||0) || (a.court||"").localeCompare((b.court||""), "fr"));
-    const next = nextCandidates.slice(0, 2);
+    // "à venir" = 2 suivants après les live (priorité: même court, puis global)
+    const next = [];
+    // 1) suivant dans chaque court (après le live de ce court)
+    for(const x of live){
+      const arr = byCourt.get(x.courtKey) || [];
+      const idx = arr.findIndex(z => z.id === x.id);
+      const cand = (idx >= 0) ? arr[idx+1] : null;
+      if(cand && !usedIds.has(cand.id) && next.length < 2){
+        next.push(cand);
+        usedIds.add(cand.id);
+      }
+    }
+    // 2) complète globalement si besoin
+    if(next.length < 2){
+      const rest = pending.filter(x=>!usedIds.has(x.id)).sort((a,b)=>(a.slot||0)-(b.slot||0));
+      for(const x of rest){
+        if(next.length >= 2) break;
+        next.push(x); usedIds.add(x.id);
+      }
+    }
 
-    const doneAll = matches.filter(m => hasResult(m.id)).map(m=>{
-      const r = getResultForMatch(m.id) || {};
-      const ts = r.updatedAt || r.createdAt || null;
-      return { m, ts };
-    });
-
-    doneAll.sort((x,y)=>{
-      const dx = x.ts?.toDate ? x.ts.toDate().getTime() : 0;
-      const dy = y.ts?.toDate ? y.ts.toDate().getTime() : 0;
-      if(dy !== dx) return dy - dx;
-      return (y.m.order||0) - (x.m.order||0);
-    });
-
-    const done = doneAll.slice(0, 6).map(x=>x.m);
-
-    doneList.innerHTML = done.length
-      ? done.map(m => mCard(m, "done", fmtScore(getResultForMatch(m.id)))).join("")
-      : `<p class="muted" style="margin:0;">Aucun match terminé pour le moment.</p>`;
+    // Render (2 / 2 / 2)
+    doneList.innerHTML = done2.length
+      ? done2.map(m => mCard(m, "done", m.score)).join("")
+      : `<p class="muted" style="margin:0;">Aucun match terminé (validé).</p>`;
 
     liveList.innerHTML = live.length
-      ? live.map(m => mCard(m, "live", "—")).join("")
+      ? live.slice(0,2).map(m => mCard(m, "live", "—")).join("")
       : `<p class="muted" style="margin:0;">Aucun match en cours.</p>`;
 
     nextList.innerHTML = next.length
-      ? next.map(m => mCard(m, "next", "—")).join("")
-      : `<p class="muted" style="margin:0;">Pas de match “à venir” détecté.</p>`;
+      ? next.slice(0,2).map(m => mCard(m, "next", "—")).join("")
+      : `<p class="muted" style="margin:0;">Aucun match à venir.</p>`;
 
-    kpiDone.textContent = `✅ Terminés : ${doneAll.length}`;
-    kpiLive.textContent = `🟠 En cours : ${live.length}`;
-    kpiNext.textContent = `⏭️ À venir : ${next.length}`;
+    // KPIs (selon la vue filtrée demandée)
+    kpiDone.textContent = `✅ Terminés : ${done2.length}`;
+    kpiLive.textContent = `🟠 En cours : ${Math.min(2, live.length)}`;
+    kpiNext.textContent = `⏭️ À venir : ${Math.min(2, next.length)}`;
 
-    doneHint.textContent = done.length ? "Derniers résultats saisis" : "—";
-    liveHint.textContent = live.length ? "1er match sans résultat par court" : "—";
-    nextHint.textContent = next.length ? "Match suivant (max 2)" : "—";
+    doneHint.textContent = done2.length ? "2 derniers validés" : "—";
+    liveHint.textContent = live.length ? "2 premiers non validés" : "—";
+    nextHint.textContent = next.length ? "2 suivants" : "—";
   }
 
   // =========================================================
-  // Tableaux rotator
+  // Tableaux rotator (inchangé)
   // =========================================================
   function normalizeTableaux(obj){
     const arr = Array.isArray(obj?.tableaux) ? obj.tableaux
@@ -722,7 +754,6 @@
     }
 
     showIdx(rotPtr);
-
     rotTimer = setInterval(()=>{
       if(!tableaux.length) return;
       showIdx(rotPtr + 1);
@@ -730,37 +761,81 @@
   }
 
   // =========================================================
-  // Subscriptions
+  // WATCH: prend la première programmation PUBLIC disponible
   // =========================================================
-  onSnapshot(doc(db, ...DOC_PROGRAMMATION), (snap)=>{
-    prog = snap.exists() ? (snap.data() || {}) : null;
-    computeView();
+  function watchFirstAvailableProgram(refs){
+    let decided = false;
+    const unsubs = [];
 
-    const fromProg = normalizeTableaux(prog || {});
-    if(fromProg.length){
-      tableaux = fromProg;
-      startRotator(); // restart clean
+    function settleWith(data, whichIdx){
+      if(decided) return;
+      decided = true;
+
+      // stop others
+      for(let i=0;i<unsubs.length;i++){
+        if(i !== whichIdx && typeof unsubs[i] === "function"){
+          try{ unsubs[i](); }catch(e){}
+        }
+      }
+      tvStatus.textContent = "🟢 En direct";
+      prog = data || null;
+
+      // tableaux depuis prog (si dispo)
+      const fromProg = normalizeTableaux(prog || {});
+      if(fromProg.length){
+        tableaux = fromProg;
+        startRotator();
+      } else if(!rotTimer){
+        startRotator();
+      }
+
+      computeView();
     }
-  }, (err)=>{
-    console.error(err);
-    tvStatus.textContent = "🔴 Erreur programmation";
-  });
+
+    refs.forEach((ref, idx)=>{
+      const u = onSnapshot(ref, (snap)=>{
+        if(snap.exists()){
+          settleWith(snap.data() || {}, idx);
+        } else {
+          // si aucun ref n'existe, on laisse un fallback (plus bas)
+          if(!decided && idx === refs.length - 1){
+            // dernière tentative non trouvée
+            prog = null;
+            tvStatus.textContent = "🟠 Programmation non trouvée";
+            computeView();
+          }
+        }
+      }, (err)=>{
+        console.error(err);
+        // erreur possible sur un ref (rules) => on laisse les autres tenter
+      });
+      unsubs[idx] = u;
+    });
+
+    return () => { unsubs.forEach(fn => { try{ fn && fn(); }catch(e){} }); };
+  }
+
+  // =========================================================
+  // LISTENERS
+  // =========================================================
+  watchFirstAvailableProgram(PROG_REFS);
 
   const qRes = query(collection(db, COL_RESULTS), orderBy("updatedAt","desc"), limit(300));
   onSnapshot(qRes, (snap)=>{
     resultsMap = new Map();
     snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
     computeView();
-    tvStatus.textContent = "🟢 En direct";
+    if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
   }, (err)=>{
     console.error(err);
     tvStatus.textContent = "🔴 Erreur résultats";
   });
 
+  // tableaux depuis tirage si prog n'en contient pas
   (async function loadTirageOnce(){
     try{
-      const s = await getDoc(doc(db, ...DOC_TIRAGE));
-      const obj = s.exists() ? s.data() : {};
+      const s = await getDoc(DOC_TIRAGE);
+      const obj = s.exists() ? (s.data() || {}) : {};
       const fromTirage = normalizeTableaux(obj || {});
       if(fromTirage.length && !tableaux.length){
         tableaux = fromTirage;
