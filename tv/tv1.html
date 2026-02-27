@@ -1,1175 +1,331 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TV — Étape 1 — Double Mixte Challenge</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-  <!-- tv/ est 1 niveau plus bas -->
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260226-tv1" />
+<title>TV — Étape 1 — Double Mixte Challenge</title>
 
-  <style>
-    /* ===== Layout TV (16:9) — NO SCROLL ===== */
-    :root{
-      /* Hauteurs pilotées */
-      --tv-top-h: clamp(120px, 18vh, 190px);
-      --tv-bottom-h: clamp(68px, 8vh, 100px);
+<link rel="stylesheet" href="../assets/css/main.css"/>
 
-      /* Tailles images top */
-      --tv-logo-h: clamp(64px, 9vh, 96px);
-      --tv-mid-h:  clamp(72px, 10vh, 110px);
+<style>
 
-      /* Spacings */
-      --tv-pad: clamp(8px, 1.2vh, 14px);
-      --tv-gap: clamp(8px, 1.2vh, 14px);
+/* ======================================================
+   ✅ VARIABLES TV
+====================================================== */
 
-      /* Typo (un peu plus petite pour TV) */
-      --tv-h2: clamp(14px, 1.7vh, 18px);
-      --tv-court-head: clamp(16px, 2.2vh, 20px);
-      --tv-sec: clamp(12px, 1.8vh, 16px);
-      --tv-team: clamp(14px, 2.1vh, 18px);
-      --tv-sub: clamp(11px, 1.6vh, 14px);
-      --tv-score: clamp(14px, 2.1vh, 18px);
-    }
+:root{
 
-    html, body{ height:100%; }
-    body{
-      margin:0;
-      background:#0b0f0c;
-      color:#111;
-      overflow:hidden;          /* ✅ interdit tout scroll */
-    }
-    .tv-wrap{
-      height:100vh;             /* ✅ pile la hauteur écran */
-      display:flex;
-      flex-direction:column;
-    }
+  /* ✅ même hauteur TOP / BOTTOM */
+  --tv-band-h: clamp(68px,8vh,100px);
 
-    /* ===== Top bar (bandeau vert) ===== */
-    .tv-top{
-      flex: 0 0 auto;
-      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
-      border-bottom: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 30px rgba(0,0,0,.25);
-    }
-    .tv-top .container{ max-width: 1400px; width: 100%; }
+  --tv-logo-h: calc(var(--tv-band-h)*.65);
+  --tv-mid-h: calc(var(--tv-band-h)*.75);
 
-    /* ✅ TOP: 5 images alignées : logo-suzini / challenge-gen / etape1 / challenge-gen / logo-challenge */
-    .tv-top-row{
-      display:grid;
-      grid-template-columns: 24px 24px 1fr 24px 24px;
-      align-items:center;
-      gap: var(--tv-gap);
-      padding: var(--tv-pad) 0 calc(var(--tv-pad) * .6);
-    }
-    .tv-top-cell{
-      height: var(--tv-top-h);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-width:0;
-    }
-    .tv-top-cell img{
-      max-height: var(--tv-logo-h);
-      height: var(--tv-logo-h);
-      width:auto;
-      max-width:100%;
-      object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
-    }
-    /* ✅ Etape: même hauteur, largeur auto (plus grand) */
-    .tv-top-cell.mid img{
-      height: var(--tv-mid-h);
-      max-height: var(--tv-mid-h);
-      width:auto;
-    }
+  --tv-pad:10px;
+  --tv-gap:12px;
 
-    /* ✅ Spacing fin: challenge-gen se rapproche de l'étape et s'éloigne des logos */
-    .tv-top-cell.is-chal{ }
-    .tv-top-cell.is-chal.left{  margin-right:-10px; margin-left: 50px; }
-    .tv-top-cell.is-chal.right{ margin-left:-10px;  margin-right:50px; }
+}
 
-    /* ✅ Rangée KPI/horloge sous les images */
-    .tv-subrow{ padding: 0 0 calc(var(--tv-pad) * .8); }
-    .tv-subrow-inner{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      flex-wrap:wrap;
-      color:#fff;
-    }
-    .tv-pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.10);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
-      white-space:nowrap;
-      font-weight:900;
-      font-size: clamp(11px, 1.5vh, 14px);
-      opacity:.98;
-    }
+/* ======================================================
+   BASE
+====================================================== */
 
-    /* ===== Main split (NO SCROLL) ===== */
-    .tv-main{
-      flex:1 1 auto;
-      display:grid;
-      grid-template-columns: 2fr 1fr;
-      gap: var(--tv-gap);
-      padding: var(--tv-pad);
-      max-width: 1400px;
-      width:100%;
-      margin: 0 auto;
-      box-sizing:border-box;
-      min-height:0;
-      overflow:hidden;
-    }
+html,body{
+height:100%;
+margin:0;
+background:#0b0f0c;
+overflow:hidden;
+}
 
-    .panel{
-      background:#fff;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow: 0 18px 45px rgba(0,0,0,.28);
-      overflow:hidden;
-      min-height: 0;
-      display:flex;
-      flex-direction:column;
-    }
-    .panel-head{
-      padding: 10px 12px;
-      border-bottom: 1px solid #eee;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      background: #fbfbfb;
-      flex: 0 0 auto;
-    }
-    .panel-head h2{ margin:0; font-size: var(--tv-h2); font-weight:1000; }
-    .muted{ color:#666; font-weight:800; }
+.tv-wrap{
+height:100vh;
+display:flex;
+flex-direction:column;
+}
 
-    /* ===== LEFT 2/3 : Split par court (FULL) ===== */
-    .left-body{
-      padding: var(--tv-pad);
-      overflow:hidden; /* ✅ pas de scroll */
-      display:flex;
-      flex-direction:column;
-      gap: var(--tv-gap);
-      min-height:0;
-    }
-    .courts-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--tv-gap);
-      align-items:stretch;
-      min-height:0;
-    }
+/* ======================================================
+   ✅ TOP BAND (FIXED HEIGHT)
+====================================================== */
 
-    /* ✅ Couleurs de fond par court */
-    .court-col{
-      border-radius:18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 18px 45px rgba(0,0,0,.14);
-      min-height:0;
-    }
-    .court-col.lisa{
-      background: #FFE6EA;
-      border-color: rgba(255,0,60,.20);
-    }
-    .court-col.manon{
-      background: #FFF6D6;
-      border-color: rgba(255,196,0,.25);
-    }
+.tv-top{
+flex:0 0 var(--tv-band-h);
+height:var(--tv-band-h);
 
-    .court-head{
-      padding:10px 12px;
-      border-bottom:1px solid rgba(0,0,0,.08);
-      font-weight:1000;
-      font-size: var(--tv-court-head);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      gap:10px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      background: rgba(255,255,255,.45);
-      backdrop-filter: blur(2px);
-      flex: 0 0 auto;
-    }
+display:flex;
+align-items:center;
+justify-content:center;
 
-    .court-body{
-      padding:10px 10px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:0;
-      overflow:hidden; /* ✅ pas de scroll */
-    }
+position:relative;
 
-    /* ✅ Section titres (Terminés / En cours / À venir) */
-    .sec-title{
-      font-weight:1000;
-      font-size: var(--tv-sec);
-      letter-spacing:.2px;
-      margin:0 0 6px;
-      opacity:.95;
-    }
+background:linear-gradient(
+180deg,
+rgba(19,86,44,.92),
+rgba(19,86,44,.78)
+);
 
-    /* ✅ Match card (par court) */
-    .mcard2{
-      border:1px solid rgba(0,0,0,.10);
-      border-radius:16px;
-      padding:10px 10px;
-      background: rgba(255,255,255,.72);
-      box-shadow: 0 10px 26px rgba(0,0,0,.08);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-    .m-time{
-      font-weight:1000;
-      color:#111;
-      white-space:nowrap;
-      font-size:12px;
-      opacity:.85;
-    }
+border-bottom:1px solid rgba(255,255,255,.14);
+box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
 
-    .teamline{
-      display:grid;
-      grid-template-columns: 1fr 24px 24px 24px;
-      gap:8px;
-      align-items:center;
-      min-width:0;
-    }
-    .tmeta{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:3px;
-    }
-    .tname{
-      font-weight:1000;
-      font-size: var(--tv-team);
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .tsub{
-      font-weight:800;
-      font-size: var(--tv-sub);
-      opacity:.85;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      min-height: 1em;
-    }
-    .g{
-      text-align:right;
-      font-weight:1000;
-      font-size: var(--tv-score);
-      font-variant-numeric: tabular-nums;
-      white-space:nowrap;
-    }
-    .placeholder{
-      color:#333;
-      font-weight:900;
-      padding:8px 4px;
-      opacity:.75;
-      font-size: clamp(12px, 1.6vh, 14px);
-    }
+.tv-top-row{
+height:100%;
+width:100%;
+max-width:1400px;
 
-    /* ===== Right: tableaux rotator ===== */
-    .right-body{
-      padding: var(--tv-pad);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:0;
-      flex: 1 1 auto;
-    }
-    .rot-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      font-weight:1000;
-      flex: 0 0 auto;
-      font-size: clamp(12px, 1.6vh, 14px);
-    }
-    .rot-box{
-      flex:1 1 auto;
-      border:1px solid #eee;
-      background:#fff;
-      border-radius:16px;
-      padding:10px;
-      overflow:hidden; /* ✅ no scroll */
-      box-shadow: 0 10px 26px rgba(0,0,0,.05);
-      min-height:0;
-    }
+display:grid;
+grid-template-columns:70px 70px 1fr 70px 70px;
+align-items:center;
+gap:12px;
+}
 
-    /* ✅ Style “tableau” dans le rotator */
-    .tv-match-list{ display:flex; flex-direction:column; gap:10px; }
-    .tv-match-card{
-      border-radius:16px;
-      border:1px solid rgba(0,0,0,.08);
-      padding:10px;
-      background:#fff;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-    }
-    .tv-match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .30); }
-    .tv-match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .22); }
+.tv-top-cell{
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+}
 
-    .tv-m-head{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .tv-m-time{
-      font-size:12px;
-      font-weight:1000;
-      white-space:nowrap;
-      letter-spacing:.2px;
-    }
-    .tv-m-court{
-      font-size:12px;
-      font-weight:900;
-      opacity:.85;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      min-width:0;
-      flex:1;
-    }
-    .tv-teamline{
-      margin-top:8px;
-      display:grid;
-      grid-template-columns: 1fr 20px 20px 22px;
-      gap:6px;
-      align-items:center;
-      min-width:0;
-    }
-    .tv-team-block{ min-width:0; }
-    .tv-team-title{
-      font-size: clamp(13px, 1.8vh, 15px);
-      font-weight:1000;
-      line-height:1.15;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .tv-team-sub{
-      margin-top:2px;
-      font-size: clamp(11px, 1.5vh, 13px);
-      font-weight:900;
-      opacity:.75;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      min-height: 1em;
-    }
-    .tv-sc{
-      text-align:right;
-      font-size: clamp(12px, 1.7vh, 15px);
-      font-weight:1000;
-      white-space:nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-    .tv-vs{
-      margin:8px 0 4px;
-      text-align:center;
-      font-weight:1000;
-      letter-spacing:2px;
-      opacity:.45;
-      font-size:11px;
-    }
+.tv-top-cell img{
+height:var(--tv-logo-h);
+object-fit:contain;
+}
 
-    /* ===== Sponsors bandeau (plus petit) ===== */
-    .tv-bottom{
-      flex: 0 0 auto;
-      height: var(--tv-bottom-h);
-      display:flex;
-      align-items:center;
-      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
-      border-top:1px solid rgba(255,255,255,.10);
-      color:#fff;
-      padding: 0;
-      overflow:hidden;
-    }
-    .sponsor-track{
-      display:flex;
-      gap:44px;
-      align-items:center;
-      white-space:nowrap;
-      will-change: transform;
-      animation: marquee 22s linear infinite;
-      padding-left: 100%;
-    }
-    .sponsor-item{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:0;
-      border:none;
-      background:transparent;
-    }
-    .sponsor-item img{
-      height: clamp(46px, 6vh, 72px);
-      width:auto;
-      object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
-    }
+.tv-top-cell.mid img{
+height:var(--tv-mid-h);
+}
 
-    @keyframes marquee{
-      0%{ transform: translateX(0); }
-      100%{ transform: translateX(-200%); }
-    }
+/* KPI intégrés AU bandeau */
+.tv-subrow{
+position:absolute;
+right:18px;
+bottom:6px;
+}
 
-    /* (scrollbar styles OK, même si on ne scroll plus) */
-    ::-webkit-scrollbar{ width:10px; height:10px; }
-    ::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.14); border-radius:999px; }
+.tv-pill{
+padding:4px 10px;
+border-radius:999px;
+background:rgba(255,255,255,.12);
+border:1px solid rgba(255,255,255,.25);
+color:#fff;
+font-weight:900;
+font-size:12px;
+}
 
-    /* ===== petits écrans ===== */
-    @media (max-width: 1100px){
-      .tv-top-row{ grid-template-columns: 90px 90px 1fr 90px 90px; }
-      .tv-top-cell.is-chal.left{  margin-left: 20px; margin-right:-8px; }
-      .tv-top-cell.is-chal.right{ margin-right:20px; margin-left:-8px; }
-    }
-  </style>
+/* ======================================================
+   MAIN
+====================================================== */
+
+.tv-main{
+flex:1;
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:12px;
+padding:12px;
+max-width:1400px;
+width:100%;
+margin:auto;
+overflow:hidden;
+}
+
+/* panels */
+
+.panel{
+background:#fff;
+border-radius:18px;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+box-shadow:0 18px 45px rgba(0,0,0,.25);
+}
+
+.left-body{
+flex:1;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+padding:12px;
+}
+
+/* courts */
+
+.court-col{
+border-radius:16px;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+
+.lisa{background:#FFE6EA;}
+.manon{background:#FFF6D6;}
+
+.court-head{
+text-align:center;
+font-weight:1000;
+padding:8px;
+background:rgba(255,255,255,.5);
+}
+
+.court-body{
+flex:1;
+display:flex;
+flex-direction:column;
+gap:8px;
+padding:8px;
+}
+
+/* match */
+
+.mcard2{
+background:#fff;
+border-radius:12px;
+padding:8px;
+font-weight:900;
+}
+
+/* ======================================================
+   RIGHT
+====================================================== */
+
+.right-body{
+flex:1;
+padding:10px;
+overflow:hidden;
+}
+
+/* ======================================================
+   ✅ BOTTOM BAND SAME SIZE
+====================================================== */
+
+.tv-bottom{
+flex:0 0 var(--tv-band-h);
+height:var(--tv-band-h);
+
+display:flex;
+align-items:center;
+
+background:linear-gradient(
+180deg,
+rgba(19,86,44,.92),
+rgba(19,86,44,.78)
+);
+
+overflow:hidden;
+}
+
+.sponsor-track{
+display:flex;
+gap:50px;
+align-items:center;
+animation:marquee 22s linear infinite;
+padding-left:100%;
+}
+
+.sponsor-item img{
+height:calc(var(--tv-band-h)*.6);
+}
+
+@keyframes marquee{
+0%{transform:translateX(0)}
+100%{transform:translateX(-200%)}
+}
+
+</style>
 </head>
 
 <body>
+
 <div class="tv-wrap">
 
-  <!-- TOP -->
-  <header class="tv-top">
-    <div class="container">
+<!-- ======================================================
+TOP
+====================================================== -->
 
-      <!-- ✅ 5 images -->
-      <div class="tv-top-row" aria-label="Bandeau images">
-        <div class="tv-top-cell">
-          <img src="../assets/img/logo-suzini.png" alt="Suzini">
-        </div>
+<header class="tv-top">
 
-        <div class="tv-top-cell is-chal left">
-          <img src="../assets/img/challenge-gen.png" alt="Challenge">
-        </div>
+<div class="tv-top-row">
 
-        <div class="tv-top-cell mid">
-          <img src="../assets/img/etape1.png" alt="Étape 1">
-        </div>
+<div class="tv-top-cell">
+<img src="../assets/img/logo-suzini.png">
+</div>
 
-        <div class="tv-top-cell is-chal right">
-          <img src="../assets/img/challenge-gen.png" alt="Challenge">
-        </div>
+<div class="tv-top-cell">
+<img src="../assets/img/challenge-gen.png">
+</div>
 
-        <div class="tv-top-cell">
-          <img src="../assets/img/logo-challenge.png" alt="Challenge">
-        </div>
-      </div>
+<div class="tv-top-cell mid">
+<img src="../assets/img/etape1.png">
+</div>
 
-      <!-- KPI / horloge -->
-      <div class="tv-subrow">
-        <div class="tv-subrow-inner">
-          <span class="tv-pill" id="tvClock">⏱️ —</span>
-          <span class="tv-pill" id="tvStatus">🟢 En direct</span>
-          <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
-          <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
-          <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
-        </div>
-      </div>
-    </div>
-  </header>
+<div class="tv-top-cell">
+<img src="../assets/img/challenge-gen.png">
+</div>
 
-  <!-- MAIN -->
-  <main class="tv-main">
-
-    <!-- LEFT 2/3 -->
-    <section class="panel">
-      <div class="left-body">
-        <div class="courts-grid">
-          <div class="court-col lisa">
-            <div class="court-head" id="courtLeftTitle">—</div>
-            <div class="court-body" id="courtLeftBody"></div>
-          </div>
-
-          <div class="court-col manon">
-            <div class="court-head" id="courtRightTitle">—</div>
-            <div class="court-body" id="courtRightBody"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RIGHT 1/3 -->
-    <aside class="panel">
-      <div class="panel-head">
-        <h2>📋 Tableaux</h2>
-        <div class="kpis">
-          <span class="tv-pill" id="rotInfo">⏲️ 10s</span>
-        </div>
-      </div>
-
-      <div class="right-body">
-        <div class="rot-title">
-          <div id="rotTitle">—</div>
-          <div class="muted" id="rotIndex">—</div>
-        </div>
-        <div class="rot-box" id="rotBox">
-          <p class="muted" style="margin:0;">Chargement…</p>
-        </div>
-      </div>
-    </aside>
-
-  </main>
-
-  <!-- BOTTOM sponsors -->
-  <footer class="tv-bottom">
-    <div class="container">
-      <div class="sponsor-track" id="sponsorTrack" aria-label="Sponsors"></div>
-    </div>
-  </footer>
+<div class="tv-top-cell">
+<img src="../assets/img/logo-challenge.png">
+</div>
 
 </div>
 
-<script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    collection, doc, getDoc, onSnapshot,
-    query, orderBy, limit
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+<div class="tv-subrow">
+<span class="tv-pill" id="tvClock">⏱️</span>
+<span class="tv-pill">🟢 En direct</span>
+</div>
 
-  const params = new URLSearchParams(location.search);
-  const etapeId = (params.get("etape") || "etape1").toLowerCase();
+</header>
 
-  // Programmation PUBLIC (fallbacks)
-  const PROG_REFS = [
-    doc(db, "programmations_public", etapeId),
-    doc(db, "programmationsPublic", etapeId),
-    doc(db, "programmations", etapeId),
-  ];
-  const DOC_TIRAGE = doc(db, "tirages", etapeId);
-  const COL_RESULTS = `resultats_${etapeId}`;
+<!-- ======================================================
+MAIN
+====================================================== -->
 
-  // UI refs
-  const tvClock = document.getElementById("tvClock");
-  const tvStatus = document.getElementById("tvStatus");
+<main class="tv-main">
 
-  const kpiDone = document.getElementById("kpiDone");
-  const kpiLive = document.getElementById("kpiLive");
-  const kpiNext = document.getElementById("kpiNext");
+<section class="panel">
+<div class="left-body">
 
-  const courtLeftTitle  = document.getElementById("courtLeftTitle");
-  const courtRightTitle = document.getElementById("courtRightTitle");
-  const courtLeftBody   = document.getElementById("courtLeftBody");
-  const courtRightBody  = document.getElementById("courtRightBody");
+<div class="court-col lisa">
+<div class="court-head">🐝 Court Lisa</div>
+<div class="court-body"></div>
+</div>
 
-  const rotTitle = document.getElementById("rotTitle");
-  const rotIndex = document.getElementById("rotIndex");
-  const rotBox   = document.getElementById("rotBox");
-  const sponsorTrack = document.getElementById("sponsorTrack");
+<div class="court-col manon">
+<div class="court-head">🌶️ Court Manon</div>
+<div class="court-body"></div>
+</div>
 
-  // Clock
-  function tickClock(){
-    const d = new Date();
-    tvClock.textContent = d.toLocaleString("fr-FR", {
-      weekday:"short", day:"2-digit", month:"2-digit",
-      hour:"2-digit", minute:"2-digit", second:"2-digit"
-    });
-  }
-  tickClock();
-  setInterval(tickClock, 1000);
+</div>
+</section>
 
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-  }
+<aside class="panel">
+<div class="right-body">
+Tableaux
+</div>
+</aside>
 
-  // ✅ Sponsors (noms réels confirmés)
-  // Ordre demandé : (brico), bt-ggt, matoque, tcs, brico, logo-suzini, psk
-  const SPONSOR_SLOTS = [
-    { alts: ["../assets/img/brico.png"] },
-    { alts: ["../assets/img/bt-fft.png"] },
-    { alts: ["../assets/img/matoque.png"] },
-    { alts: ["../assets/img/tcs.png"] },
-    { alts: ["../assets/img/brico.png"] },
-    { alts: ["../assets/img/logo-suzini.png"] },
-    { alts: ["../assets/img/psk.png"] },
-    { alts: ["../assets/img/lobstars.png"] },
-  ];
+</main>
 
-  function sponsorImgHTML(slot){
-    const safe = slot.alts.map(a=>String(a));
-    const first = safe[0] || "";
-    const data = esc(JSON.stringify(safe));
-    return `<span class="sponsor-item"><img src="${esc(first)}" data-alts="${data}" alt="sponsor"></span>`;
-  }
+<!-- ======================================================
+BOTTOM
+====================================================== -->
 
-  sponsorTrack.innerHTML = (SPONSOR_SLOTS.concat(SPONSOR_SLOTS))
-    .map(sponsorImgHTML)
-    .join("");
+<footer class="tv-bottom">
+<div class="sponsor-track">
 
-  function wireSponsorFallbacks(){
-    const imgs = sponsorTrack.querySelectorAll("img[data-alts]");
-    imgs.forEach(img=>{
-      img.addEventListener("error", ()=>{
-        try{
-          const alts = JSON.parse(img.getAttribute("data-alts") || "[]");
-          const cur = img.getAttribute("src");
-          const idx = alts.indexOf(cur);
-          const next = alts[idx+1];
-          if(next){
-            img.setAttribute("src", next);
-          } else {
-            img.style.opacity = "0.15";
-          }
-        }catch(e){
-          img.style.opacity = "0.15";
-        }
-      }, { once:false });
-    });
-  }
-  wireSponsorFallbacks();
+<span class="sponsor-item"><img src="../assets/img/brico.png"></span>
+<span class="sponsor-item"><img src="../assets/img/matoque.png"></span>
+<span class="sponsor-item"><img src="../assets/img/logo-suzini.png"></span>
+<span class="sponsor-item"><img src="../assets/img/psk.png"></span>
 
-  // Data state
-  let prog = null;
-  let resultsMap = new Map();
+</div>
+</footer>
 
-  // Rotator state
-  let tableaux = [];     // [{title, html}]
-  let rotPtr = 0;
-  let rotTimer = null;
+</div>
 
-  // ===== Programmation helpers =====
-  function normalizeScheduleEntry(entry, slotObj){
-    if(typeof entry === "number"){
-      const slot = Number(entry);
-      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
-      return { slot, court };
-    }
-    if(entry && typeof entry === "object"){
-      const slot = Number(entry.slot);
-      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
-      return { slot, court };
-    }
-    const fallbackSlot = Number(slotObj?.slot || 1);
-    return { slot: fallbackSlot, court: slotObj?.court || "A" };
-  }
-
-  function courtLabel(p, courtKey){
-    const name = p?.courts?.[courtKey] || courtKey || "—";
-    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
-    return `${emo} ${name} ${emo}`;
-  }
-
-  // ===== Résultats helpers =====
-  function getResultForMatch(id){ return resultsMap.get(id) || null; }
-  function isValidatedResult(r){ return !!r && (r.winnerSide === "A" || r.winnerSide === "B"); }
-
-  function fmtScoreCell(x){
-    return (x === null || x === undefined || x === "") ? "—" : String(x);
-  }
-
-  // ===== Team resolution =====
-  function teamPartsFromTeam(t){
-    if(!t) return { title:"—", sub:"" };
-    const title = t.teamName || "Équipe";
-    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
-    return { title, sub };
-  }
-
-  function resolveTeamRef(ref, guard=new Set()){
-    if(!prog) return null;
-
-    const teams = prog.teams || {};
-    const matches = prog.matches || {};
-
-    if(!ref) return null;
-
-    if(ref.type === "team"){
-      return teams[ref.key] || null;
-    }
-
-    if(ref.type === "winner" || ref.type === "loser"){
-      const mid = ref.matchId;
-      if(!mid || guard.has(mid)) return null;
-      guard.add(mid);
-
-      const m = matches[mid];
-      if(!m) return null;
-
-      const res = getResultForMatch(mid);
-      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
-
-      const teamA = resolveTeamRef(m.A, guard);
-      const teamB = resolveTeamRef(m.B, guard);
-
-      const winner = (res.winnerSide === "A") ? teamA : teamB;
-      const loser  = (res.winnerSide === "A") ? teamB : teamA;
-
-      return (ref.type === "winner") ? winner : loser;
-    }
-
-    return null;
-  }
-
-  function teamPartsFromRef(ref){
-    const t = resolveTeamRef(ref);
-    if(t) return teamPartsFromTeam(t);
-
-    if(ref?.type === "winner" && ref?.matchId) return { title:`V${String(ref.matchId).slice(1)}`, sub:"" };
-    if(ref?.type === "loser"  && ref?.matchId) return { title:`P${String(ref.matchId).slice(1)}`, sub:"" };
-    if(ref?.type === "team"   && ref?.key)     return { title:String(ref.key), sub:"" };
-
-    return { title:"—", sub:"" };
-  }
-
-  // ===== Matches list (slots) =====
-  function getProgMatchesV3(p){
-    if(!p) return [];
-    const matches = p.matches || {};
-    const slots = Array.isArray(p.slots) ? p.slots : [];
-    const schedule = p.schedule || {};
-
-    const slotToMatch = new Map();
-    for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
-      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
-      const norm = normalizeScheduleEntry(entry, sObj);
-      if(!slotToMatch.has(norm.slot)) slotToMatch.set(norm.slot, mid);
-    }
-
-    const out = [];
-    for(const s of slots){
-      const mid = slotToMatch.get(Number(s.slot));
-      const m = mid ? matches[mid] : null;
-      if(!m) continue;
-
-      const entry = schedule[mid];
-      const norm = normalizeScheduleEntry(entry, s);
-      const courtKey = norm.court;
-
-      const aParts = teamPartsFromRef(m.A);
-      const bParts = teamPartsFromRef(m.B);
-
-      out.push({
-        id: mid,
-        slot: Number(s.slot),
-        time: s.time || "",
-        courtKey,
-        court: courtLabel(p, courtKey),
-        aParts,
-        bParts,
-      });
-    }
-    return out;
-  }
-
-  // ===== KPI totaux (sur tous les matchs) =====
-  function computeTotals(allMatches){
-    const total = allMatches.length;
-    const validated = allMatches.filter(m => isValidatedResult(getResultForMatch(m.id))).length;
-    const remaining = total - validated;
-
-    const live = remaining <= 0 ? 0 : (remaining === 1 ? 1 : 2);
-    const next = Math.max(0, remaining - live);
-
-    kpiDone.textContent = `✅ Terminés : ${validated}`;
-    kpiLive.textContent = `🟠 En cours : ${live}`;
-    kpiNext.textContent = `⏭️ À venir : ${next}`;
-  }
-
-  function fmtTime(m){ return m.time || "—"; }
-
-  function matchCardPerCourt(m){
-    const r = getResultForMatch(m.id) || null;
-
-    const s1A = fmtScoreCell(r?.s1A);
-    const s2A = fmtScoreCell(r?.s2A);
-    const s3A = fmtScoreCell(r?.s3A);
-
-    const s1B = fmtScoreCell(r?.s1B);
-    const s2B = fmtScoreCell(r?.s2B);
-    const s3B = fmtScoreCell(r?.s3B);
-
-    const a = m.aParts || { title:"—", sub:"" };
-    const b = m.bParts || { title:"—", sub:"" };
-
-    return `
-      <div class="mcard2">
-        <div class="m-time">🕘 ${esc(fmtTime(m))}</div>
-
-        <div class="teamline">
-          <div class="tmeta">
-            <div class="tname">${esc(a.title)}</div>
-            <div class="tsub">${a.sub ? esc(a.sub) : ""}</div>
-          </div>
-          <div class="g">${esc(s1A)}</div>
-          <div class="g">${esc(s2A)}</div>
-          <div class="g">${esc(s3A)}</div>
-        </div>
-
-        <div class="teamline">
-          <div class="tmeta">
-            <div class="tname">${esc(b.title)}</div>
-            <div class="tsub">${b.sub ? esc(b.sub) : ""}</div>
-          </div>
-          <div class="g">${esc(s1B)}</div>
-          <div class="g">${esc(s2B)}</div>
-          <div class="g">${esc(s3B)}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  // ===== Rendu par court: 1 terminé + 1 en cours + 1 à venir =====
-  function computeCourtBlocks(){
-    const matches = getProgMatchesV3(prog);
-
-    if(!matches.length){
-      courtLeftTitle.textContent = "—";
-      courtRightTitle.textContent = "—";
-      courtLeftBody.innerHTML = `<div class="placeholder">Programmation publique introuvable / vide.</div>`;
-      courtRightBody.innerHTML = `<div class="placeholder">—</div>`;
-      computeTotals([]);
-      return;
-    }
-
-    const courtAName = courtLabel(prog, "A");
-    const courtBName = courtLabel(prog, "B");
-
-    // Lisa gauche, Manon droite
-    courtLeftTitle.textContent = courtBName;
-    courtRightTitle.textContent = courtAName;
-
-    computeTotals(matches);
-
-    const byCourt = new Map([["A",[]],["B",[]]]);
-    for(const m of matches){
-      if(!byCourt.has(m.courtKey)) byCourt.set(m.courtKey, []);
-      byCourt.get(m.courtKey).push(m);
-    }
-    for(const [k, arr] of byCourt){
-      arr.sort((x,y)=> (x.slot||0) - (y.slot||0));
-    }
-
-    function pickForCourt(courtKey){
-      const arr = byCourt.get(courtKey) || [];
-      const done = arr.filter(m => isValidatedResult(getResultForMatch(m.id)));
-      const pending = arr.filter(m => !isValidatedResult(getResultForMatch(m.id)));
-
-      done.sort((a,b)=>{
-        const ra = getResultForMatch(a.id) || {};
-        const rb = getResultForMatch(b.id) || {};
-        const ta = ra.updatedAt || ra.createdAt || null;
-        const tb = rb.updatedAt || rb.createdAt || null;
-        const da = ta?.toDate ? ta.toDate().getTime() : 0;
-        const db = tb?.toDate ? tb.toDate().getTime() : 0;
-        if(db !== da) return db - da;
-        return (b.slot||0)-(a.slot||0);
-      });
-
-      return {
-        done1: done[0] || null,
-        live1: pending[0] || null,
-        next1: pending[1] || null,
-      };
-    }
-
-    const left = pickForCourt("B");  // Lisa
-    const right = pickForCourt("A"); // Manon
-
-    function renderBlock(x){
-      return `
-        <div>
-          <div class="sec-title">✅ Match terminé</div>
-          ${x.done1 ? matchCardPerCourt(x.done1) : `<div class="placeholder">Aucun match terminé.</div>`}
-        </div>
-
-        <div>
-          <div class="sec-title">🟠 Match en cours</div>
-          ${x.live1 ? matchCardPerCourt(x.live1) : `<div class="placeholder">Aucun match en cours.</div>`}
-        </div>
-
-        <div>
-          <div class="sec-title">⏭️ Match à venir</div>
-          ${x.next1 ? matchCardPerCourt(x.next1) : `<div class="placeholder">Aucun match à venir.</div>`}
-        </div>
-      `;
-    }
-
-    courtLeftBody.innerHTML = renderBlock(left);
-    courtRightBody.innerHTML = renderBlock(right);
-  }
-
-  // =========================================================
-  // ✅ TABLEAUX: on fait défiler toutes les combinaisons (bracket x round)
-  // =========================================================
-  function roundOptions(bracket){
-    if(bracket === "main"){
-      return [
-        ["QF", "Quarts de finale"],
-        ["SF", "Demi-finales"],
-        ["3rd", "Match 3e place"],
-        ["F", "Finale"]
-      ];
-    }
-    return [
-      ["SF", "Demi-finales (5–8)"],
-      ["7th", "Match 7e place"],
-      ["5th", "Match 5e place"]
-    ];
-  }
-
-  function inferBracketRound(matchId, m){
-    const id = matchId || m?.id || "";
-    const n = Number(m?.n || 0);
-
-    if(id === "M1" || id === "M2" || id === "M3" || id === "M4" || (n>=1 && n<=4)){
-      return { bracket:"main", round:"QF" };
-    }
-    if(id === "M5" || id === "M6" || (n===5 || n===6)){
-      return { bracket:"5-8", round:"SF" };
-    }
-    if(id === "M7" || id === "M8" || (n===7 || n===8)){
-      return { bracket:"main", round:"SF" };
-    }
-    if(id === "M9" || n===9){
-      return { bracket:"5-8", round:"7th" };
-    }
-    if(id === "M10" || n===10){
-      return { bracket:"5-8", round:"5th" };
-    }
-    if(id === "M11" || n===11){
-      return { bracket:"main", round:"3rd" };
-    }
-    if(id === "M12" || n===12){
-      return { bracket:"main", round:"F" };
-    }
-    return { bracket:"main", round:"QF" };
-  }
-
-  function normalizeMatchWithMeta(matchId, m){
-    const inferred = inferBracketRound(matchId, m);
-    const bracket = m?.bracket || inferred.bracket;
-    const round   = m?.round   || inferred.round;
-    return { id: matchId, ...(m || {}), bracket, round };
-  }
-
-  function courtClass(courtKey){
-    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
-  }
-
-  function renderTableauMatchCard({ time, courtKey, teamARef, teamBRef, res }){
-    const cls = courtClass(courtKey);
-    const court = courtLabel(prog, courtKey);
-
-    const aTeam = resolveTeamRef(teamARef) || null;
-    const bTeam = resolveTeamRef(teamBRef) || null;
-
-    const a = aTeam ? teamPartsFromTeam(aTeam) : teamPartsFromRef(teamARef);
-    const b = bTeam ? teamPartsFromTeam(bTeam) : teamPartsFromRef(teamBRef);
-
-    const s1A = fmtScoreCell(res?.s1A);
-    const s2A = fmtScoreCell(res?.s2A);
-    const s3A = fmtScoreCell(res?.s3A);
-
-    const s1B = fmtScoreCell(res?.s1B);
-    const s2B = fmtScoreCell(res?.s2B);
-    const s3B = fmtScoreCell(res?.s3B);
-
-    return `
-      <div class="tv-match-card ${esc(cls)}">
-        <div class="tv-m-head">
-          <div class="tv-m-time">${esc(time || "—")}</div>
-          <div class="tv-m-court">${esc(court)}</div>
-        </div>
-
-        <div class="tv-teamline">
-          <div class="tv-team-block">
-            <div class="tv-team-title">${esc(a.title)}</div>
-            <div class="tv-team-sub">${a.sub ? esc(a.sub) : ""}</div>
-          </div>
-          <div class="tv-sc">${esc(s1A)}</div>
-          <div class="tv-sc">${esc(s2A)}</div>
-          <div class="tv-sc">${esc(s3A)}</div>
-        </div>
-
-        <div class="tv-vs">VS</div>
-
-        <div class="tv-teamline">
-          <div class="tv-team-block">
-            <div class="tv-team-title">${esc(b.title)}</div>
-            <div class="tv-team-sub">${b.sub ? esc(b.sub) : ""}</div>
-          </div>
-          <div class="tv-sc">${esc(s1B)}</div>
-          <div class="tv-sc">${esc(s2B)}</div>
-          <div class="tv-sc">${esc(s3B)}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function buildTableauxFromCombos(){
-    if(!prog) return [];
-
-    const combos = [];
-    for(const [round, lbl] of roundOptions("main")) combos.push({ bracket:"main", round, label: `Tableau principal — ${lbl}` });
-    for(const [round, lbl] of roundOptions("5-8")) combos.push({ bracket:"5-8", round, label: `Tableau 5–8 — ${lbl}` });
-
-    const matches = prog.matches || {};
-    const schedule = prog.schedule || {};
-    const slots = Array.isArray(prog.slots) ? prog.slots : [];
-
-    return combos.map(c=>{
-      const list = Object.entries(matches)
-        .map(([id, m]) => normalizeMatchWithMeta(id, m))
-        .filter(m => m.bracket === c.bracket && m.round === c.round)
-        .sort((a,b)=> (a.n||0) - (b.n||0));
-
-      const cards = list.map(m=>{
-        const res = getResultForMatch(m.id) || null;
-
-        let time = "—";
-        let courtKey = "A";
-
-        const entry = schedule[m.id];
-        const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
-
-        if(Number.isFinite(slotNum) && slotNum > 0){
-          const s = slots.find(x => Number(x.slot) === slotNum) || null;
-          const norm = normalizeScheduleEntry(entry, s);
-          courtKey = norm.court;
-          time = s?.time || "—";
-        }
-
-        return renderTableauMatchCard({
-          time,
-          courtKey,
-          teamARef: m.A,
-          teamBRef: m.B,
-          res
-        });
-      });
-
-      const html = cards.length
-        ? `<div class="tv-match-list">${cards.join("")}</div>`
-        : `<p class="muted" style="margin:0;">Aucun match pour ce filtre.</p>`;
-
-      return { title: `🧩 ${c.label}`, html };
-    });
-  }
-
-  function renderRotItem(t){
-    if(!t){
-      rotTitle.textContent = "—";
-      rotIndex.textContent = "—";
-      rotBox.innerHTML = `<p class="muted" style="margin:0;">Aucun tableau.</p>`;
-      return;
-    }
-    rotTitle.textContent = t.title || "—";
-    rotBox.innerHTML = t.html || `<p class="muted" style="margin:0;">Aucun contenu.</p>`;
-  }
-
-  function startRotator(){
-    if(rotTimer){ clearInterval(rotTimer); rotTimer = null; }
-
-    if(!tableaux.length){
-      rotTitle.textContent = "Tableaux";
-      rotIndex.textContent = "—";
-      rotBox.innerHTML = `<p class="muted" style="margin:0;">Tableaux non disponibles.</p>`;
-      return;
-    }
-
-    function showIdx(i){
-      rotPtr = i % tableaux.length;
-      rotIndex.textContent = `${rotPtr+1}/${tableaux.length}`;
-      renderRotItem(tableaux[rotPtr]);
-    }
-
-    showIdx(rotPtr);
-    rotTimer = setInterval(()=> showIdx(rotPtr + 1), 10000);
-  }
-
-  function refreshTableaux(){
-    tableaux = buildTableauxFromCombos();
-    startRotator();
-  }
-
-  // ===== WATCH programmation: première trouvée =====
-  function watchFirstAvailableProgram(refs){
-    let decided = false;
-    const unsubs = [];
-
-    function settleWith(data, whichIdx){
-      if(decided) return;
-      decided = true;
-
-      for(let i=0;i<unsubs.length;i++){
-        if(i !== whichIdx && typeof unsubs[i] === "function"){
-          try{ unsubs[i](); }catch(e){}
-        }
-      }
-
-      tvStatus.textContent = "🟢 En direct";
-      prog = data || null;
-
-      computeCourtBlocks();
-      refreshTableaux();
-    }
-
-    refs.forEach((ref, idx)=>{
-      const u = onSnapshot(ref, (snap)=>{
-        if(snap.exists()){
-          settleWith(snap.data() || {}, idx);
-        } else if(!decided && idx === refs.length - 1){
-          prog = null;
-          tvStatus.textContent = "🟠 Programmation non trouvée";
-          computeCourtBlocks();
-          tableaux = [];
-          startRotator();
-        }
-      }, (err)=>{
-        console.error(err);
-      });
-      unsubs[idx] = u;
-    });
-
-    return () => { unsubs.forEach(fn => { try{ fn && fn(); }catch(e){} }); };
-  }
-
-  // ===== Subscriptions =====
-  watchFirstAvailableProgram(PROG_REFS);
-
-  const qRes = query(collection(db, COL_RESULTS), orderBy("updatedAt","desc"), limit(300));
-  onSnapshot(qRes, (snap)=>{
-    resultsMap = new Map();
-    snap.forEach(d => resultsMap.set(d.id, d.data() || {}));
-
-    computeCourtBlocks();
-    if(prog) refreshTableaux();
-
-    if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
-  }, (err)=>{
-    console.error(err);
-    tvStatus.textContent = "🔴 Erreur résultats";
-  });
-
-  (async function loadTirageOnce(){
-    try{ await getDoc(DOC_TIRAGE); } catch(e){ /* noop */ }
-  })();
-
-  setTimeout(()=> location.reload(), 30 * 60 * 1000);
+<script>
+setInterval(()=>{
+document.getElementById("tvClock").textContent =
+new Date().toLocaleTimeString("fr-FR");
+},1000);
 </script>
 
 </body>
