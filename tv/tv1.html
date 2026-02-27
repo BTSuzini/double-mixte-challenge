@@ -9,39 +9,69 @@
   <link rel="stylesheet" href="../assets/css/main.css?v=20260226-tv1" />
 
   <style>
-    /* ===== Layout TV (16:9) ===== */
+    /* ===== Layout TV (16:9) — NO SCROLL ===== */
+    :root{
+      /* Hauteurs pilotées */
+      --tv-top-h: clamp(120px, 18vh, 190px);
+      --tv-bottom-h: clamp(68px, 8vh, 100px);
+
+      /* Tailles images top */
+      --tv-logo-h: clamp(64px, 9vh, 96px);
+      --tv-mid-h:  clamp(72px, 10vh, 110px);
+
+      /* Spacings */
+      --tv-pad: clamp(8px, 1.2vh, 14px);
+      --tv-gap: clamp(8px, 1.2vh, 14px);
+
+      /* Typo (un peu plus petite pour TV) */
+      --tv-h2: clamp(14px, 1.7vh, 18px);
+      --tv-court-head: clamp(16px, 2.2vh, 20px);
+      --tv-sec: clamp(12px, 1.8vh, 16px);
+      --tv-team: clamp(14px, 2.1vh, 18px);
+      --tv-sub: clamp(11px, 1.6vh, 14px);
+      --tv-score: clamp(14px, 2.1vh, 18px);
+    }
+
     html, body{ height:100%; }
-    body{ margin:0; background:#0b0f0c; color:#111; overflow-x:hidden; }
-    .tv-wrap{ min-height:100vh; display:flex; flex-direction:column; }
+    body{
+      margin:0;
+      background:#0b0f0c;
+      color:#111;
+      overflow:hidden;          /* ✅ interdit tout scroll */
+    }
+    .tv-wrap{
+      height:100vh;             /* ✅ pile la hauteur écran */
+      display:flex;
+      flex-direction:column;
+    }
 
     /* ===== Top bar (bandeau vert) ===== */
     .tv-top{
+      flex: 0 0 auto;
       background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
       border-bottom: 1px solid rgba(255,255,255,.14);
       box-shadow: 0 12px 30px rgba(0,0,0,.25);
     }
     .tv-top .container{ max-width: 1400px; width: 100%; }
 
-    /* ✅ TOP: 5 images alignées : logo-suzini / challenge-gen / etape1 / challenge-gen / logo-challenge
-       Ajustement spacing: challenge-gen plus près de etape1, moins près des logos
-    */
+    /* ✅ TOP: 5 images alignées : logo-suzini / challenge-gen / etape1 / challenge-gen / logo-challenge */
     .tv-top-row{
       display:grid;
-      grid-template-columns: 120px 120px 1fr 120px 120px;
+      grid-template-columns: 110px 110px 1fr 110px 110px; /* plus compact */
       align-items:center;
-      gap:18px; /* base gap (logo <-> challenge) */
-      padding: 14px 0 10px;
+      gap: var(--tv-gap);
+      padding: var(--tv-pad) 0 calc(var(--tv-pad) * .6);
     }
     .tv-top-cell{
-      height:120px;
+      height: var(--tv-top-h);
       display:flex;
       align-items:center;
       justify-content:center;
       min-width:0;
     }
     .tv-top-cell img{
-      max-height:120px;
-      height:120px;
+      max-height: var(--tv-logo-h);
+      height: var(--tv-logo-h);
       width:auto;
       max-width:100%;
       object-fit:contain;
@@ -49,17 +79,18 @@
     }
     /* ✅ Etape: même hauteur, largeur auto (plus grand) */
     .tv-top-cell.mid img{
-      height:120px;
+      height: var(--tv-mid-h);
+      max-height: var(--tv-mid-h);
       width:auto;
     }
 
-    /* ✅ Spacing fin: challenge-gen se rapproche de l'étape (1/4) et s'éloigne des logos (3/4) */
+    /* ✅ Spacing fin: challenge-gen se rapproche de l'étape et s'éloigne des logos */
     .tv-top-cell.is-chal{ }
-    .tv-top-cell.is-chal.left{  margin-right:-10px; margin-left: 50px; }  /* rapproche vers l'étape */
-    .tv-top-cell.is-chal.right{ margin-left:-10px;  margin-right:50px; }  /* rapproche vers l'étape */
+    .tv-top-cell.is-chal.left{  margin-right:-10px; margin-left: 50px; }
+    .tv-top-cell.is-chal.right{ margin-left:-10px;  margin-right:50px; }
 
     /* ✅ Rangée KPI/horloge sous les images */
-    .tv-subrow{ padding: 0 0 14px; }
+    .tv-subrow{ padding: 0 0 calc(var(--tv-pad) * .8); }
     .tv-subrow-inner{
       display:flex;
       justify-content:center;
@@ -69,27 +100,30 @@
     }
     .tv-pill{
       display:inline-flex; align-items:center; gap:8px;
-      padding:8px 12px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.24);
-      background: rgba(255,255,255,.12);
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.10);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
       white-space:nowrap;
       font-weight:900;
+      font-size: clamp(11px, 1.5vh, 14px);
       opacity:.98;
     }
 
-    /* ===== Main split ===== */
+    /* ===== Main split (NO SCROLL) ===== */
     .tv-main{
-      flex:1;
+      flex:1 1 auto;
       display:grid;
       grid-template-columns: 2fr 1fr;
-      gap:14px;
-      padding: 14px;
+      gap: var(--tv-gap);
+      padding: var(--tv-pad);
       max-width: 1400px;
       width:100%;
       margin: 0 auto;
       box-sizing:border-box;
       min-height:0;
+      overflow:hidden;
     }
 
     .panel{
@@ -103,7 +137,7 @@
       flex-direction:column;
     }
     .panel-head{
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-bottom: 1px solid #eee;
       display:flex;
       align-items:center;
@@ -112,22 +146,22 @@
       background: #fbfbfb;
       flex: 0 0 auto;
     }
-    .panel-head h2{ margin:0; font-size:18px; font-weight:1000; }
+    .panel-head h2{ margin:0; font-size: var(--tv-h2); font-weight:1000; }
     .muted{ color:#666; font-weight:800; }
 
     /* ===== LEFT 2/3 : Split par court (FULL) ===== */
     .left-body{
-      padding: 12px 12px;
-      overflow:auto;
+      padding: var(--tv-pad);
+      overflow:hidden; /* ✅ pas de scroll */
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap: var(--tv-gap);
       min-height:0;
     }
     .courts-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:12px;
+      gap: var(--tv-gap);
       align-items:stretch;
       min-height:0;
     }
@@ -141,6 +175,7 @@
       min-width:0;
       border: 1px solid rgba(0,0,0,.06);
       box-shadow: 0 18px 45px rgba(0,0,0,.14);
+      min-height:0;
     }
     .court-col.lisa{
       background: #FFE6EA;
@@ -152,50 +187,46 @@
     }
 
     .court-head{
-      padding:14px 14px;
+      padding:10px 12px;
       border-bottom:1px solid rgba(0,0,0,.08);
       font-weight:1000;
-      font-size:20px;
+      font-size: var(--tv-court-head);
       display:flex;
       align-items:center;
-      justify-content:center; /* ✅ centrage */
-      text-align:center;      /* ✅ centrage */
+      justify-content:center;
+      text-align:center;
       gap:10px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       background: rgba(255,255,255,.45);
       backdrop-filter: blur(2px);
+      flex: 0 0 auto;
     }
 
     .court-body{
-      padding:12px 12px 14px;
+      padding:10px 10px 12px;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
       min-height:0;
+      overflow:hidden; /* ✅ pas de scroll */
     }
 
     /* ✅ Section titres (Terminés / En cours / À venir) */
     .sec-title{
       font-weight:1000;
-      font-size:16px;
+      font-size: var(--tv-sec);
       letter-spacing:.2px;
       margin:0 0 6px;
       opacity:.95;
     }
 
-    /* ✅ Match card (par court)
-       - heure petite en haut
-       - 2 lignes équipe A : nom + prénoms
-       - idem équipe B
-       - scores alignés par set à droite
-       - (S1/S2/S3 supprimé)
-    */
+    /* ✅ Match card (par court) */
     .mcard2{
       border:1px solid rgba(0,0,0,.10);
       border-radius:16px;
-      padding:12px 12px;
+      padding:10px 10px;
       background: rgba(255,255,255,.72);
       box-shadow: 0 10px 26px rgba(0,0,0,.08);
       display:flex;
@@ -207,14 +238,14 @@
       font-weight:1000;
       color:#111;
       white-space:nowrap;
-      font-size:14px;
+      font-size:12px;
       opacity:.85;
     }
 
     .teamline{
       display:grid;
-      grid-template-columns: 1fr 26px 26px 26px;
-      gap:10px;
+      grid-template-columns: 1fr 24px 24px 24px;
+      gap:8px;
       align-items:center;
       min-width:0;
     }
@@ -226,7 +257,7 @@
     }
     .tname{
       font-weight:1000;
-      font-size:18px;
+      font-size: var(--tv-team);
       line-height:1.1;
       white-space:nowrap;
       overflow:hidden;
@@ -234,7 +265,7 @@
     }
     .tsub{
       font-weight:800;
-      font-size:14px;
+      font-size: var(--tv-sub);
       opacity:.85;
       white-space:nowrap;
       overflow:hidden;
@@ -244,26 +275,27 @@
     .g{
       text-align:right;
       font-weight:1000;
-      font-size:18px;
+      font-size: var(--tv-score);
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
     }
     .placeholder{
       color:#333;
       font-weight:900;
-      padding:10px 4px;
+      padding:8px 4px;
       opacity:.75;
+      font-size: clamp(12px, 1.6vh, 14px);
     }
 
     /* ===== Right: tableaux rotator ===== */
     .right-body{
-      padding: 12px 12px;
+      padding: var(--tv-pad);
       overflow:hidden;
       display:flex;
       flex-direction:column;
       gap:10px;
       min-height:0;
-      flex: 1 1 auto; /* ✅ s’adapte en hauteur */
+      flex: 1 1 auto;
     }
     .rot-title{
       display:flex;
@@ -272,24 +304,25 @@
       gap:10px;
       font-weight:1000;
       flex: 0 0 auto;
+      font-size: clamp(12px, 1.6vh, 14px);
     }
     .rot-box{
-      flex:1 1 auto;          /* ✅ prend tout l’espace vertical restant */
+      flex:1 1 auto;
       border:1px solid #eee;
       background:#fff;
       border-radius:16px;
       padding:10px;
-      overflow:auto;
+      overflow:hidden; /* ✅ no scroll */
       box-shadow: 0 10px 26px rgba(0,0,0,.05);
       min-height:0;
     }
 
     /* ✅ Style “tableau” dans le rotator */
-    .tv-match-list{ display:flex; flex-direction:column; gap:12px; }
+    .tv-match-list{ display:flex; flex-direction:column; gap:10px; }
     .tv-match-card{
       border-radius:16px;
       border:1px solid rgba(0,0,0,.08);
-      padding:12px;
+      padding:10px;
       background:#fff;
       box-shadow:0 1px 0 rgba(0,0,0,.03);
     }
@@ -303,14 +336,14 @@
       min-width:0;
     }
     .tv-m-time{
-      font-size:13px;
+      font-size:12px;
       font-weight:1000;
       white-space:nowrap;
       letter-spacing:.2px;
     }
     .tv-m-court{
-      font-size:13px;
-      font-weight:800;
+      font-size:12px;
+      font-weight:900;
       opacity:.85;
       white-space:nowrap;
       overflow:hidden;
@@ -319,16 +352,16 @@
       flex:1;
     }
     .tv-teamline{
-      margin-top:10px;
+      margin-top:8px;
       display:grid;
-      grid-template-columns: 1fr 22px 22px 24px;
-      gap:8px;
+      grid-template-columns: 1fr 20px 20px 22px;
+      gap:6px;
       align-items:center;
       min-width:0;
     }
     .tv-team-block{ min-width:0; }
     .tv-team-title{
-      font-size:15px;
+      font-size: clamp(13px, 1.8vh, 15px);
       font-weight:1000;
       line-height:1.15;
       white-space:nowrap;
@@ -337,7 +370,7 @@
     }
     .tv-team-sub{
       margin-top:2px;
-      font-size:13px;
+      font-size: clamp(11px, 1.5vh, 13px);
       font-weight:900;
       opacity:.75;
       white-space:nowrap;
@@ -347,31 +380,35 @@
     }
     .tv-sc{
       text-align:right;
-      font-size:15px;
+      font-size: clamp(12px, 1.7vh, 15px);
       font-weight:1000;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
     .tv-vs{
-      margin:10px 0 6px;
+      margin:8px 0 4px;
       text-align:center;
       font-weight:1000;
       letter-spacing:2px;
       opacity:.45;
-      font-size:12px;
+      font-size:11px;
     }
 
-    /* ===== Sponsors bandeau (fond vert comme top, taille XXL) ===== */
+    /* ===== Sponsors bandeau (plus petit) ===== */
     .tv-bottom{
+      flex: 0 0 auto;
+      height: var(--tv-bottom-h);
+      display:flex;
+      align-items:center;
       background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
       border-top:1px solid rgba(255,255,255,.10);
       color:#fff;
-      padding: 10px 0;
+      padding: 0;
       overflow:hidden;
     }
     .sponsor-track{
       display:flex;
-      gap:54px;
+      gap:44px;
       align-items:center;
       white-space:nowrap;
       will-change: transform;
@@ -387,7 +424,7 @@
       background:transparent;
     }
     .sponsor-item img{
-      height:84px;
+      height: clamp(46px, 6vh, 72px);
       width:auto;
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
@@ -397,8 +434,17 @@
       0%{ transform: translateX(0); }
       100%{ transform: translateX(-200%); }
     }
+
+    /* (scrollbar styles OK, même si on ne scroll plus) */
     ::-webkit-scrollbar{ width:10px; height:10px; }
     ::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.14); border-radius:999px; }
+
+    /* ===== petits écrans ===== */
+    @media (max-width: 1100px){
+      .tv-top-row{ grid-template-columns: 90px 90px 1fr 90px 90px; }
+      .tv-top-cell.is-chal.left{  margin-left: 20px; margin-right:-8px; }
+      .tv-top-cell.is-chal.right{ margin-right:20px; margin-left:-8px; }
+    }
   </style>
 </head>
 
@@ -634,7 +680,7 @@
     return (x === null || x === undefined || x === "") ? "—" : String(x);
   }
 
-  // ===== Team resolution (comme la page programmation) =====
+  // ===== Team resolution =====
   function teamPartsFromTeam(t){
     if(!t) return { title:"—", sub:"" };
     const title = t.teamName || "Équipe";
