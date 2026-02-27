@@ -22,7 +22,6 @@
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
 
-
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
@@ -44,6 +43,9 @@
 
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
+
+    <!-- ✅ FIX: élément utilisé par JS (sinon crash) -->
+    <p class="muted" id="pageSub" style="margin:0 0 10px;">—</p>
 
     <div class="field">
       <label for="scope">Choisir</label>
@@ -101,6 +103,14 @@
 </main>
 
 <style>
+  /* ✅ Surbrillance onglet actif */
+  .tab-active{
+    background: rgba(19,86,44,.14) !important;
+    border-color: rgba(19,86,44,.45) !important;
+    box-shadow: 0 10px 22px rgba(0,0,0,.08);
+    transform: translateY(-1px);
+  }
+
   .match-list{ display:flex; flex-direction:column; gap:14px; }
 
   .match-card{
@@ -230,7 +240,7 @@
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub");
+  const pageSub = document.getElementById("pageSub"); // ✅ existe maintenant
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelBuild = document.getElementById("panelBuild");
@@ -260,9 +270,30 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // ✅ Tabs JAT (réduits)
+  // ✅ Onglet actif = page courante
+  function currentPageName(){
+    const p = (location.pathname || "").split("/").pop() || "";
+    return p.toLowerCase();
+  }
+
+  // ✅ Tabs JAT (réduits) + surbrillance onglet actif
   function setTabs(scope){
     tabsEl.innerHTML = "";
+    const cur = currentPageName();
+
+    function addTab(label, url){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      const isActive = (cur === url.toLowerCase());
+      if(isActive){
+        a.classList.add("tab-active");
+        a.setAttribute("aria-current","page");
+      }
+      tabsEl.appendChild(a);
+    }
 
     if(scope === "general"){
       hintEl.textContent = "Zone Général : infos (depuis JAT).";
@@ -271,27 +302,20 @@
       a.href = "index.html?scope=general";
       a.textContent = "📰 Infos";
       a.style.fontWeight = "900";
+      if(cur === "index.html"){
+        a.classList.add("tab-active");
+        a.setAttribute("aria-current","page");
+      }
       tabsEl.appendChild(a);
       return;
     }
 
     hintEl.textContent = "Zone Étape : programmation / résultats / vérification / classement.";
 
-    const links = [
-      ["📅 Programmation", "programmation.html"],
-      ["🏁 Résultats", "resultats.html"],
-      ["🔎 Vérification", "verification.html"],
-      ["🏅 Classement", "classement.html"],
-    ];
-
-    for(const [label, url] of links){
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
-      a.textContent = label;
-      if(url === "programmation.html") a.style.fontWeight = "900";
-      tabsEl.appendChild(a);
-    }
+    addTab("📅 Programmation", "programmation.html");
+    addTab("🏁 Résultats", "resultats.html");
+    addTab("🔎 Vérification", "verification.html");
+    addTab("🏅 Classement", "classement.html");
   }
 
   function progRef(scope){ return doc(db, "programmations", scope); }
@@ -302,24 +326,16 @@
     return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
   }
 
-  // ✅ LOGIQUE OFFICIELLE (fixe) — matchId ne change jamais
   function buildMatches(){
     return {
-      // Quarts
       M1:{id:"M1",n:1,  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
       M2:{id:"M2",n:2,  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
       M3:{id:"M3",n:3,  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
       M4:{id:"M4",n:4,  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
-
-      // 5-8 (demi)
       M5:{id:"M5",n:5,  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
       M6:{id:"M6",n:6,  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
-
-      // Tableau principal (demi)
       M7:{id:"M7",n:7,  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
       M8:{id:"M8",n:8,  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
-
-      // Classements
       M9:{id:"M9",n:9,   A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
       M10:{id:"M10",n:10,A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
       M11:{id:"M11",n:11,A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
@@ -327,7 +343,6 @@
     };
   }
 
-  // Slots = créneaux "heure (+ note)". On garde court en legacy mais il n’est plus “source de vérité”.
   function defaultSlots(){
     return [
       { slot:1,  time:"18:00", court:"A" },
@@ -345,9 +360,7 @@
     ];
   }
 
-  // ✅ schedule normalization (compat: number OR {slot,court})
   function normalizeScheduleEntry(entry, slotObj){
-    // entry can be: 5 OR {slot:5,court:"A"}
     if(typeof entry === "number"){
       const slot = Number(entry);
       const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
@@ -392,7 +405,6 @@
     const slots = defaultSlots();
     const courts = defaultCourts();
 
-    // ✅ NEW schedule format: schedule[mid] = {slot, court}
     const schedule = {};
     for(const mid of Object.keys(matches)){
       const n = Number(matches[mid].n);
@@ -419,7 +431,6 @@
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
     return `${emo} ${name} ${emo}`;
   }
-
   function courtClass(courtKey){
     return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
   }
@@ -433,14 +444,12 @@
 
   function teamRefParts(prog, ref){
     if(!ref) return { title:"—", sub:"" };
-
     if(ref.type === "team"){
       const t = prog?.teams?.[ref.key] || null;
       return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
     }
     if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
     if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
-
     return { title:"—", sub:"" };
   }
 
@@ -503,7 +512,6 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> mid (si collisions, on prend le premier trouvé)
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
       const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
@@ -558,7 +566,6 @@
     const slots = Array.isArray(prog.slots) ? prog.slots : [];
     const schedule = prog.schedule || {};
 
-    // Find match assigned to slotA and slotB (first match found)
     let mA = null, mB = null;
     for(const [mid, entry] of Object.entries(schedule)){
       const sObj = slots.find(x => Number(x.slot) === Number((typeof entry === "number") ? entry : entry?.slot));
@@ -616,10 +623,7 @@
       resultsByMatch = new Map();
       snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
       renderAdminList();
-    }, (err)=>{
-      console.error(err);
-      // pas bloquant
-    });
+    }, (err)=>{ console.error(err); });
   }
 
   function startProgListener(scope){
@@ -649,6 +653,7 @@
   }
 
   function showPanelsForScope(scope){
+    // ✅ pageSub existe désormais
     pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
 
     if(scope === "general"){
@@ -747,12 +752,11 @@
 
     scopeEl.onchange = ()=>{
       currentScope = scopeEl.value || "general";
-      setTabs(currentScope);
+      setTabs(currentScope);          // ✅ met à jour le style des onglets
       showPanelsForScope(currentScope);
     };
   }
 
-  // ✅ Guard JAT + Admin
   const g = await requireRole(["admin","jat"]);
   if(!g.ok){ showDenied(); } else { showAdmin(); }
 
