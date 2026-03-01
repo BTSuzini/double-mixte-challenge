@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Résultats</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-admin-resultats" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-admin-resultats-etape2" />
 
   <style>
     /* ✅ pas de scroll horizontal */
@@ -71,9 +71,7 @@
       max-width:100%;
     }
 
-    .team{
-      min-width:0;
-    }
+    .team{ min-width:0; }
     .team-title{
       font-size:15px;
       font-weight:1000;
@@ -164,8 +162,10 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
+      <!-- ✅ bandeau dynamique selon l’étape -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <img src="../assets/img/etape1-rouge.png"
+        <img id="stepBanner"
+             src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
@@ -238,7 +238,7 @@
   import { auth, db } from "../assets/js/firebase.js";
   import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, collection } from
+  import { doc, setDoc, onSnapshot, serverTimestamp, collection } from
     "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const LS_SCOPE_KEY = "admin_scope_last";
@@ -271,6 +271,8 @@
   const adminList  = document.getElementById("adminList");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
+  const stepBanner = document.getElementById("stepBanner");
+
   // state
   let currentScope = getInitialScope();
   let unsubProg = null;
@@ -292,6 +294,21 @@
     a.textContent = label;
     a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
     return a;
+  }
+
+  function setHeaderBanner(scope){
+    const stepImg = `../assets/img/${scope}-rouge.png`;
+    if(!scope || scope === "general"){
+      stepBanner.src = "../assets/img/challenge-gen.png";
+      stepBanner.alt = "Suzini Beach Tennis Double Mixte Challenge";
+      return;
+    }
+    stepBanner.src = stepImg;
+    stepBanner.alt = `Suzini Beach Tennis Double Mixte Challenge — ${scope}`;
+    stepBanner.onerror = ()=>{
+      stepBanner.onerror = null;
+      stepBanner.src = "../assets/img/challenge-gen.png";
+    };
   }
 
   function setTabs(scope){
@@ -403,7 +420,6 @@
   }
 
   function winnerFromScores(x){
-    // x are strings or null
     const sets = [
       [x.s1A, x.s1B],
       [x.s2A, x.s2B],
@@ -625,6 +641,8 @@
   }
 
   function showPanelsForScope(scope){
+    setHeaderBanner(scope);
+
     if(scope === "general"){
       panelNeedStep.style.display = "block";
       panelResults.style.display = "none";
