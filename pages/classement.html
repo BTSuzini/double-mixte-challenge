@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v5" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v6" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -18,6 +18,8 @@
       gap:12px;
       align-items:center;
       justify-content:space-between;
+      position:relative;
+      overflow:hidden;
     }
 
     .rk{
@@ -28,7 +30,7 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .rmain{ min-width:0; flex:1 1 auto; }
+    .rmain{ min-width:0; flex:1 1 auto; position:relative; z-index:2; }
     .rtitle{
       font-weight:1000; line-height:1.15; margin:0;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -53,6 +55,8 @@
       opacity:.95;
       flex:0 0 auto;
       font-variant-numeric: tabular-nums;
+      position:relative;
+      z-index:2;
     }
 
     /* Général : 1 ligne (Joueur · Points · Étapes) */
@@ -65,6 +69,8 @@
       align-items:center;
       justify-content:flex-end;
       flex-wrap:wrap;
+      position:relative;
+      z-index:2;
     }
     .meta-pill{
       border:1px solid rgba(0,0,0,.12);
@@ -77,28 +83,34 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ✅ Logo équipe au milieu de l’encart (entre numéro et contenu) */
+    /* ✅ Logo au MILIEU de l’encart (après le nom), SANS cadre, hauteur max */
     .mid-logo{
-      width:44px; height:44px;
-      border-radius:14px;
-      border:1px solid rgba(0,0,0,.10);
-      background:#fff;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-      display:flex; align-items:center; justify-content:center;
-      flex:0 0 auto;
-      overflow:hidden;
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      height:100%;
+      width:auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      z-index:1;
+      opacity:.22; /* filigrane discret (ajuste si tu veux) */
     }
     .mid-logo img{
-      width:100%; height:100%;
+      height:100%;
+      width:auto;
       object-fit:contain;
       display:block;
-      padding:6px; /* “respire” dans le cadre */
+      /* un petit padding pour éviter que ça colle aux bords */
+      padding:6px;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
     }
 
     @media (max-width: 420px){
       .rk{ width:38px; height:38px; border-radius:12px; }
       .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
-      .mid-logo{ width:40px; height:40px; border-radius:12px; }
       .mid-logo img{ padding:5px; }
     }
   </style>
@@ -167,7 +179,7 @@
   import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ============================================================
-  // CONFIG POINTS FFT (capture)
+  // CONFIG POINTS FFT
   // ============================================================
   const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
   const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
@@ -175,7 +187,6 @@
   const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
 
   function stepType(stepId){
-    // Étape 1 & 5 = BT250 ; Étapes 2/3/4 = BT100
     return (stepId === "etape1" || stepId === "etape5") ? "BT250" : "BT100";
   }
 
@@ -195,7 +206,6 @@
   // ============================================================
   // STATE
   // ============================================================
-  // Map: "general" | "etape1..5" => doc data (ou null si pas publié)
   const classements = new Map();
   classements.set("general", null);
   for(const s of STEP_IDS) classements.set(s, null);
@@ -226,7 +236,6 @@
     return s[0].toUpperCase() + ".";
   }
 
-  // ✅ Prénom + initiale nom (public)
   function playerDisplay(firstName, lastName){
     const fn = (firstName || "").toString().trim();
     const ini = nameInitial(lastName);
@@ -250,23 +259,18 @@
   }
 
   // ============================================================
-  // ✅ LOGOS ÉQUIPE
-  // - Préparation étape 2 : si Firestore met un champ logo/logoFile/logoUrl
-  // - Étape 1 : uniquement "Les lobstars" => assets/img/lobstars.png
+  // LOGOS ÉQUIPE
   // ============================================================
   function normTeamName(s){
     return (s || "").toString().trim().toLowerCase()
-      .replaceAll("’","'") // apostrophes
+      .replaceAll("’","'")
       .replace(/\s+/g," ");
   }
 
   function teamLogoFromDoc(stepDoc, teamName){
     if(!stepDoc) return null;
-
-    // Option A: stepDoc.teamLogos = { "Les lobstars": "lobstars.png", ... }
     const map = stepDoc.teamLogos || stepDoc.logos || null;
     if(map && typeof map === "object"){
-      // exact match keys (case sensitive), then normalized match
       if(map[teamName]) return map[teamName];
       const tn = normTeamName(teamName);
       for(const k of Object.keys(map)){
@@ -279,23 +283,19 @@
   function teamLogoSrc(stepId, stepDoc, team){
     const teamName = teamNameOf(team);
 
-    // Option B: directement porté par l'équipe/position
     const file = team?.logoFile || team?.logo || team?.logoUrl || team?.teamLogo || null;
     if(file){
-      // si c'est déjà une URL absolue, on la laisse
       if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
-      // sinon on suppose un fichier dans assets/img
       return `../assets/img/${String(file)}`;
     }
 
-    // Option A: map globale dans le doc
     const fromMap = teamLogoFromDoc(stepDoc, teamName);
     if(fromMap){
       if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
       return `../assets/img/${String(fromMap)}`;
     }
 
-    // ✅ Étape 1: hardcode "Les lobstars"
+    // Étape 1: uniquement Lobstars
     if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
       return "../assets/img/lobstars.png";
     }
@@ -305,20 +305,13 @@
 
   function renderMidLogo(logoSrc, alt){
     if(!logoSrc) return "";
-    return `<div class="mid-logo" title="${esc(alt || "Logo équipe")}"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
+    return `<div class="mid-logo" aria-hidden="true"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
   }
 
   // ============================================================
-  // ✅ ÉGALITÉS + "filles devant" (si on a l’info)
-  // - Si égalité de points : même rang affiché
-  // - Tri dans une égalité : F devant puis nom
-  //
-  // Préparation : dans Firestore, tu peux ajouter par joueur :
-  //   gender: "F" | "M"   (ou sex: "F"/"M" ou isFemale: true/false)
-  // Sinon : fallback neutre.
+  // ÉGALITÉS + "filles devant" (si info dispo)
   // ============================================================
   function genderRank(g){
-    // 0 = F (devant), 1 = inconnu, 2 = M (après)
     const s = (g ?? "").toString().toUpperCase().trim();
     if(s === "F" || s === "FEMALE" || s === "W") return 0;
     if(s === "M" || s === "MALE") return 2;
@@ -334,12 +327,11 @@
   }
 
   // ============================================================
-  // POINTS + NORMALIZATION
+  // NORMALIZE STEP DOC -> teams ordered by pos
   // ============================================================
   function normalizeStepTeams(stepId, stepDoc){
     const ptsTable = pointsTable(stepId);
 
-    // --- CAS 1 : doc.positions existe (format admin -> positions)
     const positions = Array.isArray(stepDoc?.positions) ? stepDoc.positions : null;
     if(positions && positions.length){
       return positions
@@ -353,7 +345,6 @@
             p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
             p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
             p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
-            // logo possible (prépa étape 2)
             logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
           };
 
@@ -364,7 +355,6 @@
         .sort((a,b)=>a.pos-b.pos);
     }
 
-    // --- CAS 2 : doc.teams ou doc.ranking (fallback legacy)
     const legacy = Array.isArray(stepDoc?.teams) ? stepDoc.teams
                  : (Array.isArray(stepDoc?.ranking) ? stepDoc.ranking : null);
 
@@ -390,10 +380,9 @@
         .sort((a,b)=>a.pos-b.pos);
     }
 
-    // --- CAS 3 : doc.players seulement
     const players = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
     if(players.length){
-      const groups = new Map(); // key -> { pos, teamName, players:[] }
+      const groups = new Map();
       for(const p of players){
         const pos = Number(p?.pos);
         if(!Number.isFinite(pos)) continue;
@@ -413,13 +402,11 @@
           p1LastName:  (a.lastName  ?? a.p1LastName  ?? "").toString(),
           p2FirstName: (b.firstName ?? b.p2FirstName ?? "").toString(),
           p2LastName:  (b.lastName  ?? b.p2LastName  ?? "").toString(),
-          // logo possible (prépa étape 2)
           logoFile: a.logoFile || a.logo || a.logoUrl || b.logoFile || b.logo || b.logoUrl || null
         };
         const pts = Number(ptsTable[g.pos] || 0);
         rows.push({ pos: g.pos, team, points: pts });
       }
-
       rows.sort((a,b)=>a.pos-b.pos);
       return rows;
     }
@@ -428,13 +415,9 @@
   }
 
   // ============================================================
-  // BUILD GENERAL (players) from available steps
-  // + logo possible (pris sur l’équipe du joueur, ex: Lobstars -> Marine & Jules)
-  // + tri égalité : filles devant (si dispo)
-  // + rangs "ex aequo" (même rang affiché si mêmes points)
+  // BUILD GENERAL
   // ============================================================
   function buildGeneralFromSteps(){
-    // key = "Prenom I."
     const map = new Map();
 
     for(const stepId of STEP_IDS){
@@ -445,20 +428,16 @@
       if(!teams.length) continue;
 
       const playedThisStep = new Set();
-
-      // Pour récupérer (éventuel) gender depuis stepDoc.players si présent
       const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
 
       function findPlayerObj(firstName, lastName, teamName){
-        // on essaye de retrouver un objet player correspondant (si fourni)
         const fn = (firstName || "").toString().trim();
         const ln = (lastName || "").toString().trim();
         const tn = (teamName || "").toString().trim();
         return playersArr.find(p=>{
-          const pfn = (p?.firstName ?? p?.p1FirstName ?? p?.p2FirstName ?? "").toString().trim();
-          const pln = (p?.lastName  ?? p?.p1LastName  ?? p?.p2LastName  ?? "").toString().trim();
+          const pfn = (p?.firstName ?? "").toString().trim();
+          const pln = (p?.lastName  ?? "").toString().trim();
           const ptn = (p?.teamName  ?? "").toString().trim();
-          // match souple: prénom + team, et nom si dispo
           if(fn && pfn && fn !== pfn) return false;
           if(tn && ptn && tn !== ptn) return false;
           if(ln && pln && ln !== pln) return false;
@@ -473,10 +452,8 @@
         const p1Key = playerDisplay(t.p1FirstName, t.p1LastName);
         const p2Key = playerDisplay(t.p2FirstName, t.p2LastName);
 
-        // logo de l’équipe (pour affichage general)
         const logoSrc = teamLogoSrc(stepId, stepDoc, t);
 
-        // gender si dispo
         const p1Obj = findPlayerObj(t.p1FirstName, t.p1LastName, teamName);
         const p2Obj = findPlayerObj(t.p2FirstName, t.p2LastName, teamName);
 
@@ -492,14 +469,9 @@
           const rec = map.get(key);
 
           rec.points += Number(row.points || 0);
-
-          // si on récupère gender plus tard, on le stocke
           if(!rec.gender && g) rec.gender = g;
-
-          // si un logo existe et pas encore défini pour ce joueur, on le fixe
           if(!rec.logo && logoSrc) rec.logo = logoSrc;
 
-          // 1 fois par étape
           const mk = `${key}|${stepId}`;
           if(!playedThisStep.has(mk)){
             playedThisStep.add(mk);
@@ -517,10 +489,6 @@
       logo: x.logo || null
     }));
 
-    // Tri:
-    // 1) points desc
-    // 2) filles devant (si égalité)
-    // 3) nom
     out.sort((a,b)=>{
       if(b.points !== a.points) return b.points - a.points;
       const ga = genderRank(a.gender);
@@ -529,7 +497,7 @@
       return a.name.localeCompare(b.name);
     });
 
-    // Rangs ex aequo (même rank si même points)
+    // rangs ex aequo
     let lastPts = null;
     let lastRank = 0;
     for(let i=0;i<out.length;i++){
@@ -548,8 +516,6 @@
   // RENDER
   // ============================================================
   function refreshStepOptions(){
-    // Étape 1 : toujours activée (même si pas encore publiée)
-    // Étapes 2..5 : activées seulement si doc existe
     for(const stepId of STEP_IDS){
       const opt = [...sel.options].find(o=>o.value === stepId);
       if(!opt) continue;
@@ -582,13 +548,13 @@
 
     const cards = rows.map((r)=>`
       <div class="rank-card one-line">
-        <div class="rk">${esc(String(r.rank))}</div>
-
         ${renderMidLogo(r.logo, `Logo — ${r.name}`)}
+        <div class="rk">${esc(String(r.rank))}</div>
 
         <div class="rmain">
           <div class="rtitle">${esc(r.name)}</div>
         </div>
+
         <div class="meta-line">
           <span class="meta-pill">⭐ ${esc(String(r.points))} pts</span>
           <span class="meta-pill">🎾 ${esc(String(r.stepsPlayed))} étape(s)</span>
@@ -625,14 +591,14 @@
       const logoSrc = teamLogoSrc(stepId, stepDoc, r.team);
       return `
         <div class="rank-card">
-          <div class="rk">${esc(String(r.pos))}</div>
-
           ${renderMidLogo(logoSrc, `Logo — ${teamNameOf(r.team)}`)}
+          <div class="rk">${esc(String(r.pos))}</div>
 
           <div class="rmain">
             <div class="rtitle">${esc(teamNameOf(r.team))} — <span style="opacity:.85;">${esc(String(r.points))} pts</span></div>
             <div class="rsub muted">${esc(teamPlayersLine(r.team))}</div>
           </div>
+
           <div class="tag">#${esc(String(r.pos))}</div>
         </div>
       `;
@@ -649,7 +615,7 @@
   }
 
   // ============================================================
-  // LISTENERS (robustes : 1 doc = 1 listener)
+  // LISTENERS
   // ============================================================
   function listenDoc(id){
     return onSnapshot(doc(db, "classements", id), (snap)=>{
