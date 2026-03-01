@@ -123,11 +123,11 @@
       <label for="rankScope">Affichage</label>
       <select id="rankScope">
         <option value="general" selected>Classement général</option>
-        <option value="etape1">Classement — Étape 1</option>
-        <option value="etape2" disabled>Classement — Étape 2 (à venir)</option>
-        <option value="etape3" disabled>Classement — Étape 3 (à venir)</option>
-        <option value="etape4" disabled>Classement — Étape 4 (à venir)</option>
-        <option value="etape5" disabled>Classement — Étape 5 (à venir)</option>
+        <option value="etape1">Classement — Étape 1 (BT250)</option>
+        <option value="etape2" disabled>Classement — Étape 2 (BT100) (à venir)</option>
+        <option value="etape3" disabled>Classement — Étape 3 (BT100) (à venir)</option>
+        <option value="etape4" disabled>Classement — Étape 4 (BT100) (à venir)</option>
+        <option value="etape5" disabled>Classement — Étape 5 (BT250) (à venir)</option>
       </select>
     </div>
 
@@ -144,7 +144,7 @@
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
-  import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ============================================================
   // CONFIG POINTS FFT (capture)
@@ -175,7 +175,12 @@
   // ============================================================
   // STATE
   // ============================================================
-  let classementsByStep = new Map(); // stepId -> doc data
+  // Map: "general" | "etape1..5" => doc data (ou null si pas publié)
+  const classements = new Map();
+  classements.set("general", null);
+  for(const s of STEP_IDS) classements.set(s, null);
+
+  let hasAnyListenerOk = false;
 
   // ============================================================
   // UTILS
@@ -265,7 +270,7 @@
     const map = new Map();
 
     for(const stepId of STEP_IDS){
-      const d = classementsByStep.get(stepId) || null;
+      const d = classements.get(stepId) || null;
       if(!d) continue;
 
       const teams = normalizeStepTeams(stepId, d);
@@ -286,6 +291,7 @@
           const rec = map.get(key);
           rec.points += Number(row.points || 0);
 
+          // 1 fois par étape
           const mk = `${key}|${stepId}`;
           if(!playedThisStep.has(mk)){
             playedThisStep.add(mk);
@@ -313,6 +319,27 @@
   // ============================================================
   // RENDER
   // ============================================================
+  function refreshStepOptions(){
+    // Étape 1 : toujours activée (même si pas encore publiée)
+    // Étapes 2..5 : activées seulement si doc existe
+    for(const stepId of STEP_IDS){
+      const opt = [...sel.options].find(o=>o.value === stepId);
+      if(!opt) continue;
+
+      const d = classements.get(stepId) || null;
+      const available = !!d;
+
+      const base = `Classement — ${stepLabel(stepId)} (${stepType(stepId)})`;
+      if(stepId === "etape1"){
+        opt.disabled = false;
+        opt.textContent = available ? base : `${base} (à venir)`;
+      } else {
+        opt.disabled = !available;
+        opt.textContent = available ? base : `${base} (à venir)`;
+      }
+    }
+  }
+
   function renderGeneral(){
     title.textContent = "Classement général";
     hint.textContent = "Affichage du classement général (cumul des points FFT sur les étapes disponibles).";
@@ -342,7 +369,7 @@
   }
 
   function renderStep(stepId){
-    const d = classementsByStep.get(stepId) || null;
+    const d = classements.get(stepId) || null;
 
     title.textContent = `Classement — ${stepLabel(stepId)} (${stepType(stepId)} mixte)`;
 
@@ -353,7 +380,7 @@
       return;
     }
 
-    hint.textContent = d?.validatedAt ? "Classement validé." : "Classement publié.";
+    hint.textContent = d?.validatedAt ? "✅ Classement validé." : "📌 Classement publié.";
     const rows = normalizeStepTeams(stepId, d);
 
     sub.textContent = rows.length ? `Équipes classées : ${rows.length}` : "Aucun classement disponible.";
@@ -377,23 +404,6 @@
     box.innerHTML = `<div class="list">${cards.join("")}</div>`;
   }
 
-  function refreshStepOptions(){
-    for(const stepId of STEP_IDS){
-      const opt = [...sel.options].find(o=>o.value === stepId);
-      if(!opt) continue;
-
-      const d = classementsByStep.get(stepId) || null;
-      const available = !!d;
-
-      // ✅ Étape 1 activée même si pas encore publiée
-      const forceEnabled = (stepId === "etape1");
-      opt.disabled = !(available || forceEnabled);
-
-      const base = `Classement — ${stepLabel(stepId)} (${stepType(stepId)})`;
-      opt.textContent = available ? base : `${base} (à venir)`;
-    }
-  }
-
   function render(){
     refreshStepOptions();
     const v = (sel.value || "general").toLowerCase();
@@ -402,23 +412,29 @@
   }
 
   // ============================================================
-  // LISTENERS
+  // LISTENERS (robustes : 1 doc = 1 listener)
   // ============================================================
+  function listenDoc(id){
+    return onSnapshot(doc(db, "classements", id), (snap)=>{
+      hasAnyListenerOk = true;
+      classements.set(id, snap.exists() ? (snap.data() || {}) : null);
+      render();
+      hint.textContent = "🟢 En direct";
+    }, (err)=>{
+      console.error("classements/" + id, err);
+      // On n'affiche l'erreur que si aucun listener n'a jamais réussi
+      if(!hasAnyListenerOk){
+        hint.textContent = "🔴 Erreur de connexion (classements).";
+        box.innerHTML = makeEmpty("Impossible de charger le classement.");
+      }
+    });
+  }
+
   hint.textContent = "Chargement des classements…";
 
-  onSnapshot(collection(db, "classements"), (snap)=>{
-    const next = new Map();
-    snap.forEach(d=>{
-      next.set(d.id, d.data() || {});
-    });
-    classementsByStep = next;
-    render();
-    hint.textContent = "🟢 En direct";
-  }, (err)=>{
-    console.error(err);
-    hint.textContent = "🔴 Erreur de connexion (classements).";
-    box.innerHTML = makeEmpty("Impossible de charger le classement.");
-  });
+  const unsubs = [];
+  unsubs.push(listenDoc("general"));
+  for(const s of STEP_IDS) unsubs.push(listenDoc(s));
 
   sel.addEventListener("change", render);
   render();
