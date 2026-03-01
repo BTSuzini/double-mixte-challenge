@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v4" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v5" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -77,9 +77,29 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* ✅ Logo équipe au milieu de l’encart (entre numéro et contenu) */
+    .mid-logo{
+      width:44px; height:44px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.10);
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      overflow:hidden;
+    }
+    .mid-logo img{
+      width:100%; height:100%;
+      object-fit:contain;
+      display:block;
+      padding:6px; /* “respire” dans le cadre */
+    }
+
     @media (max-width: 420px){
       .rk{ width:38px; height:38px; border-radius:12px; }
       .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
+      .mid-logo{ width:40px; height:40px; border-radius:12px; }
+      .mid-logo img{ padding:5px; }
     }
   </style>
 </head>
@@ -230,11 +250,92 @@
   }
 
   // ============================================================
-  // POINTS : source unique = table FFT (selon BT100/BT250)
-  // - On calcule TOUJOURS les points via la position (pos)
-  // - Compatible si le doc n'a PAS "positions" (ex: seulement "players")
+  // ✅ LOGOS ÉQUIPE
+  // - Préparation étape 2 : si Firestore met un champ logo/logoFile/logoUrl
+  // - Étape 1 : uniquement "Les lobstars" => assets/img/lobstars.png
   // ============================================================
+  function normTeamName(s){
+    return (s || "").toString().trim().toLowerCase()
+      .replaceAll("’","'") // apostrophes
+      .replace(/\s+/g," ");
+  }
 
+  function teamLogoFromDoc(stepDoc, teamName){
+    if(!stepDoc) return null;
+
+    // Option A: stepDoc.teamLogos = { "Les lobstars": "lobstars.png", ... }
+    const map = stepDoc.teamLogos || stepDoc.logos || null;
+    if(map && typeof map === "object"){
+      // exact match keys (case sensitive), then normalized match
+      if(map[teamName]) return map[teamName];
+      const tn = normTeamName(teamName);
+      for(const k of Object.keys(map)){
+        if(normTeamName(k) === tn) return map[k];
+      }
+    }
+    return null;
+  }
+
+  function teamLogoSrc(stepId, stepDoc, team){
+    const teamName = teamNameOf(team);
+
+    // Option B: directement porté par l'équipe/position
+    const file = team?.logoFile || team?.logo || team?.logoUrl || team?.teamLogo || null;
+    if(file){
+      // si c'est déjà une URL absolue, on la laisse
+      if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+      // sinon on suppose un fichier dans assets/img
+      return `../assets/img/${String(file)}`;
+    }
+
+    // Option A: map globale dans le doc
+    const fromMap = teamLogoFromDoc(stepDoc, teamName);
+    if(fromMap){
+      if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
+      return `../assets/img/${String(fromMap)}`;
+    }
+
+    // ✅ Étape 1: hardcode "Les lobstars"
+    if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
+      return "../assets/img/lobstars.png";
+    }
+
+    return null;
+  }
+
+  function renderMidLogo(logoSrc, alt){
+    if(!logoSrc) return "";
+    return `<div class="mid-logo" title="${esc(alt || "Logo équipe")}"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
+  }
+
+  // ============================================================
+  // ✅ ÉGALITÉS + "filles devant" (si on a l’info)
+  // - Si égalité de points : même rang affiché
+  // - Tri dans une égalité : F devant puis nom
+  //
+  // Préparation : dans Firestore, tu peux ajouter par joueur :
+  //   gender: "F" | "M"   (ou sex: "F"/"M" ou isFemale: true/false)
+  // Sinon : fallback neutre.
+  // ============================================================
+  function genderRank(g){
+    // 0 = F (devant), 1 = inconnu, 2 = M (après)
+    const s = (g ?? "").toString().toUpperCase().trim();
+    if(s === "F" || s === "FEMALE" || s === "W") return 0;
+    if(s === "M" || s === "MALE") return 2;
+    return 1;
+  }
+
+  function inferGenderFromPlayerObj(p){
+    if(!p || typeof p !== "object") return null;
+    if("gender" in p) return p.gender;
+    if("sex" in p) return p.sex;
+    if("isFemale" in p) return (p.isFemale === true ? "F" : (p.isFemale === false ? "M" : null));
+    return null;
+  }
+
+  // ============================================================
+  // POINTS + NORMALIZATION
+  // ============================================================
   function normalizeStepTeams(stepId, stepDoc){
     const ptsTable = pointsTable(stepId);
 
@@ -251,10 +352,11 @@
             p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
             p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
             p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
-            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || ""
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            // logo possible (prépa étape 2)
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
           };
 
-          // ✅ points FFT via pos
           const pts = Number(ptsTable[pos] || 0);
           return { pos, team, points: pts };
         })
@@ -277,7 +379,8 @@
             p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
             p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
             p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
-            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || ""
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
           };
 
           const pts = Number(ptsTable[pos] || 0);
@@ -287,10 +390,9 @@
         .sort((a,b)=>a.pos-b.pos);
     }
 
-    // --- CAS 3 : doc.players seulement (comme ta capture Firestore)
+    // --- CAS 3 : doc.players seulement
     const players = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
     if(players.length){
-      // group by (pos, teamName)
       const groups = new Map(); // key -> { pos, teamName, players:[] }
       for(const p of players){
         const pos = Number(p?.pos);
@@ -303,7 +405,6 @@
 
       const rows = [];
       for(const g of groups.values()){
-        // on prend 2 joueurs max
         const a = g.players[0] || {};
         const b = g.players[1] || {};
         const team = {
@@ -312,6 +413,8 @@
           p1LastName:  (a.lastName  ?? a.p1LastName  ?? "").toString(),
           p2FirstName: (b.firstName ?? b.p2FirstName ?? "").toString(),
           p2LastName:  (b.lastName  ?? b.p2LastName  ?? "").toString(),
+          // logo possible (prépa étape 2)
+          logoFile: a.logoFile || a.logo || a.logoUrl || b.logoFile || b.logo || b.logoUrl || null
         };
         const pts = Number(ptsTable[g.pos] || 0);
         rows.push({ pos: g.pos, team, points: pts });
@@ -326,31 +429,75 @@
 
   // ============================================================
   // BUILD GENERAL (players) from available steps
+  // + logo possible (pris sur l’équipe du joueur, ex: Lobstars -> Marine & Jules)
+  // + tri égalité : filles devant (si dispo)
+  // + rangs "ex aequo" (même rang affiché si mêmes points)
   // ============================================================
   function buildGeneralFromSteps(){
+    // key = "Prenom I."
     const map = new Map();
 
     for(const stepId of STEP_IDS){
-      const d = classements.get(stepId) || null;
-      if(!d) continue;
+      const stepDoc = classements.get(stepId) || null;
+      if(!stepDoc) continue;
 
-      const teams = normalizeStepTeams(stepId, d);
+      const teams = normalizeStepTeams(stepId, stepDoc);
       if(!teams.length) continue;
 
       const playedThisStep = new Set();
 
-      for(const row of teams){
-        const p1Key = playerDisplay(row.team?.p1FirstName, row.team?.p1LastName);
-        const p2Key = playerDisplay(row.team?.p2FirstName, row.team?.p2LastName);
+      // Pour récupérer (éventuel) gender depuis stepDoc.players si présent
+      const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
 
-        for(const key of [p1Key, p2Key]){
+      function findPlayerObj(firstName, lastName, teamName){
+        // on essaye de retrouver un objet player correspondant (si fourni)
+        const fn = (firstName || "").toString().trim();
+        const ln = (lastName || "").toString().trim();
+        const tn = (teamName || "").toString().trim();
+        return playersArr.find(p=>{
+          const pfn = (p?.firstName ?? p?.p1FirstName ?? p?.p2FirstName ?? "").toString().trim();
+          const pln = (p?.lastName  ?? p?.p1LastName  ?? p?.p2LastName  ?? "").toString().trim();
+          const ptn = (p?.teamName  ?? "").toString().trim();
+          // match souple: prénom + team, et nom si dispo
+          if(fn && pfn && fn !== pfn) return false;
+          if(tn && ptn && tn !== ptn) return false;
+          if(ln && pln && ln !== pln) return false;
+          return (fn && pfn && tn && ptn);
+        }) || null;
+      }
+
+      for(const row of teams){
+        const t = row.team || {};
+        const teamName = teamNameOf(t);
+
+        const p1Key = playerDisplay(t.p1FirstName, t.p1LastName);
+        const p2Key = playerDisplay(t.p2FirstName, t.p2LastName);
+
+        // logo de l’équipe (pour affichage general)
+        const logoSrc = teamLogoSrc(stepId, stepDoc, t);
+
+        // gender si dispo
+        const p1Obj = findPlayerObj(t.p1FirstName, t.p1LastName, teamName);
+        const p2Obj = findPlayerObj(t.p2FirstName, t.p2LastName, teamName);
+
+        const p1Gender = inferGenderFromPlayerObj(p1Obj);
+        const p2Gender = inferGenderFromPlayerObj(p2Obj);
+
+        for(const [key, g] of [[p1Key, p1Gender],[p2Key, p2Gender]]){
           if(!key || key === "—") continue;
 
           if(!map.has(key)){
-            map.set(key, { name:key, points:0, steps:new Set() });
+            map.set(key, { name:key, points:0, steps:new Set(), gender:g, logo:null });
           }
           const rec = map.get(key);
+
           rec.points += Number(row.points || 0);
+
+          // si on récupère gender plus tard, on le stocke
+          if(!rec.gender && g) rec.gender = g;
+
+          // si un logo existe et pas encore défini pour ce joueur, on le fixe
+          if(!rec.logo && logoSrc) rec.logo = logoSrc;
 
           // 1 fois par étape
           const mk = `${key}|${stepId}`;
@@ -365,14 +512,34 @@
     const out = [...map.values()].map(x=>({
       name: x.name,
       points: x.points,
-      stepsPlayed: x.steps.size
+      stepsPlayed: x.steps.size,
+      gender: x.gender || null,
+      logo: x.logo || null
     }));
 
+    // Tri:
+    // 1) points desc
+    // 2) filles devant (si égalité)
+    // 3) nom
     out.sort((a,b)=>{
       if(b.points !== a.points) return b.points - a.points;
-      if(b.stepsPlayed !== a.stepsPlayed) return b.stepsPlayed - a.stepsPlayed;
+      const ga = genderRank(a.gender);
+      const gb = genderRank(b.gender);
+      if(ga !== gb) return ga - gb;
       return a.name.localeCompare(b.name);
     });
+
+    // Rangs ex aequo (même rank si même points)
+    let lastPts = null;
+    let lastRank = 0;
+    for(let i=0;i<out.length;i++){
+      const pts = out[i].points;
+      if(lastPts === null || pts !== lastPts){
+        lastPts = pts;
+        lastRank = i + 1;
+      }
+      out[i].rank = lastRank;
+    }
 
     return out;
   }
@@ -413,9 +580,12 @@
       return;
     }
 
-    const cards = rows.map((r, i)=>`
+    const cards = rows.map((r)=>`
       <div class="rank-card one-line">
-        <div class="rk">${esc(String(i+1))}</div>
+        <div class="rk">${esc(String(r.rank))}</div>
+
+        ${renderMidLogo(r.logo, `Logo — ${r.name}`)}
+
         <div class="rmain">
           <div class="rtitle">${esc(r.name)}</div>
         </div>
@@ -430,19 +600,19 @@
   }
 
   function renderStep(stepId){
-    const d = classements.get(stepId) || null;
+    const stepDoc = classements.get(stepId) || null;
 
     title.textContent = `Classement — ${stepLabel(stepId)} (${stepType(stepId)} mixte)`;
 
-    if(!d){
+    if(!stepDoc){
       hint.textContent = "⏳ Classement pas encore publié.";
       sub.textContent = "—";
       box.innerHTML = makeEmpty("Dès que le classement est validé en admin, il apparaîtra ici.");
       return;
     }
 
-    hint.textContent = d?.validatedAt ? "✅ Classement validé." : "📌 Classement publié.";
-    const rows = normalizeStepTeams(stepId, d);
+    hint.textContent = stepDoc?.validatedAt ? "✅ Classement validé." : "📌 Classement publié.";
+    const rows = normalizeStepTeams(stepId, stepDoc);
 
     sub.textContent = rows.length ? `Équipes classées : ${rows.length}` : "Aucun classement disponible.";
 
@@ -451,16 +621,22 @@
       return;
     }
 
-    const cards = rows.map((r)=>`
-      <div class="rank-card">
-        <div class="rk">${esc(String(r.pos))}</div>
-        <div class="rmain">
-          <div class="rtitle">${esc(teamNameOf(r.team))} — <span style="opacity:.85;">${esc(String(r.points))} pts</span></div>
-          <div class="rsub muted">${esc(teamPlayersLine(r.team))}</div>
+    const cards = rows.map((r)=>{
+      const logoSrc = teamLogoSrc(stepId, stepDoc, r.team);
+      return `
+        <div class="rank-card">
+          <div class="rk">${esc(String(r.pos))}</div>
+
+          ${renderMidLogo(logoSrc, `Logo — ${teamNameOf(r.team)}`)}
+
+          <div class="rmain">
+            <div class="rtitle">${esc(teamNameOf(r.team))} — <span style="opacity:.85;">${esc(String(r.points))} pts</span></div>
+            <div class="rsub muted">${esc(teamPlayersLine(r.team))}</div>
+          </div>
+          <div class="tag">#${esc(String(r.pos))}</div>
         </div>
-        <div class="tag">#${esc(String(r.pos))}</div>
-      </div>
-    `);
+      `;
+    });
 
     box.innerHTML = `<div class="list">${cards.join("")}</div>`;
   }
@@ -483,7 +659,6 @@
       hint.textContent = "🟢 En direct";
     }, (err)=>{
       console.error("classements/" + id, err);
-      // On n'affiche l'erreur que si aucun listener n'a jamais réussi
       if(!hasAnyListenerOk){
         hint.textContent = "🔴 Erreur de connexion (classements).";
         box.innerHTML = makeEmpty("Impossible de charger le classement.");
