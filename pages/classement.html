@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v3" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v4" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -166,7 +166,7 @@
   // ============================================================
   // DOM
   // ============================================================
-  const sel  = document.getElementById("rankScope");
+  const sel   = document.getElementById("rankScope");
   const title = document.getElementById("rankTitle");
   const sub   = document.getElementById("rankSub");
   const hint  = document.getElementById("rankHint");
@@ -247,7 +247,6 @@
           p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || ""
         };
 
-        // points (si stockés on les respecte, sinon table FFT)
         const storedPts = (r?.points ?? r?.pts ?? null);
         const pts = Number.isFinite(Number(storedPts)) ? Number(storedPts) : (ptsTable[pos] || 0);
 
@@ -261,7 +260,6 @@
 
   // ============================================================
   // BUILD GENERAL (players) from available steps
-  // key = "Prenom I." pour gérer homonymes
   // ============================================================
   function buildGeneralFromSteps(){
     const map = new Map();
@@ -288,7 +286,6 @@
           const rec = map.get(key);
           rec.points += Number(row.points || 0);
 
-          // 1 fois par étape
           const mk = `${key}|${stepId}`;
           if(!playedThisStep.has(mk)){
             playedThisStep.add(mk);
@@ -350,9 +347,9 @@
     title.textContent = `Classement — ${stepLabel(stepId)} (${stepType(stepId)} mixte)`;
 
     if(!d){
-      hint.textContent = "À venir.";
+      hint.textContent = "⏳ Classement pas encore publié.";
       sub.textContent = "—";
-      box.innerHTML = makeEmpty("⏳ Classement non disponible pour le moment.");
+      box.innerHTML = makeEmpty("Dès que le classement est validé en admin, il apparaîtra ici.");
       return;
     }
 
@@ -386,8 +383,11 @@
       if(!opt) continue;
 
       const d = classementsByStep.get(stepId) || null;
-      const available = !!d; // doc existe
-      opt.disabled = !available;
+      const available = !!d;
+
+      // ✅ Étape 1 activée même si pas encore publiée
+      const forceEnabled = (stepId === "etape1");
+      opt.disabled = !(available || forceEnabled);
 
       const base = `Classement — ${stepLabel(stepId)} (${stepType(stepId)})`;
       opt.textContent = available ? base : `${base} (à venir)`;
