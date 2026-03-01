@@ -1,443 +1,301 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v4" />
-  <style>
-    .list{ display:flex; flex-direction:column; gap:10px; }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Classement — Double Mixte Challenge</title>
 
-    .rank-card{
-      border-radius:16px;
-      border:2px solid rgba(0,0,0,.06);
-      padding:12px;
-      background:#fff;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-    }
+<link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v5"/>
 
-    .rk{
-      width:42px; height:42px; border-radius:14px;
-      border:1px solid rgba(0,0,0,.10);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:1000; font-size:16px; flex:0 0 auto;
-      font-variant-numeric: tabular-nums;
-    }
+<style>
+.list{display:flex;flex-direction:column;gap:10px}
 
-    .rmain{ min-width:0; flex:1 1 auto; }
-    .rtitle{
-      font-weight:1000; line-height:1.15; margin:0;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .rsub{
-      margin-top:6px;
-      font-size:12px;
-      opacity:.85;
-      line-height:1.35;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+.rank-card{
+border-radius:16px;
+border:2px solid rgba(0,0,0,.06);
+padding:12px;
+background:#fff;
+display:flex;
+gap:12px;
+align-items:center;
+justify-content:space-between;
+}
 
-    .tag{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      font-weight:1000;
-      white-space:nowrap;
-      opacity:.95;
-      flex:0 0 auto;
-      font-variant-numeric: tabular-nums;
-    }
+.rk{
+width:42px;height:42px;
+border-radius:14px;
+border:1px solid rgba(0,0,0,.1);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:1000;
+}
 
-    /* Général : 1 ligne (Joueur · Points · Étapes) */
-    .rank-card.one-line{ align-items:center; }
-    .one-line .rsub{ display:none; }
+.rmain{flex:1}
+.rtitle{font-weight:1000}
+.rsub{font-size:12px;opacity:.8;margin-top:4px}
 
-    .meta-line{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-    .meta-pill{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      font-weight:1000;
-      white-space:nowrap;
-      opacity:.95;
-      font-variant-numeric: tabular-nums;
-    }
-
-    @media (max-width: 420px){
-      .rk{ width:38px; height:38px; border-radius:12px; }
-      .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
-    }
-  </style>
+.meta-line{display:flex;gap:8px}
+.meta-pill{
+border:1px solid rgba(0,0,0,.12);
+border-radius:999px;
+padding:6px 10px;
+font-size:12px;
+font-weight:900;
+}
+</style>
 </head>
+
 <body>
-
-<header class="topbar">
-  <div class="container">
-    <div class="topbar-row">
-      <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
-      </div>
-
-      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <img src="../assets/img/challenge-gen.png"
-             alt="Suzini Beach Tennis Double Mixte Challenge"
-             style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
-      </div>
-
-      <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
-      </div>
-    </div>
-
-    <nav class="nav">
-      <a href="../index.html" aria-label="Accueil">🏠</a>
-      <a href="reglement.html">📘 Règlement</a>
-      <a href="classement.html" aria-current="page">🏆 Classement</a>
-      <a href="boutique.html">🛍️ Boutique</a>
-      <a href="infos.html">📰 Infos</a>
-      <a href="contact.html" aria-label="Contact">📩 📞</a>
-    </nav>
-  </div>
-</header>
 
 <main class="container">
 
-  <section class="card">
-    <h2 style="margin:0 0 8px;">Choisir un classement</h2>
+<section class="card">
+<h2>Choisir un classement</h2>
 
-    <div class="field">
-      <label for="rankScope">Affichage</label>
-      <select id="rankScope">
-        <option value="general" selected>Classement général</option>
-        <option value="etape1">Classement — Étape 1 (BT250)</option>
-        <option value="etape2" disabled>Classement — Étape 2 (BT100) (à venir)</option>
-        <option value="etape3" disabled>Classement — Étape 3 (BT100) (à venir)</option>
-        <option value="etape4" disabled>Classement — Étape 4 (BT100) (à venir)</option>
-        <option value="etape5" disabled>Classement — Étape 5 (BT250) (à venir)</option>
-      </select>
-    </div>
+<select id="rankScope">
+<option value="general">Classement général</option>
+<option value="etape1">Classement — Étape 1 (BT250)</option>
+<option value="etape2" disabled>Étape 2</option>
+<option value="etape3" disabled>Étape 3</option>
+<option value="etape4" disabled>Étape 4</option>
+<option value="etape5" disabled>Étape 5</option>
+</select>
 
-    <p class="muted" id="rankHint" style="margin:10px 0 0;">Chargement…</p>
-  </section>
+<p id="rankHint" class="muted">Chargement…</p>
+</section>
 
-  <section class="card">
-    <h2 id="rankTitle" style="margin:0 0 6px;">Classement général</h2>
-    <p class="muted" id="rankSub" style="margin:0;">—</p>
-    <div id="rankBox" style="margin-top:12px;"></div>
-  </section>
+<section class="card">
+<h2 id="rankTitle">Classement</h2>
+<p id="rankSub" class="muted"></p>
+<div id="rankBox"></div>
+</section>
 
 </main>
 
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ============================================================
-  // CONFIG POINTS FFT (capture)
-  // ============================================================
-  const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
-  const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
+import { db } from "../assets/js/firebase.js";
+import { doc,onSnapshot }
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
+/* ===========================
+POINTS FFT
+=========================== */
 
-  function stepType(stepId){
-    // Étape 1 & 5 = BT250 ; Étapes 2/3/4 = BT100
-    return (stepId === "etape1" || stepId === "etape5") ? "BT250" : "BT100";
-  }
+const POINTS_BT100={1:100,2:75,3:65,4:55,5:47,6:45,7:40,8:35};
+const POINTS_BT250={1:250,2:175,3:140,4:105,5:88,6:76,7:65,8:52};
 
-  function pointsTable(stepId){
-    return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
-  }
+const STEP_IDS=["etape1","etape2","etape3","etape4","etape5"];
 
-  // ============================================================
-  // DOM
-  // ============================================================
-  const sel   = document.getElementById("rankScope");
-  const title = document.getElementById("rankTitle");
-  const sub   = document.getElementById("rankSub");
-  const hint  = document.getElementById("rankHint");
-  const box   = document.getElementById("rankBox");
+const classements=new Map();
 
-  // ============================================================
-  // STATE
-  // ============================================================
-  // Map: "general" | "etape1..5" => doc data (ou null si pas publié)
-  const classements = new Map();
-  classements.set("general", null);
-  for(const s of STEP_IDS) classements.set(s, null);
+/* ===========================
+UTILS
+=========================== */
 
-  let hasAnyListenerOk = false;
+const esc=s=>(s??"").toString()
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;");
 
-  // ============================================================
-  // UTILS
-  // ============================================================
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+function stepType(id){
+return(id==="etape1"||id==="etape5")
+?"BT250":"BT100";
+}
 
-  function stepLabel(stepId){
-    const n = String(stepId || "").replace("etape","");
-    if(!n || n === stepId) return stepId;
-    return `Étape ${n}`;
-  }
+function ptsTable(id){
+return stepType(id)==="BT250"
+?POINTS_BT250
+:POINTS_BT100;
+}
 
-  function nameInitial(lastName){
-    const s = (lastName || "").toString().trim();
-    if(!s) return "";
-    return s[0].toUpperCase() + ".";
-  }
+function playerDisplay(fn,ln){
+if(!fn&&!ln)return"—";
+return ln?`${fn} ${ln[0]}.`:fn;
+}
 
-  // ✅ Prénom + initiale nom (public)
-  function playerDisplay(firstName, lastName){
-    const fn = (firstName || "").toString().trim();
-    const ini = nameInitial(lastName);
-    if(!fn && !ini) return "—";
-    if(!ini) return fn || "—";
-    return `${fn} ${ini}`.trim();
-  }
+/* ===========================
+🔥 NORMALISATION ADMIN
+(players[])
+=========================== */
 
-  function teamNameOf(team){
-    return (team?.teamName || team?.name || "Équipe").toString().trim() || "Équipe";
-  }
+function normalizeStepTeams(stepId,docData){
 
-  function teamPlayersLine(team){
-    const p1 = playerDisplay(team?.p1FirstName, team?.p1LastName);
-    const p2 = playerDisplay(team?.p2FirstName, team?.p2LastName);
-    return `${p1}/${p2}`;
-  }
+if(!docData?.players)return[];
 
-  function makeEmpty(msg){
-    return `<p class="muted" style="margin:0;">${esc(msg)}</p>`;
-  }
+const table=ptsTable(stepId);
+const map=new Map();
 
-  // ============================================================
-  // NORMALIZE STEP DOC -> teams ordered by pos
-  // ============================================================
-  function normalizeStepTeams(stepId, stepDoc){
-    const src = Array.isArray(stepDoc?.positions) ? stepDoc.positions
-              : (Array.isArray(stepDoc?.teams) ? stepDoc.teams
-              : (Array.isArray(stepDoc?.ranking) ? stepDoc.ranking : []));
+/* group players -> team */
+for(const p of docData.players){
 
-    const ptsTable = pointsTable(stepId);
+const pos=Number(p.pos);
+if(!pos)continue;
 
-    const rows = src
-      .map(r=>{
-        const pos = Number(r?.pos);
-        if(!Number.isFinite(pos)) return null;
+const team=p.teamName||"Équipe";
+const key=pos+"_"+team;
 
-        const team = {
-          teamName: r?.teamName || r?.team?.teamName || "Équipe",
-          p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
-          p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
-          p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
-          p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || ""
-        };
+if(!map.has(key))
+map.set(key,{pos,team,players:[]});
 
-        const storedPts = (r?.points ?? r?.pts ?? null);
-        const pts = Number.isFinite(Number(storedPts)) ? Number(storedPts) : (ptsTable[pos] || 0);
+map.get(key).players.push(p);
+}
 
-        return { pos, team, points: pts };
-      })
-      .filter(Boolean)
-      .sort((a,b)=>a.pos-b.pos);
+return [...map.values()]
+.map(g=>{
 
-    return rows;
-  }
+const a=g.players[0]||{};
+const b=g.players[1]||{};
 
-  // ============================================================
-  // BUILD GENERAL (players) from available steps
-  // ============================================================
-  function buildGeneralFromSteps(){
-    const map = new Map();
+return{
+pos:g.pos,
+points:table[g.pos]||0,
+team:{
+teamName:g.team,
+p1FirstName:a.firstName,
+p1LastName:a.lastName,
+p2FirstName:b.firstName,
+p2LastName:b.lastName
+}
+};
+})
+.sort((a,b)=>a.pos-b.pos);
+}
 
-    for(const stepId of STEP_IDS){
-      const d = classements.get(stepId) || null;
-      if(!d) continue;
+/* ===========================
+GENERAL
+=========================== */
 
-      const teams = normalizeStepTeams(stepId, d);
-      if(!teams.length) continue;
+function buildGeneral(){
 
-      const playedThisStep = new Set();
+const players=new Map();
 
-      for(const row of teams){
-        const p1Key = playerDisplay(row.team?.p1FirstName, row.team?.p1LastName);
-        const p2Key = playerDisplay(row.team?.p2FirstName, row.team?.p2LastName);
+for(const step of STEP_IDS){
 
-        for(const key of [p1Key, p2Key]){
-          if(!key || key === "—") continue;
+const doc=classements.get(step);
+if(!doc)continue;
 
-          if(!map.has(key)){
-            map.set(key, { name:key, points:0, steps:new Set() });
-          }
-          const rec = map.get(key);
-          rec.points += Number(row.points || 0);
+for(const row of normalizeStepTeams(step,doc)){
 
-          // 1 fois par étape
-          const mk = `${key}|${stepId}`;
-          if(!playedThisStep.has(mk)){
-            playedThisStep.add(mk);
-            rec.steps.add(stepId);
-          }
-        }
-      }
-    }
+const pts=row.points;
 
-    const out = [...map.values()].map(x=>({
-      name: x.name,
-      points: x.points,
-      stepsPlayed: x.steps.size
-    }));
+[
+playerDisplay(row.team.p1FirstName,row.team.p1LastName),
+playerDisplay(row.team.p2FirstName,row.team.p2LastName)
+]
+.forEach(name=>{
 
-    out.sort((a,b)=>{
-      if(b.points !== a.points) return b.points - a.points;
-      if(b.stepsPlayed !== a.stepsPlayed) return b.stepsPlayed - a.stepsPlayed;
-      return a.name.localeCompare(b.name);
-    });
+if(name==="—")return;
 
-    return out;
-  }
+if(!players.has(name))
+players.set(name,{name,pts:0,steps:new Set()});
 
-  // ============================================================
-  // RENDER
-  // ============================================================
-  function refreshStepOptions(){
-    // Étape 1 : toujours activée (même si pas encore publiée)
-    // Étapes 2..5 : activées seulement si doc existe
-    for(const stepId of STEP_IDS){
-      const opt = [...sel.options].find(o=>o.value === stepId);
-      if(!opt) continue;
+players.get(name).pts+=pts;
+players.get(name).steps.add(step);
 
-      const d = classements.get(stepId) || null;
-      const available = !!d;
+});
+}
+}
 
-      const base = `Classement — ${stepLabel(stepId)} (${stepType(stepId)})`;
-      if(stepId === "etape1"){
-        opt.disabled = false;
-        opt.textContent = available ? base : `${base} (à venir)`;
-      } else {
-        opt.disabled = !available;
-        opt.textContent = available ? base : `${base} (à venir)`;
-      }
-    }
-  }
+return [...players.values()]
+.map(p=>({
+name:p.name,
+points:p.pts,
+steps:p.steps.size
+}))
+.sort((a,b)=>b.points-a.points);
+}
 
-  function renderGeneral(){
-    title.textContent = "Classement général";
-    hint.textContent = "Affichage du classement général (cumul des points FFT sur les étapes disponibles).";
+/* ===========================
+RENDER
+=========================== */
 
-    const rows = buildGeneralFromSteps();
-    sub.textContent = rows.length ? `Joueurs classés : ${rows.length}` : "Aucun classement disponible pour le moment.";
+const sel=document.getElementById("rankScope");
+const title=document.getElementById("rankTitle");
+const sub=document.getElementById("rankSub");
+const hint=document.getElementById("rankHint");
+const box=document.getElementById("rankBox");
 
-    if(!rows.length){
-      box.innerHTML = makeEmpty("Bientôt disponible… (aucune étape publiée).");
-      return;
-    }
+function renderGeneral(){
 
-    const cards = rows.map((r, i)=>`
-      <div class="rank-card one-line">
-        <div class="rk">${esc(String(i+1))}</div>
-        <div class="rmain">
-          <div class="rtitle">${esc(r.name)}</div>
-        </div>
-        <div class="meta-line">
-          <span class="meta-pill">⭐ ${esc(String(r.points))} pts</span>
-          <span class="meta-pill">🎾 ${esc(String(r.stepsPlayed))} étape(s)</span>
-        </div>
-      </div>
-    `);
+title.textContent="Classement général";
 
-    box.innerHTML = `<div class="list">${cards.join("")}</div>`;
-  }
+const rows=buildGeneral();
 
-  function renderStep(stepId){
-    const d = classements.get(stepId) || null;
+if(!rows.length){
+box.innerHTML="Aucun classement.";
+return;
+}
 
-    title.textContent = `Classement — ${stepLabel(stepId)} (${stepType(stepId)} mixte)`;
+box.innerHTML=
+rows.map((r,i)=>`
+<div class="rank-card">
+<div class="rk">${i+1}</div>
+<div>${esc(r.name)}</div>
+<div class="meta-line">
+<span class="meta-pill">${r.points} pts</span>
+<span class="meta-pill">${r.steps} étape(s)</span>
+</div>
+</div>`).join("");
+}
 
-    if(!d){
-      hint.textContent = "⏳ Classement pas encore publié.";
-      sub.textContent = "—";
-      box.innerHTML = makeEmpty("Dès que le classement est validé en admin, il apparaîtra ici.");
-      return;
-    }
+function renderStep(step){
 
-    hint.textContent = d?.validatedAt ? "✅ Classement validé." : "📌 Classement publié.";
-    const rows = normalizeStepTeams(stepId, d);
+const d=classements.get(step);
 
-    sub.textContent = rows.length ? `Équipes classées : ${rows.length}` : "Aucun classement disponible.";
+title.textContent=`Classement ${step}`;
 
-    if(!rows.length){
-      box.innerHTML = makeEmpty("⏳ En attente des résultats / validation.");
-      return;
-    }
+if(!d){
+box.innerHTML="Classement non publié.";
+return;
+}
 
-    const cards = rows.map((r)=>`
-      <div class="rank-card">
-        <div class="rk">${esc(String(r.pos))}</div>
-        <div class="rmain">
-          <div class="rtitle">${esc(teamNameOf(r.team))} — <span style="opacity:.85;">${esc(String(r.points))} pts</span></div>
-          <div class="rsub muted">${esc(teamPlayersLine(r.team))}</div>
-        </div>
-        <div class="tag">#${esc(String(r.pos))}</div>
-      </div>
-    `);
+const rows=normalizeStepTeams(step,d);
 
-    box.innerHTML = `<div class="list">${cards.join("")}</div>`;
-  }
+box.innerHTML=
+rows.map(r=>`
+<div class="rank-card">
+<div class="rk">${r.pos}</div>
+<div class="rmain">
+<div class="rtitle">
+${esc(r.team.teamName)} — ${r.points} pts
+</div>
+<div class="rsub">
+${playerDisplay(r.team.p1FirstName,r.team.p1LastName)}
+/
+${playerDisplay(r.team.p2FirstName,r.team.p2LastName)}
+</div>
+</div>
+</div>`).join("");
+}
 
-  function render(){
-    refreshStepOptions();
-    const v = (sel.value || "general").toLowerCase();
-    if(v === "general") renderGeneral();
-    else renderStep(v);
-  }
+function render(){
+sel.value==="general"
+?renderGeneral()
+:renderStep(sel.value);
+}
 
-  // ============================================================
-  // LISTENERS (robustes : 1 doc = 1 listener)
-  // ============================================================
-  function listenDoc(id){
-    return onSnapshot(doc(db, "classements", id), (snap)=>{
-      hasAnyListenerOk = true;
-      classements.set(id, snap.exists() ? (snap.data() || {}) : null);
-      render();
-      hint.textContent = "🟢 En direct";
-    }, (err)=>{
-      console.error("classements/" + id, err);
-      // On n'affiche l'erreur que si aucun listener n'a jamais réussi
-      if(!hasAnyListenerOk){
-        hint.textContent = "🔴 Erreur de connexion (classements).";
-        box.innerHTML = makeEmpty("Impossible de charger le classement.");
-      }
-    });
-  }
+/* ===========================
+LISTEN FIRESTORE
+=========================== */
 
-  hint.textContent = "Chargement des classements…";
+function listen(id){
 
-  const unsubs = [];
-  unsubs.push(listenDoc("general"));
-  for(const s of STEP_IDS) unsubs.push(listenDoc(s));
+onSnapshot(doc(db,"classements",id),
+snap=>{
+classements.set(id,
+snap.exists()?snap.data():null);
+render();
+hint.textContent="🟢 En direct";
+});
+}
 
-  sel.addEventListener("change", render);
-  render();
+listen("general");
+STEP_IDS.forEach(listen);
+
+sel.onchange=render;
+
 </script>
 
 </body>
