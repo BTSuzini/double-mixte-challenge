@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tirage — Étape 2</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape2-tirage" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row topbar-row-step">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <div class="step-title-wrap" aria-label="Étape 2">
+        <img class="step-title-img" src="../assets/img/etape2.png" alt="Étape 2">
+      </div>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html">🍽️ Repas</a>
+      <a href="programmation.html">🗓️ Programmation</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html" aria-current="page">🎲 Tirage</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- 1) État -->
+  <section class="card">
+    <h2 style="margin:0 0 10px;">🎲 Tirage au sort</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnReplay" style="font-weight:900; color:#111; display:none;">▶️ Replay roulette</button>
+      <button class="btn" id="btnStopReplay" style="font-weight:900; color:#111; display:none;">⏹️ Stop replay</button>
+    </div>
+
+    <p class="muted" id="modeBadge" style="margin-top:10px;"></p>
+    <p class="muted" id="validatedAt" style="margin-top:6px;"></p>
+  </section>
+
+  <!-- 2) Roulette -->
+  <section class="card" id="panelRoulette" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎰 Roulette</h2>
+    <div class="roulette-wheel" id="wheel">—</div>
+    <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
+  </section>
+
+  <!-- 3) Matchs -->
+  <section class="card" id="panelMatches" style="display:none;">
+    <h2 style="margin:0 0 8px;">📋 Quarts de finale</h2>
+    <div id="matchesList" class="matches-list"></div>
+  </section>
+
+  <!-- 4) Urne -->
+  <section class="card" id="panelUrne" style="display:none;">
+    <h2 style="margin:0 0 10px;">📥 Urne</h2>
+    <div id="urneList" style="display:grid; gap:8px;"></div>
+  </section>
+
+  <!-- 5) Seeds -->
+  <section class="card" id="panelSeeds" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏷️ Têtes de série</h2>
+
+    <div class="grid">
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #1</div>
+        <div class="muted" id="seed1">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #2</div>
+        <div class="muted" id="seed2">—</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<style>
+  /* ✅ CSS bandeau étape (même ref que equipes/inscriptions) */
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+  }
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+  }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  .nav-step{
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
+  }
+  .nav-step a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
+    .step-title-img{ max-height: 74px; }
+  }
+
+  /* ✅ Réduire verticalement les encarts (objectif: roulette + 4 matchs visibles) */
+  #panelRoulette.card, #panelMatches.card{
+    padding:12px;
+  }
+  #panelUrne.card, #panelSeeds.card{
+    padding:12px;
+  }
+  #panelMatches h2{ margin-bottom:8px !important; }
+  #panelRoulette h2{ margin-bottom:10px !important; }
+
+  /* Roulette plus compacte */
+  .roulette-wheel{
+    height:58px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    font-size:17px;
+    letter-spacing:.2px;
+    background:linear-gradient(180deg,#fff,#fafafa);
+    padding:0 10px;
+    text-align:center;
+  }
+  #wheelSub{ margin-top:6px !important; }
+
+  /* ✅ Matchs compacts, 1 ligne */
+  .matches-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .match-line{
+    border:1px solid #eee;
+    border-radius:12px;
+    background:#fff;
+    padding:8px 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.03);
+  }
+  .match-row{
+    display:grid;
+    grid-template-columns: 1fr 34px 1fr;
+    gap:8px;
+    align-items:center;
+  }
+  .m-team{
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:14px;
+    line-height:1.15;
+  }
+  .m-vs{
+    text-align:center;
+    font-weight:1000;
+    letter-spacing:1px;
+    opacity:.55;
+    font-size:12px;
+  }
+  .m-team.right{ text-align:right; }
+
+  @media (max-width: 360px){
+    .match-row{ grid-template-columns: 1fr 30px 1fr; gap:7px; }
+    .m-team{ font-size:13px; }
+    .roulette-wheel{ height:54px; font-size:16px; }
+  }
+
+  /* ✅ Urne: pas de scroll horizontal (wrap + police adaptée) */
+  .pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    border:1px solid #eee;
+    background:#fafafa;
+    white-space:nowrap;
+  }
+  .urne-item{
+    margin:0;
+  }
+  .urne-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .urne-name{
+    font-weight:900;
+    font-size:13px;
+    line-height:1.25;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:normal;
+    word-break:break-word;
+  }
+</style>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const scope = "etape2";
+  const DRAW_REF = doc(db, "tirages", scope);
+
+  const statusText = document.getElementById("statusText");
+  const modeBadge = document.getElementById("modeBadge");
+  const validatedAtEl = document.getElementById("validatedAt");
+
+  const panelRoulette = document.getElementById("panelRoulette");
+  const panelMatches = document.getElementById("panelMatches");
+  const panelUrne = document.getElementById("panelUrne");
+  const panelSeeds = document.getElementById("panelSeeds");
+
+  const seed1El = document.getElementById("seed1");
+  const seed2El = document.getElementById("seed2");
+
+  const wheel = document.getElementById("wheel");
+  const wheelSub = document.getElementById("wheelSub");
+
+  const urneList = document.getElementById("urneList");
+  const matchesList = document.getElementById("matchesList");
+
+  const btnReplay = document.getElementById("btnReplay");
+  const btnStopReplay = document.getElementById("btnStopReplay");
+
+  let currentDraw = null;
+
+  // LIVE reveal
+  let shownCount = 0;
+  let revealedShownIds = [];
+  let liveAnimating = false;
+
+  // Replay
+  let replayMode = false;
+  let replayAbort = false;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "";
+      return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
+    }catch{ return ""; }
+  }
+
+  function drawHasUrn(draw){
+    return !!(draw && draw.seed1 && draw.seed2 && Array.isArray(draw.pool) && draw.pool.length === 6);
+  }
+
+  function teamNameOnly(t){
+    return (t && t.teamName) ? t.teamName : "—";
+  }
+
+  function rouletteLabel(t){
+    if(!t) return "—";
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
+  }
+
+  async function rouletteSpin(finalText, durationMs = 1300){
+    const start = Date.now();
+    wheelSub.textContent = replayMode ? "Replay en cours…" : "La roulette tourne…";
+    const fake = ["🌪️","🎾","🔥","🍀","⚡️","🎲","🏖️"];
+
+    return new Promise((resolve) => {
+      const tick = () => {
+        if(replayAbort){ resolve("aborted"); return; }
+        const t = Date.now() - start;
+        if(t >= durationMs){
+          wheel.textContent = finalText;
+          wheelSub.textContent = "✅ Révélé";
+          resolve("done");
+          return;
+        }
+        wheel.textContent =
+          fake[Math.floor(Math.random()*fake.length)] + " " +
+          fake[Math.floor(Math.random()*fake.length)];
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+  }
+
+  function computeLists(draw){
+    const order = draw?.order || [];
+    const pool = draw?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+
+    const revealed = Number(draw?.revealed || 0);
+
+    const revealedIds = order.slice(0, revealed);
+    const remainingIds = order.length
+      ? order.slice(revealed)
+      : pool.map(x => x.id);
+
+    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
+    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
+
+    return { poolById, revealedIds, revealedTeams, remainingTeams };
+  }
+
+  function renderSeeds(draw){
+    panelSeeds.style.display = "block";
+    seed1El.textContent = draw?.seed1 ? rouletteLabel(draw.seed1) : "—";
+    seed2El.textContent = draw?.seed2 ? rouletteLabel(draw.seed2) : "—";
+  }
+
+  function renderUrne(remainingTeams, draw){
+    panelUrne.style.display = "block";
+
+    if(!drawHasUrn(draw)){
+      urneList.innerHTML = `<div class="muted">⏳ Urne non prête.</div>`;
+      return;
+    }
+
+    const revealed = Number(draw?.revealed || 0);
+    if(revealed >= 6){
+      urneList.innerHTML = `<div class="muted">✅ Urne vide.</div>`;
+      return;
+    }
+
+    if(!remainingTeams.length){
+      urneList.innerHTML = `<div class="muted">—</div>`;
+      return;
+    }
+
+    urneList.innerHTML = remainingTeams.map(t => `
+      <div class="card urne-item">
+        <div class="urne-row">
+          <div class="urne-name">${esc(rouletteLabel(t))}</div>
+          <span class="pill">urne</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function matchLineHtml(n, A, B){
+    return `
+      <div class="match-line">
+        <div class="match-row">
+          <div class="m-team">${esc(teamNameOnly(A))}</div>
+          <div class="m-vs">VS</div>
+          <div class="m-team right">${esc(teamNameOnly(B))}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMatchesFromShown(draw){
+    panelMatches.style.display = "block";
+
+    const seed1 = draw?.seed1 || null;
+    const seed2 = draw?.seed2 || null;
+
+    const pool = draw?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+
+    const shownTeams = revealedShownIds.map(id => poolById.get(id)).filter(Boolean);
+
+    const p1 = shownTeams[0] || null;
+    const p2 = shownTeams[1] || null;
+    const p3 = shownTeams[2] || null;
+    const p4 = shownTeams[3] || null;
+    const p5 = shownTeams[4] || null;
+    const p6 = shownTeams[5] || null;
+
+    const matches = [
+      { n: 1, A: seed1, B: p1 },
+      { n: 2, A: p2,    B: p3 },
+      { n: 3, A: p4,    B: p5 },
+      { n: 4, A: p6,    B: seed2 }
+    ];
+
+    matchesList.innerHTML = matches.map(m => matchLineHtml(m.n, m.A, m.B)).join("");
+  }
+
+  function updateStatus(draw){
+    const st = draw?.status || "idle";
+    const revealed = Number(draw?.revealed || 0);
+
+    if(replayMode){
+      modeBadge.textContent = "🎥 Mode REPLAY";
+    } else if(st === "running"){
+      modeBadge.textContent = "🟢 En direct";
+    } else {
+      modeBadge.textContent = "";
+    }
+
+    if(!draw){
+      statusText.textContent = "⏳ Tirage non prêt.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "idle"){
+      statusText.textContent = drawHasUrn(draw)
+        ? "📥 Urne chargée. Tirage pas encore lancé."
+        : "⏳ Urne non prête (en attente du chargement côté admin).";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "running"){
+      statusText.textContent = `🎰 Tirage en cours… (${revealed}/6 révélées)`;
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "pending_validation"){
+      statusText.textContent = "🏁 Tirage fini — en attente de validation.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "validated"){
+      statusText.textContent = "✅ Tirage validé.";
+      const d = fmtDate(draw.validatedAt);
+      validatedAtEl.textContent = d ? ("🗓️ Validé le " + d) : "";
+      return;
+    }
+
+    statusText.textContent = "—";
+  }
+
+  async function applyLiveRevealAnimation(draw){
+    if(replayMode) return;
+    if(liveAnimating) return;
+
+    const st = draw?.status || "idle";
+
+    panelRoulette.style.display = "block";
+    panelMatches.style.display = "block";
+    panelUrne.style.display = "block";
+    panelSeeds.style.display = "block";
+
+    if(st !== "running" && st !== "pending_validation" && st !== "validated"){
+      wheel.textContent = "—";
+      wheelSub.textContent = "—";
+
+      renderSeeds(draw);
+      renderMatchesFromShown(draw);
+
+      const { remainingTeams } = computeLists(draw);
+      renderUrne(remainingTeams, draw);
+      return;
+    }
+
+    const { revealedIds, remainingTeams } = computeLists(draw);
+
+    renderSeeds(draw);
+    renderUrne(remainingTeams, draw);
+    renderMatchesFromShown(draw);
+
+    if(revealedIds.length <= shownCount){
+      return;
+    }
+
+    liveAnimating = true;
+
+    while(shownCount < revealedIds.length){
+      const id = revealedIds[shownCount];
+
+      const poolById = new Map((draw?.pool || []).map(x => [x.id, x]));
+      const t = poolById.get(id);
+
+      await rouletteSpin(rouletteLabel(t), 1300);
+
+      revealedShownIds.push(id);
+      shownCount++;
+
+      renderMatchesFromShown(currentDraw);
+      const { remainingTeams: rem2 } = computeLists(currentDraw);
+      renderUrne(rem2, currentDraw);
+    }
+
+    liveAnimating = false;
+  }
+
+  async function doReplay(draw){
+    if(!draw || draw.status !== "validated"){
+      alert("Replay disponible uniquement quand le tirage est validé.");
+      return;
+    }
+
+    replayMode = true;
+    replayAbort = false;
+
+    btnReplay.style.display = "none";
+    btnStopReplay.style.display = "inline-flex";
+
+    updateStatus(draw);
+
+    shownCount = 0;
+    revealedShownIds = [];
+    wheel.textContent = "—";
+    wheelSub.textContent = "Replay en cours…";
+
+    panelRoulette.style.display = "block";
+    panelMatches.style.display = "block";
+    panelSeeds.style.display = "block";
+    panelUrne.style.display = "none";
+
+    renderSeeds(draw);
+    renderMatchesFromShown(draw);
+
+    const order = draw.order || [];
+    const revealed = Number(draw.revealed || 0);
+    const revealedIds = order.slice(0, revealed);
+    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+
+    for(let i=0;i<revealedIds.length;i++){
+      if(replayAbort) break;
+
+      const id = revealedIds[i];
+      const t = poolById.get(id);
+
+      await rouletteSpin(rouletteLabel(t), 1300);
+
+      revealedShownIds.push(id);
+      shownCount = revealedShownIds.length;
+      renderMatchesFromShown(draw);
+    }
+
+    btnStopReplay.style.display = "none";
+    btnReplay.style.display = "inline-flex";
+
+    replayMode = false;
+    replayAbort = false;
+
+    panelUrne.style.display = "block";
+    wheelSub.textContent = "✅ Replay terminé";
+
+    updateStatus(currentDraw);
+
+    const { remainingTeams } = computeLists(currentDraw);
+    renderUrne(remainingTeams, currentDraw);
+    renderSeeds(currentDraw);
+    renderMatchesFromShown(currentDraw);
+  }
+
+  btnReplay.onclick = async (e)=>{
+    e.preventDefault();
+    await doReplay(currentDraw);
+  };
+
+  btnStopReplay.onclick = (e)=>{
+    e.preventDefault();
+    replayAbort = true;
+  };
+
+  onSnapshot(DRAW_REF, async (snap)=>{
+    currentDraw = snap.exists() ? (snap.data() || {}) : null;
+
+    if(!currentDraw){
+      panelRoulette.style.display = "none";
+      panelMatches.style.display = "none";
+      panelUrne.style.display = "none";
+      panelSeeds.style.display = "none";
+
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
+
+      statusText.textContent = "⏳ Tirage non prêt.";
+      modeBadge.textContent = "";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    panelRoulette.style.display = "block";
+    panelMatches.style.display = "block";
+    panelUrne.style.display = "block";
+    panelSeeds.style.display = "block";
+
+    updateStatus(currentDraw);
+
+    if(currentDraw.status === "validated"){
+      if(!replayMode) btnReplay.style.display = "inline-flex";
+    } else {
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
+    }
+
+    renderSeeds(currentDraw);
+    const { remainingTeams } = computeLists(currentDraw);
+    renderUrne(remainingTeams, currentDraw);
+
+    if(!replayMode && currentDraw.status === "idle"){
+      shownCount = 0;
+      revealedShownIds = [];
+      wheel.textContent = "—";
+      wheelSub.textContent = "—";
+      renderMatchesFromShown(currentDraw);
+      return;
+    }
+
+    if(!replayMode && (currentDraw.status === "pending_validation" || currentDraw.status === "validated")){
+      const { revealedIds } = computeLists(currentDraw);
+      revealedShownIds = revealedIds.slice(0);
+      shownCount = revealedShownIds.length;
+      renderMatchesFromShown(currentDraw);
+      return;
+    }
+
+    if(!replayMode){
+      await applyLiveRevealAnimation(currentDraw);
+    }
+  }, (err)=>{
+    console.error(err);
+    statusText.textContent = "🔴 Erreur de connexion au tirage.";
+  });
+</script>
+
+</body>
+</html>
