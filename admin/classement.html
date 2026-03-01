@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Classement</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-classement-admin" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-classement-admin-etape2" />
 </head>
 <body>
 
@@ -15,8 +15,10 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
+      <!-- ✅ bandeau dynamique selon l’étape -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <img src="../assets/img/etape1-rouge.png"
+        <img id="stepBanner"
+             src="../assets/img/etape1-rouge.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
              style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
@@ -157,7 +159,7 @@
 
   const LS_SCOPE_KEY = "admin_scope_last";
 
-  // ---- scope (URL ?scope=etape1) + fallback localStorage
+  // ---- scope (URL ?scope=etape2) + fallback localStorage
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope");
 
@@ -190,6 +192,8 @@
 
   const teamList      = document.getElementById("teamList");
   const playerList    = document.getElementById("playerList");
+
+  const stepBanner    = document.getElementById("stepBanner");
 
   // ---- state
   let currentScope = getInitialScope();
@@ -249,7 +253,7 @@
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
       ["🏆 Classement",     "classement.html"],
-      ["RAZ",     "raz.html"],
+      ["RAZ",              "raz.html"],
     ];
 
     for(const [label, url] of links){
@@ -273,10 +277,27 @@
     if(unsubCls){ unsubCls(); unsubCls = null; }
   }
 
-  // ---- Firestore refs (inchangés)
+  // ---- Firestore refs
   function progRef(scope){ return doc(db, "programmations", scope); }
   function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
   function classementRef(scope){ return doc(db, "classements", scope); }
+
+  function setHeaderBanner(scope){
+    // si tu ajoutes etape2-rouge.png etc : parfait
+    // sinon fallback sur challenge-gen.png
+    const stepImg = `../assets/img/${scope}-rouge.png`;
+    if(!scope || scope === "general"){
+      stepBanner.src = "../assets/img/challenge-gen.png";
+      stepBanner.alt = "Suzini Beach Tennis Double Mixte Challenge";
+      return;
+    }
+    stepBanner.src = stepImg;
+    stepBanner.alt = `Suzini Beach Tennis Double Mixte Challenge — ${scope}`;
+    stepBanner.onerror = ()=>{
+      stepBanner.onerror = null;
+      stepBanner.src = "../assets/img/challenge-gen.png";
+    };
+  }
 
   function teamParts(t){
     if(!t) return { teamName:"—", p1:"—", p2:"—" };
@@ -345,6 +366,7 @@
   }
 
   function buildFinalRanking(){
+    // même logique pour toutes les étapes (etape1, etape2, etc.)
     const needed = ["M9","M10","M11","M12"];
     const missing = [];
 
@@ -521,12 +543,14 @@
       panelNeedStep.style.display = "block";
       panelRank.style.display = "none";
       stopListeners();
+      setHeaderBanner(scope);
       return;
     }
 
     panelNeedStep.style.display = "none";
     panelRank.style.display = "block";
 
+    setHeaderBanner(scope);
     startProgListener(scope);
     startResultsListener(scope);
     startClassementListener(scope);
