@@ -3,92 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Suzini Beach Tennis — Double Mixte Challenge</title>
 
-  <!-- ✅ RACINE : pas de ../ -->
-  <link rel="stylesheet" href="assets/css/main.css?v=20260301-root-index" />
+  <title>Suzini Beach Tennis Double Mixte Challenge</title>
 
-  <style>
-    .hero{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-      text-align:center;
-    }
-    .hero img{
-      width:min(620px, 100%);
-      max-height:96px;
-      height:auto;
-      object-fit:contain;
-      display:block;
-      filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-    }
-    .steps-grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (min-width: 860px){
-      .steps-grid{ grid-template-columns: 1fr 1fr; }
-    }
-
-    .step-card{
-      border:1px solid rgba(0,0,0,.06);
-      border-radius:18px;
-      background:#fff;
-      padding:14px;
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
-      overflow:hidden;
-    }
-    .step-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .step-title{
-      font-weight:1000;
-      font-size:18px;
-      margin:0;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #eee;
-      background:#fafafa;
-      font-weight:1000;
-      white-space:nowrap;
-      font-size:12px;
-    }
-    .btnrow{ display:flex; gap:10px; flex-wrap:wrap; }
-    .muted.small{ font-size:13px; }
-
-    /* ✅ évite tout scroll horizontal sur iPad */
-    html, body{ max-width:100%; overflow-x:hidden; }
-  </style>
+  <link rel="stylesheet" href="assets/css/main.css?v=20260301-home-challenge" />
 </head>
 
 <body>
 
 <header class="topbar">
   <div class="container">
+
+    <!-- ✅ Bandeau repris de pages/reglement (adapté aux chemins racine) -->
     <div class="topbar-row">
       <div class="brand-logo">
-        <!-- ✅ RACINE -->
         <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <div class="brand-title hero">
-        <!-- ✅ image centrale : si tu préfères un autre visuel, change juste le src -->
-        <img src="assets/img/etape1-rouge.png" alt="Suzini Beach Tennis Double Mixte Challenge">
+      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
+        <img src="assets/img/challenge-gen.png"
+             alt="Suzini Beach Tennis Double Mixte Challenge"
+             style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
 
       <div class="brand-logo">
@@ -96,89 +31,154 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="index.html" aria-current="page">🏠 Accueil</a>
-      <a href="admin/tirage.html?scope=etape1">🔐 Admin</a>
-    </nav>
   </div>
 </header>
 
 <main class="container">
 
+  <!-- ========================= -->
+  <!-- ACCÈS TOURNOI -->
+  <!-- ========================= -->
   <section class="card">
-    <h2 style="margin:0 0 8px;">🏖️ Suzini Beach Tennis — Double Mixte Challenge</h2>
-    <p class="muted" style="margin:0;">
-      Choisis ton étape pour accéder aux pages publiques (inscriptions, équipes, tirage, programmation…).
-    </p>
+    <h2>🎾 Accès tournoi</h2>
 
-    <div class="steps-grid">
-
-      <!-- =======================
-           ÉTAPE 1
-      ======================== -->
-      <div class="step-card">
-        <div class="step-head">
-          <h3 class="step-title">🎾 Étape 1</h3>
-          <span class="pill">Public</span>
-        </div>
-
-        <p class="muted small" style="margin:0 0 12px;">
-          Accès direct aux pages publiques de l’étape 1.
-        </p>
-
-        <div class="btnrow">
-          <a class="btn" href="etape1/inscriptions.html" style="font-weight:900;color:#111;">📝 Inscriptions</a>
-          <a class="btn" href="etape1/equipes.html" style="font-weight:900;color:#111;">👥 Équipes</a>
-          <a class="btn" href="etape1/tirage.html" style="font-weight:900;color:#111;">🎲 Tirage</a>
-          <a class="btn" href="etape1/programmation.html" style="font-weight:900;color:#111;">🗓️ Programmation</a>
-        </div>
-      </div>
-
-      <!-- =======================
-           ÉTAPE 2
-      ======================== -->
-      <div class="step-card">
-        <div class="step-head">
-          <h3 class="step-title">🎾 Étape 2</h3>
-          <span class="pill">Public</span>
-        </div>
-
-        <p class="muted small" style="margin:0 0 12px;">
-          Étape 2 (nouvelle) — liens prêts dès que tu as créé les fichiers dans <b>/etape2/</b>.
-        </p>
-
-        <div class="btnrow">
-          <a class="btn" href="etape2/inscriptions.html" style="font-weight:900;color:#111;">📝 Inscriptions</a>
-          <a class="btn" href="etape2/equipes.html" style="font-weight:900;color:#111;">👥 Équipes</a>
-          <a class="btn" href="etape2/tirage.html" style="font-weight:900;color:#111;">🎲 Tirage</a>
-          <a class="btn" href="etape2/programmation.html" style="font-weight:900;color:#111;">🗓️ Programmation</a>
-        </div>
-      </div>
-
+    <div class="grid">
+      <a class="btn" href="etape1/equipes.html">🎾 Étape 1</a>
+      <a class="btn" href="etape2/equipes.html">🎾 Étape 2</a>
     </div>
   </section>
 
+  <!-- ========================= -->
+  <!-- ACCÈS ORGANISATEURS -->
+  <!-- ========================= -->
   <section class="card">
-    <h2 style="margin:0 0 10px;">🔐 Accès administrateur</h2>
-    <p class="muted" style="margin:0 0 12px;">
-      Accès aux pages admin (gestion équipes, inscriptions, tirage, programmation, résultats, classement).
-    </p>
+    <h2>🔐 Accès organisateurs</h2>
 
-    <div class="btnrow">
-      <a class="btn" href="admin/equipes.html?scope=etape1" style="font-weight:900;color:#111;">👥 Admin Équipes</a>
-      <a class="btn" href="admin/inscriptions.html?scope=etape1" style="font-weight:900;color:#111;">📝 Admin Inscriptions</a>
-      <a class="btn" href="admin/tirage.html?scope=etape1" style="font-weight:900;color:#111;">🎲 Admin Tirage</a>
-      <a class="btn" href="admin/programmation.html?scope=etape1" style="font-weight:900;color:#111;">📅 Admin Programmation</a>
-      <a class="btn" href="admin/resultats.html?scope=etape1" style="font-weight:900;color:#111;">🏁 Admin Résultats</a>
-      <a class="btn" href="admin/classement.html?scope=etape1" style="font-weight:900;color:#111;">🏆 Admin Classement</a>
+    <div class="grid">
+
+      <a class="btn" href="#" id="btnAdmin">
+        🛠️ Mode Admin
+      </a>
+
+      <a class="btn" href="#" id="btnJAT">
+        🎾 Espace JAT
+      </a>
+
+      <a class="btn" href="#" id="btnLogout">
+        🚪 Déconnexion
+      </a>
+
     </div>
 
-    <p class="muted" style="margin-top:12px;">
-      💡 Pour passer sur l’étape 2 : remplace juste <b>scope=etape1</b> par <b>scope=etape2</b>.
+    <p class="muted" id="authHint" style="margin-top:10px;">
+      Accès sécurisé organisateurs.
     </p>
   </section>
 
 </main>
+
+<!-- ================================================= -->
+<!-- FIREBASE -->
+<!-- ================================================= -->
+<script type="module">
+
+import { auth } from "./assets/js/firebase.js";
+import { loginAndRedirect, logout, getRoleByEmail }
+  from "./assets/js/session.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+
+const btnAdmin = document.getElementById("btnAdmin");
+const btnJAT   = document.getElementById("btnJAT");
+const btnLogout = document.getElementById("btnLogout");
+const hint = document.getElementById("authHint");
+
+
+/* =====================================================
+   ADMIN
+===================================================== */
+btnAdmin.onclick = async (e)=>{
+  e.preventDefault();
+
+  if(!auth.currentUser){
+    await loginAndRedirect();
+  }
+
+  const u = auth.currentUser;
+  if(!u){
+    alert("Connexion annulée.");
+    return;
+  }
+
+  const role = await getRoleByEmail(u.email);
+
+  if(role !== "admin"){
+    alert("Accès réservé aux administrateurs.");
+    return;
+  }
+
+  window.location.href = "admin/index.html?scope=general";
+};
+
+
+/* =====================================================
+   JAT
+===================================================== */
+btnJAT.onclick = async (e)=>{
+  e.preventDefault();
+
+  if(!auth.currentUser){
+    await loginAndRedirect();
+  }
+
+  const u = auth.currentUser;
+  if(!u){
+    alert("Connexion annulée.");
+    return;
+  }
+
+  const role = await getRoleByEmail(u.email);
+
+  if(role !== "admin" && role !== "jat"){
+    alert("Accès réservé JAT.");
+    return;
+  }
+
+  window.location.href = "jat/index.html";
+};
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+btnLogout.onclick = async (e)=>{
+  e.preventDefault();
+  await logout();
+};
+
+
+/* =====================================================
+   STATUS USER
+===================================================== */
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    hint.textContent = "Non connecté.";
+    return;
+  }
+
+  try{
+    const role = await getRoleByEmail(user.email);
+    hint.textContent =
+      `Connecté : ${user.email} — rôle : ${role || "aucun"}`;
+  }catch{
+    hint.textContent = "Utilisateur connecté.";
+  }
+});
+
+</script>
 
 </body>
 </html>
