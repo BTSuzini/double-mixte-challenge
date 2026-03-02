@@ -3,144 +3,517 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Suzini BT — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="assets/css/main.css?v=20260224-2" />
+  <title>Admin — Général</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-admin-general" />
+
+  <style>
+    /* ✅ Onglet actif noir/blanc (tabs Zone) */
+    .btn.is-active{
+      background:#111 !important;
+      border-color:#111 !important;
+      color:#fff !important;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 720px){
+      .grid-2{ grid-template-columns: 1fr; }
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #eee;
+      background:#fafafa;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      display:inline-block;
+      background:#bbb;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+    }
+    .dot.red{ background:#e74c3c; }
+    .dot.orange{ background:#f39c12; }
+    .dot.green{ background:#2ecc71; }
+
+    .muted2{ opacity:.8; }
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .hint-box{
+      border:1px solid #eee;
+      background:#fafafa;
+      border-radius:14px;
+      padding:12px;
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="topbar">
   <div class="container">
-
-    <!-- ✅ BANDEAU STANDARD (identique règlement) -->
     <div class="topbar-row">
-
       <div class="brand-logo">
-        <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <div class="brand-title"
-           style="display:flex;align-items:center;justify-content:center;">
-        <img
-          src="assets/img/challenge-gen.png"
-          alt="Suzini Beach Tennis Double Mixte Challenge"
-          style="
-            width:min(560px,100%);
-            max-height:90px;
-            height:auto;
-            object-fit:contain;
-            display:block;
-            filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));
-          ">
+      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
+        <img src="../assets/img/etape1-rouge.png"
+             alt="Suzini Beach Tennis Double Mixte Challenge"
+             style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
       </div>
 
       <div class="brand-logo">
-        <img src="assets/img/logo-challenge.png" alt="Logo Challenge">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
-
     </div>
 
-    <!-- NAV identique -->
     <nav class="nav">
-      <a href="index.html" aria-current="page">🏠</a>
-      <a href="pages/reglement.html">📘 Règlement</a>
-      <a href="pages/classement.html">🏆 Classement</a>
-      <a href="pages/boutique.html">🛍️ Boutique</a>
-      <a href="pages/infos.html">📰 Infos</a>
-      <a href="pages/contact.html">📩 📞</a>
+      <a href="../index.html">🏠 Accueil public</a>
+      <a href="#" id="btnLogout">🚪 Déconnexion</a>
     </nav>
-
   </div>
 </header>
+
 <main class="container">
 
-  <section class="card">
-    <h2>🗓️ Les étapes</h2>
-    <div class="grid">
-      <a class="btn" href="etape1/equipes.html">🎾 Étape 1 — 27/02/2026 — BT250</a>
+  <section class="card" id="accessDenied" style="display:none;">
+    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
+    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
+  </section>
 
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
-        ⏳ Étape 2 — 12/03/2026 — à venir
-      </a>
+  <!-- ✅ Zone -->
+  <section class="card" id="adminZone" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
-        ⏳ Étape 3 — 26/03/2026 — à venir
-      </a>
-
-      <a class="btn disabled" href="#" data-disabled="true" aria-disabled="true">
-        ⏳ Étape 4 — 09/04/2026 — à venir
-      </a>
-
-      <a class="btn" href="etape5/equipes.html">
-        🧪 Étape 5 — 17/04/2026 — TEST
-      </a>
+    <div class="field">
+      <label for="scope">Choisir</label>
+      <select id="scope">
+        <option value="general">🌐 Général</option>
+        <option value="etape1">🎾 Étape 1</option>
+        <option value="etape2">🎾 Étape 2</option>
+        <option value="etape3">🎾 Étape 3</option>
+        <option value="etape4">🎾 Étape 4</option>
+        <option value="etape5">🧪 Étape 5 (test)</option>
+      </select>
     </div>
 
-    <p class="muted">
-      📌 Le classement général est calculé par joueur (points + départages).
+    <div class="grid" style="margin-top:10px;" id="tabs"></div>
+    <p class="muted" id="hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- ✅ Général -->
+  <section class="card" id="panelGeneral" style="display:none;">
+    <h2 style="margin:0 0 10px;">🛠️ Général — Pilotage étapes</h2>
+
+    <div class="hint-box">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div>
+          <div style="font-weight:1000;">Étape sélectionnée :</div>
+          <div class="muted" id="currentStepLabel">—</div>
+        </div>
+        <div class="pill" id="gatePill">
+          <span class="dot" id="gateDot"></span>
+          <span id="gateLabel">Chargement…</span>
+        </div>
+      </div>
+
+      <div class="muted" style="margin-top:8px;" id="gateExplain">—</div>
+    </div>
+
+    <div class="grid" style="margin-top:12px;">
+      <div class="field" style="margin:0;">
+        <label for="gateSelect">État des inscriptions</label>
+        <select id="gateSelect">
+          <option value="not_open">⏳ Pas encore ouvertes</option>
+          <option value="open">✅ Ouvertes</option>
+          <option value="paused">⏸️ Suspendues</option>
+          <option value="closed">🔒 Clôturées</option>
+        </select>
+      </div>
+
+      <button class="btn" id="btnApplyGate" style="font-weight:900; color:#111;">
+        💾 Appliquer
+      </button>
+    </div>
+
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn" id="btnQuickOpen" style="font-weight:900; color:#111;">✅ Ouvrir</button>
+      <button class="btn" id="btnQuickPause" style="font-weight:900; color:#111;">⏸️ Pause</button>
+      <button class="btn" id="btnQuickClose" style="font-weight:900; color:#111; border-color:#f1b2b2;">🔒 Clôturer</button>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      🔗 Ceci écrit dans Firestore : <b>config/{scope}</b> → <b>inscriptionsState</b>.
+      <br>📌 Tes pages publiques d’inscription écoutent déjà ce document (ex: <b>config/etape2</b>).
     </p>
   </section>
 
-  <section class="card">
-    <h2>⚡ Accès rapide</h2>
-    <div class="grid">
-      <a class="btn" href="pages/classement.html">🏆 Voir le classement général</a>
-      <a class="btn" href="pages/reglement.html">📘 Lire le règlement</a>
-      <a class="btn" href="pages/infos.html">📰 Fil d’infos</a>
-      <a class="btn" href="pages/boutique.html">🛍️ Boutique / Paiement</a>
-      <a class="btn" href="pages/contact.html">📩 Contact</a>
+  <!-- ✅ Raccourcis -->
+  <section class="card" id="panelLinks" style="display:none;">
+    <h2 style="margin:0 0 10px;">🚀 Raccourcis (Étape)</h2>
+
+    <div class="grid-2">
+      <div class="card" style="margin:0;">
+        <h3 style="margin:0 0 10px;">Admin</h3>
+        <div class="grid">
+          <a class="btn" id="lnkAdminEquipes" href="#" style="font-weight:900;color:#111;">👥 Équipes</a>
+          <a class="btn" id="lnkAdminInscriptions" href="#" style="font-weight:900;color:#111;">📝 Inscriptions</a>
+          <a class="btn" id="lnkAdminRepas" href="#" style="font-weight:900;color:#111;">🍽️ Repas</a>
+          <a class="btn" id="lnkAdminTirage" href="#" style="font-weight:900;color:#111;">🎲 Tirage</a>
+          <a class="btn" id="lnkAdminProg" href="#" style="font-weight:900;color:#111;">📅 Programmation</a>
+          <a class="btn" id="lnkAdminRes" href="#" style="font-weight:900;color:#111;">🏁 Résultats</a>
+          <a class="btn" id="lnkAdminClassement" href="#" style="font-weight:900;color:#111;">🏆 Classement</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <h3 style="margin:0 0 10px;">Public</h3>
+        <div class="grid">
+          <a class="btn" id="lnkPubHome" href="#" style="font-weight:900;color:#111;">🏠 Accueil Étape</a>
+          <a class="btn" id="lnkPubInscriptions" href="#" style="font-weight:900;color:#111;">📝 Inscriptions</a>
+          <a class="btn" id="lnkPubEquipes" href="#" style="font-weight:900;color:#111;">👥 Équipes</a>
+          <a class="btn" id="lnkPubTirage" href="#" style="font-weight:900;color:#111;">🎲 Tirage</a>
+          <a class="btn" id="lnkPubProg" href="#" style="font-weight:900;color:#111;">🗓️ Programmation</a>
+        </div>
+
+        <p class="muted" style="margin:10px 0 0;">
+          (Les pages publiques existent si tu as créé le dossier <b>etape2/</b> et les fichiers.)
+        </p>
+      </div>
     </div>
-  </section>
-
-  <section class="card">
-    <h2>🔐 Accès organisateurs</h2>
-
-    <div class="grid">
-      <a class="btn" href="#" id="btnAdmin">🛠️ Mode Admin</a>
-      <a class="btn" href="#" id="btnJat">🎾 Mode JAT</a>
-      <a class="btn" href="#" id="btnLogout">🚪 Déconnexion</a>
-    </div>
-
-    <p class="muted">Accès sécurisé (email / mot de passe).</p>
-    <p class="muted" id="authHint" style="margin-top:8px;"></p>
   </section>
 
 </main>
 
 <script type="module">
-  import { auth } from "./assets/js/firebase.js";
-  import { autoLoginOrPrompt, logout, ensurePersistence } from "./assets/js/session.js";
+  import { auth, db } from "../assets/js/firebase.js";
+  import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { doc, setDoc, onSnapshot, serverTimestamp } from
+    "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  await ensurePersistence();
+  const LS_SCOPE_KEY = "admin_scope_last";
 
-  document.querySelectorAll("a[data-disabled='true']").forEach(a=>{
-    a.addEventListener("click", (e)=> e.preventDefault());
-  });
+  const params = new URLSearchParams(location.search);
+  const scopeFromUrl = params.get("scope");
 
-  async function goToRoleHome(path){
-    await autoLoginOrPrompt("general");
-    window.location.href = path;
+  function getInitialScope(){
+    if(scopeFromUrl) return scopeFromUrl;
+    try{
+      const saved = localStorage.getItem(LS_SCOPE_KEY);
+      if(saved) return saved;
+    }catch(e){}
+    return "general";
+  }
+  function persistScope(scope){
+    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
   }
 
-  document.getElementById("btnAdmin").onclick = async (e)=>{
+  // DOM
+  const accessDenied = document.getElementById("accessDenied");
+  const adminZone = document.getElementById("adminZone");
+  const scopeEl = document.getElementById("scope");
+  const tabsEl  = document.getElementById("tabs");
+  const hintEl  = document.getElementById("hint");
+
+  const panelGeneral = document.getElementById("panelGeneral");
+  const panelLinks   = document.getElementById("panelLinks");
+
+  const currentStepLabel = document.getElementById("currentStepLabel");
+  const gatePill  = document.getElementById("gatePill");
+  const gateDot   = document.getElementById("gateDot");
+  const gateLabel = document.getElementById("gateLabel");
+  const gateExplain = document.getElementById("gateExplain");
+
+  const gateSelect = document.getElementById("gateSelect");
+  const btnApplyGate = document.getElementById("btnApplyGate");
+  const btnQuickOpen = document.getElementById("btnQuickOpen");
+  const btnQuickPause = document.getElementById("btnQuickPause");
+  const btnQuickClose = document.getElementById("btnQuickClose");
+
+  const lnkAdminEquipes = document.getElementById("lnkAdminEquipes");
+  const lnkAdminInscriptions = document.getElementById("lnkAdminInscriptions");
+  const lnkAdminRepas = document.getElementById("lnkAdminRepas");
+  const lnkAdminTirage = document.getElementById("lnkAdminTirage");
+  const lnkAdminProg = document.getElementById("lnkAdminProg");
+  const lnkAdminRes = document.getElementById("lnkAdminRes");
+  const lnkAdminClassement = document.getElementById("lnkAdminClassement");
+
+  const lnkPubHome = document.getElementById("lnkPubHome");
+  const lnkPubInscriptions = document.getElementById("lnkPubInscriptions");
+  const lnkPubEquipes = document.getElementById("lnkPubEquipes");
+  const lnkPubTirage = document.getElementById("lnkPubTirage");
+  const lnkPubProg = document.getElementById("lnkPubProg");
+
+  // state
+  let currentScope = getInitialScope();
+  let unsubCfg = null;
+
+  function stepLabel(scope){
+    if(!scope || scope === "general") return "Général";
+    return `Étape ${scope.replace("etape","")}`;
+  }
+
+  function makeDisabledBtn(label, reason){
+    const a = document.createElement("a");
+    a.className = "btn disabled";
+    a.href = "#";
+    a.setAttribute("aria-disabled","true");
+    a.textContent = label;
+    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    return a;
+  }
+
+  function setTabs(scope){
+    tabsEl.innerHTML = "";
+
+    // Ici on est sur admin/index.html => onglet "Général" actif quand scope=general
+    const links = [
+      ["🧰 Général", "index.html"],
+      ["👥 Équipes", "equipes.html"],
+      ["📝 Inscriptions", "inscriptions.html"],
+      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
+      ["🎲 Tirage", "tirage.html"],
+      ["📅 Programmation", "programmation.html"],
+      ["🏁 Résultats", "resultats.html"],
+      ["🏆 Classement", "classement.html"],
+    ];
+
+    // Pour scope=general : on ne propose que Général (les autres nécessitent une étape)
+    if(scope === "general"){
+      for(const [label, url] of [["🧰 Général", "index.html"]]){
+        const a = document.createElement("a");
+        a.className = "btn is-active";
+        a.href = url;
+        a.textContent = label;
+        tabsEl.appendChild(a);
+      }
+      hintEl.textContent = "Choisis une étape pour piloter l’ouverture et accéder aux pages admin de l’étape.";
+      return;
+    }
+
+    if(scope === "etape5"){
+      // info : repas désactivé dans ton admin (comme ailleurs)
+      // on ajoute un bouton désactivé cohérent
+    }
+
+    for(const [label, url] of links){
+      const a = document.createElement("a");
+      a.className = "btn";
+      a.href = (url === "index.html") ? `index.html?scope=${encodeURIComponent(scope)}` : `${url}?scope=${encodeURIComponent(scope)}`;
+      a.textContent = label;
+
+      if(url === "index.html") a.classList.add("is-active");
+
+      // Désactive repas pour etape5
+      if(scope === "etape5" && url === "repas.html"){
+        tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
+        continue;
+      }
+
+      tabsEl.appendChild(a);
+    }
+
+    hintEl.textContent = `Tu pilotes ici les paramètres de ${stepLabel(scope)} (ex: ouverture des inscriptions).`;
+  }
+
+  function cfgRef(scope){
+    return doc(db, "config", scope);
+  }
+
+  function normalizeState(state){
+    if(state === "suspended") return "paused";
+    return state || "not_open";
+  }
+
+  function gateUi(stateRaw){
+    const st = normalizeState(stateRaw);
+
+    gateSelect.value = st;
+
+    gateDot.className = "dot";
+    gateLabel.textContent = "—";
+    gateExplain.textContent = "—";
+
+    if(st === "open"){
+      gateDot.classList.add("green");
+      gateLabel.textContent = "Ouvertes";
+      gateExplain.textContent = "✅ Les formulaires publics acceptent les inscriptions.";
+      return;
+    }
+    if(st === "paused"){
+      gateDot.classList.add("orange");
+      gateLabel.textContent = "Suspendues";
+      gateExplain.textContent = "⏸️ Les formulaires publics sont bloqués temporairement.";
+      return;
+    }
+    if(st === "closed"){
+      gateDot.classList.add("red");
+      gateLabel.textContent = "Clôturées";
+      gateExplain.textContent = "🔒 Les inscriptions sont terminées.";
+      return;
+    }
+    gateDot.classList.add("red");
+    gateLabel.textContent = "Pas ouvertes";
+    gateExplain.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
+  }
+
+  function stopListeners(){
+    if(unsubCfg){ unsubCfg(); unsubCfg = null; }
+  }
+
+  function setLinks(scope){
+    // Admin (avec scope)
+    lnkAdminEquipes.href = `equipes.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminInscriptions.href = `inscriptions.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminRepas.href = `repas.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminTirage.href = `tirage.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminProg.href = `programmation.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminRes.href = `resultats.html?scope=${encodeURIComponent(scope)}`;
+    lnkAdminClassement.href = `classement.html?scope=${encodeURIComponent(scope)}`;
+
+    // Public (dossier étape)
+    lnkPubHome.href = `../${scope}/index.html`;
+    lnkPubInscriptions.href = `../${scope}/inscriptions.html`;
+    lnkPubEquipes.href = `../${scope}/equipes.html`;
+    lnkPubTirage.href = `../${scope}/tirage.html`;
+    lnkPubProg.href = `../${scope}/programmation.html`;
+
+    // Désactive repas admin si etape5
+    if(scope === "etape5"){
+      lnkAdminRepas.onclick = (e)=>{ e.preventDefault(); alert("Repas non activé pour l’étape 5 (zone test)."); };
+      lnkAdminRepas.classList.add("disabled");
+      lnkAdminRepas.setAttribute("aria-disabled","true");
+    }else{
+      lnkAdminRepas.onclick = null;
+      lnkAdminRepas.classList.remove("disabled");
+      lnkAdminRepas.removeAttribute("aria-disabled");
+    }
+  }
+
+  function showPanelsForScope(scope){
+    panelGeneral.style.display = "block";
+
+    if(scope === "general"){
+      panelLinks.style.display = "none";
+      currentStepLabel.textContent = "— (choisis une étape)";
+      gateUi("not_open");
+      stopListeners();
+      return;
+    }
+
+    panelLinks.style.display = "block";
+    currentStepLabel.textContent = stepLabel(scope);
+    setLinks(scope);
+
+    stopListeners();
+    unsubCfg = onSnapshot(cfgRef(scope), (snap)=>{
+      const d = snap.exists() ? (snap.data() || {}) : {};
+      gateUi(d.inscriptionsState || "not_open");
+    }, (err)=>{
+      console.error(err);
+      gateUi("not_open");
+      gateExplain.textContent = "❌ Impossible de lire config/" + scope;
+    });
+  }
+
+  async function applyGate(scope, state){
+    if(!scope || scope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
+    await setDoc(cfgRef(scope), {
+      inscriptionsState: normalizeState(state),
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || null
+    }, { merge:true });
+  }
+
+  // Actions UI
+  btnApplyGate.onclick = async (e)=>{
     e.preventDefault();
-    await goToRoleHome("admin/index.html");
+    try{
+      btnApplyGate.disabled = true;
+      await applyGate(currentScope, gateSelect.value);
+    }catch(err){
+      console.error(err);
+      alert("❌ Erreur Firestore (droits / rules ?).");
+    }finally{
+      btnApplyGate.disabled = false;
+    }
   };
 
-  document.getElementById("btnJat").onclick = async (e)=>{
+  btnQuickOpen.onclick = async (e)=>{
     e.preventDefault();
-    await goToRoleHome("jat/index.html");
+    try{ await applyGate(currentScope, "open"); }catch(err){ console.error(err); alert("❌ Erreur Firestore."); }
+  };
+  btnQuickPause.onclick = async (e)=>{
+    e.preventDefault();
+    try{ await applyGate(currentScope, "paused"); }catch(err){ console.error(err); alert("❌ Erreur Firestore."); }
+  };
+  btnQuickClose.onclick = async (e)=>{
+    e.preventDefault();
+    const ok = confirm("Clôturer les inscriptions pour " + stepLabel(currentScope) + " ?");
+    if(!ok) return;
+    try{ await applyGate(currentScope, "closed"); }catch(err){ console.error(err); alert("❌ Erreur Firestore."); }
   };
 
+  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
-    alert("Déconnecté ✅");
+    window.location.href = "../index.html";
   };
 
-  onAuthStateChanged(auth, (user)=>{
-    document.getElementById("authHint").textContent =
-      user ? ("Connecté : " + user.email) : "Non connecté.";
+  function showDenied(){
+    accessDenied.style.display = "block";
+    adminZone.style.display = "none";
+    panelGeneral.style.display = "none";
+    panelLinks.style.display = "none";
+    stopListeners();
+  }
+
+  function showAdmin(){
+    accessDenied.style.display = "none";
+    adminZone.style.display = "block";
+
+    scopeEl.value = currentScope;
+    setTabs(currentScope);
+    showPanelsForScope(currentScope);
+    persistScope(currentScope);
+
+    scopeEl.onchange = ()=>{
+      currentScope = scopeEl.value || "general";
+      setTabs(currentScope);
+      showPanelsForScope(currentScope);
+      persistScope(currentScope);
+    };
+  }
+
+  // Guard
+  const g = await requireRole(["admin"]);
+  if(!g.ok){ showDenied(); } else { showAdmin(); }
+
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){ showDenied(); return; }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){ showDenied(); return; }
   });
 </script>
 
