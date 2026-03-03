@@ -28,6 +28,8 @@
       display:flex; align-items:center; justify-content:center;
       font-weight:1000; font-size:16px; flex:0 0 auto;
       font-variant-numeric: tabular-nums;
+      position:relative;
+      z-index:2;
     }
 
     .rmain{ min-width:0; flex:1 1 auto; position:relative; z-index:2; }
@@ -83,7 +85,7 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ✅ Logo au MILIEU de l’encart (après le nom), SANS cadre, hauteur max */
+    /* ✅ Logo "filigrane" (desktop: centré comme avant) */
     .mid-logo{
       position:absolute;
       left:50%;
@@ -96,14 +98,13 @@
       justify-content:center;
       pointer-events:none;
       z-index:1;
-      opacity:1; /* filigrane discret (ajuste si tu veux) */
+      opacity:1;
     }
     .mid-logo img{
       height:100%;
       width:auto;
       object-fit:contain;
       display:block;
-      /* un petit padding pour éviter que ça colle aux bords */
       padding:6px;
       filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
     }
@@ -112,6 +113,61 @@
       .rk{ width:38px; height:38px; border-radius:12px; }
       .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
       .mid-logo img{ padding:5px; }
+    }
+
+    /* =========================================================
+       ✅ OPTION A (MOBILE PRO)
+       - Layout vertical
+       - Noms non coupés
+       - Logo discret à droite (jamais au-dessus du texte)
+    ========================================================== */
+    @media (max-width: 520px){
+      .rank-card{
+        flex-direction:column;
+        align-items:flex-start;
+        justify-content:flex-start;
+        gap:10px;
+        padding-right:72px; /* réserve pour le logo à droite */
+      }
+
+      /* Noms / sous-ligne : pas de coupe */
+      .rtitle, .rsub{
+        white-space:normal;
+        overflow:visible;
+        text-overflow:unset;
+      }
+      .rsub{
+        margin-top:6px;
+      }
+
+      /* Pastilles sous le nom */
+      .meta-line{
+        justify-content:flex-start;
+        width:100%;
+        gap:8px;
+      }
+
+      /* Tag (#pos) : aligné à droite en haut */
+      .tag{
+        position:absolute;
+        top:10px;
+        right:10px;
+      }
+
+      /* Logo : à droite, centré verticalement, discret */
+      .mid-logo{
+        left:auto;
+        right:10px;
+        top:50%;
+        transform:translateY(-50%);
+        height:62%;
+        opacity:.16;
+      }
+      .mid-logo img{
+        height:100%;
+        padding:0;
+        filter: none;
+      }
     }
   </style>
 </head>
