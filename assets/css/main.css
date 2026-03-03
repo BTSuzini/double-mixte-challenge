@@ -273,6 +273,11 @@ a, button{
   box-shadow: 0 6px 14px rgba(0,0,0,.10);
 }
 
+/* ✅ Nav étape : pas de soulignement qui déborde */
+.nav.nav-step a[aria-current="page"]::after{
+  content: none;
+}
+
 /* =========================================================
    CARTES / BOUTONS
    ========================================================= */
