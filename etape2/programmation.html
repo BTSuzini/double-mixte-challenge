@@ -4,8 +4,149 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 2</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260303-etape2-prog" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape2-prog" />
+
+  <style>
+    /* ✅ CSS bandeau étape (identique à repas.html) */
+    .topbar-row-step{
+      grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+    }
+    .step-title-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: calc(var(--logo-size) * 0.55);
+    }
+    .step-title-img{
+      width: min(520px, 100%);
+      max-height: 88px;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+    }
+
+    .nav-step{
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-step::after{
+      content:"";
+      flex:auto;
+    }
+    .nav-step a{
+      padding:8px 12px;
+      flex: 1 1 auto;
+      text-align:center;
+    }
+
+    .nav a[aria-current="page"]{
+      background: rgba(255,255,255,.26);
+      border-color: rgba(255,255,255,.45);
+      box-shadow: 0 6px 14px rgba(0,0,0,.10);
+    }
+
+    @media (max-width: 420px){
+      .nav-step a{
+        padding:7px 10px;
+        font-size: 13px;
+      }
+      .step-title-img{ max-height: 74px; }
+    }
+
+    /* ===== Style prog (inchangé) ===== */
+    .match-list{ display:flex; flex-direction:column; gap:14px; }
+
+    .match-card{
+      border-radius:18px;
+      border:2px solid rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+    .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .m-time{
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+      letter-spacing:.2px;
+    }
+
+    .m-court{
+      font-size:13px;
+      font-weight:400;
+      font-style:italic;
+      opacity:.95;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+      flex:1;
+    }
+
+    .team-row{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 22px 22px 24px;
+      align-items:center;
+      gap:6px;
+    }
+
+    .team-block{ min-width:0; }
+    .team-title{
+      font-size:15px;
+      font-weight:900;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .sc{
+      text-align:right;
+      font-size:15px;
+      font-weight:900;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vs-line{
+      margin:10px 0 6px;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
+    @media (max-width: 380px){
+      .m-time{ font-size:13px; }
+      .m-court{ font-size:13px; }
+      .team-title{ font-size:14px; }
+      .team-sub{ font-size:12px; }
+      .sc{ font-size:14px; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="topbar">
@@ -80,146 +221,6 @@
   </section>
 
 </main>
-
-<style>
-  /* ✅ CSS bandeau étape (IDENTIQUE à repas.html) */
-  .topbar-row-step{
-    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-  }
-  .step-title-wrap{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height: calc(var(--logo-size) * 0.55);
-  }
-  .step-title-img{
-    width: min(520px, 100%);
-    max-height: 88px;
-    height: auto;
-    object-fit: contain;
-    display:block;
-    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-  }
-
-  .nav-step{
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .nav-step::after{
-    content:"";
-    flex:auto;
-  }
-  .nav-step a{
-    padding:8px 12px;
-    flex: 1 1 auto;
-    text-align:center;
-  }
-
-  .nav a[aria-current="page"]{
-    background: rgba(255,255,255,.26);
-    border-color: rgba(255,255,255,.45);
-    box-shadow: 0 6px 14px rgba(0,0,0,.10);
-  }
-
-  @media (max-width: 420px){
-    .nav-step a{
-      padding:7px 10px;
-      font-size: 13px;
-    }
-    .step-title-img{ max-height: 74px; }
-  }
-
-  /* ===== Style prog (inchangé) */
-  .match-list{ display:flex; flex-direction:column; gap:14px; }
-
-  .match-card{
-    border-radius:18px;
-    border:2px solid rgba(0,0,0,.06);
-    padding:14px;
-    background:#fff;
-    box-shadow:0 1px 0 rgba(0,0,0,.03);
-  }
-  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
-  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
-
-  .match-head{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
-  }
-
-  .m-time{
-    font-size:13px;
-    font-weight:900;
-    white-space:nowrap;
-    letter-spacing:.2px;
-  }
-
-  .m-court{
-    font-size:13px;
-    font-weight:400;
-    font-style:italic;
-    opacity:.95;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    min-width:0;
-    flex:1;
-  }
-
-  .team-row{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns: 1fr 22px 22px 24px;
-    align-items:center;
-    gap:6px;
-  }
-
-  .team-block{ min-width:0; }
-  .team-title{
-    font-size:15px;
-    font-weight:900;
-    line-height:1.15;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .team-sub{
-    margin-top:2px;
-    font-size:13px;
-    font-weight:800;
-    opacity:.85;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .sc{
-    text-align:right;
-    font-size:15px;
-    font-weight:900;
-    white-space:nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .vs-line{
-    margin:10px 0 6px;
-    text-align:center;
-    font-weight:900;
-    letter-spacing:2px;
-    opacity:.55;
-    font-size:12px;
-  }
-
-  @media (max-width: 380px){
-    .m-time{ font-size:13px; }
-    .m-court{ font-size:13px; }
-    .team-title{ font-size:14px; }
-    .team-sub{ font-size:12px; }
-    .sc{ font-size:14px; }
-  }
-</style>
 
 <script type="module">
   import { db } from "../assets/js/firebase.js";
