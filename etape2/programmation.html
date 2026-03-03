@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 2</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape2-prog" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260303-etape2-prog" />
 </head>
 <body>
 
@@ -34,7 +34,6 @@
     </nav>
   </div>
 </header>
-    
 
 <main class="container">
 
@@ -82,53 +81,53 @@
 
 </main>
 
-/* ✅ CSS bandeau étape (référence) */
-.topbar-row-step{
-  grid-template-columns: var(--logo-size) 1fr var(--logo-size);
-}
-.step-title-wrap{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height: calc(var(--logo-size) * 0.55);
-}
-.step-title-img{
-  width: min(520px, 100%);
-  max-height: 88px;
-  height: auto;
-  object-fit: contain;
-  display:block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
-}
-
-.nav-step{
-  justify-content: space-between;
-  gap: 8px;
-}
-.nav-step::after{
-  content:"";
-  flex:auto;
-}
-.nav-step a{
-  padding:8px 12px;
-  flex: 1 1 auto;
-  text-align:center;
-}
-
-.nav a[aria-current="page"]{
-  background: rgba(255,255,255,.26);
-  border-color: rgba(255,255,255,.45);
-  box-shadow: 0 6px 14px rgba(0,0,0,.10);
-}
-
-@media (max-width: 420px){
-  .nav-step a{
-    padding:7px 10px;
-    font-size: 13px;
+<style>
+  /* ✅ CSS bandeau étape (IDENTIQUE à repas.html) */
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
-  .step-title-img{ max-height: 74px; }
-}
-  
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+  }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  .nav-step{
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
+  }
+  .nav-step a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
+    .step-title-img{ max-height: 74px; }
+  }
 
   /* ===== Style prog (inchangé) */
   .match-list{ display:flex; flex-direction:column; gap:14px; }
