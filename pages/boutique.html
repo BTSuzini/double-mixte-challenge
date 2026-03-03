@@ -148,6 +148,15 @@
 
     .mutedline{ margin:10px 0 0; }
 
+    /* Sections main/wait */
+    .pay-section-title{
+      margin:12px 0 0;
+      font-weight:1000;
+    }
+    .pay-section-sub{
+      margin:6px 0 0;
+    }
+
     @media (max-width: 420px){
       .player-row{ padding:9px 9px; }
       .pay-team{ font-size:15px; }
@@ -164,7 +173,6 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/challenge-gen.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
@@ -176,7 +184,6 @@
       </div>
     </div>
 
-    <!-- ✅ même NAV que tes pages générales d'origine (classe nav seulement) -->
     <nav class="nav">
       <a href="../index.html">🏠</a>
       <a href="reglement.html">📘 Règlement</a>
@@ -248,7 +255,7 @@
         <label for="paidEtape">Étape</label>
         <select id="paidEtape">
           <option value="etape1">🎾 Étape 1</option>
-          <option value="etape2" disabled>🎾 Étape 2 (plus tard)</option>
+          <option value="etape2">🎾 Étape 2</option>
           <option value="etape3" disabled>🎾 Étape 3 (plus tard)</option>
           <option value="etape4" disabled>🎾 Étape 4 (plus tard)</option>
           <option value="etape5" disabled>🧪 Étape 5 (test) (plus tard)</option>
@@ -312,7 +319,6 @@
   }
 
   tabShop.addEventListener("click", showShop);
-  tabPaid.addEventListener("click", showPaid);
 
   try{
     const saved = localStorage.getItem("challenge_boutique_tab");
@@ -383,64 +389,22 @@
     const qPay = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
 
     unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; rebuild(etapeId); }, (e)=>{ console.error(e); paidStatus.textContent="🔴 Erreur équipes"; });
-    // paiements peut être vide => on tolère snapPay=null
     unsubPay = onSnapshot(qPay, (s)=>{ snapPay = s; rebuild(etapeId); }, (e)=>{ console.error(e); snapPay = null; rebuild(etapeId); });
   }
 
-  function rebuild(etapeId){
-    if(!snapTeams){
-      paidStatus.textContent = "Chargement…";
-      return;
+  function renderSection(title, subtitle, arr){
+    const header = `
+      <div style="margin-top:6px;">
+        <div class="pay-section-title">${esc(title)}</div>
+        ${subtitle ? `<p class="muted pay-section-sub">${esc(subtitle)}</p>` : ``}
+      </div>
+    `;
+
+    if(!arr.length){
+      return header + `<p class="muted" style="margin:0;">Aucune équipe.</p>`;
     }
 
-    const payMap = new Map(); // id -> {p1Paid,p2Paid}
-    if(snapPay){
-      snapPay.forEach(d=>{
-        const x = d.data() || {};
-        payMap.set(d.id, {
-          p1Paid: x.p1Paid === true,
-          p2Paid: x.p2Paid === true
-        });
-      });
-    }
-
-    const teams = [];
-
-    snapTeams.forEach(d=>{
-      const x = d.data() || {};
-      const teamName = (x.teamName || "").trim();
-      const p1 = (x.p1FirstName || "").trim();
-      const p2 = (x.p2FirstName || "").trim();
-      if(!teamName) return;
-
-      const payId = `${etapeId}_${d.id}`;
-      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false };
-
-      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
-
-      teams.push({
-        payId,
-        teamName,
-        p1, p2,
-        p1Paid: pay.p1Paid,
-        p2Paid: pay.p2Paid,
-        paidCount
-      });
-    });
-
-    teams.sort((a,b)=>{
-      if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
-      return (a.teamName||"").localeCompare((b.teamName||""), "fr");
-    });
-
-    paidStatus.textContent = `🟢 En direct — ${teams.length} équipe(s) — ${esc(etapeId)}`;
-
-    if(teams.length === 0){
-      payList.innerHTML = `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
-      return;
-    }
-
-    payList.innerHTML = teams.map(t=>{
+    const cards = arr.map(t=>{
       const dot = statusDotClass(t.paidCount);
       const label = statusLabel(t.paidCount);
 
@@ -471,6 +435,78 @@
         </div>
       `;
     }).join("");
+
+    return header + cards;
+  }
+
+  function rebuild(etapeId){
+    if(!snapTeams){
+      paidStatus.textContent = "Chargement…";
+      return;
+    }
+
+    const payMap = new Map(); // id -> {p1Paid,p2Paid}
+    if(snapPay){
+      snapPay.forEach(d=>{
+        const x = d.data() || {};
+        payMap.set(d.id, {
+          p1Paid: x.p1Paid === true,
+          p2Paid: x.p2Paid === true
+        });
+      });
+    }
+
+    const mainTeams = [];
+    const waitTeams = [];
+
+    snapTeams.forEach(d=>{
+      const x = d.data() || {};
+      const teamName = (x.teamName || "").trim();
+      const p1 = (x.p1FirstName || "").trim();
+      const p2 = (x.p2FirstName || "").trim();
+      if(!teamName) return;
+
+      const list = (x.list || "main").toString(); // "main" | "wait"
+      const payId = `${etapeId}_${d.id}`;
+      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false };
+      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
+
+      const rec = {
+        payId,
+        teamName,
+        p1, p2,
+        p1Paid: pay.p1Paid,
+        p2Paid: pay.p2Paid,
+        paidCount,
+        list
+      };
+
+      if(list === "wait") waitTeams.push(rec);
+      else mainTeams.push(rec);
+    });
+
+    function sortArr(arr){
+      arr.sort((a,b)=>{
+        if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount; // 0 -> 1 -> 2
+        return (a.teamName||"").localeCompare((b.teamName||""), "fr");
+      });
+    }
+
+    sortArr(mainTeams);
+    sortArr(waitTeams);
+
+    const total = mainTeams.length + waitTeams.length;
+    paidStatus.textContent = `🟢 En direct — ${total} équipe(s) — ${esc(etapeId)}`;
+
+    if(total === 0){
+      payList.innerHTML = `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
+      return;
+    }
+
+    payList.innerHTML = [
+      renderSection("✅ Tableau principal", "Équipes du tableau principal.", mainTeams),
+      renderSection("⏳ Liste d’attente", "Équipes en attente (affichées après le tableau principal).", waitTeams)
+    ].join("");
   }
 
   // Restore étape selection
@@ -487,12 +523,10 @@
   });
 
   // Start watchers when Paid tab is visible
-  const origShowPaid = showPaid;
   function showPaidPatched(){
-    origShowPaid();
+    showPaid();
     startSubs(paidEtape.value);
   }
-  tabPaid.removeEventListener("click", showPaid);
   tabPaid.addEventListener("click", showPaidPatched);
 
   // If page opens already on paid tab
@@ -502,7 +536,6 @@
       startSubs(paidEtape.value);
     }
   }catch(e){}
-
 </script>
 
 </body>
