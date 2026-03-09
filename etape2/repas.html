@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Repas — Étape 2</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape2-repas" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260309-etape2-repas" />
 </head>
+
 <body>
 
 <header class="topbar">
@@ -36,32 +37,45 @@
 </header>
 
 <main class="container">
-  <section class="card">
-    <h2 style="margin:0 0 8px;">🍽️ Repas — Étape 2</h2>
-    <p class="muted" style="margin:0;">
-      ⏳ Cette page arrive bientôt.<br>
-      Pour l’instant, les infos repas seront communiquées via WhatsApp / organisation.
-    </p>
 
-    <div style="margin-top:14px;">
-      <a class="btn" href="programmation.html" style="font-weight:900; color:#111;">
-        🗓️ Voir la programmation
-      </a>
-    </div>
+  <section class="card repas-card">
+    <img 
+      src="../assets/img/repas-etape2.jpeg"
+      alt="Repas Étape 2"
+      class="repas-img"
+    >
   </section>
+
 </main>
 
 <style>
-  /* ✅ CSS bandeau étape (référence) */
+
+  /* ===== Image repas responsive ===== */
+
+  .repas-card{
+    padding:10px;
+  }
+
+  .repas-img{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:12px;
+  }
+
+  /* ===== Bandeau étape (référence identique autres pages) ===== */
+
   .topbar-row-step{
     grid-template-columns: var(--logo-size) 1fr var(--logo-size);
   }
+
   .step-title-wrap{
     display:flex;
     align-items:center;
     justify-content:center;
     min-height: calc(var(--logo-size) * 0.55);
   }
+
   .step-title-img{
     width: min(520px, 100%);
     max-height: 88px;
@@ -75,10 +89,12 @@
     justify-content: space-between;
     gap: 8px;
   }
+
   .nav-step::after{
     content:"";
     flex:auto;
   }
+
   .nav-step a{
     padding:8px 12px;
     flex: 1 1 auto;
@@ -91,13 +107,19 @@
     box-shadow: 0 6px 14px rgba(0,0,0,.10);
   }
 
-  @media (max-width: 420px){
+  @media (max-width:420px){
+
     .nav-step a{
       padding:7px 10px;
-      font-size: 13px;
+      font-size:13px;
     }
-    .step-title-img{ max-height: 74px; }
+
+    .step-title-img{
+      max-height:74px;
+    }
+
   }
+
 </style>
 
 </body>
