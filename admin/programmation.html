@@ -203,6 +203,10 @@
         🧩 Générer la programmation depuis le tirage VALIDÉ
       </button>
 
+      <button class="btn" id="btnResetProg" style="font-weight:900; color:#111; border-color:#f1b2b2;">
+        🧨 RAZ programmation
+      </button>
+
       <a class="btn" id="btnOpenPublic" href="#" style="font-weight:900; color:#111; text-align:center;">
         👀 Ouvrir la programmation (public)
       </a>
@@ -231,12 +235,11 @@
   import { logout, requireRole } from "../assets/js/session.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
-    doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, collection
+    doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const LS_SCOPE_KEY = "admin_scope_last";
 
-  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope");
 
@@ -252,7 +255,6 @@
     try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
   }
 
-  // ---- DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminZone = document.getElementById("adminZone");
   const scopeEl = document.getElementById("scope");
@@ -267,22 +269,17 @@
   const adminList = document.getElementById("adminList");
 
   const btnGenerate = document.getElementById("btnGenerate");
+  const btnResetProg = document.getElementById("btnResetProg");
   const btnOpenPublic = document.getElementById("btnOpenPublic");
 
   const stepBanner = document.getElementById("stepBanner");
 
-  // ---- state
   let currentScope = getInitialScope();
   let unsubProg = null;
   let unsubRes = null;
 
   let currentProg = null;
-  let resultsByMatch = new Map(); // matchId -> result doc
-
-  function stepLabel(scope){
-    if(!scope || scope === "general") return "Général";
-    return `Étape ${scope.replace("etape","")}`;
-  }
+  let resultsByMatch = new Map();
 
   function esc(s){
     return (s ?? "").toString()
@@ -347,7 +344,7 @@
       a.textContent = label;
 
       if(url === "programmation.html"){
-        a.classList.add("is-active"); // ✅ onglet actif noir/blanc
+        a.classList.add("is-active");
       }
       tabsEl.appendChild(a);
     }
@@ -466,10 +463,47 @@
     return payload;
   }
 
+  async function resetProgrammation(scope){
+    await deleteDoc(progRef(scope));
+  }
+
   function courtLabel(prog, courtKey){
     const name = prog?.courts?.[courtKey] || courtKey || "—";
     const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
     return `${emo} ${name} ${emo}`;
+  }
+
+  function resolveTeamRef(prog, ref, guard=new Set()){
+    if(!prog || !ref) return null;
+
+    const teams = prog.teams || {};
+    const matches = prog.matches || {};
+
+    if(ref.type === "team"){
+      return teams[ref.key] || null;
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const mid = ref.matchId;
+      if(!mid || guard.has(mid)) return null;
+      guard.add(mid);
+
+      const m = matches[mid];
+      if(!m) return null;
+
+      const res = resultsByMatch.get(mid);
+      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+
+      const teamA = resolveTeamRef(prog, m.A, guard);
+      const teamB = resolveTeamRef(prog, m.B, guard);
+
+      const winner = (res.winnerSide === "A") ? teamA : teamB;
+      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+
+      return ref.type === "winner" ? winner : loser;
+    }
+
+    return null;
   }
 
   function teamPartsFromTeam(t){
@@ -481,6 +515,9 @@
 
   function teamRefParts(prog, ref){
     if(!ref) return { title:"—", sub:"" };
+
+    const resolved = resolveTeamRef(prog, ref);
+    if(resolved) return teamPartsFromTeam(resolved);
 
     if(ref.type === "team"){
       const t = prog?.teams?.[ref.key] || null;
@@ -709,7 +746,6 @@
     startResultsListener(scope);
   }
 
-  // actions
   btnGenerate.onclick = async (e)=>{
     e.preventDefault();
     if(currentScope === "general"){ alert("Choisis une étape."); return; }
@@ -724,6 +760,27 @@
       alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
     }finally{
       btnGenerate.disabled = false;
+    }
+  };
+
+  btnResetProg.onclick = async (e)=>{
+    e.preventDefault();
+    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+
+    const ok = confirm("Réinitialiser la programmation ?\n\n⚠️ Cela supprimera la programmation de cette étape.");
+    if(!ok) return;
+
+    btnResetProg.disabled = true;
+    buildStatus.textContent = "Réinitialisation…";
+    try{
+      await resetProgrammation(currentScope);
+      buildStatus.textContent = "✅ Programmation réinitialisée.";
+    }catch(err){
+      console.error(err);
+      buildStatus.textContent = "❌ " + (err?.message || "Impossible.");
+      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
+    }finally{
+      btnResetProg.disabled = false;
     }
   };
 
@@ -797,7 +854,6 @@
     };
   }
 
-  // Guard
   const g = await requireRole(["admin"]);
   if(!g.ok){ showDenied(); }
   else { showAdmin(); }
