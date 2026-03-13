@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-classement-public-v6" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v7" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -292,6 +292,40 @@
     return s[0].toUpperCase() + ".";
   }
 
+  // ============================================================
+  // ✅ NORMALISATION JOUEURS (pour classement général)
+  // ============================================================
+  const PLAYER_FIRSTNAME_ALIASES = {
+    "charlyne": "charline"
+  };
+
+  function normalizeTextBasic(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function canonicalFirstName(firstName){
+    const raw = normalizeTextBasic(firstName);
+    if(!raw) return "";
+    return PLAYER_FIRSTNAME_ALIASES[raw] || raw;
+  }
+
+  function canonicalLastName(lastName){
+    return normalizeTextBasic(lastName);
+  }
+
+  function canonicalPlayerKey(firstName, lastName){
+    const fn = canonicalFirstName(firstName);
+    const ln = canonicalLastName(lastName);
+    if(!fn && !ln) return "";
+    return `${fn}|${ln}`;
+  }
+
   function playerDisplay(firstName, lastName){
     const fn = (firstName || "").toString().trim();
     const ini = nameInitial(lastName);
@@ -351,7 +385,6 @@
       return `../assets/img/${String(fromMap)}`;
     }
 
-    // Étape 1: uniquement Lobstars
     if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
       return "../assets/img/lobstars.png";
     }
@@ -487,17 +520,15 @@
       const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
 
       function findPlayerObj(firstName, lastName, teamName){
-        const fn = (firstName || "").toString().trim();
-        const ln = (lastName || "").toString().trim();
+        const wantedKey = canonicalPlayerKey(firstName, lastName);
         const tn = (teamName || "").toString().trim();
+
         return playersArr.find(p=>{
-          const pfn = (p?.firstName ?? "").toString().trim();
-          const pln = (p?.lastName  ?? "").toString().trim();
-          const ptn = (p?.teamName  ?? "").toString().trim();
-          if(fn && pfn && fn !== pfn) return false;
-          if(tn && ptn && tn !== ptn) return false;
-          if(ln && pln && ln !== pln) return false;
-          return (fn && pfn && tn && ptn);
+          const pKey = canonicalPlayerKey(p?.firstName, p?.lastName);
+          const pTeam = (p?.teamName || "").toString().trim();
+          if(wantedKey && pKey && wantedKey !== pKey) return false;
+          if(tn && pTeam && tn !== pTeam) return false;
+          return !!wantedKey && !!pKey;
         }) || null;
       }
 
@@ -505,8 +536,11 @@
         const t = row.team || {};
         const teamName = teamNameOf(t);
 
-        const p1Key = playerDisplay(t.p1FirstName, t.p1LastName);
-        const p2Key = playerDisplay(t.p2FirstName, t.p2LastName);
+        const p1DisplayName = playerDisplay(t.p1FirstName, t.p1LastName);
+        const p2DisplayName = playerDisplay(t.p2FirstName, t.p2LastName);
+
+        const p1Canonical = canonicalPlayerKey(t.p1FirstName, t.p1LastName);
+        const p2Canonical = canonicalPlayerKey(t.p2FirstName, t.p2LastName);
 
         const logoSrc = teamLogoSrc(stepId, stepDoc, t);
 
@@ -516,19 +550,33 @@
         const p1Gender = inferGenderFromPlayerObj(p1Obj);
         const p2Gender = inferGenderFromPlayerObj(p2Obj);
 
-        for(const [key, g] of [[p1Key, p1Gender],[p2Key, p2Gender]]){
-          if(!key || key === "—") continue;
+        for(const item of [
+          { canonical:p1Canonical, display:p1DisplayName, gender:p1Gender },
+          { canonical:p2Canonical, display:p2DisplayName, gender:p2Gender }
+        ]){
+          if(!item.canonical || !item.display || item.display === "—") continue;
 
-          if(!map.has(key)){
-            map.set(key, { name:key, points:0, steps:new Set(), gender:g, logo:null });
+          if(!map.has(item.canonical)){
+            map.set(item.canonical, {
+              key: item.canonical,
+              name: item.display,
+              points: 0,
+              steps: new Set(),
+              gender: item.gender,
+              logo: null
+            });
           }
-          const rec = map.get(key);
+
+          const rec = map.get(item.canonical);
 
           rec.points += Number(row.points || 0);
-          if(!rec.gender && g) rec.gender = g;
+          if(!rec.gender && item.gender) rec.gender = item.gender;
           if(!rec.logo && logoSrc) rec.logo = logoSrc;
 
-          const mk = `${key}|${stepId}`;
+          // garde la version la plus "canonique" / récente du prénom affiché
+          rec.name = item.display;
+
+          const mk = `${item.canonical}|${stepId}`;
           if(!playedThisStep.has(mk)){
             playedThisStep.add(mk);
             rec.steps.add(stepId);
@@ -553,7 +601,6 @@
       return a.name.localeCompare(b.name);
     });
 
-    // rangs ex aequo
     let lastPts = null;
     let lastRank = 0;
     for(let i=0;i<out.length;i++){
