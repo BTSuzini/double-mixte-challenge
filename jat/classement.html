@@ -45,7 +45,6 @@
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
-    <!-- ✅ FIX: élément utilisé par JS (sinon crash) -->
     <p class="muted" id="pageSub" style="margin:0 0 10px;">—</p>
 
     <div class="field">
@@ -102,7 +101,6 @@
 </main>
 
 <style>
-  /* ✅ Surbrillance onglet actif */
   .tab-active{
     background: rgba(19,86,44,.14) !important;
     border-color: rgba(19,86,44,.45) !important;
@@ -202,7 +200,7 @@
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub"); // ✅ existe maintenant
+  const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelRank     = document.getElementById("panelRank");
@@ -243,13 +241,11 @@
     }catch{ return "—"; }
   }
 
-  // ✅ Onglet actif
   function currentPageName(){
     const p = (location.pathname || "").split("/").pop() || "";
     return p.toLowerCase();
   }
 
-  // ✅ Tabs JAT + surbrillance onglet actif
   function setTabs(scope){
     tabsEl.innerHTML = "";
     const cur = currentPageName();
@@ -362,11 +358,25 @@
   }
 
   function teamParts(t){
-    if(!t) return { teamName:"—", p1:"—", p2:"—" };
+    if(!t) return {
+      teamName:"—",
+      p1:"—",
+      p2:"—",
+      p1Licence:"—",
+      p2Licence:"—"
+    };
+
     const teamName = t.teamName || "Équipe";
     const p1 = `${t.p1LastName || ""} ${t.p1FirstName || ""}`.trim() || "—";
     const p2 = `${t.p2LastName || ""} ${t.p2FirstName || ""}`.trim() || "—";
-    return { teamName, p1, p2 };
+
+    return {
+      teamName,
+      p1,
+      p2,
+      p1Licence: t.p1Licence || "—",
+      p2Licence: t.p2Licence || "—"
+    };
   }
 
   function buildFinalRanking(){
@@ -435,7 +445,10 @@
           <div class="rk">${esc(String(x.pos))}</div>
           <div class="rmain">
             <div class="rtitle">${esc(t.teamName)}</div>
-            <div class="rsub muted">${esc(t.p1)}<br>${esc(t.p2)}</div>
+            <div class="rsub muted">
+              ${esc(t.p1)} — Licence : ${esc(t.p1Licence)}<br>
+              ${esc(t.p2)} — Licence : ${esc(t.p2Licence)}
+            </div>
           </div>
           <div class="tag">${esc(x.label)}</div>
         </div>
