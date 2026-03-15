@@ -3,459 +3,286 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Équipes — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css" />
+
+  <title>Suzini Beach Tennis Double Mixte Challenge</title>
+
+  <link rel="stylesheet" href="assets/css/main.css?v=20260315-home-challenge" />
+
+  <style>
+    .steps-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .step-card{
+      border:1px solid #eee;
+      border-radius:16px;
+      background:#fff;
+      padding:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.04);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+
+    .step-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      min-width:0;
+    }
+
+    .step-title{
+      font-weight:1000;
+      line-height:1.15;
+      min-width:0;
+    }
+
+    .step-date{
+      font-weight:900;
+      opacity:.85;
+    }
+
+    .step-badge{
+      border:1px solid rgba(0,0,0,.12);
+      background:#fafafa;
+      border-radius:999px;
+      padding:6px 10px;
+      font-weight:1000;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .step-btn{
+      width:100%;
+      text-align:center;
+      font-weight:900;
+      color:#111;
+    }
+
+    .step-card.is-live{
+      border-color:#111;
+      box-shadow:0 10px 22px rgba(0,0,0,.10);
+    }
+
+    .step-card.is-done{
+      border-color:#dfeee3;
+      background:linear-gradient(135deg,#fff,#f7fbf8);
+    }
+
+    .step-card.is-upcoming{
+      border-color:#ececec;
+      background:linear-gradient(135deg,#fff,#fcfcfc);
+    }
+
+    @media (max-width: 520px){
+      .steps-grid{ grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="topbar">
   <div class="container">
+
     <div class="topbar-row">
       <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+        <img src="assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">Étape 5 — 17 avril 2026<br><span style="opacity:.95;font-weight:800;">BT250</span></h1>
+      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
+        <img src="assets/img/challenge-gen.png"
+             alt="Suzini Beach Tennis Double Mixte Challenge"
+             style="width:min(560px,100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
+      </div>
 
       <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+        <img src="assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
     <nav class="nav">
-      <a href="../index.html">Accueil</a>
-      <a href="programmation.html">Programmation</a>
-      <a href="equipes.html" aria-current="page">Équipes</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="repas.html">Repas</a>
-      <a href="tirage.html">Tirage au sort</a>
+      <a href="index.html" aria-current="page">🏠</a>
+      <a href="pages/reglement.html">📘 Règlement</a>
+      <a href="pages/classement.html">🏆 Classement</a>
+      <a href="pages/boutique.html">🛍️ Boutique</a>
+      <a href="pages/infos.html">📰 Infos</a>
+      <a href="pages/contact.html" aria-label="Contact">📩 📞</a>
     </nav>
+
   </div>
 </header>
 
 <main class="container">
 
-  <!-- Compteurs + sous-onglets -->
+  <!-- ========================= -->
+  <!-- ACCÈS TOURNOI -->
+  <!-- ========================= -->
   <section class="card">
-    <h2 style="margin-bottom:6px;">👥 Équipes inscrites</h2>
+    <h2>🎾 Accès tournoi</h2>
 
-    <p class="muted" style="margin-top:0;">
-      Total : <strong><span id="totalCount">0</span></strong>
-      — Principale : <strong><span id="mainCount">0</span></strong>/8
-      — Attente : <strong><span id="waitCount">0</span></strong>
-      — STBY : <strong><span id="stbyCount">0</span></strong>
-    </p>
+    <div class="steps-grid">
 
-    <div class="subtabs" role="tablist" aria-label="Affichage équipes">
-      <button class="subtab" id="tabInscrits" type="button" role="tab" aria-selected="true" aria-controls="panelInscrits">
-        ✅ Inscrits
-      </button>
-      <button class="subtab" id="tabClassees" type="button" role="tab" aria-selected="false" aria-controls="panelClassees">
-        🏷️ Classées
-      </button>
+      <!-- ÉTAPE 1 -->
+      <div class="step-card is-done">
+        <div class="step-head">
+          <div class="step-title">Étape 1 — BT250 mixte</div>
+          <div class="step-badge">🏁 Terminée</div>
+        </div>
+        <div class="step-date">27 février 2026</div>
+        <a class="btn step-btn" href="etape1/equipes.html">Accéder</a>
+      </div>
+
+      <!-- ÉTAPE 2 -->
+      <div class="step-card is-done">
+        <div class="step-head">
+          <div class="step-title">Étape 2 — BT100 mixte</div>
+          <div class="step-badge">🏁 Terminée</div>
+        </div>
+        <div class="step-date">12 mars 2026</div>
+        <a class="btn step-btn" href="etape2/equipes.html">Accéder</a>
+      </div>
+
+      <!-- ÉTAPE 3 -->
+      <div class="step-card is-done">
+        <div class="step-head">
+          <div class="step-title">Étape 3 — BT100 mixte</div>
+          <div class="step-badge">🏁 Terminée</div>
+        </div>
+        <div class="step-date">26 mars 2026</div>
+        <a class="btn step-btn" href="etape3/equipes.html">Accéder</a>
+      </div>
+
+      <!-- ÉTAPE 4 -->
+      <div class="step-card is-done">
+        <div class="step-head">
+          <div class="step-title">Étape 4 — BT100 mixte</div>
+          <div class="step-badge">🏁 Terminée</div>
+        </div>
+        <div class="step-date">09 avril 2026</div>
+        <a class="btn step-btn" href="etape4/equipes.html">Accéder</a>
+      </div>
+
+      <!-- ÉTAPE 5 -->
+      <div class="step-card is-live">
+        <div class="step-head">
+          <div class="step-title">Étape 5 — BT250 mixte</div>
+          <div class="step-badge">🔥 En cours</div>
+        </div>
+        <div class="step-date">17 avril 2026</div>
+        <a class="btn step-btn" href="etape5/equipes.html">Accéder</a>
+      </div>
+
     </div>
-
-    <p class="muted" id="status" style="margin-top:10px;">Connexion…</p>
   </section>
 
-  <!-- =========================
-       VUE 1 : INSCRITS
-  ========================== -->
-  <div id="panelInscrits" role="tabpanel" aria-labelledby="tabInscrits">
+  <!-- ========================= -->
+  <!-- ACCÈS ORGANISATEURS -->
+  <!-- ========================= -->
+  <section class="card">
+    <h2>🔐 Accès organisateurs</h2>
 
-    <!-- Liste principale -->
-    <section class="card">
-      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
-        <span>✅ Liste principale</span>
-        <span class="muted" style="font-weight:700;"><span id="mainCount2">0</span>/8</span>
-      </h2>
+    <div class="grid">
+      <a class="btn" href="#" id="btnAdmin">
+        🛠️ Mode Admin
+      </a>
 
-      <div class="table-wrap">
-        <table class="teams-table" aria-label="Liste principale">
-          <thead>
-            <tr>
-              <th style="width:44px;">#</th>
-              <th>Équipe</th>
-              <th>Joueuse</th>
-              <th>Joueur</th>
-              <th style="width:90px;">Statut</th>
-            </tr>
-          </thead>
-          <tbody id="mainBody"></tbody>
-        </table>
-      </div>
-    </section>
+      <a class="btn" href="#" id="btnJAT">
+        🎾 Espace JAT
+      </a>
 
-    <!-- Liste d'attente -->
-    <section class="card">
-      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
-        <span>⏳ Liste d’attente</span>
-        <span class="muted" style="font-weight:700;"><span id="waitCount2">0</span></span>
-      </h2>
+      <a class="btn" href="#" id="btnLogout">
+        🚪 Déconnexion
+      </a>
+    </div>
 
-      <div class="table-wrap">
-        <table class="teams-table" aria-label="Liste d’attente">
-          <thead>
-            <tr>
-              <th style="width:44px;">#</th>
-              <th>Équipe</th>
-              <th>Joueuse</th>
-              <th>Joueur</th>
-              <th style="width:90px;">Statut</th>
-            </tr>
-          </thead>
-          <tbody id="waitBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- =========================
-       VUE 2 : CLASSÉES
-       - seulement liste principale
-       - tri par (p1Rank+p2Rank) croissant
-  ========================== -->
-  <div id="panelClassees" style="display:none;" role="tabpanel" aria-labelledby="tabClassees">
-
-    <section class="card">
-      <h2 style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
-        <span>🏷️ Équipes classées (liste principale)</span>
-        <span class="muted" style="font-weight:700;"><span id="rankedCount">0</span> équipe(s)</span>
-      </h2>
-
-      <p class="muted" style="margin-top:0;">
-        Tri : <b>classement équipe croissant</b> (Joueuse + Joueur). Le plus petit est en haut.
-      </p>
-
-      <div class="table-wrap">
-        <table class="teams-table" aria-label="Équipes classées">
-          <thead>
-            <tr>
-              <th style="width:44px;">#</th>
-              <th>Équipe</th>
-              <th>Joueuse</th>
-              <th>Joueur</th>
-              <th style="width:90px;">Statut</th>
-            </tr>
-          </thead>
-          <tbody id="rankedBody"></tbody>
-        </table>
-      </div>
-
-      <p class="muted" style="margin:10px 0 0;">
-        ⚠️ Si le classement d’un joueur n’est pas encore renseigné par l’admin, l’équipe apparaît en bas avec “—”.
-      </p>
-    </section>
-
-  </div>
+    <p class="muted" id="authHint" style="margin-top:10px;">
+      Accès sécurisé organisateurs.
+    </p>
+  </section>
 
 </main>
 
-<style>
-  .table-wrap{
-    overflow:auto;
-    border:1px solid #eee;
-    border-radius:14px;
-    background:#fff;
-  }
-  .teams-table{
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    min-width: 620px;
-  }
-  .teams-table thead th{
-    text-align:left;
-    font-size:13px;
-    letter-spacing:.2px;
-    color:#444;
-    background:#f7f7f7;
-    border-bottom:1px solid #eee;
-    padding:12px 12px;
-    position:sticky;
-    top:0;
-    z-index:1;
-  }
-  .teams-table tbody td{
-    padding:12px 12px;
-    border-bottom:1px solid #f0f0f0;
-    vertical-align:top;
-    font-size:14px;
-  }
-  .teams-table tbody tr:last-child td{ border-bottom:none; }
-
-  .pill{
-    display:inline-block;
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:12px;
-    border:1px solid #eee;
-    background:#fafafa;
-    color:#333;
-    white-space:nowrap;
-  }
-  .pill.stby{
-    border-color:#ffd37a;
-    background:#fff7e6;
-  }
-  .pill.rank{
-    border-color:#d9e6ff;
-    background:#f3f7ff;
-    font-weight:800;
-  }
-
-  .num{
-    color:#666;
-    font-variant-numeric: tabular-nums;
-    white-space:nowrap;
-  }
-  .team{ font-weight:800; }
-
-  /* Sous-onglets */
-  .subtabs{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:10px;
-  }
-  .subtab{
-    appearance:none;
-    border:1px solid #ddd;
-    background:#fafafa;
-    border-radius:999px;
-    padding:10px 14px;
-    font-weight:900;
-    cursor:pointer;
-  }
-  .subtab[aria-selected="true"]{
-    background:#fff;
-    border-color:#cfcfcf;
-    box-shadow: 0 6px 14px rgba(0,0,0,.06);
-  }
-
-  @media (max-width: 520px){
-    .teams-table{ min-width: 600px; }
-  }
-</style>
-
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
+  import { auth } from "./assets/js/firebase.js";
+  import { loginAndRedirect, logout, getRoleByEmail }
+    from "./assets/js/session.js";
+
   import {
-    collection,
-    query,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-  const MAX_MAIN = 8;
-  const COL_PUBLIC = "equipes_etape5_public";
+  const btnAdmin = document.getElementById("btnAdmin");
+  const btnJAT   = document.getElementById("btnJAT");
+  const btnLogout = document.getElementById("btnLogout");
+  const hint = document.getElementById("authHint");
 
-  const statusEl = document.getElementById("status");
+  /* ================= ADMIN ================= */
+  btnAdmin.onclick = async (e)=>{
+    e.preventDefault();
 
-  const totalCountEl = document.getElementById("totalCount");
-  const mainCountEl = document.getElementById("mainCount");
-  const waitCountEl = document.getElementById("waitCount");
-  const stbyCountEl = document.getElementById("stbyCount");
-
-  const mainCount2El = document.getElementById("mainCount2");
-  const waitCount2El = document.getElementById("waitCount2");
-
-  const rankedCountEl = document.getElementById("rankedCount");
-
-  const mainBody = document.getElementById("mainBody");
-  const waitBody = document.getElementById("waitBody");
-  const rankedBody = document.getElementById("rankedBody");
-
-  // Tabs
-  const tabInscrits = document.getElementById("tabInscrits");
-  const tabClassees = document.getElementById("tabClassees");
-  const panelInscrits = document.getElementById("panelInscrits");
-  const panelClassees = document.getElementById("panelClassees");
-
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-
-  function toNum(v){
-    if(v === null || v === undefined || v === "") return null;
-    const n = typeof v === "number" ? v : Number(String(v).replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function fmtRank(n){
-    return (n === null || n === undefined) ? "—" : String(n);
-  }
-
-  function statusPill(r){
-    return r.stby ? `<span class="pill stby">STBY</span>` : `<span class="pill">OK</span>`;
-  }
-
-  function rowHtml(idx, r){
-    return `
-      <tr>
-        <td class="num">#${idx}</td>
-        <td class="team">${esc(r.teamName)}</td>
-        <td><span class="pill">${esc(r.p1FirstName)}</span></td>
-        <td><span class="pill">${esc(r.p2FirstName)}</span></td>
-        <td>${statusPill(r)}</td>
-      </tr>
-    `;
-  }
-
-  function rowRankedHtml(idx, r){
-    const p1 = toNum(r.p1Rank);
-    const p2 = toNum(r.p2Rank);
-    const teamRank = (p1 !== null && p2 !== null) ? (p1 + p2) : null;
-
-    return `
-      <tr>
-        <td class="num">#${idx}</td>
-        <td class="team">
-          ${esc(r.teamName)}
-          <div style="margin-top:6px;">
-            <span class="pill rank">🏷️ Équipe : ${esc(fmtRank(teamRank))}</span>
-          </div>
-        </td>
-        <td>
-          <span class="pill">${esc(r.p1FirstName)}</span>
-          <div style="margin-top:6px;">
-            <span class="pill rank">BT : ${esc(fmtRank(p1))}</span>
-          </div>
-        </td>
-        <td>
-          <span class="pill">${esc(r.p2FirstName)}</span>
-          <div style="margin-top:6px;">
-            <span class="pill rank">BT : ${esc(fmtRank(p2))}</span>
-          </div>
-        </td>
-        <td>${statusPill(r)}</td>
-      </tr>
-    `;
-  }
-
-  function computeLists(rows){
-    rows.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
-
-    const forcedMain = rows.filter(r => r.list === "main");
-    const forcedWait = rows.filter(r => r.list === "wait");
-    const auto = rows.filter(r => !r.list);
-
-    const main = [];
-    const used = new Set();
-
-    for(const r of forcedMain){
-      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
-    }
-    for(const r of auto){
-      if(main.length >= MAX_MAIN) break;
-      if(!used.has(r.id)){ main.push(r); used.add(r.id); }
+    if(!auth.currentUser){
+      await loginAndRedirect();
     }
 
-    const wait = [];
-    for(const r of forcedWait){
-      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+    const u = auth.currentUser;
+    if(!u) return alert("Connexion annulée.");
+
+    const role = await getRoleByEmail(u.email);
+
+    if(role !== "admin"){
+      alert("Accès réservé aux administrateurs.");
+      return;
     }
-    for(const r of rows){
-      if(!used.has(r.id)){ wait.push(r); used.add(r.id); }
+
+    window.location.href = "admin/index.html?scope=general";
+  };
+
+  /* ================= JAT ================= */
+  btnJAT.onclick = async (e)=>{
+    e.preventDefault();
+
+    if(!auth.currentUser){
+      await loginAndRedirect();
     }
 
-    return { main, wait };
-  }
+    const u = auth.currentUser;
+    if(!u) return alert("Connexion annulée.");
 
-  function render(rows){
-    const { main, wait } = computeLists(rows);
+    const role = await getRoleByEmail(u.email);
 
-    totalCountEl.textContent = rows.length;
-    mainCountEl.textContent = main.length;
-    waitCountEl.textContent = wait.length;
-    stbyCountEl.textContent = rows.filter(r => r.stby).length;
+    if(role !== "admin" && role !== "jat"){
+      alert("Accès réservé JAT.");
+      return;
+    }
 
-    mainCount2El.textContent = main.length;
-    waitCount2El.textContent = wait.length;
+    window.location.href = "jat/index.html";
+  };
 
-    // INSCRITS
-    mainBody.innerHTML = main.length
-      ? main.map((r,i) => rowHtml(i+1, r)).join("")
-      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe pour le moment.</td></tr>`;
+  /* ================= LOGOUT ================= */
+  btnLogout.onclick = async (e)=>{
+    e.preventDefault();
+    await logout();
+  };
 
-    waitBody.innerHTML = wait.length
-      ? wait.map((r,i) => rowHtml(main.length + i + 1, r)).join("")
-      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe en liste d’attente.</td></tr>`;
+  /* ================= STATUS ================= */
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){
+      hint.textContent = "Non connecté.";
+      return;
+    }
 
-    // CLASSÉES : seulement main, tri par teamRank asc (missing ranks => en bas)
-    const ranked = [...main];
-    ranked.sort((a,b)=>{
-      const a1 = toNum(a.p1Rank), a2 = toNum(a.p2Rank);
-      const b1 = toNum(b.p1Rank), b2 = toNum(b.p2Rank);
-      const at = (a1 !== null && a2 !== null) ? (a1+a2) : Number.POSITIVE_INFINITY;
-      const bt = (b1 !== null && b2 !== null) ? (b1+b2) : Number.POSITIVE_INFINITY;
-      if(at !== bt) return at - bt;
-      return (a.createdAtMs||0) - (b.createdAtMs||0);
-    });
-
-    rankedCountEl.textContent = ranked.length;
-
-    rankedBody.innerHTML = ranked.length
-      ? ranked.map((r,i) => rowRankedHtml(i+1, r)).join("")
-      : `<tr><td colspan="5" class="muted" style="padding:14px;">Aucune équipe sur la liste principale.</td></tr>`;
-  }
-
-  // Tabs behavior
-  function showInscrits(){
-    tabInscrits.setAttribute("aria-selected", "true");
-    tabClassees.setAttribute("aria-selected", "false");
-    panelInscrits.style.display = "block";
-    panelClassees.style.display = "none";
-    try{ localStorage.setItem("etape5_equipes_view", "inscrits"); }catch(e){}
-  }
-  function showClassees(){
-    tabInscrits.setAttribute("aria-selected", "false");
-    tabClassees.setAttribute("aria-selected", "true");
-    panelInscrits.style.display = "none";
-    panelClassees.style.display = "block";
-    try{ localStorage.setItem("etape5_equipes_view", "classees"); }catch(e){}
-  }
-
-  tabInscrits.addEventListener("click", showInscrits);
-  tabClassees.addEventListener("click", showClassees);
-
-  // restore last view
-  try{
-    const saved = localStorage.getItem("etape5_equipes_view");
-    if(saved === "classees") showClassees(); else showInscrits();
-  }catch(e){
-    showInscrits();
-  }
-
-  // 🔴 SNAPSHOT
-  const q = query(collection(db, COL_PUBLIC), orderBy("createdAt", "asc"));
-
-  onSnapshot(q, (snap) => {
-    const rows = [];
-    snap.forEach(doc => {
-      const d = doc.data() || {};
-      rows.push({
-        id: doc.id,
-        teamName: d.teamName || "",
-        p1FirstName: d.p1FirstName || "",
-        p2FirstName: d.p2FirstName || "",
-        createdAtMs: d.createdAt?.toMillis ? d.createdAt.toMillis() : 0,
-        list: d.list || null,
-        stby: d.stby === true,
-        p1Rank: d.p1Rank ?? null,
-        p2Rank: d.p2Rank ?? null
-      });
-    });
-
-    render(rows);
-    statusEl.textContent = "🟢 En direct";
-  }, (err) => {
-    console.error(err);
-    statusEl.textContent = "🔴 Erreur de connexion";
+    try{
+      const role = await getRoleByEmail(user.email);
+      hint.textContent = `Connecté : ${user.email} — rôle : ${role || "aucun"}`;
+    }catch{
+      hint.textContent = "Utilisateur connecté.";
+    }
   });
 </script>
 
