@@ -4,248 +4,258 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inscriptions — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260218" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260303-etape5-inscriptions-tabs-v1" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="container">
-    <div class="topbar-row">
+    <div class="topbar-row topbar-row-step">
       <div class="brand-logo">
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        Étape 5 — 17 avril 2026<br>
-        <span style="opacity:.95;font-weight:800;">BT250</span>
-      </h1>
+      <div class="step-title-wrap" aria-label="Étape 5">
+        <img class="step-title-img" src="../assets/img/etape5.png" alt="Étape 5">
+      </div>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="../index.html">Accueil</a>
-      <a href="programmation.html">Programmation</a>
-      <a href="equipes.html">Équipes</a>
-      <a href="inscriptions.html" aria-current="page">Inscriptions</a>
-      <a href="repas.html">Repas</a>
-      <a href="tirage.html">Tirage au sort</a>
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html" aria-current="page">📝 Inscriptions</a>
+      <a href="repas.html">🍽️ Repas</a>
+      <a href="programmation.html">🗓️ Programmation</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html">🎲 Tirage</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
 
-  <section class="card">
-    <h2>Formulaire d’inscription</h2>
+<section class="card">
 
-    <!-- Message statut inscriptions -->
-    <p id="gateMsg" class="muted">Chargement…</p>
+<h2 style="margin:0 0 8px;">📝 Inscriptions — Étape 5</h2>
 
-    <form id="signupForm" class="form" autocomplete="on">
+<p id="gateMsg" class="muted" style="margin:0;">Chargement…</p>
 
-      <div class="field">
-        <label for="teamName">Nom de l’équipe *</label>
-        <input id="teamName" name="teamName" type="text" required maxlength="40" placeholder="Ex : Les beacheurs">
-      </div>
+<div class="step-subtabs" role="tablist" style="margin-top:12px;">
+<button class="step-subtab" id="tabForm" type="button" aria-selected="true">📝 Formulaire</button>
+<button class="step-subtab" id="tabShop" type="button" aria-selected="false" style="display:none;">🛍️ Boutique</button>
+<button class="step-subtab" id="tabPay" type="button" aria-selected="false" style="display:none;">✅ Paiements</button>
+</div>
 
-      <hr class="sep" />
+<div id="panelForm" style="margin-top:12px;">
 
-      <h3 style="margin:0;">Joueuse 👩</h3>
+<form id="signupForm" class="form" autocomplete="on">
 
-      <div class="field">
-        <label for="p1LastName">Nom *</label>
-        <input id="p1LastName" name="p1LastName" type="text" required placeholder="Nom">
-      </div>
+<div class="field">
+<label for="teamName">Nom de l’équipe *</label>
+<input id="teamName" name="teamName" type="text" required maxlength="40">
+</div>
 
-      <div class="field">
-        <label for="p1FirstName">Prénom *</label>
-        <input id="p1FirstName" name="p1FirstName" type="text" required placeholder="Prénom">
-      </div>
+<hr class="sep" />
 
-      <div class="field">
-        <label for="p1Licence">N° Licence *</label>
-        <input id="p1Licence" name="p1Licence" type="text" required placeholder="Ex : 0123456A">
-      </div>
+<h3 style="margin:0;">Joueuse 👩</h3>
 
-      <div class="field">
-        <label for="p1Phone">Téléphone *</label>
-        <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
-      </div>
+<div class="field">
+<label for="p1LastName">Nom *</label>
+<input id="p1LastName" name="p1LastName" type="text" required>
+</div>
 
-      <hr class="sep" />
+<div class="field">
+<label for="p1FirstName">Prénom *</label>
+<input id="p1FirstName" name="p1FirstName" type="text" required>
+</div>
 
-      <h3 style="margin:0;">Joueur 👨</h3>
+<div class="field">
+<label for="p1Licence">N° Licence *</label>
+<input id="p1Licence" name="p1Licence" type="text" required>
+</div>
 
-      <div class="field">
-        <label for="p2LastName">Nom *</label>
-        <input id="p2LastName" name="p2LastName" type="text" required placeholder="Nom">
-      </div>
+<div class="field">
+<label for="p1Phone">Téléphone *</label>
+<input id="p1Phone" name="p1Phone" type="tel" required>
+</div>
 
-      <div class="field">
-        <label for="p2FirstName">Prénom *</label>
-        <input id="p2FirstName" name="p2FirstName" type="text" required placeholder="Prénom">
-      </div>
+<hr class="sep" />
 
-      <div class="field">
-        <label for="p2Licence">N° Licence *</label>
-        <input id="p2Licence" name="p2Licence" type="text" required placeholder="Ex : 0123456A">
-      </div>
+<h3 style="margin:0;">Joueur 👨</h3>
 
-      <div class="field">
-        <label for="p2Phone">Téléphone *</label>
-        <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
-      </div>
+<div class="field">
+<label for="p2LastName">Nom *</label>
+<input id="p2LastName" name="p2LastName" type="text" required>
+</div>
 
-      <hr class="sep" />
+<div class="field">
+<label for="p2FirstName">Prénom *</label>
+<input id="p2FirstName" name="p2FirstName" type="text" required>
+</div>
 
-      <button id="submitBtn" class="btn" type="submit" style="font-weight:800; color:#111;">
-        ✅ Valider
-      </button>
+<div class="field">
+<label for="p2Licence">N° Licence *</label>
+<input id="p2Licence" name="p2Licence" type="text" required>
+</div>
 
-      <p id="status" class="muted" role="status" aria-live="polite"></p>
+<div class="field">
+<label for="p2Phone">Téléphone *</label>
+<input id="p2Phone" name="p2Phone" type="tel" required>
+</div>
 
-    </form>
-  </section>
+<hr class="sep" />
+
+<button id="submitBtn" class="btn" type="submit" style="font-weight:800;color:#111;">
+✅ Valider
+</button>
+
+<p id="status" class="muted" style="margin:10px 0 0;"></p>
+
+</form>
+</div>
+
+<div id="panelShop" style="display:none;margin-top:12px;">
+<div class="note">
+
+<p>Paiement des inscriptions via <b>SumUp</b>.</p>
+
+<ul>
+<li>Paiement équipe : <b>20€</b></li>
+<li>Paiement joueur : <b>10€</b></li>
+</ul>
+
+<div class="grid" style="margin-top:12px;">
+<a
+class="btn"
+href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a"
+target="_blank"
+rel="noopener"
+style="font-weight:900;color:#111;"
+>
+🔗 Ouvrir la boutique
+</a>
+</div>
+
+</div>
+</div>
+
+<div id="panelPay" style="display:none;margin-top:12px;">
+<p id="paidStatus" class="muted">Chargement…</p>
+<div id="payList" style="display:grid;gap:10px;margin-top:12px;"></div>
+</div>
+
+</section>
 
 </main>
 
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    doc,
-    onSnapshot,
-    collection,
-    addDoc,
-    setDoc,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const COL_PRIVATE = "inscriptions_etape5_private";
-  const COL_PUBLIC  = "equipes_etape5_public";
+import { db } from "../assets/js/firebase.js";
 
-  const form = document.getElementById("signupForm");
-  const statusEl = document.getElementById("status");
-  const gateMsgEl = document.getElementById("gateMsg");
-  const submitBtn = document.getElementById("submitBtn");
+import {
+doc,
+onSnapshot,
+collection,
+addDoc,
+setDoc,
+serverTimestamp,
+query,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // tes rules: open | paused | closed (sinon => pas encore ouvert)
-  let gateState = "not_open";
+const SCOPE = "etape5";
 
-  const setStatus = (msg) => { statusEl.textContent = msg; };
+const COL_PRIVATE = "inscriptions_etape5_private";
+const COL_PUBLIC  = "equipes_etape5_public";
+const COL_PAYMENTS = "paiements_challenge";
 
-  function setInputsDisabled(disabled){
-    const fields = form.querySelectorAll("input, select, textarea");
-    fields.forEach(el => el.disabled = disabled);
-  }
+const form = document.getElementById("signupForm");
+const statusEl = document.getElementById("status");
+const gateMsgEl = document.getElementById("gateMsg");
+const submitBtn = document.getElementById("submitBtn");
 
-  function normalizeState(state){
-    // compat: certains messages/anciens tests utilisaient "suspended"
-    if(state === "suspended") return "paused";
-    return state || "not_open";
-  }
+let gateState = "not_open";
+let cfg = {};
 
-  function applyGate(stateRaw){
-    gateState = normalizeState(stateRaw);
+function readFormData(){
+return{
+createdAt: serverTimestamp(),
+teamName: form.teamName.value.trim(),
 
-    if(gateState === "open"){
-      gateMsgEl.textContent = "✅ Inscriptions ouvertes. Tu peux t’inscrire ci-dessous.";
-      setInputsDisabled(false);
-      submitBtn.disabled = false;
-      submitBtn.classList.remove("disabled");
-      return;
-    }
+p1FirstName: form.p1FirstName.value.trim(),
+p1LastName: form.p1LastName.value.trim(),
+p1Licence: form.p1Licence.value.trim(),
+p1Phone: form.p1Phone.value.trim(),
 
-    // sinon: bloqué
-    setInputsDisabled(true);
-    submitBtn.disabled = true;
-    submitBtn.classList.add("disabled");
+p2FirstName: form.p2FirstName.value.trim(),
+p2LastName: form.p2LastName.value.trim(),
+p2Licence: form.p2Licence.value.trim(),
+p2Phone: form.p2Phone.value.trim()
+};
+}
 
-    if(gateState === "paused"){
-      gateMsgEl.textContent = "⏸️ Inscriptions temporairement suspendues. Réessaie un peu plus tard.";
-      return;
-    }
-    if(gateState === "closed"){
-      gateMsgEl.textContent = "🔒 Inscriptions clôturées.";
-      return;
-    }
-    gateMsgEl.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
-  }
+form.addEventListener("submit", async(e)=>{
 
-  // 🔄 Live gate
-  const cfgRef = doc(db, "config", "etape5");
-  onSnapshot(cfgRef, (snap)=>{
-    const state = snap.exists() ? (snap.data().inscriptionsState || "not_open") : "not_open";
-    applyGate(state);
-  }, (err)=>{
-    console.error(err);
-    applyGate("not_open");
-    gateMsgEl.textContent = "❌ Impossible de vérifier l’état des inscriptions. Réessaie plus tard.";
-  });
+e.preventDefault();
 
-  function readFormData(){
-    return {
-      createdAt: serverTimestamp(),
-      teamName: (form.teamName.value || "").trim(),
+if(gateState!=="open"){
+statusEl.textContent="⛔ Inscriptions non ouvertes.";
+return;
+}
 
-      p1FirstName: (form.p1FirstName.value || "").trim(),
-      p1LastName:  (form.p1LastName.value || "").trim(),
-      p1Licence:   (form.p1Licence.value || "").trim(),
-      p1Phone:     (form.p1Phone.value || "").trim(),
+submitBtn.disabled=true;
 
-      p2FirstName: (form.p2FirstName.value || "").trim(),
-      p2LastName:  (form.p2LastName.value || "").trim(),
-      p2Licence:   (form.p2Licence.value || "").trim(),
-      p2Phone:     (form.p2Phone.value || "").trim(),
-    };
-  }
+try{
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+const data=readFormData();
 
-    if(gateState !== "open"){
-      setStatus("⛔ Inscriptions non ouvertes.");
-      return;
-    }
+const ref=await addDoc(collection(db,COL_PRIVATE),data);
 
-    submitBtn.disabled = true;
-    submitBtn.classList.add("disabled");
-    setStatus("Envoi en cours…");
+await setDoc(doc(db,COL_PUBLIC,ref.id),{
+createdAt: serverTimestamp(),
+teamName:data.teamName,
+p1FirstName:data.p1FirstName,
+p2FirstName:data.p2FirstName,
+list:"main",
+stby:false
+});
 
-    try {
-      const data = readFormData();
+form.reset();
 
-      if (!data.teamName || !data.p1FirstName || !data.p1LastName || !data.p2FirstName || !data.p2LastName) {
-        throw new Error("Merci de compléter tous les champs obligatoires.");
-      }
+statusEl.textContent="✅ Inscription enregistrée";
 
-      // 1) PRIVÉ
-      const ref = await addDoc(collection(db, COL_PRIVATE), data);
+}catch(err){
 
-      // 2) PUBLIC (même ID)
-      await setDoc(doc(db, COL_PUBLIC, ref.id), {
-        createdAt: serverTimestamp(),
-        teamName: data.teamName,
-        p1FirstName: data.p1FirstName,
-        p2FirstName: data.p2FirstName,
-        list: "main",
-        stby: false
-      });
+statusEl.textContent="❌ Erreur";
 
-      form.reset();
-      setStatus("✅ Inscription enregistrée !");
-    } catch (err) {
-      console.error(err);
-      setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
-    } finally {
-      if(gateState === "open"){
-        submitBtn.disabled = false;
-        submitBtn.classList.remove("disabled");
-      }
-    }
-  });
+}
+
+submitBtn.disabled=false;
+
+});
+
+const cfgRef=doc(db,"config","etape5");
+
+onSnapshot(cfgRef,(snap)=>{
+
+const d=snap.exists()?snap.data():{};
+cfg=d||{};
+
+gateState=d.inscriptionsState||"not_open";
+
+if(gateState==="open"){
+gateMsgEl.textContent="✅ Inscriptions ouvertes";
+submitBtn.disabled=false;
+}else{
+gateMsgEl.textContent="⏳ Inscriptions non ouvertes";
+submitBtn.disabled=true;
+}
+
+});
+
 </script>
 
 </body>
