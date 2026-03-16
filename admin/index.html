@@ -18,7 +18,7 @@
     /* Sous-onglets dans Général */
     .subtabs{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap:10px;
       margin-top:10px;
     }
@@ -201,6 +201,7 @@
     @media (max-width:420px){
       .pay-team{ font-size:15px; }
       .toggle button{ padding:7px 9px; font-size:13px; }
+      .subtabs{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -256,7 +257,6 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <!-- ✅ tu veux supprimer le texte explicatif -->
     <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
@@ -268,6 +268,7 @@
     <div class="subtabs" role="tablist" aria-label="Général — onglets">
       <button class="subtab" id="tabInfos" type="button" aria-selected="true">📰 Infos</button>
       <button class="subtab" id="tabPayments" type="button" aria-selected="false">✅ Paiements</button>
+      <button class="subtab" id="tabGeneralRank" type="button" aria-selected="false">🏆 Classement général</button>
     </div>
 
     <!-- ========= INFOS ========= -->
@@ -336,6 +337,20 @@
       <div id="payList" class="pay-list" aria-label="Liste paiements"></div>
     </div>
 
+    <!-- ========= CLASSEMENT GENERAL ========= -->
+    <div id="panelGeneralRank" style="display:none; margin-top:14px;">
+      <h2 style="margin:0 0 10px;">🏆 Classement général — Administration</h2>
+      <p class="muted" style="margin:0 0 12px;">
+        Accès à l’outil dédié pour gérer l’affichage du classement général, l’ordre à égalité et les badges joueurs.
+      </p>
+
+      <div class="grid">
+        <a class="btn" href="classement-general.html" style="font-weight:900; color:#111; text-align:center;">
+          🏆 Ouvrir l’admin du classement général
+        </a>
+      </div>
+    </div>
+
   </section>
 
 </main>
@@ -355,7 +370,7 @@
   // CONFIG
   // =========================
   const COL_INFOS = "infos";
-  const COL_PAYMENTS = "paiements_challenge"; // docId = `${etapeId}_${teamDocId}`
+  const COL_PAYMENTS = "paiements_challenge";
 
   const TEAM_COLLECTION_BY_ETAPE = {
     etape1: "equipes_etape1_public",
@@ -366,7 +381,7 @@
   };
 
   const LS_SCOPE_KEY    = "admin_scope_last";
-  const LS_GENERAL_TAB  = "challenge_admin_general_tab"; // "infos" | "pay"
+  const LS_GENERAL_TAB  = "challenge_admin_general_tab"; // "infos" | "pay" | "general-rank"
   const LS_PAY_ETAPE    = "challenge_admin_pay_etape";
 
   // =========================
@@ -383,8 +398,11 @@
   // General subtabs
   const tabInfos = document.getElementById("tabInfos");
   const tabPayments = document.getElementById("tabPayments");
+  const tabGeneralRank = document.getElementById("tabGeneralRank");
+
   const panelInfos = document.getElementById("panelInfos");
   const panelPay = document.getElementById("panelPay");
+  const panelGeneralRank = document.getElementById("panelGeneralRank");
 
   // Infos form
   const infoForm = document.getElementById("infoForm");
@@ -724,25 +742,28 @@
   });
 
   // =========================
-  // Général tabs (infos / pay)
+  // Général tabs (infos / pay / classement général)
   // =========================
   function showGeneralTab(which){
     const isInfos = which === "infos";
+    const isPay = which === "pay";
+    const isGeneralRank = which === "general-rank";
 
     tabInfos.setAttribute("aria-selected", isInfos ? "true" : "false");
-    tabPayments.setAttribute("aria-selected", isInfos ? "false" : "true");
+    tabPayments.setAttribute("aria-selected", isPay ? "true" : "false");
+    tabGeneralRank.setAttribute("aria-selected", isGeneralRank ? "true" : "false");
 
     panelInfos.style.display = isInfos ? "block" : "none";
-    panelPay.style.display   = isInfos ? "none" : "block";
+    panelPay.style.display   = isPay ? "block" : "none";
+    panelGeneralRank.style.display = isGeneralRank ? "block" : "none";
 
     try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
 
     if(isInfos){
       startInfos();
       stopPaymentsSubs();
-    }else{
+    }else if(isPay){
       stopInfos();
-      // restore last pay etape
       try{
         const savedEtape = localStorage.getItem(LS_PAY_ETAPE);
         if(savedEtape && payEtape.querySelector(`option[value="${savedEtape}"]`)){
@@ -750,11 +771,15 @@
         }
       }catch(e){}
       startPaymentsSubs(payEtape.value);
+    }else{
+      stopInfos();
+      stopPaymentsSubs();
     }
   }
 
   tabInfos.onclick = ()=> showGeneralTab("infos");
   tabPayments.onclick = ()=> showGeneralTab("pay");
+  tabGeneralRank.onclick = ()=> showGeneralTab("general-rank");
 
   // =========================
   // Zone tabs
@@ -776,7 +801,6 @@
     persistScope(scope);
 
     if(scope === "general"){
-      // ✅ onglet "Général" noir/blanc
       const a = document.createElement("a");
       a.className = "btn is-active";
       a.href = "#";
@@ -786,14 +810,13 @@
 
       panelGeneral.style.display = "block";
 
-      // restore general tab
       let saved = "infos";
       try{ saved = localStorage.getItem(LS_GENERAL_TAB) || "infos"; }catch(e){}
-      showGeneralTab(saved === "pay" ? "pay" : "infos");
+      if(saved !== "pay" && saved !== "general-rank") saved = "infos";
+      showGeneralTab(saved);
       return;
     }
 
-    // Zone Étape
     if(scope === "etape5"){
       tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
     }
@@ -816,7 +839,6 @@
       tabsEl.appendChild(a);
     }
 
-    // en quittant général : coupe les listeners
     stopInfos();
     stopPaymentsSubs();
   }
