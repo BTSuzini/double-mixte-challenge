@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v7" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v8" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -61,7 +61,6 @@
       z-index:2;
     }
 
-    /* Général : 1 ligne (Joueur · Points · Étapes) */
     .rank-card.one-line{ align-items:center; }
     .one-line .rsub{ display:none; }
 
@@ -85,7 +84,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ✅ Logo "filigrane" (desktop: centré comme avant) */
     .mid-logo{
       position:absolute;
       left:50%;
@@ -109,28 +107,38 @@
       filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
     }
 
+    .badge-player{
+      position:relative;
+      z-index:2;
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:46px;
+    }
+    .badge-player img{
+      max-height:42px;
+      max-width:56px;
+      object-fit:contain;
+      display:block;
+    }
+
     @media (max-width: 420px){
       .rk{ width:38px; height:38px; border-radius:12px; }
       .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
       .mid-logo img{ padding:5px; }
+      .badge-player img{ max-height:36px; max-width:50px; }
     }
 
-    /* =========================================================
-       ✅ OPTION A (MOBILE PRO)
-       - Layout vertical
-       - Noms non coupés
-       - Logo discret à droite (jamais au-dessus du texte)
-    ========================================================== */
     @media (max-width: 520px){
       .rank-card{
         flex-direction:column;
         align-items:flex-start;
         justify-content:flex-start;
         gap:10px;
-        padding-right:72px; /* réserve pour le logo à droite */
+        padding-right:72px;
       }
 
-      /* Noms / sous-ligne : pas de coupe */
       .rtitle, .rsub{
         white-space:normal;
         overflow:visible;
@@ -140,21 +148,18 @@
         margin-top:6px;
       }
 
-      /* Pastilles sous le nom */
       .meta-line{
         justify-content:flex-start;
         width:100%;
         gap:8px;
       }
 
-      /* Tag (#pos) : aligné à droite en haut */
       .tag{
         position:absolute;
         top:10px;
         right:10px;
       }
 
-      /* Logo : à droite, centré verticalement, discret */
       .mid-logo{
         left:auto;
         right:10px;
@@ -166,7 +171,13 @@
       .mid-logo img{
         height:100%;
         padding:0;
-        filter: none;
+        filter:none;
+      }
+
+      .badge-player{
+        position:absolute;
+        right:12px;
+        bottom:12px;
       }
     }
   </style>
@@ -234,9 +245,6 @@
   import { db } from "../assets/js/firebase.js";
   import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // ============================================================
-  // CONFIG POINTS FFT
-  // ============================================================
   const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
   const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
 
@@ -250,27 +258,17 @@
     return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
   }
 
-  // ============================================================
-  // DOM
-  // ============================================================
   const sel   = document.getElementById("rankScope");
   const title = document.getElementById("rankTitle");
   const sub   = document.getElementById("rankSub");
   const hint  = document.getElementById("rankHint");
   const box   = document.getElementById("rankBox");
 
-  // ============================================================
-  // STATE
-  // ============================================================
   const classements = new Map();
-  classements.set("general", null);
   for(const s of STEP_IDS) classements.set(s, null);
-
+  let generalConfig = { players:{}, order:[] };
   let hasAnyListenerOk = false;
 
-  // ============================================================
-  // UTILS
-  // ============================================================
   function esc(s){
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
@@ -292,9 +290,6 @@
     return s[0].toUpperCase() + ".";
   }
 
-  // ============================================================
-  // ✅ NORMALISATION JOUEURS (pour classement général)
-  // ============================================================
   const PLAYER_FIRSTNAME_ALIASES = {
     "charlyne": "charline"
   };
@@ -348,9 +343,6 @@
     return `<p class="muted" style="margin:0;">${esc(msg)}</p>`;
   }
 
-  // ============================================================
-  // LOGOS ÉQUIPE
-  // ============================================================
   function normTeamName(s){
     return (s || "").toString().trim().toLowerCase()
       .replaceAll("’","'")
@@ -397,9 +389,14 @@
     return `<div class="mid-logo" aria-hidden="true"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
   }
 
-  // ============================================================
-  // ÉGALITÉS + "filles devant" (si info dispo)
-  // ============================================================
+  function renderBadgeImg(src, alt){
+    if(!src) return "";
+    const full = String(src).startsWith("http://") || String(src).startsWith("https://")
+      ? String(src)
+      : `../assets/img/${String(src)}`;
+    return `<div class="badge-player"><img src="${esc(full)}" alt="${esc(alt || "Badge joueur")}"></div>`;
+  }
+
   function genderRank(g){
     const s = (g ?? "").toString().toUpperCase().trim();
     if(s === "F" || s === "FEMALE" || s === "W") return 0;
@@ -415,9 +412,6 @@
     return null;
   }
 
-  // ============================================================
-  // NORMALIZE STEP DOC -> teams ordered by pos
-  // ============================================================
   function normalizeStepTeams(stepId, stepDoc){
     const ptsTable = pointsTable(stepId);
 
@@ -503,9 +497,6 @@
     return [];
   }
 
-  // ============================================================
-  // BUILD GENERAL
-  // ============================================================
   function buildGeneralFromSteps(){
     const map = new Map();
 
@@ -572,8 +563,6 @@
           rec.points += Number(row.points || 0);
           if(!rec.gender && item.gender) rec.gender = item.gender;
           if(!rec.logo && logoSrc) rec.logo = logoSrc;
-
-          // garde la version la plus "canonique" / récente du prénom affiché
           rec.name = item.display;
 
           const mk = `${item.canonical}|${stepId}`;
@@ -585,20 +574,37 @@
       }
     }
 
-    const out = [...map.values()].map(x=>({
-      name: x.name,
-      points: x.points,
-      stepsPlayed: x.steps.size,
-      gender: x.gender || null,
-      logo: x.logo || null
-    }));
+    const out = [...map.values()].map(x=>{
+      const cfg = generalConfig?.players?.[x.key] || {};
+      return {
+        key: x.key,
+        name: x.name,
+        points: x.points,
+        stepsPlayed: x.steps.size,
+        gender: x.gender || null,
+        logo: x.logo || null,
+        badge: cfg.badge || null,
+        priority: Number(cfg.priority || 0)
+      };
+    });
 
     out.sort((a,b)=>{
       if(b.points !== a.points) return b.points - a.points;
+      if(a.priority !== b.priority) return a.priority - b.priority;
       const ga = genderRank(a.gender);
       const gb = genderRank(b.gender);
       if(ga !== gb) return ga - gb;
-      return a.name.localeCompare(b.name);
+
+      const order = Array.isArray(generalConfig?.order) ? generalConfig.order : [];
+      const ia = order.indexOf(a.key);
+      const ib = order.indexOf(b.key);
+      if(ia !== -1 || ib !== -1){
+        if(ia === -1) return 1;
+        if(ib === -1) return -1;
+        if(ia !== ib) return ia - ib;
+      }
+
+      return a.name.localeCompare(b.name, "fr");
     });
 
     let lastPts = null;
@@ -615,9 +621,6 @@
     return out;
   }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
   function refreshStepOptions(){
     for(const stepId of STEP_IDS){
       const opt = [...sel.options].find(o=>o.value === stepId);
@@ -662,6 +665,8 @@
           <span class="meta-pill">⭐ ${esc(String(r.points))} pts</span>
           <span class="meta-pill">🎾 ${esc(String(r.stepsPlayed))} étape(s)</span>
         </div>
+
+        ${renderBadgeImg(r.badge, `Badge — ${r.name}`)}
       </div>
     `);
 
@@ -717,10 +722,7 @@
     else renderStep(v);
   }
 
-  // ============================================================
-  // LISTENERS
-  // ============================================================
-  function listenDoc(id){
+  function listenClassementDoc(id){
     return onSnapshot(doc(db, "classements", id), (snap)=>{
       hasAnyListenerOk = true;
       classements.set(id, snap.exists() ? (snap.data() || {}) : null);
@@ -735,11 +737,17 @@
     });
   }
 
+  onSnapshot(doc(db, "config", "classement_general"), (snap)=>{
+    generalConfig = snap.exists() ? (snap.data() || {}) : {};
+    if(!generalConfig.players) generalConfig.players = {};
+    if(!Array.isArray(generalConfig.order)) generalConfig.order = [];
+    render();
+  });
+
   hint.textContent = "Chargement des classements…";
 
   const unsubs = [];
-  unsubs.push(listenDoc("general"));
-  for(const s of STEP_IDS) unsubs.push(listenDoc(s));
+  for(const s of STEP_IDS) unsubs.push(listenClassementDoc(s));
 
   sel.addEventListener("change", render);
   render();
