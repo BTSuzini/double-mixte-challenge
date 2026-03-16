@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boutique — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260221" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-boutique-v2-verifications" />
 
   <style>
     .note{
@@ -206,7 +206,7 @@
     </div>
 
     <p class="muted mutedline" id="paidHint" style="display:none;">
-      Affichage en direct. Le statut “payé / pas payé” est mis à jour par l’organisation.
+      Affichage en direct. Le statut affiché reprend la vérification faite par l’organisation.
     </p>
   </section>
 
@@ -247,7 +247,7 @@
   <section class="card" id="panelPaid" style="display:none;">
     <h2 style="margin:0;">✅ Paiements effectués</h2>
     <p class="muted" style="margin:8px 0 0;">
-      Tri : <b>non payé</b> → <b>partiel</b> → <b>payé</b>.
+      Tri : <b>non payé</b> → <b>à vérifier</b> → <b>payé</b>.
     </p>
 
     <div class="pay-top">
@@ -256,9 +256,9 @@
         <select id="paidEtape">
           <option value="etape1">🎾 Étape 1</option>
           <option value="etape2">🎾 Étape 2</option>
-          <option value="etape3" disabled>🎾 Étape 3 (plus tard)</option>
-          <option value="etape4" disabled>🎾 Étape 4 (plus tard)</option>
-          <option value="etape5" disabled>🧪 Étape 5 (test) (plus tard)</option>
+          <option value="etape3">🎾 Étape 3</option>
+          <option value="etape4">🎾 Étape 4</option>
+          <option value="etape5">🧪 Étape 5 (test)</option>
         </select>
       </div>
     </div>
@@ -281,8 +281,6 @@
   // =========================
   // CONFIG FIRESTORE
   // =========================
-  const COL_PAYMENTS = "paiements_challenge"; // docId = `${etapeId}_${teamDocId}`
-
   const TEAM_COLLECTION_BY_ETAPE = {
     etape1: "equipes_etape1_public",
     etape2: "equipes_etape2_public",
@@ -290,6 +288,10 @@
     etape4: "equipes_etape4_public",
     etape5: "equipes_etape5_public",
   };
+
+  function verifCollectionName(etapeId){
+    return `verifications_${etapeId}`;
+  }
 
   // =========================
   // TABS
@@ -306,6 +308,7 @@
     panelShop.style.display = "block";
     panelPaid.style.display = "none";
     paidHint.style.display = "none";
+    stopSubs();
     try{ localStorage.setItem("challenge_boutique_tab","shop"); }catch(e){}
   }
 
@@ -316,16 +319,11 @@
     panelPaid.style.display = "block";
     paidHint.style.display = "block";
     try{ localStorage.setItem("challenge_boutique_tab","paid"); }catch(e){}
+    startSubs(paidEtape.value);
   }
 
   tabShop.addEventListener("click", showShop);
-
-  try{
-    const saved = localStorage.getItem("challenge_boutique_tab");
-    if(saved === "paid") showPaid(); else showShop();
-  }catch(e){
-    showShop();
-  }
+  tabPaid.addEventListener("click", showPaid);
 
   // =========================
   // UI PAIEMENTS
@@ -341,36 +339,56 @@
       .replaceAll(">","&gt;");
   }
 
-  function statusDotClass(paidCount){
-    if(paidCount >= 2) return "green";
-    if(paidCount === 1) return "orange";
+  function playerStatusCode(statusValue){
+    if(statusValue === "ok") return 2;   // payé
+    if(statusValue === "nok") return 1;  // à vérifier
+    return 0;                            // non payé / non vérifié
+  }
+
+  function statusDotClass(teamStatus){
+    if(teamStatus >= 2) return "green";
+    if(teamStatus === 1) return "orange";
     return "red";
   }
 
-  function statusLabel(paidCount){
-    return paidCount >= 2 ? "Payé"
-      : paidCount === 1 ? "Partiel"
-      : "Non payé";
+  function statusLabel(teamStatus){
+    if(teamStatus >= 2) return "Payé";
+    if(teamStatus === 1) return "À vérifier";
+    return "Non payé";
   }
 
-  function paidIcon(isPaid){
-    return isPaid ? "✅" : "❌";
+  function playerIcon(statusValue){
+    if(statusValue === "ok") return "✅";
+    if(statusValue === "nok") return "⚠️";
+    return "❌";
+  }
+
+  function playerLabel(statusValue){
+    if(statusValue === "ok") return "Payé";
+    if(statusValue === "nok") return "À vérifier";
+    return "Non payé";
+  }
+
+  function teamSortValue(p1Status, p2Status){
+    const a = playerStatusCode(p1Status);
+    const b = playerStatusCode(p2Status);
+    return Math.min(a, b);
   }
 
   // =========================
-  // DATA (Teams + Payments)
+  // DATA (Teams + Verifications)
   // =========================
   let snapTeams = null;
-  let snapPay = null;
+  let snapVerif = null;
 
   let unsubTeams = null;
-  let unsubPay = null;
+  let unsubVerif = null;
 
   function stopSubs(){
     if(unsubTeams){ unsubTeams(); unsubTeams = null; }
-    if(unsubPay){ unsubPay(); unsubPay = null; }
+    if(unsubVerif){ unsubVerif(); unsubVerif = null; }
     snapTeams = null;
-    snapPay = null;
+    snapVerif = null;
   }
 
   function startSubs(etapeId){
@@ -386,10 +404,32 @@
     payList.innerHTML = "";
 
     const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
-    const qPay = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+    const qVerif = query(collection(db, verifCollectionName(etapeId)));
 
-    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; rebuild(etapeId); }, (e)=>{ console.error(e); paidStatus.textContent="🔴 Erreur équipes"; });
-    unsubPay = onSnapshot(qPay, (s)=>{ snapPay = s; rebuild(etapeId); }, (e)=>{ console.error(e); snapPay = null; rebuild(etapeId); });
+    unsubTeams = onSnapshot(
+      qTeams,
+      (s)=>{
+        snapTeams = s;
+        rebuild(etapeId);
+      },
+      (e)=>{
+        console.error(e);
+        paidStatus.textContent = "🔴 Erreur équipes";
+      }
+    );
+
+    unsubVerif = onSnapshot(
+      qVerif,
+      (s)=>{
+        snapVerif = s;
+        rebuild(etapeId);
+      },
+      (e)=>{
+        console.error(e);
+        snapVerif = null;
+        rebuild(etapeId);
+      }
+    );
   }
 
   function renderSection(title, subtitle, arr){
@@ -405,8 +445,8 @@
     }
 
     const cards = arr.map(t=>{
-      const dot = statusDotClass(t.paidCount);
-      const label = statusLabel(t.paidCount);
+      const dot = statusDotClass(t.teamStatus);
+      const teamLabel = statusLabel(t.teamStatus);
 
       const p1Name = t.p1 || "—";
       const p2Name = t.p2 || "—";
@@ -415,21 +455,25 @@
         <div class="pay-card">
           <div class="pay-head">
             <div class="pay-team">${esc(t.teamName)}</div>
-            <div class="badge" title="${esc(label)}">
+            <div class="badge" title="${esc(teamLabel)}">
               <span class="dot ${dot}"></span>
-              ${esc(label)}
+              ${esc(teamLabel)}
             </div>
           </div>
 
           <div class="players">
             <div class="player-row">
               <div class="player-name">${esc(p1Name)}</div>
-              <div class="player-right">${paidIcon(t.p1Paid)}</div>
+              <div class="player-right" title="${esc(playerLabel(t.p1PaymentStatus))}">
+                ${playerIcon(t.p1PaymentStatus)}
+              </div>
             </div>
 
             <div class="player-row">
               <div class="player-name">${esc(p2Name)}</div>
-              <div class="player-right">${paidIcon(t.p2Paid)}</div>
+              <div class="player-right" title="${esc(playerLabel(t.p2PaymentStatus))}">
+                ${playerIcon(t.p2PaymentStatus)}
+              </div>
             </div>
           </div>
         </div>
@@ -445,13 +489,13 @@
       return;
     }
 
-    const payMap = new Map(); // id -> {p1Paid,p2Paid}
-    if(snapPay){
-      snapPay.forEach(d=>{
+    const verifMap = new Map();
+    if(snapVerif){
+      snapVerif.forEach(d=>{
         const x = d.data() || {};
-        payMap.set(d.id, {
-          p1Paid: x.p1Paid === true,
-          p2Paid: x.p2Paid === true
+        verifMap.set(d.id, {
+          p1PaymentStatus: x?.p1?.payment || "nv",
+          p2PaymentStatus: x?.p2?.payment || "nv"
         });
       });
     }
@@ -466,18 +510,22 @@
       const p2 = (x.p2FirstName || "").trim();
       if(!teamName) return;
 
-      const list = (x.list || "main").toString(); // "main" | "wait"
-      const payId = `${etapeId}_${d.id}`;
-      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false };
-      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
+      const list = (x.list || "main").toString();
+      const verif = verifMap.get(d.id) || {
+        p1PaymentStatus: "nv",
+        p2PaymentStatus: "nv"
+      };
+
+      const teamStatus = teamSortValue(verif.p1PaymentStatus, verif.p2PaymentStatus);
 
       const rec = {
-        payId,
+        teamDocId: d.id,
         teamName,
-        p1, p2,
-        p1Paid: pay.p1Paid,
-        p2Paid: pay.p2Paid,
-        paidCount,
+        p1,
+        p2,
+        p1PaymentStatus: verif.p1PaymentStatus,
+        p2PaymentStatus: verif.p2PaymentStatus,
+        teamStatus,
         list
       };
 
@@ -487,8 +535,8 @@
 
     function sortArr(arr){
       arr.sort((a,b)=>{
-        if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount; // 0 -> 1 -> 2
-        return (a.teamName||"").localeCompare((b.teamName||""), "fr");
+        if(a.teamStatus !== b.teamStatus) return a.teamStatus - b.teamStatus;
+        return (a.teamName || "").localeCompare((b.teamName || ""), "fr");
       });
     }
 
@@ -509,33 +557,34 @@
     ].join("");
   }
 
-  // Restore étape selection
+  // =========================
+  // Restore état onglets / étape
+  // =========================
   try{
     const savedEtape = localStorage.getItem("challenge_boutique_paid_etape");
-    if(savedEtape && paidEtape.querySelector(`option[value="${savedEtape}"]`) && !paidEtape.querySelector(`option[value="${savedEtape}"]`).disabled){
+    if(
+      savedEtape &&
+      paidEtape.querySelector(`option[value="${savedEtape}"]`) &&
+      !paidEtape.querySelector(`option[value="${savedEtape}"]`).disabled
+    ){
       paidEtape.value = savedEtape;
     }
   }catch(e){}
 
   paidEtape.addEventListener("change", ()=>{
     try{ localStorage.setItem("challenge_boutique_paid_etape", paidEtape.value); }catch(e){}
-    startSubs(paidEtape.value);
-  });
-
-  // Start watchers when Paid tab is visible
-  function showPaidPatched(){
-    showPaid();
-    startSubs(paidEtape.value);
-  }
-  tabPaid.addEventListener("click", showPaidPatched);
-
-  // If page opens already on paid tab
-  try{
-    const saved = localStorage.getItem("challenge_boutique_tab");
-    if(saved === "paid"){
+    if(panelPaid.style.display !== "none"){
       startSubs(paidEtape.value);
     }
-  }catch(e){}
+  });
+
+  try{
+    const saved = localStorage.getItem("challenge_boutique_tab");
+    if(saved === "paid") showPaid();
+    else showShop();
+  }catch(e){
+    showShop();
+  }
 </script>
 
 </body>
