@@ -4,34 +4,175 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape5-prog" />
+
+  <style>
+    /* ✅ CSS bandeau étape (identique à repas.html) */
+    .topbar-row-step{
+      grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+    }
+    .step-title-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: calc(var(--logo-size) * 0.55);
+    }
+    .step-title-img{
+      width: min(520px, 100%);
+      max-height: 88px;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+    }
+
+    .nav-step{
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-step::after{
+      content:"";
+      flex:auto;
+    }
+    .nav-step a{
+      padding:8px 12px;
+      flex: 1 1 auto;
+      text-align:center;
+    }
+
+
+    .nav a[aria-current="page"]{
+      background: rgba(255,255,255,.26);
+      
+      box-shadow: 0 6px 14px rgba(0,0,0,.10);
+    }
+
+    @media (max-width: 420px){
+      .nav-step a{
+        padding:7px 10px;
+        font-size: 13px;
+      }
+      .step-title-img{ max-height: 74px; }
+    }
+
+    /* ===== Style prog (inchangé) ===== */
+    .match-list{ display:flex; flex-direction:column; gap:14px; }
+
+    .match-card{
+      border-radius:18px;
+      border:2px solid rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
+    .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
+
+    .match-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .m-time{
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+      letter-spacing:.2px;
+    }
+
+    .m-court{
+      font-size:13px;
+      font-weight:400;
+      font-style:italic;
+      opacity:.95;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+      flex:1;
+    }
+
+    .team-row{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 22px 22px 24px;
+      align-items:center;
+      gap:6px;
+    }
+
+    .team-block{ min-width:0; }
+    .team-title{
+      font-size:15px;
+      font-weight:900;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .team-sub{
+      margin-top:2px;
+      font-size:13px;
+      font-weight:800;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .sc{
+      text-align:right;
+      font-size:15px;
+      font-weight:900;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vs-line{
+      margin:10px 0 6px;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:2px;
+      opacity:.55;
+      font-size:12px;
+    }
+
+    @media (max-width: 380px){
+      .m-time{ font-size:13px; }
+      .m-court{ font-size:13px; }
+      .team-title{ font-size:14px; }
+      .team-sub{ font-size:12px; }
+      .sc{ font-size:14px; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="topbar">
   <div class="container">
-    <div class="topbar-row">
+    <div class="topbar-row topbar-row-step">
       <div class="brand-logo">
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <h1 class="brand-title">
-        Étape 5 — TEST<br>
-        <span style="opacity:.95;font-weight:800;">Programmation 📅</span>
-      </h1>
+      <div class="step-title-wrap" aria-label="Étape 5">
+        <img class="step-title-img" src="../assets/img/etape5.png" alt="Étape 5">
+      </div>
 
       <div class="brand-logo">
         <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="../index.html">Accueil</a>
-      <a href="programmation.html" aria-current="page">Programmation</a>
-      <a href="equipes.html">Équipes</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="repas.html">Repas</a>
-      <a href="tirage.html">Tirage au sort</a>
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html">🍽️ Repas</a>
+      <a href="programmation.html" aria-current="page">🗓️ Programme</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html">🎲 Tirage</a>
     </nav>
   </div>
 </header>
@@ -43,7 +184,7 @@
     <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
     <div class="grid" style="margin-top:12px;">
-      <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chronologique</button>
+      <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chrono</button>
       <button class="btn" id="tabTableau" style="font-weight:900; color:#111;">🧩 Tableau</button>
     </div>
 
@@ -82,98 +223,6 @@
 
 </main>
 
-<style>
-  .match-list{ display:flex; flex-direction:column; gap:14px; }
-
-  .match-card{
-    border-radius:18px;
-    border:2px solid rgba(0,0,0,.06);
-    padding:14px;
-    background:#fff;
-    box-shadow:0 1px 0 rgba(0,0,0,.03);
-  }
-  .match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .35); }
-  .match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .25); }
-
-  .match-head{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
-  }
-
-  .m-time{
-    font-size:13px;
-    font-weight:900;
-    white-space:nowrap;
-    letter-spacing:.2px;
-  }
-
-  .m-court{
-    font-size:13px;
-    font-weight:400;
-    font-style:italic;
-    opacity:.95;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    min-width:0;
-    flex:1;
-  }
-
-  .team-row{
-    margin-top:10px;
-    display:grid;
-    grid-template-columns: 1fr 22px 22px 24px;
-    align-items:center;
-    gap:6px;
-  }
-
-  .team-block{ min-width:0; }
-  .team-title{
-    font-size:15px;
-    font-weight:900;
-    line-height:1.15;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .team-sub{
-    margin-top:2px;
-    font-size:13px;
-    font-weight:800;
-    opacity:.85;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .sc{
-    text-align:right;
-    font-size:15px;
-    font-weight:900;
-    white-space:nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .vs-line{
-    margin:10px 0 6px;
-    text-align:center;
-    font-weight:900;
-    letter-spacing:2px;
-    opacity:.55;
-    font-size:12px;
-  }
-
-  @media (max-width: 380px){
-    .m-time{ font-size:13px; }
-    .m-court{ font-size:13px; }
-    .team-title{ font-size:14px; }
-    .team-sub{ font-size:12px; }
-    .sc{ font-size:14px; }
-  }
-</style>
-
 <script type="module">
   import { db } from "../assets/js/firebase.js";
   import { doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -206,7 +255,6 @@
       .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
-  // ✅ Compat: schedule[mid] = number OR {slot,court}
   function normalizeScheduleEntry(entry, slotObj){
     if(typeof entry === "number"){
       const slot = Number(entry);
@@ -245,6 +293,8 @@
 
     tabChrono.style.fontWeight = isChrono ? "900" : "800";
     tabTableau.style.fontWeight = isChrono ? "800" : "900";
+
+    if(!isChrono) renderTableau();
   }
 
   function teamPartsFromTeam(t){
@@ -353,7 +403,6 @@
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
     const schedule = currentProg.schedule || {};
 
-    // slot -> mid (premier match trouvé)
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
       const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
@@ -368,7 +417,6 @@
       const m = mid ? matches[mid] : null;
       if(!m) continue;
 
-      // ✅ terrain réel du match (schedule[mid].court) + compat legacy
       const entry = schedule[mid];
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
@@ -390,6 +438,41 @@
       : `<p class="muted">Aucun match.</p>`;
   }
 
+  function inferBracketRound(matchId, m){
+    const id = matchId || m?.id || "";
+    const n = Number(m?.n || 0);
+
+    if(id === "M1" || id === "M2" || id === "M3" || id === "M4" || (n>=1 && n<=4)){
+      return { bracket:"main", round:"QF" };
+    }
+    if(id === "M5" || id === "M6" || (n===5 || n===6)){
+      return { bracket:"5-8", round:"SF" };
+    }
+    if(id === "M7" || id === "M8" || (n===7 || n===8)){
+      return { bracket:"main", round:"SF" };
+    }
+    if(id === "M9" || n===9){
+      return { bracket:"5-8", round:"7th" };
+    }
+    if(id === "M10" || n===10){
+      return { bracket:"5-8", round:"5th" };
+    }
+    if(id === "M11" || n===11){
+      return { bracket:"main", round:"3rd" };
+    }
+    if(id === "M12" || n===12){
+      return { bracket:"main", round:"F" };
+    }
+    return { bracket:"main", round:"QF" };
+  }
+
+  function normalizeMatchWithMeta(matchId, m){
+    const inf = inferBracketRound(matchId, m);
+    const bracket = m?.bracket || inf.bracket;
+    const round   = m?.round   || inf.round;
+    return { id: matchId, ...(m || {}), bracket, round };
+  }
+
   function renderTableau(){
     if(!currentProg){ tableList.innerHTML = ""; return; }
 
@@ -397,19 +480,19 @@
     const round = selRound.value;
 
     const matches = currentProg.matches || {};
-    const list = Object.values(matches)
-      .filter(m => m.bracket === bracket && m.round === round)
-      .sort((a,b)=> (a.n||0) - (b.n||0));
-
     const schedule = currentProg.schedule || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
+
+    const list = Object.entries(matches)
+      .map(([id, m]) => normalizeMatchWithMeta(id, m))
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(m.id) || null;
 
-      // ✅ heure = slot du match (schedule[m.id].slot)
       let time = "—";
       let courtKey = "A";
 
@@ -436,6 +519,12 @@
     selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
   }
 
+  function ensureRoundValue(){
+    const wanted = (selBracket.value === "main") ? "QF" : "SF";
+    const hasWanted = Array.from(selRound.options).some(o => o.value === wanted);
+    selRound.value = hasWanted ? wanted : (selRound.options[0]?.value || "");
+  }
+
   function renderAll(){
     renderChrono();
     renderTableau();
@@ -444,12 +533,16 @@
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
 
-  selBracket.onchange = ()=>{ refreshRounds(); renderTableau(); };
+  selBracket.onchange = ()=>{
+    refreshRounds();
+    ensureRoundValue();
+    renderTableau();
+  };
   selRound.onchange = ()=> renderTableau();
 
-  setActiveTab("chrono");
   refreshRounds();
-  selRound.value = "QF";
+  ensureRoundValue();
+  setActiveTab("chrono");
 
   onSnapshot(RESULTS_COL, (snap)=>{
     resultsByMatch = new Map();
@@ -481,9 +574,15 @@
     }
 
     statusText.textContent = "✅ Programmation disponible.";
-    subtitle.textContent = "🧩 Tableau + 🕒 Chronologique (mise à jour en direct).";
+    subtitle.textContent = "🧩 Tableau + 🕒 Chrono (mise à jour en direct).";
+
     panelChrono.style.display = "block";
-    panelTableau.style.display = "none"; // on garde l’onglet chrono par défaut
+    panelTableau.style.display = "none";
+    setActiveTab("chrono");
+
+    refreshRounds();
+    ensureRoundValue();
+
     renderAll();
   }, (err)=>{
     console.error(err);
