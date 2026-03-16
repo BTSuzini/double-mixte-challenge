@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v8" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v7" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -115,6 +115,7 @@
       align-items:center;
       justify-content:center;
       min-width:46px;
+      min-height:42px;
     }
     .badge-player img{
       max-height:42px;
@@ -127,7 +128,6 @@
       .rk{ width:38px; height:38px; border-radius:12px; }
       .meta-pill, .tag{ font-size:11px; padding:6px 9px; }
       .mid-logo img{ padding:5px; }
-      .badge-player img{ max-height:36px; max-width:50px; }
     }
 
     @media (max-width: 520px){
@@ -171,13 +171,7 @@
       .mid-logo img{
         height:100%;
         padding:0;
-        filter:none;
-      }
-
-      .badge-player{
-        position:absolute;
-        right:12px;
-        bottom:12px;
+        filter: none;
       }
     }
   </style>
@@ -265,7 +259,9 @@
   const box   = document.getElementById("rankBox");
 
   const classements = new Map();
+  classements.set("general", null);
   for(const s of STEP_IDS) classements.set(s, null);
+
   let generalConfig = { players:{}, order:[] };
   let hasAnyListenerOk = false;
 
@@ -389,12 +385,15 @@
     return `<div class="mid-logo" aria-hidden="true"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
   }
 
+  function badgeToSrc(file){
+    if(!file) return "";
+    if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+    return `../assets/img/badges/${String(file)}`;
+  }
+
   function renderBadgeImg(src, alt){
     if(!src) return "";
-    const full = String(src).startsWith("http://") || String(src).startsWith("https://")
-      ? String(src)
-      : `../assets/img/${String(src)}`;
-    return `<div class="badge-player"><img src="${esc(full)}" alt="${esc(alt || "Badge joueur")}"></div>`;
+    return `<div class="badge-player"><img src="${esc(badgeToSrc(src))}" alt="${esc(alt || "Badge joueur")}"></div>`;
   }
 
   function genderRank(g){
@@ -542,8 +541,8 @@
         const p2Gender = inferGenderFromPlayerObj(p2Obj);
 
         for(const item of [
-          { canonical:p1Canonical, display:p1DisplayName, gender:p1Gender },
-          { canonical:p2Canonical, display:p2DisplayName, gender:p2Gender }
+          { canonical:p1Canonical, display:p1DisplayName, gender:p1Gender, firstName:t.p1FirstName || "", lastName:t.p1LastName || "" },
+          { canonical:p2Canonical, display:p2DisplayName, gender:p2Gender, firstName:t.p2FirstName || "", lastName:t.p2LastName || "" }
         ]){
           if(!item.canonical || !item.display || item.display === "—") continue;
 
@@ -551,6 +550,8 @@
             map.set(item.canonical, {
               key: item.canonical,
               name: item.display,
+              firstName: item.firstName || "",
+              lastName: item.lastName || "",
               points: 0,
               steps: new Set(),
               gender: item.gender,
@@ -563,6 +564,8 @@
           rec.points += Number(row.points || 0);
           if(!rec.gender && item.gender) rec.gender = item.gender;
           if(!rec.logo && logoSrc) rec.logo = logoSrc;
+          if(item.firstName) rec.firstName = item.firstName;
+          if(item.lastName) rec.lastName = item.lastName;
           rec.name = item.display;
 
           const mk = `${item.canonical}|${stepId}`;
@@ -591,6 +594,7 @@
     out.sort((a,b)=>{
       if(b.points !== a.points) return b.points - a.points;
       if(a.priority !== b.priority) return a.priority - b.priority;
+
       const ga = genderRank(a.gender);
       const gb = genderRank(b.gender);
       if(ga !== gb) return ga - gb;
@@ -722,7 +726,7 @@
     else renderStep(v);
   }
 
-  function listenClassementDoc(id){
+  function listenDoc(id){
     return onSnapshot(doc(db, "classements", id), (snap)=>{
       hasAnyListenerOk = true;
       classements.set(id, snap.exists() ? (snap.data() || {}) : null);
@@ -747,7 +751,8 @@
   hint.textContent = "Chargement des classements…";
 
   const unsubs = [];
-  for(const s of STEP_IDS) unsubs.push(listenClassementDoc(s));
+  unsubs.push(listenDoc("general"));
+  for(const s of STEP_IDS) unsubs.push(listenDoc(s));
 
   sel.addEventListener("change", render);
   render();
