@@ -1,833 +1,103 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin — Classement général</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    .admin-grid{
-      display:grid;
-      grid-template-columns: minmax(0,1fr) 360px;
-      gap:20px;
-    }
+<title>Admin Classement Général</title>
 
-    @media(max-width:900px){
-      .admin-grid{ grid-template-columns:1fr; }
-    }
+<link rel="stylesheet" href="../assets/css/main.css">
 
-    .list{ display:flex; flex-direction:column; gap:10px; }
-
-    .rank-card{
-      border-radius:16px;
-      border:2px solid rgba(0,0,0,.06);
-      padding:12px;
-      background:#fff;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .rk{
-      width:42px; height:42px; border-radius:14px;
-      border:1px solid rgba(0,0,0,.10);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:1000; font-size:16px; flex:0 0 auto;
-      font-variant-numeric: tabular-nums;
-      position:relative;
-      z-index:2;
-      background:#fafafa;
-    }
-
-    .rmain{ min-width:0; flex:1 1 auto; position:relative; z-index:2; }
-    .rtitle{
-      font-weight:1000; line-height:1.15; margin:0;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-
-    .meta-line{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      position:relative;
-      z-index:2;
-    }
-    .meta-pill{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      font-weight:1000;
-      white-space:nowrap;
-      opacity:.95;
-      font-variant-numeric: tabular-nums;
-      background:#fff;
-    }
-
-    .mid-logo{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      height:100%;
-      width:auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      pointer-events:none;
-      z-index:1;
-      opacity:1;
-    }
-    .mid-logo img{
-      height:100%;
-      width:auto;
-      object-fit:contain;
-      display:block;
-      padding:6px;
-      filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
-    }
-
-    .badge-player{
-      position:relative;
-      z-index:2;
-      flex:0 0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-width:46px;
-    }
-    .badge-player img{
-      max-height:42px;
-      max-width:56px;
-      object-fit:contain;
-      display:block;
-    }
-
-    .move-col{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      position:relative;
-      z-index:2;
-      flex:0 0 auto;
-    }
-    .move-btn{
-      appearance:none;
-      border:1px solid #ddd;
-      background:#fff;
-      border-radius:10px;
-      padding:6px 8px;
-      cursor:pointer;
-      font-weight:1000;
-      line-height:1;
-    }
-    .move-btn:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
-
-    .admin-panel{
-      border:1px solid #eee;
-      border-radius:16px;
-      padding:16px;
-      background:#fff;
-      height:fit-content;
-    }
-
-    .field{ margin-bottom:12px; }
-
-    .muted-box{
-      border:1px solid #eee;
-      background:#fafafa;
-      border-radius:12px;
-      padding:10px 12px;
-      font-size:14px;
-      line-height:1.4;
-    }
-
-    @media (max-width: 520px){
-      .rank-card{
-        flex-direction:column;
-        align-items:flex-start;
-        justify-content:flex-start;
-        gap:10px;
-        padding-right:72px;
-      }
-
-      .rtitle{
-        white-space:normal;
-        overflow:visible;
-        text-overflow:unset;
-      }
-
-      .meta-line{
-        justify-content:flex-start;
-        width:100%;
-        gap:8px;
-      }
-
-      .mid-logo{
-        left:auto;
-        right:10px;
-        top:50%;
-        transform:translateY(-50%);
-        height:62%;
-        opacity:.86;
-      }
-      .mid-logo img{
-        height:100%;
-        padding:0;
-        filter:none;
-      }
-
-      .move-col{
-        position:absolute;
-        top:10px;
-        right:10px;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
-<header class="topbar">
-  <div class="container">
-    <div class="topbar-row">
-      <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
-      </div>
+<h2>Admin classement général</h2>
 
-      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <h2 style="margin:0;">Admin classement général</h2>
-      </div>
-
-      <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
-      </div>
-    </div>
-
-    <nav class="nav">
-      <a href="index.html?scope=general">⬅️ Retour admin</a>
-      <a href="../pages/classement.html">👀 Voir la page publique</a>
-    </nav>
-  </div>
-</header>
-
-<main class="container">
-
-  <div class="admin-grid">
-
-    <!-- =================== -->
-    <!-- CLASSEMENT -->
-    <!-- =================== -->
-    <section class="card">
-      <h2 style="margin:0 0 8px;">🏆 Classement général</h2>
-      <p class="muted" id="rankSub" style="margin:0 0 12px;">Chargement…</p>
-      <div id="rankBox"></div>
-    </section>
-
-    <!-- =================== -->
-    <!-- ADMIN -->
-    <!-- =================== -->
-    <section class="admin-panel">
-      <h3 style="margin-top:0;">Modifier joueur</h3>
-
-      <div class="muted-box" id="selectedInfo" style="margin-bottom:12px;">
-        Sélectionne un joueur depuis le classement.
-      </div>
-
-      <div class="field">
-        <label>Prénom</label>
-        <input id="firstName" readonly>
-      </div>
-
-      <div class="field">
-        <label>Nom</label>
-        <input id="lastName" readonly>
-      </div>
-
-      <div class="field">
-        <label>Badge image</label>
-        <input id="badge" placeholder="Ex : badge-charline.png">
-      </div>
-
-      <div class="field">
-        <label>Ordre manuel</label>
-        <input id="priority" type="number" placeholder="0">
-      </div>
-
-      <button class="btn" id="savePlayer" style="font-weight:900; color:#111;">✅ Enregistrer</button>
-
-      <p class="muted" id="saveStatus" style="margin:10px 0 0;"></p>
-
-      <hr class="sep">
-
-      <p class="muted" style="margin:0;">
-        Le classement public reprend automatiquement :
-        <br>• le badge défini ici
-        <br>• l’ordre manuel enregistré ici
-        <br>• les flèches ↑ ↓ appliquées ici
-      </p>
-    </section>
-
-  </div>
-
-</main>
+<div id="classement"></div>
 
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    doc,
-    setDoc,
-    getDoc,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-  // ============================================================
-  // CONFIG POINTS FFT
-  // ============================================================
-  const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
-  const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
-  const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
-
-  // ============================================================
-  // REFS
-  // ============================================================
-  const CONFIG_REF = doc(db, "config", "classement_general");
-  const CLASSEMENT_REFS = STEP_IDS.map(id => ({ id, ref: doc(db, "classements", id) }));
-
-  // ============================================================
-  // DOM
-  // ============================================================
-  const rankBox = document.getElementById("rankBox");
-  const rankSub = document.getElementById("rankSub");
-
-  const selectedInfo = document.getElementById("selectedInfo");
-  const firstName = document.getElementById("firstName");
-  const lastName = document.getElementById("lastName");
-  const badge = document.getElementById("badge");
-  const priority = document.getElementById("priority");
-  const saveBtn = document.getElementById("savePlayer");
-  const status = document.getElementById("saveStatus");
-
-  // ============================================================
-  // STATE
-  // ============================================================
-  const classements = new Map();
-  let generalConfig = { players:{}, order:[] };
-  let renderedRows = [];
-  let selectedKey = "";
-
-  // ============================================================
-  // UTILS
-  // ============================================================
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function stepType(stepId){
-    return (stepId === "etape1" || stepId === "etape5") ? "BT250" : "BT100";
-  }
-
-  function pointsTable(stepId){
-    return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
-  }
-
-  function nameInitial(lastName){
-    const s = (lastName || "").toString().trim();
-    if(!s) return "";
-    return s[0].toUpperCase() + ".";
-  }
-
-  const PLAYER_FIRSTNAME_ALIASES = {
-    "charlyne": "charline"
-  };
-
-  function normalizeTextBasic(s){
-    return (s || "")
-      .toString()
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ");
-  }
-
-  function canonicalFirstName(firstName){
-    const raw = normalizeTextBasic(firstName);
-    if(!raw) return "";
-    return PLAYER_FIRSTNAME_ALIASES[raw] || raw;
-  }
-
-  function canonicalLastName(lastName){
-    return normalizeTextBasic(lastName);
-  }
-
-  function canonicalPlayerKey(firstName, lastName){
-    const fn = canonicalFirstName(firstName);
-    const ln = canonicalLastName(lastName);
-    if(!fn && !ln) return "";
-    return `${fn}|${ln}`;
-  }
-
-  function playerDisplay(firstName, lastName){
-    const fn = (firstName || "").toString().trim();
-    const ini = nameInitial(lastName);
-    if(!fn && !ini) return "—";
-    if(!ini) return fn || "—";
-    return `${fn} ${ini}`.trim();
-  }
-
-  function teamNameOf(team){
-    return (team?.teamName || team?.name || "Équipe").toString().trim() || "Équipe";
-  }
-
-  function normTeamName(s){
-    return (s || "").toString().trim().toLowerCase()
-      .replaceAll("’","'")
-      .replace(/\s+/g," ");
-  }
-
-  function teamLogoFromDoc(stepDoc, teamName){
-    if(!stepDoc) return null;
-    const map = stepDoc.teamLogos || stepDoc.logos || null;
-    if(map && typeof map === "object"){
-      if(map[teamName]) return map[teamName];
-      const tn = normTeamName(teamName);
-      for(const k of Object.keys(map)){
-        if(normTeamName(k) === tn) return map[k];
-      }
-    }
-    return null;
-  }
-
-  function teamLogoSrc(stepId, stepDoc, team){
-    const teamName = teamNameOf(team);
-
-    const file = team?.logoFile || team?.logo || team?.logoUrl || team?.teamLogo || null;
-    if(file){
-      if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
-      return `../assets/img/${String(file)}`;
-    }
-
-    const fromMap = teamLogoFromDoc(stepDoc, teamName);
-    if(fromMap){
-      if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
-      return `../assets/img/${String(fromMap)}`;
-    }
-
-    if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
-      return "../assets/img/lobstars.png";
-    }
-
-    return null;
-  }
-
-  function renderMidLogo(logoSrc, alt){
-    if(!logoSrc) return "";
-    return `<div class="mid-logo" aria-hidden="true"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
-  }
-
-  function renderBadgeImg(src, alt){
-    if(!src) return "";
-    const full = String(src).startsWith("http://") || String(src).startsWith("https://")
-      ? String(src)
-      : `../assets/img/${String(src)}`;
-    return `<div class="badge-player"><img src="${esc(full)}" alt="${esc(alt || "Badge joueur")}"></div>`;
-  }
-
-  function genderRank(g){
-    const s = (g ?? "").toString().toUpperCase().trim();
-    if(s === "F" || s === "FEMALE" || s === "W") return 0;
-    if(s === "M" || s === "MALE") return 2;
-    return 1;
-  }
-
-  function inferGenderFromPlayerObj(p){
-    if(!p || typeof p !== "object") return null;
-    if("gender" in p) return p.gender;
-    if("sex" in p) return p.sex;
-    if("isFemale" in p) return (p.isFemale === true ? "F" : (p.isFemale === false ? "M" : null));
-    return null;
-  }
-
-  function normalizeStepTeams(stepId, stepDoc){
-    const ptsTable = pointsTable(stepId);
-
-    const positions = Array.isArray(stepDoc?.positions) ? stepDoc.positions : null;
-    if(positions && positions.length){
-      return positions
-        .map(r=>{
-          const pos = Number(r?.pos);
-          if(!Number.isFinite(pos)) return null;
-
-          const team = {
-            teamName: r?.teamName || r?.team?.teamName || "Équipe",
-            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
-            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
-            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
-            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
-            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
-          };
-
-          const pts = Number(ptsTable[pos] || 0);
-          return { pos, team, points: pts };
-        })
-        .filter(Boolean)
-        .sort((a,b)=>a.pos-b.pos);
-    }
-
-    const legacy = Array.isArray(stepDoc?.teams) ? stepDoc.teams
-                 : (Array.isArray(stepDoc?.ranking) ? stepDoc.ranking : null);
-
-    if(legacy && legacy.length){
-      return legacy
-        .map(r=>{
-          const pos = Number(r?.pos);
-          if(!Number.isFinite(pos)) return null;
-
-          const team = {
-            teamName: r?.teamName || r?.team?.teamName || "Équipe",
-            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
-            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
-            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
-            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
-            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
-          };
-
-          const pts = Number(ptsTable[pos] || 0);
-          return { pos, team, points: pts };
-        })
-        .filter(Boolean)
-        .sort((a,b)=>a.pos-b.pos);
-    }
-
-    const players = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
-    if(players.length){
-      const groups = new Map();
-      for(const p of players){
-        const pos = Number(p?.pos);
-        if(!Number.isFinite(pos)) continue;
-        const tname = (p?.teamName || "Équipe").toString().trim() || "Équipe";
-        const key = `${pos}||${tname}`;
-        if(!groups.has(key)) groups.set(key, { pos, teamName: tname, players: [] });
-        groups.get(key).players.push(p);
-      }
-
-      const rows = [];
-      for(const g of groups.values()){
-        const a = g.players[0] || {};
-        const b = g.players[1] || {};
-        const team = {
-          teamName: g.teamName,
-          p1FirstName: (a.firstName ?? a.p1FirstName ?? "").toString(),
-          p1LastName:  (a.lastName  ?? a.p1LastName  ?? "").toString(),
-          p2FirstName: (b.firstName ?? b.p2FirstName ?? "").toString(),
-          p2LastName:  (b.lastName  ?? b.p2LastName  ?? "").toString(),
-          logoFile: a.logoFile || a.logo || a.logoUrl || b.logoFile || b.logo || b.logoUrl || null
-        };
-        const pts = Number(ptsTable[g.pos] || 0);
-        rows.push({ pos: g.pos, team, points: pts });
-      }
-      rows.sort((a,b)=>a.pos-b.pos);
-      return rows;
-    }
-
-    return [];
-  }
-
-  function buildGeneralRows(){
-    const map = new Map();
-
-    for(const stepId of STEP_IDS){
-      const stepDoc = classements.get(stepId) || null;
-      if(!stepDoc) continue;
-
-      const teams = normalizeStepTeams(stepId, stepDoc);
-      if(!teams.length) continue;
-
-      const playedThisStep = new Set();
-      const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
-
-      function findPlayerObj(firstName, lastName, teamName){
-        const wantedKey = canonicalPlayerKey(firstName, lastName);
-        const tn = (teamName || "").toString().trim();
-
-        return playersArr.find(p=>{
-          const pKey = canonicalPlayerKey(p?.firstName, p?.lastName);
-          const pTeam = (p?.teamName || "").toString().trim();
-          if(wantedKey && pKey && wantedKey !== pKey) return false;
-          if(tn && pTeam && tn !== pTeam) return false;
-          return !!wantedKey && !!pKey;
-        }) || null;
-      }
-
-      for(const row of teams){
-        const t = row.team || {};
-        const teamName = teamNameOf(t);
-
-        const p1DisplayName = playerDisplay(t.p1FirstName, t.p1LastName);
-        const p2DisplayName = playerDisplay(t.p2FirstName, t.p2LastName);
-
-        const p1Canonical = canonicalPlayerKey(t.p1FirstName, t.p1LastName);
-        const p2Canonical = canonicalPlayerKey(t.p2FirstName, t.p2LastName);
-
-        const logoSrc = teamLogoSrc(stepId, stepDoc, t);
-
-        const p1Obj = findPlayerObj(t.p1FirstName, t.p1LastName, teamName);
-        const p2Obj = findPlayerObj(t.p2FirstName, t.p2LastName, teamName);
-
-        const p1Gender = inferGenderFromPlayerObj(p1Obj);
-        const p2Gender = inferGenderFromPlayerObj(p2Obj);
-
-        for(const item of [
-          {
-            canonical:p1Canonical,
-            display:p1DisplayName,
-            gender:p1Gender,
-            firstName:t.p1FirstName || "",
-            lastName:t.p1LastName || ""
-          },
-          {
-            canonical:p2Canonical,
-            display:p2DisplayName,
-            gender:p2Gender,
-            firstName:t.p2FirstName || "",
-            lastName:t.p2LastName || ""
-          }
-        ]){
-          if(!item.canonical || !item.display || item.display === "—") continue;
-
-          if(!map.has(item.canonical)){
-            map.set(item.canonical, {
-              key: item.canonical,
-              name: item.display,
-              firstName: item.firstName || "",
-              lastName: item.lastName || "",
-              points: 0,
-              steps: new Set(),
-              gender: item.gender,
-              logo: null
-            });
-          }
-
-          const rec = map.get(item.canonical);
-          rec.points += Number(row.points || 0);
-          if(!rec.gender && item.gender) rec.gender = item.gender;
-          if(!rec.logo && logoSrc) rec.logo = logoSrc;
-          if(item.firstName) rec.firstName = item.firstName;
-          if(item.lastName) rec.lastName = item.lastName;
-          rec.name = item.display;
-
-          const mk = `${item.canonical}|${stepId}`;
-          if(!playedThisStep.has(mk)){
-            playedThisStep.add(mk);
-            rec.steps.add(stepId);
-          }
-        }
-      }
-    }
-
-    let rows = [...map.values()].map(x=>{
-      const cfg = generalConfig?.players?.[x.key] || {};
-      return {
-        key: x.key,
-        name: x.name,
-        firstName: x.firstName || "",
-        lastName: x.lastName || "",
-        points: x.points,
-        stepsPlayed: x.steps.size,
-        gender: x.gender || null,
-        logo: x.logo || null,
-        badge: cfg.badge || null,
-        priority: Number(cfg.priority || 0)
-      };
-    });
-
-    rows.sort((a,b)=>{
-      if(b.points !== a.points) return b.points - a.points;
-      if(a.priority !== b.priority) return a.priority - b.priority;
-      const ga = genderRank(a.gender);
-      const gb = genderRank(b.gender);
-      if(ga !== gb) return ga - gb;
-
-      const order = Array.isArray(generalConfig?.order) ? generalConfig.order : [];
-      const ia = order.indexOf(a.key);
-      const ib = order.indexOf(b.key);
-      if(ia !== -1 || ib !== -1){
-        if(ia === -1) return 1;
-        if(ib === -1) return -1;
-        if(ia !== ib) return ia - ib;
-      }
-
-      return a.name.localeCompare(b.name, "fr");
-    });
-
-    let lastPts = null;
-    let lastRank = 0;
-    for(let i=0;i<rows.length;i++){
-      const pts = rows[i].points;
-      if(lastPts === null || pts !== lastPts){
-        lastPts = pts;
-        lastRank = i + 1;
-      }
-      rows[i].rank = lastRank;
-    }
-
-    return rows;
-  }
-
-  function fillEditor(row){
-    if(!row) return;
-    selectedKey = row.key;
-    firstName.value = row.firstName || "";
-    lastName.value = row.lastName || "";
-    badge.value = row.badge || "";
-    priority.value = Number(row.priority || 0);
-    selectedInfo.innerHTML = `Joueur sélectionné : <b>${esc(row.name)}</b>`;
-    status.textContent = "";
-  }
-
-  function render(){
-    renderedRows = buildGeneralRows();
-    rankSub.textContent = renderedRows.length
-      ? `Joueurs classés : ${renderedRows.length}`
-      : "Aucun classement disponible pour le moment.";
-
-    if(!renderedRows.length){
-      rankBox.innerHTML = `<p class="muted" style="margin:0;">Aucun classement disponible.</p>`;
-      return;
-    }
-
-    rankBox.innerHTML = `
-      <div class="list">
-        ${renderedRows.map((r, idx)=>`
-          <div class="rank-card" data-key="${esc(r.key)}">
-            ${renderMidLogo(r.logo, `Logo — ${r.name}`)}
-
-            <div class="rk">${esc(String(r.rank))}</div>
-
-            <div class="rmain">
-              <div class="rtitle">${esc(r.name)}</div>
-            </div>
-
-            <div class="meta-line">
-              <span class="meta-pill">⭐ ${esc(String(r.points))} pts</span>
-              <span class="meta-pill">🎾 ${esc(String(r.stepsPlayed))} étape(s)</span>
-            </div>
-
-            ${renderBadgeImg(r.badge, `Badge — ${r.name}`)}
-
-            <div class="move-col">
-              <button class="move-btn" data-act="up" data-key="${esc(r.key)}" ${idx===0 ? "disabled" : ""}>↑</button>
-              <button class="move-btn" data-act="down" data-key="${esc(r.key)}" ${idx===renderedRows.length-1 ? "disabled" : ""}>↓</button>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  }
-
-  async function savePlayer(){
-    const key = selectedKey || canonicalPlayerKey(firstName.value, lastName.value);
-    if(!key){
-      status.textContent = "Sélectionne un joueur.";
-      return;
-    }
-
-    const snap = await getDoc(CONFIG_REF);
-    const data = snap.exists() ? (snap.data() || {}) : {};
-    if(!data.players) data.players = {};
-    if(!Array.isArray(data.order)) data.order = [];
-
-    data.players[key] = {
-      ...(data.players[key] || {}),
-      badge: (badge.value || "").trim() || null,
-      priority: Number(priority.value || 0)
-    };
-
-    await setDoc(CONFIG_REF, data, { merge:true });
-    status.textContent = "✅ Enregistré";
-  }
-
-  async function movePlayer(key, dir){
-    const rows = buildGeneralRows();
-    const currentOrder = rows.map(r => r.key);
-    const idx = currentOrder.indexOf(key);
-    if(idx === -1) return;
-
-    const swapIdx = dir === "up" ? idx - 1 : idx + 1;
-    if(swapIdx < 0 || swapIdx >= currentOrder.length) return;
-
-    const arr = [...currentOrder];
-    const tmp = arr[idx];
-    arr[idx] = arr[swapIdx];
-    arr[swapIdx] = tmp;
-
-    const snap = await getDoc(CONFIG_REF);
-    const data = snap.exists() ? (snap.data() || {}) : {};
-    if(!data.players) data.players = {};
-    data.order = arr;
-
-    await setDoc(CONFIG_REF, data, { merge:true });
-  }
-
-  saveBtn.onclick = savePlayer;
-
-  rankBox.addEventListener("click", async (e)=>{
-    const moveBtn = e.target.closest("button[data-act]");
-    if(moveBtn){
-      const key = moveBtn.dataset.key;
-      const act = moveBtn.dataset.act;
-      if(!key || !act) return;
-      moveBtn.disabled = true;
-      try{
-        await movePlayer(key, act);
-      }catch(err){
-        console.error(err);
-        alert("Erreur Firestore ❌");
-      }finally{
-        moveBtn.disabled = false;
-      }
-      return;
-    }
-
-    const card = e.target.closest(".rank-card[data-key]");
-    if(!card) return;
-    const key = card.dataset.key;
-    const row = renderedRows.find(x => x.key === key);
-    fillEditor(row);
-  });
-
-  onSnapshot(CONFIG_REF, (snap)=>{
-    generalConfig = snap.exists() ? (snap.data() || {}) : {};
-    if(!generalConfig.players) generalConfig.players = {};
-    if(!Array.isArray(generalConfig.order)) generalConfig.order = [];
-    render();
-  });
-
-  for(const { id, ref } of CLASSEMENT_REFS){
-    onSnapshot(ref, (snap)=>{
-      classements.set(id, snap.exists() ? (snap.data() || {}) : null);
-      render();
-    }, (err)=>{
-      console.error("classements/" + id, err);
-    });
-  }
+
+import { db } from "../assets/js/firebase.js"
+
+import {
+doc,
+onSnapshot,
+setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+
+const refConfig = doc(db,"config","classement_general")
+
+let config = {
+players:{},
+order:[]
+}
+
+const container = document.getElementById("classement")
+
+function render(){
+
+if(!config.order) return
+
+container.innerHTML = config.order.map((player,i)=>`
+
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+
+<div>${i+1}</div>
+
+<div style="flex:1">${player}</div>
+
+<button onclick="moveUp('${player}')">↑</button>
+<button onclick="moveDown('${player}')">↓</button>
+
+</div>
+
+`).join("")
+
+}
+
+window.moveUp = async function(key){
+
+const index = config.order.indexOf(key)
+
+if(index <= 0) return
+
+const temp = config.order[index-1]
+
+config.order[index-1] = key
+
+config.order[index] = temp
+
+await setDoc(refConfig,config)
+
+}
+
+window.moveDown = async function(key){
+
+const index = config.order.indexOf(key)
+
+if(index === config.order.length-1) return
+
+const temp = config.order[index+1]
+
+config.order[index+1] = key
+
+config.order[index] = temp
+
+await setDoc(refConfig,config)
+
+}
+
+onSnapshot(refConfig,(snap)=>{
+
+if(snap.exists()) config = snap.data()
+
+render()
+
+})
+
 </script>
 
 </body>
