@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-classement-public-v7" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-classement-public-v8" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -84,6 +84,7 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* Logo / badge en filigrane */
     .mid-logo{
       position:absolute;
       left:50%;
@@ -105,23 +106,6 @@
       display:block;
       padding:6px;
       filter: drop-shadow(0 1px 0 rgba(0,0,0,.08));
-    }
-
-    .badge-player{
-      position:relative;
-      z-index:2;
-      flex:0 0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-width:46px;
-      min-height:42px;
-    }
-    .badge-player img{
-      max-height:42px;
-      max-width:56px;
-      object-fit:contain;
-      display:block;
     }
 
     @media (max-width: 420px){
@@ -380,9 +364,9 @@
     return null;
   }
 
-  function renderMidLogo(logoSrc, alt){
-    if(!logoSrc) return "";
-    return `<div class="mid-logo" aria-hidden="true"><img src="${esc(logoSrc)}" alt="${esc(alt || "Logo équipe")}"></div>`;
+  function renderMidLogo(src, alt){
+    if(!src) return "";
+    return `<div class="mid-logo" aria-hidden="true"><img src="${esc(src)}" alt="${esc(alt || "Logo")}"></div>`;
   }
 
   function badgeToSrc(file){
@@ -391,9 +375,15 @@
     return `../assets/img/badges/${String(file)}`;
   }
 
-  function renderBadgeImg(src, alt){
-    if(!src) return "";
-    return `<div class="badge-player"><img src="${esc(badgeToSrc(src))}" alt="${esc(alt || "Badge joueur")}"></div>`;
+  function renderGeneralVisual(row){
+    const badgeSrc = row?.badge ? badgeToSrc(row.badge) : "";
+    if(badgeSrc){
+      return renderMidLogo(badgeSrc, `Badge — ${row.name}`);
+    }
+    if(row?.logo){
+      return renderMidLogo(row.logo, `Logo — ${row.name}`);
+    }
+    return "";
   }
 
   function genderRank(g){
@@ -658,7 +648,7 @@
 
     const cards = rows.map((r)=>`
       <div class="rank-card one-line">
-        ${renderMidLogo(r.logo, `Logo — ${r.name}`)}
+        ${renderGeneralVisual(r)}
         <div class="rk">${esc(String(r.rank))}</div>
 
         <div class="rmain">
@@ -669,8 +659,6 @@
           <span class="meta-pill">⭐ ${esc(String(r.points))} pts</span>
           <span class="meta-pill">🎾 ${esc(String(r.stepsPlayed))} étape(s)</span>
         </div>
-
-        ${renderBadgeImg(r.badge, `Badge — ${r.name}`)}
       </div>
     `);
 
