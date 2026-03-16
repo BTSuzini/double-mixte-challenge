@@ -1,5 +1,15 @@
 [
-  { "file": "badge-charline.png", "label": "Badge Charline" },
-  { "file": "badge-melanie.png", "label": "Badge Mélanie" },
-  { "file": "badge-lobstars.png", "label": "Badge Lobstars" }
+  { "file": "Aurel.png", "label": "Aurel" },
+  { "file": "Camille.png", "label": "Camille" },
+  { "file": "Charline.png", "label": "Charline" },
+  { "file": "Christo.png", "label": "Christo" },
+  { "file": "Drizzou.png", "label": "Drizzou" },
+  { "file": "JulMarine.png", "label": "JulMarine" },
+  { "file": "Karine.png", "label": "Karine" },
+  { "file": "Loic.png", "label": "Loïc" },
+  { "file": "Lucas.png", "label": "Lucas" },
+  { "file": "Marine.png", "label": "Marine" },
+  { "file": "Meki.png", "label": "Meki" },
+  { "file": "Mel.png", "label": "Mel" },
+  { "file": "Paul.png", "label": "Paul" }
 ]
