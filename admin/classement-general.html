@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — Classement général</title>
+
+<link rel="stylesheet" href="../assets/css/main.css">
+
+<style>
+
+.admin-grid{
+display:grid;
+grid-template-columns:1fr 420px;
+gap:20px;
+}
+
+@media(max-width:900px){
+.admin-grid{grid-template-columns:1fr;}
+}
+
+.rank-card{
+border-radius:16px;
+border:2px solid rgba(0,0,0,.06);
+padding:12px;
+background:#fff;
+display:flex;
+gap:12px;
+align-items:center;
+justify-content:space-between;
+}
+
+.rk{
+width:42px;
+height:42px;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:1000;
+background:#fafafa;
+}
+
+.badge-img{
+height:40px;
+}
+
+.admin-panel{
+border:1px solid #eee;
+border-radius:16px;
+padding:16px;
+background:#fff;
+}
+
+.field{
+margin-bottom:12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+<div class="container">
+
+<div class="topbar-row">
+<div class="brand-logo">
+<img src="../assets/img/logo-suzini.png">
+</div>
+
+<div class="brand-title">
+<h2>Admin classement général</h2>
+</div>
+
+<div class="brand-logo">
+<img src="../assets/img/logo-challenge.png">
+</div>
+</div>
+
+</div>
+</header>
+
+
+<main class="container">
+
+<div class="admin-grid">
+
+<!-- =================== -->
+<!-- CLASSEMENT -->
+<!-- =================== -->
+
+<section class="card">
+
+<h2>Classement</h2>
+
+<div id="rankBox"></div>
+
+</section>
+
+
+<!-- =================== -->
+<!-- ADMIN -->
+<!-- =================== -->
+
+<section class="admin-panel">
+
+<h3>Modifier joueur</h3>
+
+<div class="field">
+<label>Prénom</label>
+<input id="firstName">
+</div>
+
+<div class="field">
+<label>Nom</label>
+<input id="lastName">
+</div>
+
+<div class="field">
+<label>Badge image</label>
+<input id="badge">
+</div>
+
+<div class="field">
+<label>Priorité (égalité)</label>
+<input id="priority" type="number">
+</div>
+
+<button class="btn" id="savePlayer">Enregistrer</button>
+
+<p class="muted" id="saveStatus"></p>
+
+</section>
+
+</div>
+
+</main>
+
+
+<script type="module">
+
+import { db } from "../assets/js/firebase.js";
+
+import {
+doc,
+setDoc,
+getDoc,
+onSnapshot
+}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+
+const CONFIG_REF = doc(db,"config","classement_general")
+
+const rankBox=document.getElementById("rankBox")
+
+const firstName=document.getElementById("firstName")
+const lastName=document.getElementById("lastName")
+const badge=document.getElementById("badge")
+const priority=document.getElementById("priority")
+
+const saveBtn=document.getElementById("savePlayer")
+const status=document.getElementById("saveStatus")
+
+
+function keyPlayer(fn,ln){
+return (fn||"").toLowerCase().trim()+"|"+(ln||"").toLowerCase().trim()
+}
+
+
+async function savePlayer(){
+
+const key=keyPlayer(firstName.value,lastName.value)
+
+if(!key.includes("|")){
+status.textContent="Nom invalide"
+return
+}
+
+const snap=await getDoc(CONFIG_REF)
+
+let data=snap.exists()?snap.data():{}
+
+if(!data.players)data.players={}
+
+data.players[key]={
+badge:badge.value||null,
+priority:Number(priority.value||0)
+}
+
+await setDoc(CONFIG_REF,data)
+
+status.textContent="✔ enregistré"
+
+}
+
+
+saveBtn.onclick=savePlayer
+
+
+// =============================
+// EXEMPLE CLASSEMENT DEMO
+// =============================
+
+function renderDemo(){
+
+const players=[
+{rank:1,name:"Charline P.",points:350,badge:"badge-charline.png"},
+{rank:2,name:"Julien D.",points:320,badge:null},
+{rank:3,name:"Mélanie S.",points:310,badge:"badge-melanie.png"}
+]
+
+rankBox.innerHTML=players.map(p=>`
+
+<div class="rank-card">
+
+<div class="rk">${p.rank}</div>
+
+<div style="flex:1">
+<strong>${p.name}</strong><br>
+<span class="muted">${p.points} pts</span>
+</div>
+
+${p.badge?`<img class="badge-img" src="../assets/img/${p.badge}">`:``}
+
+</div>
+
+`).join("")
+
+}
+
+renderDemo()
+
+
+</script>
+
+</body>
+</html>
