@@ -1,1 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TV — Étape 3 — Double Mixte Challenge</title>
 
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-tv3" />
+
+  <style>
+    :root{
+      --tv-band-h: clamp(68px, 8vh, 100px);
+      --tv-logo-h: calc(var(--tv-band-h) * .70);
+      --tv-mid-h:  calc(var(--tv-band-h) * .82);
+      --tv-pad: clamp(8px, 1.2vh, 14px);
+      --tv-gap: clamp(8px, 1.2vh, 14px);
+      --tv-h2: clamp(14px, 1.7vh, 18px);
+      --tv-court-head: clamp(16px, 2.2vh, 20px);
+      --tv-sec: clamp(12px, 1.8vh, 16px);
+      --tv-team: clamp(14px, 2.1vh, 18px);
+      --tv-sub: clamp(11px, 1.6vh, 14px);
+      --tv-score: clamp(14px, 2.1vh, 18px);
+    }
+
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      background:#0b0f0c;
+      color:#111;
+      overflow:hidden;
+    }
+    .tv-wrap{
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .tv-top{
+      flex: 0 0 var(--tv-band-h);
+      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
+      display:flex;
+      align-items:center;
+    }
+
+    .tv-top-row{
+      display:grid;
+      grid-template-columns: 80px 80px 1fr 80px 80px;
+      align-items:center;
+    }
+
+    .tv-top-cell{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .tv-top-cell img{
+      height: var(--tv-logo-h);
+      object-fit:contain;
+    }
+
+    .tv-top-cell.mid img{
+      height: var(--tv-mid-h);
+    }
+
+    .tv-main{
+      flex:1;
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--tv-gap);
+      padding: var(--tv-pad);
+      max-width: 1400px;
+      margin:auto;
+    }
+
+    .panel{
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .court-head{
+      padding:14px;
+      font-weight:1000;
+      text-align:center;
+    }
+
+    .court-body{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .tv-bottom{
+      flex: 0 0 var(--tv-band-h);
+      background: linear-gradient(180deg, rgba(19,86,44,.92), rgba(19,86,44,.78));
+    }
+  </style>
+</head>
+
+<body>
+<div class="tv-wrap">
+
+<header class="tv-top">
+  <div class="container">
+    <div class="tv-top-row">
+
+      <div class="tv-top-cell">
+        <img src="../assets/img/logo-suzini.png">
+      </div>
+
+      <div class="tv-top-cell">
+        <img src="../assets/img/challenge-gen.png">
+      </div>
+
+      <div class="tv-top-cell mid">
+        <img src="../assets/img/etape3.png">
+      </div>
+
+      <div class="tv-top-cell">
+        <img src="../assets/img/challenge-gen.png">
+      </div>
+
+      <div class="tv-top-cell">
+        <img src="../assets/img/logo-challenge.png">
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<main class="tv-main">
+
+  <section class="panel">
+    <div class="court-head">Chargement…</div>
+    <div class="court-body" id="contentLeft"></div>
+  </section>
+
+  <aside class="panel">
+    <div class="court-head">Tableaux</div>
+    <div class="court-body" id="contentRight"></div>
+  </aside>
+
+</main>
+
+<footer class="tv-bottom"></footer>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    collection, onSnapshot, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const etapeId = "etape3";
+
+  const COL_RESULTS = `resultats_${etapeId}`;
+
+  const left = document.getElementById("contentLeft");
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function render(){
+    left.innerHTML = `<p style="font-weight:900">Étape 3 connectée 🔥</p>`;
+  }
+
+  const qRes = query(collection(db, COL_RESULTS), orderBy("updatedAt","desc"));
+
+  onSnapshot(qRes, (snap)=>{
+    render();
+  });
+</script>
+
+</body>
+</html>
