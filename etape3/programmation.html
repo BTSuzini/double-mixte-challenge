@@ -40,10 +40,8 @@
       text-align:center;
     }
 
-
     .nav a[aria-current="page"]{
       background: rgba(255,255,255,.26);
-      
       box-shadow: 0 6px 14px rgba(0,0,0,.10);
     }
 
@@ -252,7 +250,9 @@
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   function normalizeScheduleEntry(entry, slotObj){
@@ -304,6 +304,44 @@
     return { title, sub };
   }
 
+  function teamPartsFromUnknownRef(ref){
+    if(!ref) return { title:"—", sub:"" };
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const matchId = ref.matchId || "";
+      const match = currentProg?.matches?.[matchId] || null;
+
+      let sideATitle = "Équipe 1";
+      let sideBTitle = "Équipe 2";
+
+      if(match){
+        const a = resolveTeamRef(match.A);
+        const b = resolveTeamRef(match.B);
+
+        if(a?.teamName) sideATitle = a.teamName;
+        if(b?.teamName) sideBTitle = b.teamName;
+      }
+
+      const prefix = ref.type === "winner" ? "Vainqueur" : "Perdant";
+      return {
+        title: `${prefix} (${sideATitle}/${sideBTitle})`,
+        sub: ""
+      };
+    }
+
+    if(ref.type === "team" && ref.key){
+      return { title: String(ref.key), sub:"" };
+    }
+
+    return { title:"—", sub:"" };
+  }
+
+  function teamPartsFromRef(ref){
+    const resolved = resolveTeamRef(ref);
+    if(resolved) return teamPartsFromTeam(resolved);
+    return teamPartsFromUnknownRef(ref);
+  }
+
   function courtLabel(courtKey){
     const c = currentProg?.courts || {};
     const name = c[courtKey] || (courtKey || "—");
@@ -349,7 +387,7 @@
     return null;
   }
 
-  function renderMatchCard({ time, courtKey, teamA, teamB, res }){
+  function renderMatchCard({ time, courtKey, teamARef, teamBRef, res }){
     const cls = courtClass(courtKey);
     const court = courtLabel(courtKey);
 
@@ -361,8 +399,8 @@
     const s2B = fmt(res?.s2B);
     const tbB = fmt(res?.s3B);
 
-    const a = teamPartsFromTeam(teamA);
-    const b = teamPartsFromTeam(teamB);
+    const a = teamPartsFromRef(teamARef);
+    const b = teamPartsFromRef(teamBRef);
 
     return `
       <div class="match-card ${esc(cls)}">
@@ -421,14 +459,13 @@
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(mid) || null;
 
       cards.push(renderMatchCard({
         time: s.time,
         courtKey,
-        teamA, teamB,
+        teamARef: m.A,
+        teamBRef: m.B,
         res
       }));
     }
@@ -489,8 +526,6 @@
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
       const res = resultsByMatch.get(m.id) || null;
 
       let time = "—";
@@ -506,7 +541,13 @@
         time = s?.time || "—";
       }
 
-      return renderMatchCard({ time, courtKey, teamA, teamB, res });
+      return renderMatchCard({
+        time,
+        courtKey,
+        teamARef: m.A,
+        teamBRef: m.B,
+        res
+      });
     });
 
     tableList.innerHTML = cards.length
