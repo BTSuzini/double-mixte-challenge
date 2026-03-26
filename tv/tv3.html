@@ -5,24 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TV — Étape 3 — Double Mixte Challenge</title>
 
-  <!-- tv/ est 1 niveau plus bas -->
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-tv3" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260326-tv3-badges-v1" />
 
   <style>
-    /* ===== Layout TV (16:9) — NO SCROLL ===== */
     :root{
-      /* ✅ TOP doit être = BOTTOM */
       --tv-band-h: clamp(68px, 8vh, 100px);
+      --tv-badge-band-h: clamp(54px, 6.2vh, 78px);
 
-      /* Tailles images TOP */
       --tv-logo-h: calc(var(--tv-band-h) * .70);
       --tv-mid-h:  calc(var(--tv-band-h) * .82);
 
-      /* Spacings */
       --tv-pad: clamp(8px, 1.2vh, 14px);
       --tv-gap: clamp(8px, 1.2vh, 14px);
 
-      /* Typo */
       --tv-h2: clamp(14px, 1.7vh, 18px);
       --tv-court-head: clamp(16px, 2.2vh, 20px);
       --tv-sec: clamp(12px, 1.8vh, 16px);
@@ -38,6 +33,7 @@
       color:#111;
       overflow:hidden;
     }
+
     .tv-wrap{
       height:100vh;
       display:flex;
@@ -55,7 +51,10 @@
       display:flex;
       align-items:center;
     }
-    .tv-top .container{ max-width: 1400px; width: 100%; }
+    .tv-top .container{
+      max-width: 1400px;
+      width: 100%;
+    }
 
     .tv-top-row{
       height: var(--tv-band-h);
@@ -65,6 +64,7 @@
       gap: var(--tv-gap);
       padding: 0;
     }
+
     .tv-top-cell{
       height: var(--tv-band-h);
       display:flex;
@@ -72,6 +72,7 @@
       justify-content:center;
       min-width:0;
     }
+
     .tv-top-cell img{
       height: var(--tv-logo-h);
       width:auto;
@@ -79,6 +80,7 @@
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.22));
     }
+
     .tv-top-cell.mid img{
       height: var(--tv-mid-h);
       width:auto;
@@ -89,6 +91,7 @@
       right: 12px;
       bottom: 8px;
     }
+
     .tv-subrow-inner{
       display:flex;
       gap:8px;
@@ -97,8 +100,11 @@
       justify-content:flex-end;
       align-items:center;
     }
+
     .tv-pill{
-      display:inline-flex; align-items:center; gap:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
       padding:4px 10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.24);
@@ -108,6 +114,63 @@
       font-weight:900;
       font-size: 12px;
       opacity:.98;
+    }
+
+    /* ===== New badges band ===== */
+    .tv-badges-band{
+      flex: 0 0 var(--tv-badge-band-h);
+      height: var(--tv-badge-band-h);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .tv-badges-inner{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      white-space:nowrap;
+      will-change: transform;
+      animation: marqueeBadges 36s linear infinite;
+      padding-left: 100%;
+    }
+
+    .tv-badge-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      height: calc(var(--tv-badge-band-h) - 12px);
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+      flex: 0 0 auto;
+    }
+
+    .tv-badge-chip img{
+      height: calc(var(--tv-badge-band-h) - 24px);
+      width: auto;
+      max-width: 64px;
+      object-fit: contain;
+      display:block;
+      flex: 0 0 auto;
+    }
+
+    .tv-badge-name{
+      font-weight:1000;
+      font-size: clamp(12px, 1.5vh, 15px);
+      color:#111;
+      letter-spacing:.1px;
+    }
+
+    @keyframes marqueeBadges{
+      0%{ transform: translateX(0); }
+      100%{ transform: translateX(-200%); }
     }
 
     /* ===== Main split ===== */
@@ -135,6 +198,7 @@
       display:flex;
       flex-direction:column;
     }
+
     .panel-head{
       padding: 12px 14px;
       border-bottom: 1px solid #eee;
@@ -145,8 +209,17 @@
       background: #fbfbfb;
       flex: 0 0 auto;
     }
-    .panel-head h2{ margin:0; font-size: var(--tv-h2); font-weight:1000; }
-    .muted{ color:#666; font-weight:800; }
+
+    .panel-head h2{
+      margin:0;
+      font-size: var(--tv-h2);
+      font-weight:1000;
+    }
+
+    .muted{
+      color:#666;
+      font-weight:800;
+    }
 
     /* ===== LEFT 2/3 ===== */
     .left-body{
@@ -157,6 +230,7 @@
       gap:12px;
       min-height:0;
     }
+
     .courts-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -175,10 +249,12 @@
       box-shadow: 0 18px 45px rgba(0,0,0,.14);
       min-height:0;
     }
+
     .court-col.lisa{
       background: #FFE6EA;
       border-color: rgba(255,0,60,.20);
     }
+
     .court-col.manon{
       background: #FFF6D6;
       border-color: rgba(255,196,0,.25);
@@ -229,6 +305,7 @@
       gap:10px;
       min-width:0;
     }
+
     .m-time{
       font-weight:1000;
       color:#111;
@@ -244,12 +321,14 @@
       align-items:center;
       min-width:0;
     }
+
     .tmeta{
       min-width:0;
       display:flex;
       flex-direction:column;
       gap:3px;
     }
+
     .tname{
       font-weight:1000;
       font-size: var(--tv-team);
@@ -258,6 +337,7 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
+
     .tsub{
       font-weight:800;
       font-size: var(--tv-sub);
@@ -267,6 +347,7 @@
       text-overflow:ellipsis;
       min-height: 1em;
     }
+
     .g{
       text-align:right;
       font-weight:1000;
@@ -274,6 +355,7 @@
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
     }
+
     .placeholder{
       color:#333;
       font-weight:900;
@@ -291,6 +373,7 @@
       min-height:0;
       flex: 1 1 auto;
     }
+
     .rot-title{
       display:flex;
       align-items:center;
@@ -299,6 +382,7 @@
       font-weight:1000;
       flex: 0 0 auto;
     }
+
     .rot-box{
       flex:1 1 auto;
       border:1px solid #eee;
@@ -310,7 +394,12 @@
       min-height:0;
     }
 
-    .tv-match-list{ display:flex; flex-direction:column; gap:12px; }
+    .tv-match-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
     .tv-match-card{
       border-radius:16px;
       border:1px solid rgba(0,0,0,.08);
@@ -318,8 +407,16 @@
       background:#fff;
       box-shadow:0 1px 0 rgba(0,0,0,.03);
     }
-    .tv-match-card.courtA{ background:#FFF6D6; border-color:rgba(255, 196, 0, .30); }
-    .tv-match-card.courtB{ background:#FFE6EA; border-color:rgba(255, 0, 60, .22); }
+
+    .tv-match-card.courtA{
+      background:#FFF6D6;
+      border-color:rgba(255, 196, 0, .30);
+    }
+
+    .tv-match-card.courtB{
+      background:#FFE6EA;
+      border-color:rgba(255, 0, 60, .22);
+    }
 
     .tv-m-head{
       display:flex;
@@ -327,12 +424,14 @@
       gap:10px;
       min-width:0;
     }
+
     .tv-m-time{
       font-size:13px;
       font-weight:1000;
       white-space:nowrap;
       letter-spacing:.2px;
     }
+
     .tv-m-court{
       font-size:13px;
       font-weight:800;
@@ -343,6 +442,7 @@
       min-width:0;
       flex:1;
     }
+
     .tv-teamline{
       margin-top:10px;
       display:grid;
@@ -351,7 +451,11 @@
       align-items:center;
       min-width:0;
     }
-    .tv-team-block{ min-width:0; }
+
+    .tv-team-block{
+      min-width:0;
+    }
+
     .tv-team-title{
       font-size:15px;
       font-weight:1000;
@@ -360,6 +464,7 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
+
     .tv-team-sub{
       margin-top:2px;
       font-size:13px;
@@ -370,6 +475,7 @@
       text-overflow:ellipsis;
       min-height: 1em;
     }
+
     .tv-sc{
       text-align:right;
       font-size:15px;
@@ -377,6 +483,7 @@
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
+
     .tv-vs{
       margin:10px 0 6px;
       text-align:center;
@@ -398,6 +505,7 @@
       padding: 0;
       overflow:hidden;
     }
+
     .sponsor-track{
       display:flex;
       gap:44px;
@@ -407,6 +515,7 @@
       animation: marquee 22s linear infinite;
       padding-left: 100%;
     }
+
     .sponsor-item{
       display:inline-flex;
       align-items:center;
@@ -415,6 +524,7 @@
       border:none;
       background:transparent;
     }
+
     .sponsor-item img{
       height: calc(var(--tv-band-h) * .70);
       width:auto;
@@ -473,6 +583,13 @@
 
     </div>
   </header>
+
+  <!-- BADGES -->
+  <section class="tv-badges-band" aria-label="Badges joueurs">
+    <div class="container">
+      <div class="tv-badges-inner" id="badgesTrack"></div>
+    </div>
+  </section>
 
   <!-- MAIN -->
   <main class="tv-main">
@@ -540,6 +657,8 @@
   const DOC_TIRAGE = doc(db, "tirages", etapeId);
   const COL_RESULTS = `resultats_${etapeId}`;
 
+  const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
+
   const tvClock = document.getElementById("tvClock");
   const tvStatus = document.getElementById("tvStatus");
 
@@ -556,6 +675,11 @@
   const rotIndex = document.getElementById("rotIndex");
   const rotBox   = document.getElementById("rotBox");
   const sponsorTrack = document.getElementById("sponsorTrack");
+  const badgesTrack = document.getElementById("badgesTrack");
+
+  let generalConfig = { players:{}, order:[] };
+  const classements = new Map();
+  for(const s of STEP_IDS) classements.set(s, null);
 
   function tickClock(){
     const d = new Date();
@@ -571,7 +695,352 @@
     return (s ?? "").toString()
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  const PLAYER_FIRSTNAME_ALIASES = {
+    "charlyne": "charline"
+  };
+
+  function normalizeTextBasic(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function canonicalFirstName(firstName){
+    const raw = normalizeTextBasic(firstName);
+    if(!raw) return "";
+    return PLAYER_FIRSTNAME_ALIASES[raw] || raw;
+  }
+
+  function canonicalLastName(lastName){
+    return normalizeTextBasic(lastName);
+  }
+
+  function canonicalPlayerKey(firstName, lastName){
+    const fn = canonicalFirstName(firstName);
+    const ln = canonicalLastName(lastName);
+    if(!fn && !ln) return "";
+    return `${fn}|${ln}`;
+  }
+
+  function nameInitial(lastName){
+    const s = (lastName || "").toString().trim();
+    if(!s) return "";
+    return s[0].toUpperCase() + ".";
+  }
+
+  function playerDisplay(firstName, lastName){
+    const fn = (firstName || "").toString().trim();
+    const ini = nameInitial(lastName);
+    if(!fn && !ini) return "—";
+    if(!ini) return fn || "—";
+    return `${fn} ${ini}`.trim();
+  }
+
+  function genderRank(g){
+    const s = (g ?? "").toString().toUpperCase().trim();
+    if(s === "F" || s === "FEMALE" || s === "W") return 0;
+    if(s === "M" || s === "MALE") return 2;
+    return 1;
+  }
+
+  function inferGenderFromPlayerObj(p){
+    if(!p || typeof p !== "object") return null;
+    if("gender" in p) return p.gender;
+    if("sex" in p) return p.sex;
+    if("isFemale" in p) return (p.isFemale === true ? "F" : (p.isFemale === false ? "M" : null));
+    return null;
+  }
+
+  const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
+  const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
+
+  function stepType(stepId){
+    return (stepId === "etape1" || stepId === "etape5") ? "BT250" : "BT100";
+  }
+
+  function pointsTable(stepId){
+    return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
+  }
+
+  function normTeamName(s){
+    return (s || "").toString().trim().toLowerCase()
+      .replaceAll("’","'")
+      .replace(/\s+/g," ");
+  }
+
+  function teamNameOf(team){
+    return (team?.teamName || team?.name || "Équipe").toString().trim() || "Équipe";
+  }
+
+  function teamLogoFromDoc(stepDoc, teamName){
+    if(!stepDoc) return null;
+    const map = stepDoc.teamLogos || stepDoc.logos || null;
+    if(map && typeof map === "object"){
+      if(map[teamName]) return map[teamName];
+      const tn = normTeamName(teamName);
+      for(const k of Object.keys(map)){
+        if(normTeamName(k) === tn) return map[k];
+      }
+    }
+    return null;
+  }
+
+  function teamLogoSrc(stepId, stepDoc, team){
+    const teamName = teamNameOf(team);
+
+    const file = team?.logoFile || team?.logo || team?.logoUrl || team?.teamLogo || null;
+    if(file){
+      if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+      return `../assets/img/${String(file)}`;
+    }
+
+    const fromMap = teamLogoFromDoc(stepDoc, teamName);
+    if(fromMap){
+      if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
+      return `../assets/img/${String(fromMap)}`;
+    }
+
+    if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
+      return "../assets/img/lobstars.png";
+    }
+
+    return null;
+  }
+
+  function badgeToSrc(file){
+    if(!file) return "";
+    if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+    return `../assets/img/badges/${String(file)}`;
+  }
+
+  function normalizeStepTeams(stepId, stepDoc){
+    const ptsTable = pointsTable(stepId);
+
+    const positions = Array.isArray(stepDoc?.positions) ? stepDoc.positions : null;
+    if(positions && positions.length){
+      return positions
+        .map(r=>{
+          const pos = Number(r?.pos);
+          if(!Number.isFinite(pos)) return null;
+
+          const team = {
+            teamName: r?.teamName || r?.team?.teamName || "Équipe",
+            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
+            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
+            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
+          };
+
+          const pts = Number(ptsTable[pos] || 0);
+          return { pos, team, points: pts };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.pos-b.pos);
+    }
+
+    const legacy = Array.isArray(stepDoc?.teams) ? stepDoc.teams
+                 : (Array.isArray(stepDoc?.ranking) ? stepDoc.ranking : null);
+
+    if(legacy && legacy.length){
+      return legacy
+        .map(r=>{
+          const pos = Number(r?.pos);
+          if(!Number.isFinite(pos)) return null;
+
+          const team = {
+            teamName: r?.teamName || r?.team?.teamName || "Équipe",
+            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
+            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
+            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
+          };
+
+          const pts = Number(ptsTable[pos] || 0);
+          return { pos, team, points: pts };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.pos-b.pos);
+    }
+
+    const players = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
+    if(players.length){
+      const groups = new Map();
+      for(const p of players){
+        const pos = Number(p?.pos);
+        if(!Number.isFinite(pos)) continue;
+        const tname = (p?.teamName || "Équipe").toString().trim() || "Équipe";
+        const key = `${pos}||${tname}`;
+        if(!groups.has(key)) groups.set(key, { pos, teamName: tname, players: [] });
+        groups.get(key).players.push(p);
+      }
+
+      const rows = [];
+      for(const g of groups.values()){
+        const a = g.players[0] || {};
+        const b = g.players[1] || {};
+        const team = {
+          teamName: g.teamName,
+          p1FirstName: (a.firstName ?? a.p1FirstName ?? "").toString(),
+          p1LastName:  (a.lastName  ?? a.p1LastName  ?? "").toString(),
+          p2FirstName: (b.firstName ?? b.p2FirstName ?? "").toString(),
+          p2LastName:  (b.lastName  ?? b.p2LastName  ?? "").toString(),
+          logoFile: a.logoFile || a.logo || a.logoUrl || b.logoFile || b.logo || b.logoUrl || null
+        };
+        const pts = Number(ptsTable[g.pos] || 0);
+        rows.push({ pos: g.pos, team, points: pts });
+      }
+      rows.sort((a,b)=>a.pos-b.pos);
+      return rows;
+    }
+
+    return [];
+  }
+
+  function buildGeneralRowsForBadges(){
+    const map = new Map();
+
+    for(const stepId of STEP_IDS){
+      const stepDoc = classements.get(stepId) || null;
+      if(!stepDoc) continue;
+
+      const teams = normalizeStepTeams(stepId, stepDoc);
+      if(!teams.length) continue;
+
+      const playedThisStep = new Set();
+      const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
+
+      function findPlayerObj(firstName, lastName, teamName){
+        const wantedKey = canonicalPlayerKey(firstName, lastName);
+        const tn = (teamName || "").toString().trim();
+
+        return playersArr.find(p=>{
+          const pKey = canonicalPlayerKey(p?.firstName, p?.lastName);
+          const pTeam = (p?.teamName || "").toString().trim();
+          if(wantedKey && pKey && wantedKey !== pKey) return false;
+          if(tn && pTeam && tn !== pTeam) return false;
+          return !!wantedKey && !!pKey;
+        }) || null;
+      }
+
+      for(const row of teams){
+        const t = row.team || {};
+        const teamName = teamNameOf(t);
+        const logoSrc = teamLogoSrc(stepId, stepDoc, t);
+
+        const p1DisplayName = playerDisplay(t.p1FirstName, t.p1LastName);
+        const p2DisplayName = playerDisplay(t.p2FirstName, t.p2LastName);
+
+        const p1Canonical = canonicalPlayerKey(t.p1FirstName, t.p1LastName);
+        const p2Canonical = canonicalPlayerKey(t.p2FirstName, t.p2LastName);
+
+        const p1Obj = findPlayerObj(t.p1FirstName, t.p1LastName, teamName);
+        const p2Obj = findPlayerObj(t.p2FirstName, t.p2LastName, teamName);
+
+        const p1Gender = inferGenderFromPlayerObj(p1Obj);
+        const p2Gender = inferGenderFromPlayerObj(p2Obj);
+
+        for(const item of [
+          { canonical:p1Canonical, display:p1DisplayName, gender:p1Gender },
+          { canonical:p2Canonical, display:p2DisplayName, gender:p2Gender }
+        ]){
+          if(!item.canonical || !item.display || item.display === "—") continue;
+
+          if(!map.has(item.canonical)){
+            map.set(item.canonical, {
+              key: item.canonical,
+              name: item.display,
+              points: 0,
+              steps: new Set(),
+              gender: item.gender,
+              logo: null
+            });
+          }
+
+          const rec = map.get(item.canonical);
+          rec.points += Number(row.points || 0);
+          if(!rec.gender && item.gender) rec.gender = item.gender;
+          if(!rec.logo && logoSrc) rec.logo = logoSrc;
+
+          const mk = `${item.canonical}|${stepId}`;
+          if(!playedThisStep.has(mk)){
+            playedThisStep.add(mk);
+            rec.steps.add(stepId);
+          }
+        }
+      }
+    }
+
+    const out = [...map.values()].map(x=>{
+      const cfg = generalConfig?.players?.[x.key] || {};
+      return {
+        key: x.key,
+        name: x.name,
+        points: x.points,
+        stepsPlayed: x.steps.size,
+        gender: x.gender || null,
+        logo: x.logo || null,
+        badge: cfg.badge || null,
+        priority: Number(cfg.priority || 0)
+      };
+    });
+
+    out.sort((a,b)=>{
+      if(b.points !== a.points) return b.points - a.points;
+      if(a.priority !== b.priority) return a.priority - b.priority;
+
+      const ga = genderRank(a.gender);
+      const gb = genderRank(b.gender);
+      if(ga !== gb) return ga - gb;
+
+      const order = Array.isArray(generalConfig?.order) ? generalConfig.order : [];
+      const ia = order.indexOf(a.key);
+      const ib = order.indexOf(b.key);
+      if(ia !== -1 || ib !== -1){
+        if(ia === -1) return 1;
+        if(ib === -1) return -1;
+        if(ia !== ib) return ia - ib;
+      }
+
+      return a.name.localeCompare(b.name, "fr");
+    });
+
+    return out.filter(x => !!x.badge);
+  }
+
+  function renderBadgesBand(){
+    const rows = buildGeneralRowsForBadges();
+
+    if(!rows.length){
+      badgesTrack.innerHTML = `
+        <div class="tv-badge-chip">
+          <span class="tv-badge-name">Badges joueurs en attente…</span>
+        </div>
+      `;
+      return;
+    }
+
+    const chips = rows.map(r=>{
+      const src = badgeToSrc(r.badge);
+      return `
+        <div class="tv-badge-chip">
+          <img src="${esc(src)}" alt="${esc(r.name)}">
+          <span class="tv-badge-name">${esc(r.name)}</span>
+        </div>
+      `;
+    }).join("");
+
+    badgesTrack.innerHTML = chips + chips;
   }
 
   const SPONSOR_SLOTS = [
@@ -620,7 +1089,6 @@
 
   let prog = null;
   let resultsMap = new Map();
-
   let tableaux = [];
   let rotPtr = 0;
   let rotTimer = null;
@@ -1127,6 +1595,20 @@
     console.error(err);
     tvStatus.textContent = "🔴 Erreur résultats";
   });
+
+  onSnapshot(doc(db, "config", "classement_general"), (snap)=>{
+    generalConfig = snap.exists() ? (snap.data() || {}) : {};
+    if(!generalConfig.players) generalConfig.players = {};
+    if(!Array.isArray(generalConfig.order)) generalConfig.order = [];
+    renderBadgesBand();
+  });
+
+  for(const stepId of STEP_IDS){
+    onSnapshot(doc(db, "classements", stepId), (snap)=>{
+      classements.set(stepId, snap.exists() ? (snap.data() || {}) : null);
+      renderBadgesBand();
+    });
+  }
 
   (async function loadTirageOnce(){
     try{ await getDoc(DOC_TIRAGE); } catch(e){}
