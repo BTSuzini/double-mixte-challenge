@@ -294,11 +294,11 @@
     return normalizeTextBasic(lastName);
   }
 
+  // ✅ CORRECTION : clé joueur = prénom uniquement
   function canonicalPlayerKey(firstName, lastName){
     const fn = canonicalFirstName(firstName);
-    const ln = canonicalLastName(lastName);
-    if(!fn && !ln) return "";
-    return `${fn}|${ln}`;
+    if(!fn) return "";
+    return fn;
   }
 
   function playerDisplay(firstName, lastName){
@@ -554,9 +554,14 @@
           rec.points += Number(row.points || 0);
           if(!rec.gender && item.gender) rec.gender = item.gender;
           if(!rec.logo && logoSrc) rec.logo = logoSrc;
-          if(item.firstName) rec.firstName = item.firstName;
-          if(item.lastName) rec.lastName = item.lastName;
-          rec.name = item.display;
+
+          // ✅ garde la version la plus complète du nom affiché
+          const currentDisplay = playerDisplay(rec.firstName, rec.lastName);
+          if(item.display.length > currentDisplay.length){
+            rec.firstName = item.firstName;
+            rec.lastName = item.lastName;
+            rec.name = item.display;
+          }
 
           const mk = `${item.canonical}|${stepId}`;
           if(!playedThisStep.has(mk)){
