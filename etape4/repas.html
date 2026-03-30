@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Repas — Étape 4</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260409-etape4-repas" />
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row topbar-row-step">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <div class="step-title-wrap" aria-label="Étape 4">
+        <img class="step-title-img" src="../assets/img/etape4.png" alt="Étape 4">
+      </div>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html" aria-current="page">🍽️ Repas</a>
+      <a href="programmation.html">🗓️ Programmation</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html">🎲 Tirage</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card repas-card">
+    <img 
+      src="../assets/img/DX-repas.png"
+      alt="Repas Étape 4"
+      class="repas-img"
+    >
+  </section>
+
+</main>
+
+<style>
+  .repas-card{
+    padding:10px;
+  }
+
+  .repas-img{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:12px;
+  }
+
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+  }
+
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+  }
+
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  .nav-step{
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .nav-step::after{
+    content:"";
+    flex:auto;
+  }
+
+  .nav-step a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width:420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size:13px;
+    }
+
+    .step-title-img{
+      max-height:74px;
+    }
+  }
+</style>
+
+</body>
+</html>
