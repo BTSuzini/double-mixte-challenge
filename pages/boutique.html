@@ -1,590 +1,218 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Boutique — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-boutique-v2-verifications" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Boutique — Open BT Bricorama</title>
 
-  <style>
-    .note{
-      border:1px solid #eee;
-      border-radius:14px;
-      padding:14px;
-      background:#fff;
-      line-height:1.55;
-    }
-    .small{ font-size:14px; }
+<link rel="stylesheet" href="../assets/css/main.css?v=20260406-open-boutique-v1"/>
 
-    /* =========================
-       Subtabs (2 boutons)
-    ========================== */
-    .subtabs{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-    .subtab{
-      appearance:none;
-      border:1px solid #ddd;
-      background:#fafafa;
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:900;
-      cursor:pointer;
-      text-align:center;
-      white-space:nowrap;
-    }
-    .subtab[aria-selected="true"]{
-      background:#fff;
-      border-color:#cfcfcf;
-      box-shadow: 0 6px 14px rgba(0,0,0,.06);
-    }
+<style>
+/* ===== SUBTABS ===== */
+.subtabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.subtab{
+  border:1px solid #ddd;
+  background:#fafafa;
+  border-radius:999px;
+  padding:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.subtab[aria-selected="true"]{
+  background:#fff;
+  box-shadow:0 6px 14px rgba(0,0,0,.06);
+}
 
-    /* =========================
-       Paiements
-    ========================== */
-    .pay-top{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:flex-end;
-      justify-content:space-between;
-      margin-top:10px;
-    }
-    .pay-top .field{
-      margin:0;
-      flex: 1 1 240px;
-      min-width: 220px;
-    }
+/* ===== CARDS ===== */
+.pay-list{
+  display:grid;
+  gap:10px;
+  margin-top:12px;
+}
 
-    .pay-list{
-      display:grid;
-      gap:10px;
-      margin-top:12px;
-    }
-    .pay-card{
-      border:1px solid #eee;
-      border-radius:16px;
-      background:#fff;
-      padding:12px 12px;
-      box-shadow: 0 6px 16px rgba(0,0,0,.04);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-    .pay-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      min-width:0;
-    }
-    .pay-team{
-      font-weight:900;
-      font-size:16px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-weight:900;
-      border:1px solid #eee;
-      background:#fafafa;
-      white-space:nowrap;
-      flex: 0 0 auto;
-    }
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      display:inline-block;
-      background:#bbb;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
-    }
-    .dot.red{ background:#e74c3c; }
-    .dot.orange{ background:#f39c12; }
-    .dot.green{ background:#2ecc71; }
+.pay-card{
+  border-radius:16px;
+  background:#fff;
+  padding:12px;
+  box-shadow:0 6px 16px rgba(0,0,0,.05);
+}
 
-    .players{
-      display:grid;
-      gap:8px;
-    }
-    .player-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border:1px solid #f0f0f0;
-      background:#fbfbfb;
-      border-radius:12px;
-      padding:10px 10px;
-      min-width:0;
-    }
-    .player-name{
-      font-weight:800;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
-    }
-    .player-right{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-      flex: 0 0 auto;
-      font-weight:900;
-      color:#111;
-    }
+.badge{
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+}
 
-    .mutedline{ margin:10px 0 0; }
-
-    /* Sections main/wait */
-    .pay-section-title{
-      margin:12px 0 0;
-      font-weight:1000;
-    }
-    .pay-section-sub{
-      margin:6px 0 0;
-    }
-
-    @media (max-width: 420px){
-      .player-row{ padding:9px 9px; }
-      .pay-team{ font-size:15px; }
-      .badge{ padding:6px 9px; font-size:13px; }
-    }
-  </style>
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+}
+.dot.red{background:#e74c3c;}
+.dot.orange{background:#f39c12;}
+.dot.green{background:#2ecc71;}
+</style>
 </head>
+
 <body>
 
-<header class="topbar">
-  <div class="container">
-    <div class="topbar-row">
-      <div class="brand-logo">
-        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
-      </div>
+<header class="site-header">
+  <div class="container header-inner">
 
-      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <img src="../assets/img/challenge-gen.png"
-             alt="Suzini Beach Tennis Double Mixte Challenge"
-             style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
-      </div>
-
-      <div class="brand-logo">
-        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
-      </div>
+    <div class="header-logo left">
+      <img src="../assets/img/blason-suzini.png">
     </div>
 
-    <nav class="nav">
-      <a href="../index.html">🏠</a>
-      <a href="reglement.html">📘 Règlement</a>
-      <a href="classement.html">🏆 Classement</a>
-      <a href="boutique.html" aria-current="page">🛍️ Boutique</a>
-      <a href="infos.html">📰 Infos</a>
-      <a href="contact.html">📩 📞</a>
+    <div class="header-logo center">
+      <img src="../assets/img/openbt.png">
+    </div>
+
+    <div class="header-logo right">
+      <img src="../assets/img/BT500.png">
+    </div>
+
+    <nav class="header-nav">
+      <a class="nav-link" href="../index.html">🏠 Accueil</a>
+      <a class="nav-link" href="equipes.html">👥 Équipes</a>
+      <a class="nav-link" href="programmation.html">📅 Programmation</a>
+      <a class="nav-link" href="classements.html">🏆 Résultats</a>
+      <a class="nav-link" href="reglement.html">📘 Règlement</a>
+      <a class="nav-link" href="inscriptions.html">📝 Inscriptions</a>
+      <a class="nav-link primary" href="boutique.html">🛍️ Boutique</a>
+      <a class="nav-link" href="repas.html">🍽️ Repas</a>
+      <a class="nav-link" href="tirage.html">🎲 Tirage</a>
+      <a class="nav-link" href="infos.html">ℹ️ Infos</a>
+      <a class="nav-link" href="contact.html">📩 Contact</a>
     </nav>
+
   </div>
 </header>
 
 <main class="container">
 
-  <section class="card">
-    <h2 style="margin-bottom:6px;">🛒 Boutique / Paiement</h2>
+<section class="panel">
+<h2>🛒 Boutique / Paiement</h2>
 
-    <div class="subtabs" role="tablist" aria-label="Boutique / Paiements">
-      <button class="subtab" id="tabShop" type="button" aria-selected="true">🛍️ Boutique</button>
-      <button class="subtab" id="tabPaid" type="button" aria-selected="false">✅ Paiements effectués</button>
-    </div>
+<div class="subtabs">
+<button id="tabShop" class="subtab" aria-selected="true">🛍️ Boutique</button>
+<button id="tabPaid" class="subtab">✅ Paiements</button>
+</div>
 
-    <p class="muted mutedline" id="paidHint" style="display:none;">
-      Affichage en direct. Le statut affiché reprend la vérification faite par l’organisation.
-    </p>
-  </section>
+</section>
 
-  <!-- ======================
-        ONGLET 1 — BOUTIQUE
-  ======================= -->
-  <section class="card" id="panelShop">
-    <div class="note">
-      <p style="margin:0 0 10px;">
-        Paiement des inscriptions via <b>SumUp</b> (ouverture via le bouton ci-dessous).
-      </p>
-      <ul style="margin:0 0 10px 18px;">
-        <li>Paiement possible <b>par équipe : 20€</b></li>
-        <li>ou <b>par personne : 10€</b></li>
-      </ul>
-      <p class="muted small" style="margin:0;">
-        Astuce : vérifiez avant que votre partenaire n'a pas déjà réglé 😜
-      </p>
-    </div>
+<!-- ===== BOUTIQUE ===== -->
+<section id="panelShop" class="panel">
 
-    <div class="grid" style="margin-top:12px;">
-      <a
-        class="btn"
-        id="btnGo"
-        href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a"
-        target="_blank"
-        rel="noopener"
-        style="font-weight:900; color:#111;"
-      >
-        🔗 Ouvrir la boutique SumUp
-      </a>
-    </div>
-  </section>
+<p>
+Paiement via <b>SumUp</b>
+</p>
 
-  <!-- ======================
-        ONGLET 2 — PAIEMENTS
-  ======================= -->
-  <section class="card" id="panelPaid" style="display:none;">
-    <h2 style="margin:0;">✅ Paiements effectués</h2>
-    <p class="muted" style="margin:8px 0 0;">
-      Tri : <b>non payé</b> → <b>à vérifier</b> → <b>payé</b>.
-    </p>
+<a class="btn btn-primary"
+href="https://tennis-club-de-suzini.sumupstore.com"
+target="_blank">
+🔗 Ouvrir la boutique
+</a>
 
-    <div class="pay-top">
-      <div class="field">
-        <label for="paidEtape">Étape</label>
-        <select id="paidEtape">
-          <option value="etape1">🎾 Étape 1</option>
-          <option value="etape2">🎾 Étape 2</option>
-          <option value="etape3">🎾 Étape 3</option>
-          <option value="etape4">🎾 Étape 4</option>
-          <option value="etape5">🎾 Étape 5</option>
-        </select>
-      </div>
-    </div>
+</section>
 
-    <p class="muted" id="paidStatus" style="margin:10px 0 0;">Chargement…</p>
-    <div id="payList" class="pay-list" aria-label="Liste des paiements"></div>
-  </section>
+<!-- ===== PAIEMENTS ===== -->
+<section id="panelPaid" class="panel" style="display:none;">
+
+<h2>✅ Paiements</h2>
+
+<div class="subtabs" style="margin-top:10px;">
+<button id="btnDH" class="subtab" aria-selected="true">👨 DH</button>
+<button id="btnDD" class="subtab">👩 DD</button>
+</div>
+
+<p id="status" class="muted">Chargement…</p>
+
+<div id="list" class="pay-list"></div>
+
+</section>
 
 </main>
 
 <script type="module">
-  import { db } from "../assets/js/firebase.js";
-  import {
-    collection,
-    query,
-    orderBy,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { db } from "../assets/js/firebase.js";
+import {
+collection,
+onSnapshot,
+query,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // =========================
-  // CONFIG FIRESTORE
-  // =========================
-  const TEAM_COLLECTION_BY_ETAPE = {
-    etape1: "equipes_etape1_public",
-    etape2: "equipes_etape2_public",
-    etape3: "equipes_etape3_public",
-    etape4: "equipes_etape4_public",
-    etape5: "equipes_etape5_public",
-  };
+const COL = {
+DH:"equipes_dh_public",
+DD:"equipes_dd_public"
+};
 
-  function verifCollectionName(etapeId){
-    return `verifications_${etapeId}`;
-  }
+let current="DH";
 
-  // =========================
-  // TABS
-  // =========================
-  const tabShop = document.getElementById("tabShop");
-  const tabPaid = document.getElementById("tabPaid");
-  const panelShop = document.getElementById("panelShop");
-  const panelPaid = document.getElementById("panelPaid");
-  const paidHint = document.getElementById("paidHint");
+const tabShop=document.getElementById("tabShop");
+const tabPaid=document.getElementById("tabPaid");
+const panelShop=document.getElementById("panelShop");
+const panelPaid=document.getElementById("panelPaid");
 
-  function showShop(){
-    tabShop.setAttribute("aria-selected","true");
-    tabPaid.setAttribute("aria-selected","false");
-    panelShop.style.display = "block";
-    panelPaid.style.display = "none";
-    paidHint.style.display = "none";
-    stopSubs();
-    try{ localStorage.setItem("challenge_boutique_tab","shop"); }catch(e){}
-  }
+tabShop.onclick=()=>{
+panelShop.style.display="block";
+panelPaid.style.display="none";
+};
 
-  function showPaid(){
-    tabShop.setAttribute("aria-selected","false");
-    tabPaid.setAttribute("aria-selected","true");
-    panelShop.style.display = "none";
-    panelPaid.style.display = "block";
-    paidHint.style.display = "block";
-    try{ localStorage.setItem("challenge_boutique_tab","paid"); }catch(e){}
-    startSubs(paidEtape.value);
-  }
+tabPaid.onclick=()=>{
+panelShop.style.display="none";
+panelPaid.style.display="block";
+load();
+};
 
-  tabShop.addEventListener("click", showShop);
-  tabPaid.addEventListener("click", showPaid);
+document.getElementById("btnDH").onclick=()=>{
+current="DH";
+load();
+};
 
-  // =========================
-  // UI PAIEMENTS
-  // =========================
-  const payList = document.getElementById("payList");
-  const paidStatus = document.getElementById("paidStatus");
-  const paidEtape = document.getElementById("paidEtape");
+document.getElementById("btnDD").onclick=()=>{
+current="DD";
+load();
+};
 
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
+function load(){
+const list=document.getElementById("list");
+const status=document.getElementById("status");
 
-  function playerStatusCode(statusValue){
-    if(statusValue === "ok") return 2;   // payé
-    if(statusValue === "nok") return 1;  // à vérifier
-    return 0;                            // non payé / non vérifié
-  }
+status.textContent="Chargement…";
 
-  function statusDotClass(teamStatus){
-    if(teamStatus >= 2) return "green";
-    if(teamStatus === 1) return "orange";
-    return "red";
-  }
+const q=query(collection(db,COL[current]),orderBy("createdAt","asc"));
 
-  function statusLabel(teamStatus){
-    if(teamStatus >= 2) return "Payé";
-    if(teamStatus === 1) return "À vérifier";
-    return "Non payé";
-  }
+onSnapshot(q,(snap)=>{
+const arr=[];
 
-  function playerIcon(statusValue){
-    if(statusValue === "ok") return "✅";
-    if(statusValue === "nok") return "⚠️";
-    return "❌";
-  }
+snap.forEach(d=>{
+const x=d.data();
+arr.push({
+team:x.teamName,
+p1:x.p1FirstName,
+p2:x.p2FirstName
+});
+});
 
-  function playerLabel(statusValue){
-    if(statusValue === "ok") return "Payé";
-    if(statusValue === "nok") return "À vérifier";
-    return "Non payé";
-  }
+status.textContent="🟢 En direct";
 
-  function teamSortValue(p1Status, p2Status){
-    const a = playerStatusCode(p1Status);
-    const b = playerStatusCode(p2Status);
-    return Math.min(a, b);
-  }
+list.innerHTML=arr.map(t=>`
+<div class="pay-card">
+<b>${t.team}</b><br>
+${t.p1} / ${t.p2}
+</div>
+`).join("");
 
-  // =========================
-  // DATA (Teams + Verifications)
-  // =========================
-  let snapTeams = null;
-  let snapVerif = null;
-
-  let unsubTeams = null;
-  let unsubVerif = null;
-
-  function stopSubs(){
-    if(unsubTeams){ unsubTeams(); unsubTeams = null; }
-    if(unsubVerif){ unsubVerif(); unsubVerif = null; }
-    snapTeams = null;
-    snapVerif = null;
-  }
-
-  function startSubs(etapeId){
-    stopSubs();
-
-    const teamsCol = TEAM_COLLECTION_BY_ETAPE[etapeId];
-    if(!teamsCol){
-      paidStatus.textContent = "Étape inconnue.";
-      return;
-    }
-
-    paidStatus.textContent = "Chargement…";
-    payList.innerHTML = "";
-
-    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
-    const qVerif = query(collection(db, verifCollectionName(etapeId)));
-
-    unsubTeams = onSnapshot(
-      qTeams,
-      (s)=>{
-        snapTeams = s;
-        rebuild(etapeId);
-      },
-      (e)=>{
-        console.error(e);
-        paidStatus.textContent = "🔴 Erreur équipes";
-      }
-    );
-
-    unsubVerif = onSnapshot(
-      qVerif,
-      (s)=>{
-        snapVerif = s;
-        rebuild(etapeId);
-      },
-      (e)=>{
-        console.error(e);
-        snapVerif = null;
-        rebuild(etapeId);
-      }
-    );
-  }
-
-  function renderSection(title, subtitle, arr){
-    const header = `
-      <div style="margin-top:6px;">
-        <div class="pay-section-title">${esc(title)}</div>
-        ${subtitle ? `<p class="muted pay-section-sub">${esc(subtitle)}</p>` : ``}
-      </div>
-    `;
-
-    if(!arr.length){
-      return header + `<p class="muted" style="margin:0;">Aucune équipe.</p>`;
-    }
-
-    const cards = arr.map(t=>{
-      const dot = statusDotClass(t.teamStatus);
-      const teamLabel = statusLabel(t.teamStatus);
-
-      const p1Name = t.p1 || "—";
-      const p2Name = t.p2 || "—";
-
-      return `
-        <div class="pay-card">
-          <div class="pay-head">
-            <div class="pay-team">${esc(t.teamName)}</div>
-            <div class="badge" title="${esc(teamLabel)}">
-              <span class="dot ${dot}"></span>
-              ${esc(teamLabel)}
-            </div>
-          </div>
-
-          <div class="players">
-            <div class="player-row">
-              <div class="player-name">${esc(p1Name)}</div>
-              <div class="player-right" title="${esc(playerLabel(t.p1PaymentStatus))}">
-                ${playerIcon(t.p1PaymentStatus)}
-              </div>
-            </div>
-
-            <div class="player-row">
-              <div class="player-name">${esc(p2Name)}</div>
-              <div class="player-right" title="${esc(playerLabel(t.p2PaymentStatus))}">
-                ${playerIcon(t.p2PaymentStatus)}
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    return header + cards;
-  }
-
-  function rebuild(etapeId){
-    if(!snapTeams){
-      paidStatus.textContent = "Chargement…";
-      return;
-    }
-
-    const verifMap = new Map();
-    if(snapVerif){
-      snapVerif.forEach(d=>{
-        const x = d.data() || {};
-        verifMap.set(d.id, {
-          p1PaymentStatus: x?.p1?.payment || "nv",
-          p2PaymentStatus: x?.p2?.payment || "nv"
-        });
-      });
-    }
-
-    const mainTeams = [];
-    const waitTeams = [];
-
-    snapTeams.forEach(d=>{
-      const x = d.data() || {};
-      const teamName = (x.teamName || "").trim();
-      const p1 = (x.p1FirstName || "").trim();
-      const p2 = (x.p2FirstName || "").trim();
-      if(!teamName) return;
-
-      const list = (x.list || "main").toString();
-      const verif = verifMap.get(d.id) || {
-        p1PaymentStatus: "nv",
-        p2PaymentStatus: "nv"
-      };
-
-      const teamStatus = teamSortValue(verif.p1PaymentStatus, verif.p2PaymentStatus);
-
-      const rec = {
-        teamDocId: d.id,
-        teamName,
-        p1,
-        p2,
-        p1PaymentStatus: verif.p1PaymentStatus,
-        p2PaymentStatus: verif.p2PaymentStatus,
-        teamStatus,
-        list
-      };
-
-      if(list === "wait") waitTeams.push(rec);
-      else mainTeams.push(rec);
-    });
-
-    function sortArr(arr){
-      arr.sort((a,b)=>{
-        if(a.teamStatus !== b.teamStatus) return a.teamStatus - b.teamStatus;
-        return (a.teamName || "").localeCompare((b.teamName || ""), "fr");
-      });
-    }
-
-    sortArr(mainTeams);
-    sortArr(waitTeams);
-
-    const total = mainTeams.length + waitTeams.length;
-    paidStatus.textContent = `🟢 En direct — ${total} équipe(s) — ${esc(etapeId)}`;
-
-    if(total === 0){
-      payList.innerHTML = `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
-      return;
-    }
-
-    payList.innerHTML = [
-      renderSection("✅ Tableau principal", "Équipes du tableau principal.", mainTeams),
-      renderSection("⏳ Liste d’attente", "Équipes en attente (affichées après le tableau principal).", waitTeams)
-    ].join("");
-  }
-
-  // =========================
-  // Restore état onglets / étape
-  // =========================
-  try{
-    const savedEtape = localStorage.getItem("challenge_boutique_paid_etape");
-    if(
-      savedEtape &&
-      paidEtape.querySelector(`option[value="${savedEtape}"]`) &&
-      !paidEtape.querySelector(`option[value="${savedEtape}"]`).disabled
-    ){
-      paidEtape.value = savedEtape;
-    }
-  }catch(e){}
-
-  paidEtape.addEventListener("change", ()=>{
-    try{ localStorage.setItem("challenge_boutique_paid_etape", paidEtape.value); }catch(e){}
-    if(panelPaid.style.display !== "none"){
-      startSubs(paidEtape.value);
-    }
-  });
-
-  try{
-    const saved = localStorage.getItem("challenge_boutique_tab");
-    if(saved === "paid") showPaid();
-    else showShop();
-  }catch(e){
-    showShop();
-  }
+});
+}
 </script>
 
 </body>
