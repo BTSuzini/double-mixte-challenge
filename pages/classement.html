@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Classement — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260316-classement-public-v8" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260410-classement-public-v9" />
   <style>
     .list{ display:flex; flex-direction:column; gap:10px; }
 
@@ -203,8 +203,8 @@
         <option value="etape1">Classement — Étape 1 (BT250)</option>
         <option value="etape2" disabled>Classement — Étape 2 (BT100) (à venir)</option>
         <option value="etape3" disabled>Classement — Étape 3 (BT100) (à venir)</option>
-        <option value="etape4" disabled>Classement — Étape 4 (BT100) (à venir)</option>
-        <option value="etape5" disabled>Classement — Étape 5 (BT250) (à venir)</option>
+        <option value="etape4" disabled>Classement — Étape 4 (BT250) (à venir)</option>
+        <option value="etape5" disabled>Classement — Étape 5 (BT500) (à venir)</option>
       </select>
     </div>
 
@@ -225,15 +225,24 @@
 
   const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
   const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
+  const POINTS_BT500 = {
+    1:500, 2:350, 3:270, 4:210, 5:175, 6:150,
+    7:130, 8:105, 9:95, 10:87, 11:82, 12:75
+  };
 
   const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
 
   function stepType(stepId){
-    return (stepId === "etape1" || stepId === "etape5") ? "BT250" : "BT100";
+    if(stepId === "etape1" || stepId === "etape4") return "BT250";
+    if(stepId === "etape5") return "BT500";
+    return "BT100";
   }
 
   function pointsTable(stepId){
-    return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
+    const type = stepType(stepId);
+    if(type === "BT500") return POINTS_BT500;
+    if(type === "BT250") return POINTS_BT250;
+    return POINTS_BT100;
   }
 
   const sel   = document.getElementById("rankScope");
