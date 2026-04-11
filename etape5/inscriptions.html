@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inscriptions — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260303-etape5-inscriptions-tabs-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260410-etape5-inscriptions-tabs-v1" />
 </head>
 <body>
 
@@ -37,225 +37,668 @@
 
 <main class="container">
 
-<section class="card">
+  <section class="card">
+    <h2 style="margin:0 0 8px;">📝 Inscriptions — Étape 5</h2>
 
-<h2 style="margin:0 0 8px;">📝 Inscriptions — Étape 5</h2>
+    <p id="gateMsg" class="muted" style="margin:0;">Chargement…</p>
 
-<p id="gateMsg" class="muted" style="margin:0;">Chargement…</p>
+    <div class="step-subtabs" role="tablist" aria-label="Inscription / Boutique / Paiements" style="margin-top:12px;">
+      <button class="step-subtab" id="tabForm" type="button" aria-selected="true">📝 Formulaire</button>
+      <button class="step-subtab" id="tabShop" type="button" aria-selected="false" style="display:none;">🛍️ Boutique</button>
+      <button class="step-subtab" id="tabPay" type="button" aria-selected="false" style="display:none;">✅ Paiements</button>
+    </div>
 
-<div class="step-subtabs" role="tablist" style="margin-top:12px;">
-<button class="step-subtab" id="tabForm" type="button" aria-selected="true">📝 Formulaire</button>
-<button class="step-subtab" id="tabShop" type="button" aria-selected="false" style="display:none;">🛍️ Boutique</button>
-<button class="step-subtab" id="tabPay" type="button" aria-selected="false" style="display:none;">✅ Paiements</button>
-</div>
+    <div id="panelForm" style="margin-top:12px;">
 
-<div id="panelForm" style="margin-top:12px;">
+      <form id="signupForm" class="form" autocomplete="on">
 
-<form id="signupForm" class="form" autocomplete="on">
+        <div class="field">
+          <label for="teamName">Nom de l’équipe *</label>
+          <input id="teamName" name="teamName" type="text" required maxlength="40" placeholder="Ex : Les beacheurs">
+        </div>
 
-<div class="field">
-<label for="teamName">Nom de l’équipe *</label>
-<input id="teamName" name="teamName" type="text" required maxlength="40">
-</div>
+        <hr class="sep" />
 
-<hr class="sep" />
+        <h3 style="margin:0;">Joueuse 👩</h3>
 
-<h3 style="margin:0;">Joueuse 👩</h3>
+        <div class="field">
+          <label for="p1LastName">Nom *</label>
+          <input id="p1LastName" name="p1LastName" type="text" required placeholder="Nom">
+        </div>
 
-<div class="field">
-<label for="p1LastName">Nom *</label>
-<input id="p1LastName" name="p1LastName" type="text" required>
-</div>
+        <div class="field">
+          <label for="p1FirstName">Prénom *</label>
+          <input id="p1FirstName" name="p1FirstName" type="text" required placeholder="Prénom">
+        </div>
 
-<div class="field">
-<label for="p1FirstName">Prénom *</label>
-<input id="p1FirstName" name="p1FirstName" type="text" required>
-</div>
+        <div class="field">
+          <label for="p1Licence">N° Licence *</label>
+          <input id="p1Licence" name="p1Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
 
-<div class="field">
-<label for="p1Licence">N° Licence *</label>
-<input id="p1Licence" name="p1Licence" type="text" required>
-</div>
+        <div class="field">
+          <label for="p1Phone">Téléphone *</label>
+          <input id="p1Phone" name="p1Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
 
-<div class="field">
-<label for="p1Phone">Téléphone *</label>
-<input id="p1Phone" name="p1Phone" type="tel" required>
-</div>
+        <hr class="sep" />
 
-<hr class="sep" />
+        <h3 style="margin:0;">Joueur 👨</h3>
 
-<h3 style="margin:0;">Joueur 👨</h3>
+        <div class="field">
+          <label for="p2LastName">Nom *</label>
+          <input id="p2LastName" name="p2LastName" type="text" required placeholder="Nom">
+        </div>
 
-<div class="field">
-<label for="p2LastName">Nom *</label>
-<input id="p2LastName" name="p2LastName" type="text" required>
-</div>
+        <div class="field">
+          <label for="p2FirstName">Prénom *</label>
+          <input id="p2FirstName" name="p2FirstName" type="text" required placeholder="Prénom">
+        </div>
 
-<div class="field">
-<label for="p2FirstName">Prénom *</label>
-<input id="p2FirstName" name="p2FirstName" type="text" required>
-</div>
+        <div class="field">
+          <label for="p2Licence">N° Licence *</label>
+          <input id="p2Licence" name="p2Licence" type="text" required placeholder="Ex : 0123456A">
+        </div>
 
-<div class="field">
-<label for="p2Licence">N° Licence *</label>
-<input id="p2Licence" name="p2Licence" type="text" required>
-</div>
+        <div class="field">
+          <label for="p2Phone">Téléphone *</label>
+          <input id="p2Phone" name="p2Phone" type="tel" required placeholder="Ex : +594... / 06...">
+        </div>
 
-<div class="field">
-<label for="p2Phone">Téléphone *</label>
-<input id="p2Phone" name="p2Phone" type="tel" required>
-</div>
+        <hr class="sep" />
 
-<hr class="sep" />
+        <button id="submitBtn" class="btn" type="submit" style="font-weight:800; color:#111;">
+          ✅ Valider
+        </button>
 
-<button id="submitBtn" class="btn" type="submit" style="font-weight:800;color:#111;">
-✅ Valider
-</button>
+        <p id="status" class="muted" role="status" aria-live="polite" style="margin:10px 0 0;"></p>
 
-<p id="status" class="muted" style="margin:10px 0 0;"></p>
+      </form>
+    </div>
 
-</form>
-</div>
+    <div id="panelShop" style="display:none; margin-top:12px;">
+      <div class="note">
+        <p style="margin:0 0 10px;">
+          Paiement des inscriptions via <b>SumUp</b> (ouverture via le bouton ci-dessous).
+        </p>
+        <ul style="margin:0 0 10px 18px;">
+          <li>Paiement possible <b>par équipe : 20€</b></li>
+          <li>ou <b>par personne : 10€</b></li>
+        </ul>
+        <p class="muted small" style="margin:0;">
+          Astuce : vérifiez avant que votre partenaire n'a pas déjà réglé 😜
+        </p>
+      </div>
 
-<div id="panelShop" style="display:none;margin-top:12px;">
-<div class="note">
+      <div class="grid" style="margin-top:12px;">
+        <a
+          class="btn"
+          id="btnGoSumUp"
+          href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a"
+          target="_blank"
+          rel="noopener"
+          style="font-weight:900; color:#111;"
+        >
+          🔗 Ouvrir la boutique SumUp
+        </a>
+      </div>
+    </div>
 
-<p>Paiement des inscriptions via <b>SumUp</b>.</p>
+    <div id="panelPay" style="display:none; margin-top:12px;">
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">✅ Paiements — Étape 5</div>
+        <p class="muted" style="margin:8px 0 0;">
+          Affichage en direct. Tri : <b>non payé</b> → <b>partiel</b> → <b>payé</b>. Tableau principal d’abord, liste d’attente ensuite.
+        </p>
 
-<ul>
-<li>Paiement équipe : <b>20€</b></li>
-<li>Paiement joueur : <b>10€</b></li>
-</ul>
+        <p class="muted" id="paidStatus" style="margin:10px 0 0;">Chargement…</p>
+        <div id="payList" style="display:grid; gap:10px; margin-top:12px;"></div>
+      </div>
+    </div>
 
-<div class="grid" style="margin-top:12px;">
-<a
-class="btn"
-href="https://tennis-club-de-suzini.sumupstore.com/produits?category=9f1abbf3-0643-4296-996c-b2b9495e716a"
-target="_blank"
-rel="noopener"
-style="font-weight:900;color:#111;"
->
-🔗 Ouvrir la boutique
-</a>
-</div>
-
-</div>
-</div>
-
-<div id="panelPay" style="display:none;margin-top:12px;">
-<p id="paidStatus" class="muted">Chargement…</p>
-<div id="payList" style="display:grid;gap:10px;margin-top:12px;"></div>
-</div>
-
-</section>
+  </section>
 
 </main>
 
+<style>
+  .topbar-row-step{
+    grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+  }
+  .step-title-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: calc(var(--logo-size) * 0.55);
+  }
+  .step-title-img{
+    width: min(520px, 100%);
+    max-height: 88px;
+    height: auto;
+    object-fit: contain;
+    display:block;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+  }
+
+  .nav-step{
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nav-step::after{
+    content:"";
+    flex:auto;
+  }
+  .nav-step a{
+    padding:8px 12px;
+    flex: 1 1 auto;
+    text-align:center;
+  }
+
+  .nav a[aria-current="page"]{
+    background: rgba(255,255,255,.26);
+    border-color: rgba(255,255,255,.45);
+    box-shadow: 0 6px 14px rgba(0,0,0,.10);
+  }
+
+  @media (max-width: 420px){
+    .nav-step a{
+      padding:7px 10px;
+      font-size: 13px;
+    }
+    .step-title-img{ max-height: 74px; }
+  }
+
+  .step-subtabs{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:10px;
+  }
+  .step-subtab{
+    appearance:none;
+    border:1px solid #ddd;
+    background:#fafafa;
+    border-radius:999px;
+    padding:10px 12px;
+    font-weight:1000;
+    cursor:pointer;
+    text-align:center;
+    white-space:nowrap;
+    color:#111;
+  }
+  .step-subtab[aria-selected="true"]{
+    background:#111;
+    border-color:#111;
+    color:#fff;
+    box-shadow: 0 10px 22px rgba(0,0,0,.14);
+  }
+  @media (max-width: 420px){
+    .step-subtabs{ grid-template-columns: 1fr; }
+  }
+
+  .note{
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:14px;
+    background:#fff;
+    line-height:1.55;
+  }
+  .small{ font-size:14px; }
+
+  .pay-card{
+    border:1px solid #eee;
+    border-radius:16px;
+    background:#fff;
+    padding:12px 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.04);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-width:0;
+  }
+  .pay-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    min-width:0;
+  }
+  .pay-team{
+    font-weight:900;
+    font-size:16px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:900;
+    border:1px solid #eee;
+    background:#fafafa;
+    white-space:nowrap;
+    flex: 0 0 auto;
+  }
+  .dot{
+    width:10px; height:10px; border-radius:999px;
+    display:inline-block; background:#bbb;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+  }
+  .dot.red{ background:#e74c3c; }
+  .dot.orange{ background:#f39c12; }
+  .dot.green{ background:#2ecc71; }
+
+  .players{ display:grid; gap:8px; }
+  .player-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    border:1px solid #f0f0f0;
+    background:#fbfbfb;
+    border-radius:12px;
+    padding:10px 10px;
+    min-width:0;
+  }
+  .player-name{
+    font-weight:800;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    min-width:0;
+  }
+  .player-right{
+    font-weight:1000;
+    white-space:nowrap;
+    flex:0 0 auto;
+  }
+
+  .pay-section-title{ margin:12px 0 0; font-weight:1000; }
+  .pay-section-sub{ margin:6px 0 0; }
+</style>
+
 <script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    doc,
+    onSnapshot,
+    collection,
+    addDoc,
+    setDoc,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-import { db } from "../assets/js/firebase.js";
+  const SCOPE = "etape5";
+  const COL_PRIVATE = "inscriptions_etape5_private";
+  const COL_PUBLIC  = "equipes_etape5_public";
+  const COL_PAYMENTS = "paiements_challenge";
 
-import {
-doc,
-onSnapshot,
-collection,
-addDoc,
-setDoc,
-serverTimestamp,
-query,
-orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  const form = document.getElementById("signupForm");
+  const statusEl = document.getElementById("status");
+  const gateMsgEl = document.getElementById("gateMsg");
+  const submitBtn = document.getElementById("submitBtn");
 
-const SCOPE = "etape5";
+  const tabForm = document.getElementById("tabForm");
+  const tabShop = document.getElementById("tabShop");
+  const tabPay  = document.getElementById("tabPay");
 
-const COL_PRIVATE = "inscriptions_etape5_private";
-const COL_PUBLIC  = "equipes_etape5_public";
-const COL_PAYMENTS = "paiements_challenge";
+  const panelForm = document.getElementById("panelForm");
+  const panelShop = document.getElementById("panelShop");
+  const panelPay  = document.getElementById("panelPay");
 
-const form = document.getElementById("signupForm");
-const statusEl = document.getElementById("status");
-const gateMsgEl = document.getElementById("gateMsg");
-const submitBtn = document.getElementById("submitBtn");
+  const paidStatus = document.getElementById("paidStatus");
+  const payList = document.getElementById("payList");
 
-let gateState = "not_open";
-let cfg = {};
+  let gateState = "not_open";
+  let cfg = { inscriptionsState:"not_open", boutiqueState:"not_open", paiementsState:"not_open" };
 
-function readFormData(){
-return{
-createdAt: serverTimestamp(),
-teamName: form.teamName.value.trim(),
+  const setStatus = (msg) => { statusEl.textContent = msg; };
 
-p1FirstName: form.p1FirstName.value.trim(),
-p1LastName: form.p1LastName.value.trim(),
-p1Licence: form.p1Licence.value.trim(),
-p1Phone: form.p1Phone.value.trim(),
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
 
-p2FirstName: form.p2FirstName.value.trim(),
-p2LastName: form.p2LastName.value.trim(),
-p2Licence: form.p2Licence.value.trim(),
-p2Phone: form.p2Phone.value.trim()
-};
-}
+  function setInputsDisabled(disabled){
+    const fields = form.querySelectorAll("input, select, textarea");
+    fields.forEach(el => el.disabled = disabled);
+  }
 
-form.addEventListener("submit", async(e)=>{
+  function normalizeState(state){
+    if(state === "suspended") return "paused";
+    return state || "not_open";
+  }
 
-e.preventDefault();
+  function gatePopupText(stateRaw){
+    const st = normalizeState(stateRaw);
+    if(st === "open") return "";
+    if(st === "paused") return "⏸️ Inscriptions temporairement suspendues.\n\nRéessaie un peu plus tard.";
+    if(st === "closed") return "🔒 Inscriptions clôturées.";
+    return "⏳ Les inscriptions ne sont pas encore ouvertes.";
+  }
 
-if(gateState!=="open"){
-statusEl.textContent="⛔ Inscriptions non ouvertes.";
-return;
-}
+  function applyGate(stateRaw){
+    gateState = normalizeState(stateRaw);
 
-submitBtn.disabled=true;
+    if(gateState === "open"){
+      gateMsgEl.textContent = "✅ Inscriptions ouvertes. Tu peux t’inscrire ci-dessous.";
+      setInputsDisabled(false);
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("disabled");
+      return;
+    }
 
-try{
+    setInputsDisabled(true);
+    submitBtn.disabled = true;
+    submitBtn.classList.add("disabled");
 
-const data=readFormData();
+    if(gateState === "paused"){
+      gateMsgEl.textContent = "⏸️ Inscriptions temporairement suspendues.";
+      return;
+    }
+    if(gateState === "closed"){
+      gateMsgEl.textContent = "🔒 Inscriptions clôturées.";
+      return;
+    }
+    gateMsgEl.textContent = "⏳ Les inscriptions ne sont pas encore ouvertes.";
+  }
 
-const ref=await addDoc(collection(db,COL_PRIVATE),data);
+  function setActive(which){
+    const isForm = which === "form";
+    const isShop = which === "shop";
+    const isPay  = which === "pay";
 
-await setDoc(doc(db,COL_PUBLIC,ref.id),{
-createdAt: serverTimestamp(),
-teamName:data.teamName,
-p1FirstName:data.p1FirstName,
-p2FirstName:data.p2FirstName,
-list:"main",
-stby:false
-});
+    tabForm.setAttribute("aria-selected", isForm ? "true" : "false");
+    tabShop.setAttribute("aria-selected", isShop ? "true" : "false");
+    tabPay.setAttribute("aria-selected",  isPay  ? "true" : "false");
 
-form.reset();
+    panelForm.style.display = isForm ? "block" : "none";
+    panelShop.style.display = isShop ? "block" : "none";
+    panelPay.style.display  = isPay  ? "block" : "none";
 
-statusEl.textContent="✅ Inscription enregistrée";
+    try{ localStorage.setItem("etape5_inscriptions_view", which); }catch(e){}
 
-}catch(err){
+    if(isPay){
+      startPayments();
+    }
+  }
 
-statusEl.textContent="❌ Erreur";
+  tabForm.addEventListener("click", ()=>{
+    if(normalizeState(cfg.inscriptionsState) !== "open"){
+      alert(gatePopupText(cfg.inscriptionsState));
+      return;
+    }
+    setActive("form");
+  });
 
-}
+  tabShop.addEventListener("click", ()=> setActive("shop"));
+  tabPay.addEventListener("click",  ()=> setActive("pay"));
 
-submitBtn.disabled=false;
+  function applyAvailability(){
+    const formOn = normalizeState(cfg.inscriptionsState) === "open";
+    const shopOn = normalizeState(cfg.boutiqueState) === "open";
+    const payOn  = normalizeState(cfg.paiementsState) === "open";
 
-});
+    tabForm.style.display = "inline-flex";
+    tabShop.style.display = shopOn ? "inline-flex" : "none";
+    tabPay.style.display  = payOn  ? "inline-flex" : "none";
 
-const cfgRef=doc(db,"config","etape5");
+    let wanted = "form";
+    try{ wanted = localStorage.getItem("etape5_inscriptions_view") || "form"; }catch(e){}
 
-onSnapshot(cfgRef,(snap)=>{
+    const canForm = formOn;
+    const canShop = shopOn;
+    const canPay  = payOn;
 
-const d=snap.exists()?snap.data():{};
-cfg=d||{};
+    const pickFirst = ()=>{
+      if(canForm) return "form";
+      if(canShop) return "shop";
+      if(canPay)  return "pay";
+      return "form";
+    };
 
-gateState=d.inscriptionsState||"not_open";
+    if(wanted === "form" && !canForm) wanted = pickFirst();
+    if(wanted === "shop" && !canShop) wanted = pickFirst();
+    if(wanted === "pay"  && !canPay)  wanted = pickFirst();
 
-if(gateState==="open"){
-gateMsgEl.textContent="✅ Inscriptions ouvertes";
-submitBtn.disabled=false;
-}else{
-gateMsgEl.textContent="⏳ Inscriptions non ouvertes";
-submitBtn.disabled=true;
-}
+    setActive(wanted);
+  }
 
-});
+  const cfgRef = doc(db, "config", "etape5");
+  onSnapshot(cfgRef, (snap)=>{
+    const d = snap.exists() ? (snap.data() || {}) : {};
+    cfg = {
+      inscriptionsState: d.inscriptionsState || "not_open",
+      boutiqueState: d.boutiqueState || "not_open",
+      paiementsState: d.paiementsState || "not_open"
+    };
+    applyGate(cfg.inscriptionsState);
+    applyAvailability();
+  }, (err)=>{
+    console.error(err);
+    applyGate("not_open");
+    gateMsgEl.textContent = "❌ Impossible de vérifier l’état des inscriptions. Réessaie plus tard.";
+    applyAvailability();
+  });
 
+  function readFormData(){
+    return {
+      createdAt: serverTimestamp(),
+      teamName: (form.teamName.value || "").trim(),
+
+      p1FirstName: (form.p1FirstName.value || "").trim(),
+      p1LastName:  (form.p1LastName.value || "").trim(),
+      p1Licence:   (form.p1Licence.value || "").trim(),
+      p1Phone:     (form.p1Phone.value || "").trim(),
+
+      p2FirstName: (form.p2FirstName.value || "").trim(),
+      p2LastName:  (form.p2LastName.value || "").trim(),
+      p2Licence:   (form.p2Licence.value || "").trim(),
+      p2Phone:     (form.p2Phone.value || "").trim(),
+    };
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if(gateState !== "open"){
+      setStatus("⛔ Inscriptions non ouvertes.");
+      alert(gatePopupText(cfg.inscriptionsState));
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add("disabled");
+    setStatus("Envoi en cours…");
+
+    try {
+      const data = readFormData();
+
+      if (!data.teamName || !data.p1FirstName || !data.p1LastName || !data.p2FirstName || !data.p2LastName) {
+        throw new Error("Merci de compléter tous les champs obligatoires.");
+      }
+
+      const ref = await addDoc(collection(db, COL_PRIVATE), data);
+
+      await setDoc(doc(db, COL_PUBLIC, ref.id), {
+        createdAt: serverTimestamp(),
+        teamName: data.teamName,
+        p1FirstName: data.p1FirstName,
+        p2FirstName: data.p2FirstName,
+        list: "main",
+        stby: false
+      });
+
+      form.reset();
+      setStatus("✅ Inscription enregistrée !");
+      alert("✅ Inscription confirmée !\n\nVotre équipe a bien été enregistrée.");
+
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Erreur : " + (err?.message || "Impossible d’enregistrer l’inscription."));
+    } finally {
+      if(gateState === "open"){
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("disabled");
+      }
+    }
+  });
+
+  let unsubTeams = null;
+  let unsubPay = null;
+  let snapTeams = null;
+  let snapPay = null;
+  let paymentsStarted = false;
+
+  function statusDotClass(paidCount){
+    if(paidCount >= 2) return "green";
+    if(paidCount === 1) return "orange";
+    return "red";
+  }
+  function statusLabel(paidCount){
+    return paidCount >= 2 ? "Payé" : (paidCount === 1 ? "Partiel" : "Non payé");
+  }
+  function paidIcon(isPaid){ return isPaid ? "✅" : "❌"; }
+
+  function stopPayments(){
+    if(unsubTeams){ unsubTeams(); unsubTeams = null; }
+    if(unsubPay){ unsubPay(); unsubPay = null; }
+    snapTeams = null;
+    snapPay = null;
+    paymentsStarted = false;
+  }
+
+  function startPayments(){
+    if(normalizeState(cfg.paiementsState) !== "open"){
+      paidStatus.textContent = "⛔ Paiements non activés.";
+      payList.innerHTML = "";
+      stopPayments();
+      return;
+    }
+    if(paymentsStarted) return;
+    paymentsStarted = true;
+
+    paidStatus.textContent = "Chargement…";
+    payList.innerHTML = "";
+
+    const qTeams = query(collection(db, COL_PUBLIC), orderBy("createdAt","asc"));
+    const qPay = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
+
+    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; rebuildPayments(); }, (e)=>{ console.error(e); paidStatus.textContent="🔴 Erreur équipes"; });
+    unsubPay   = onSnapshot(qPay,   (s)=>{ snapPay = s; rebuildPayments(); }, (e)=>{ console.error(e); snapPay = null; rebuildPayments(); });
+  }
+
+  function renderSection(title, subtitle, arr){
+    const header = `
+      <div style="margin-top:6px;">
+        <div class="pay-section-title">${esc(title)}</div>
+        ${subtitle ? `<p class="muted pay-section-sub">${esc(subtitle)}</p>` : ``}
+      </div>
+    `;
+
+    if(!arr.length){
+      return header + `<p class="muted" style="margin:0;">Aucune équipe.</p>`;
+    }
+
+    const cards = arr.map(t=>{
+      const dot = statusDotClass(t.paidCount);
+      const lab = statusLabel(t.paidCount);
+
+      return `
+        <div class="pay-card">
+          <div class="pay-head">
+            <div class="pay-team">${esc(t.teamName)}</div>
+            <div class="badge" title="${esc(lab)}">
+              <span class="dot ${dot}"></span>
+              ${esc(lab)}
+            </div>
+          </div>
+
+          <div class="players">
+            <div class="player-row">
+              <div class="player-name">${esc(t.p1 || "—")}</div>
+              <div class="player-right">${paidIcon(t.p1Paid)}</div>
+            </div>
+
+            <div class="player-row">
+              <div class="player-name">${esc(t.p2 || "—")}</div>
+              <div class="player-right">${paidIcon(t.p2Paid)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return header + cards;
+  }
+
+  function rebuildPayments(){
+    if(!snapTeams){
+      paidStatus.textContent = "Chargement…";
+      return;
+    }
+
+    const payMap = new Map();
+    if(snapPay){
+      snapPay.forEach(d=>{
+        const x = d.data() || {};
+        payMap.set(d.id, {
+          p1Paid: x.p1Paid === true,
+          p2Paid: x.p2Paid === true
+        });
+      });
+    }
+
+    const mainTeams = [];
+    const waitTeams = [];
+
+    snapTeams.forEach(d=>{
+      const x = d.data() || {};
+      const teamName = (x.teamName || "").trim();
+      if(!teamName) return;
+
+      const p1 = (x.p1FirstName || "").trim();
+      const p2 = (x.p2FirstName || "").trim();
+
+      const list = (x.list || "main").toString();
+      const payId = `${SCOPE}_${d.id}`;
+      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false };
+      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
+
+      const rec = { teamName, p1, p2, paidCount, p1Paid:pay.p1Paid, p2Paid:pay.p2Paid, list };
+
+      if(list === "wait") waitTeams.push(rec);
+      else mainTeams.push(rec);
+    });
+
+    function sortArr(arr){
+      arr.sort((a,b)=>{
+        if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
+        return (a.teamName||"").localeCompare((b.teamName||""), "fr");
+      });
+    }
+    sortArr(mainTeams);
+    sortArr(waitTeams);
+
+    const total = mainTeams.length + waitTeams.length;
+    paidStatus.textContent = `🟢 En direct — ${total} équipe(s) — ${esc(SCOPE)}`;
+
+    if(total === 0){
+      payList.innerHTML = `<p class="muted" style="margin:0;">Aucune équipe pour le moment.</p>`;
+      return;
+    }
+
+    payList.innerHTML = [
+      renderSection("✅ Tableau principal", "Équipes du tableau principal.", mainTeams),
+      renderSection("⏳ Liste d’attente", "Équipes en attente (affichées après le tableau principal).", waitTeams),
+    ].join("");
+  }
 </script>
 
 </body>
