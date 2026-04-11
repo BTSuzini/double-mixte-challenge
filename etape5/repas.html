@@ -1,1 +1,219 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Repas — Étape 5</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260410-etape5-repas-v1" />
 
+  <style>
+    .topbar-row-step{
+      grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+    }
+    .step-title-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: calc(var(--logo-size) * 0.55);
+    }
+    .step-title-img{
+      width: min(520px, 100%);
+      max-height: 88px;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
+    }
+
+    .nav-step{
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-step::after{
+      content:"";
+      flex:auto;
+    }
+    .nav-step a{
+      padding:8px 12px;
+      flex: 1 1 auto;
+      text-align:center;
+    }
+
+    .nav a[aria-current="page"]{
+      background: rgba(255,255,255,.26);
+      border-color: rgba(255,255,255,.45);
+      box-shadow: 0 6px 14px rgba(0,0,0,.10);
+    }
+
+    @media (max-width: 420px){
+      .nav-step a{
+        padding:7px 10px;
+        font-size:13px;
+      }
+      .step-title-img{
+        max-height:74px;
+      }
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      padding:28px 20px 24px;
+      color:#fff;
+      box-shadow:
+        0 20px 44px rgba(16,24,40,.16),
+        inset 0 0 0 1px rgba(255,255,255,.06);
+      background:
+        radial-gradient(circle at 50% 68%, rgba(255,212,0,.32), transparent 18%),
+        radial-gradient(circle at 28% 18%, rgba(255,138,42,.42), transparent 22%),
+        radial-gradient(circle at 78% 22%, rgba(217,79,122,.30), transparent 20%),
+        linear-gradient(180deg, #1b2c4f 0%, #245f9b 38%, #1f7a3a 100%);
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 50% 100%, rgba(0,0,0,.22), transparent 32%),
+        linear-gradient(180deg, rgba(7,16,32,.08), rgba(7,16,32,.18));
+      pointer-events:none;
+    }
+
+    .hero-inner{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:18px;
+    }
+
+    .hero-topline{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+    }
+
+    .hero-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.02em;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+      backdrop-filter:blur(8px);
+    }
+
+    .hero-content{
+      text-align:center;
+      max-width:900px;
+      margin:0 auto;
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(30px, 5vw, 52px);
+      line-height:1;
+      letter-spacing:-0.04em;
+      font-weight:900;
+      text-shadow:0 10px 24px rgba(0,0,0,.20);
+    }
+
+    .hero-sub{
+      margin:12px auto 0;
+      max-width:760px;
+      font-size:16px;
+      line-height:1.55;
+      color:rgba(255,255,255,.95);
+      font-weight:600;
+    }
+
+    .repas-wrap{
+      margin-top:18px;
+      border:1px solid #eee;
+      border-radius:22px;
+      background:#fff;
+      padding:10px;
+      box-shadow:0 16px 36px rgba(0,0,0,.08);
+    }
+
+    .repas-img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:16px;
+      box-shadow:0 10px 24px rgba(0,0,0,.10);
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="topbar-row topbar-row-step">
+      <div class="brand-logo">
+        <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
+      </div>
+
+      <div class="step-title-wrap" aria-label="Étape 5">
+        <img class="step-title-img" src="../assets/img/etape5.png" alt="Étape 5">
+      </div>
+
+      <div class="brand-logo">
+        <img src="../assets/img/logo-challenge.png" alt="Logo Challenge">
+      </div>
+    </div>
+
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html" aria-current="page">🍽️ Repas</a>
+      <a href="programmation.html">🗓️ Programmation</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage.html">🎲 Tirage</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-topline">
+          <span class="hero-pill">Suzini Double Mixte Challenge</span>
+          <span class="hero-pill">🍽️ Repas</span>
+          <span class="hero-pill">Étape 5 — BT500</span>
+        </div>
+
+        <div class="hero-content">
+          <h1 class="hero-title">Carte repas</h1>
+          <p class="hero-sub">
+            Retrouvez ici la proposition repas de l’étape 5 du Suzini Beach Tennis Double Mixte Challenge.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="repas-wrap">
+      <img
+        src="../assets/img/crepe.png"
+        alt="Carte repas Étape 5"
+        class="repas-img"
+      >
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
