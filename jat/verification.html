@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>JAT — Vérification</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260222" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260412-jat-verification-v2" />
 </head>
 <body>
 
@@ -15,7 +15,6 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ même bandeau que le règlement (centre = image) -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img src="../assets/img/etape1-jaune.png"
              alt="Suzini Beach Tennis Double Mixte Challenge"
@@ -41,11 +40,9 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs et aux JAT.</p>
   </section>
 
-  <!-- ✅ Encart Zone -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎛️ Zone</h2>
 
-    <!-- ✅ FIX: élément utilisé par JS (sinon crash) -->
     <p class="muted" id="pageSub" style="margin:0 0 10px;">—</p>
 
     <div class="field">
@@ -81,7 +78,6 @@
 </main>
 
 <style>
-  /* ✅ Surbrillance onglet actif */
   .tab-active{
     background: rgba(19,86,44,.14) !important;
     border-color: rgba(19,86,44,.45) !important;
@@ -145,7 +141,10 @@
     gap:10px;
   }
 
-  .ci-left{ min-width:0; }
+  .ci-left{
+    min-width:0;
+    flex:1 1 auto;
+  }
 
   .ci-label{
     font-size:12px;
@@ -163,7 +162,6 @@
     text-overflow:ellipsis;
   }
 
-  /* ✅ Bouton statut + couleurs */
   .stbtn{
     flex:0 0 auto;
     border:1px solid rgba(0,0,0,.12);
@@ -175,6 +173,7 @@
     min-width:92px;
     text-align:center;
   }
+
   .stbtn:hover{ filter:brightness(.98); }
   .stbtn:disabled{ opacity:.6; cursor:not-allowed; }
 
@@ -183,15 +182,63 @@
     border-color:rgba(0,0,0,.10);
     color:#111;
   }
+
   .stbtn.ok{
     background:#d1fae5;
     border-color:rgba(16,185,129,.35);
     color:#064e3b;
   }
+
   .stbtn.nok{
     background:#fee2e2;
     border-color:rgba(239,68,68,.35);
     color:#7f1d1d;
+  }
+
+  .stbtn.readonly{
+    cursor:default;
+    min-width:110px;
+  }
+
+  .stbtn.readonly:hover{
+    filter:none;
+  }
+
+  .pay-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex:0 0 auto;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .pay-method-btn{
+    appearance:none;
+    border:1px solid rgba(0,0,0,.12);
+    border-radius:999px;
+    padding:8px 12px;
+    font-weight:1000;
+    background:#fff;
+    cursor:pointer;
+    min-width:92px;
+    text-align:center;
+  }
+
+  .pay-method-btn:hover{
+    filter:brightness(.98);
+  }
+
+  .pay-method-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+  }
+
+  .pay-method-btn.is-on{
+    background:#111;
+    border-color:#111;
+    color:#fff;
+    box-shadow:0 8px 18px rgba(0,0,0,.14);
   }
 
   .two-col{
@@ -199,8 +246,20 @@
     grid-template-columns: 1fr 1fr;
     gap:12px;
   }
-  @media (max-width: 520px){
-    .two-col{ grid-template-columns: 1fr; }
+
+  @media (max-width: 640px){
+    .two-col{
+      grid-template-columns: 1fr;
+    }
+
+    .checkitem{
+      flex-direction:column;
+      align-items:stretch;
+    }
+
+    .pay-actions{
+      justify-content:flex-start;
+    }
   }
 </style>
 
@@ -216,21 +275,19 @@
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
 
-  // DOM
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
   const scopeEl = document.getElementById("scope");
   const tabsEl  = document.getElementById("tabs");
   const hintEl  = document.getElementById("hint");
-  const pageSub = document.getElementById("pageSub"); // ✅ existe maintenant
+  const pageSub = document.getElementById("pageSub");
 
   const panelNeedStep = document.getElementById("panelNeedStep");
   const panelVerify = document.getElementById("panelVerify");
   const statusText = document.getElementById("statusText");
   const cardsEl = document.getElementById("cards");
 
-  // State
   let currentScope = scopeFromUrl;
   let unsubIns = null;
   let unsubEq = null;
@@ -247,16 +304,16 @@
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
-  // ✅ Onglet actif
   function currentPageName(){
     const p = (location.pathname || "").split("/").pop() || "";
     return p.toLowerCase();
   }
 
-  // ✅ Tabs JAT + surbrillance onglet actif
   function setTabs(scope){
     tabsEl.innerHTML = "";
     const cur = currentPageName();
@@ -309,7 +366,7 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — vérification`;
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
@@ -320,7 +377,6 @@
 
     panelNeedStep.style.display = "none";
     panelVerify.style.display = "block";
-
     startListeners(scope);
   }
 
@@ -376,6 +432,52 @@
     return (cur === "ok" || cur === "nok" || cur === "nv") ? cur : fallback;
   }
 
+  function getPaymentMethod(vdoc, which){
+    const m = vdoc?.[which]?.paymentMethod || null;
+    return (m === "cb" || m === "especes") ? m : null;
+  }
+
+  function renderPaymentBlock(ins, which){
+    const vdoc = verifFor(ins.id);
+    const payStatus = getV(vdoc, `${which}.payment`, "nv");
+    const payMethod = getPaymentMethod(vdoc, which);
+
+    return `
+      <div class="checkitem">
+        <div class="ci-left">
+          <p class="ci-label">Paiement</p>
+          <p class="ci-value">Mode de règlement</p>
+        </div>
+
+        <div class="pay-actions">
+          <span class="stbtn readonly ${esc(payStatus)}">${esc(statusTextOf(payStatus))}</span>
+
+          <button
+            class="pay-method-btn ${payMethod === "cb" ? "is-on" : ""}"
+            data-act="payment-method"
+            data-ins="${esc(ins.id)}"
+            data-player="${esc(which)}"
+            data-method="cb"
+            type="button"
+          >
+            CB
+          </button>
+
+          <button
+            class="pay-method-btn ${payMethod === "especes" ? "is-on" : ""}"
+            data-act="payment-method"
+            data-ins="${esc(ins.id)}"
+            data-player="${esc(which)}"
+            data-method="especes"
+            type="button"
+          >
+            Espèces
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   function renderPlayerBlock(ins, which){
     const p = getPlayer(ins, which);
     const vdoc = verifFor(ins.id);
@@ -384,8 +486,7 @@
 
     const items = [
       { key:`${which}.licence`, label:"N° licence", value: p.licence || "—" },
-      { key:`${which}.rank`,    label:"Classement", value: p.rank || "—" },
-      { key:`${which}.payment`, label:"Paiement", value: "—" },
+      { key:`${which}.rank`, label:"Classement", value: p.rank || "—" }
     ];
 
     const htmlItems = items.map(it=>{
@@ -396,7 +497,7 @@
             <p class="ci-label">${esc(it.label)}</p>
             <p class="ci-value">${esc(it.value)}</p>
           </div>
-          <button class="stbtn ${esc(st)}" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}">
+          <button class="stbtn ${esc(st)}" data-act="toggle" data-ins="${esc(ins.id)}" data-key="${esc(it.key)}" type="button">
             ${esc(statusTextOf(st))}
           </button>
         </div>
@@ -408,6 +509,7 @@
         <div class="player-name">${esc(displayName)}</div>
         <div class="checklist">
           ${htmlItems}
+          ${renderPaymentBlock(ins, which)}
         </div>
       </div>
     `;
@@ -415,7 +517,7 @@
 
   function render(){
     const n = inscriptions.length;
-    statusText.textContent = `✅ ${n} équipe${n>1?"s":""} (clic sur un statut pour vérifier)`;
+    statusText.textContent = `✅ ${n} équipe${n>1?"s":""} (licence / classement cliquables, paiement via CB ou Espèces)`;
 
     if(n === 0){
       cardsEl.innerHTML = `<p class="muted" style="margin:0;">Aucune inscription.</p>`;
@@ -501,22 +603,66 @@
     await setDoc(doc(db, `verifications_${currentScope}`, insId), patch, { merge:true });
   }
 
+  async function togglePaymentMethod(insId, which, method){
+    const curDoc = verifFor(insId);
+    const currentMethod = getPaymentMethod(curDoc, which);
+
+    let nextPayment = "ok";
+    let nextMethod = method;
+
+    if(currentMethod === method){
+      nextPayment = "nv";
+      nextMethod = null;
+    }
+
+    const patch = {
+      [which]: {
+        ...(curDoc[which] || {}),
+        payment: nextPayment,
+        paymentMethod: nextMethod
+      },
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.email || null
+    };
+
+    await setDoc(doc(db, `verifications_${currentScope}`, insId), patch, { merge:true });
+  }
+
   cardsEl.addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act='toggle']");
-    if(!btn) return;
+    if(btn){
+      const insId = btn.dataset.ins;
+      const key = btn.dataset.key;
+      if(!insId || !key) return;
 
-    const insId = btn.dataset.ins;
-    const key = btn.dataset.key;
-    if(!insId || !key) return;
+      btn.disabled = true;
+      try{
+        await toggleStatus(insId, key);
+      }catch(err){
+        console.error(err);
+        alert("Erreur Firestore ❌\n\n" + (err?.message || "Vérifie les droits Firestore (rules)."));
+      }finally{
+        btn.disabled = false;
+      }
+      return;
+    }
 
-    btn.disabled = true;
-    try{
-      await toggleStatus(insId, key);
-    }catch(err){
-      console.error(err);
-      alert("Erreur Firestore ❌\n\n" + (err?.message || "Vérifie les droits Firestore (rules)."));
-    }finally{
-      btn.disabled = false;
+    const payBtn = e.target.closest("button[data-act='payment-method']");
+    if(payBtn){
+      const insId = payBtn.dataset.ins;
+      const player = payBtn.dataset.player;
+      const method = payBtn.dataset.method;
+      if(!insId || !player || !method) return;
+
+      payBtn.disabled = true;
+      try{
+        await togglePaymentMethod(insId, player, method);
+      }catch(err){
+        console.error(err);
+        alert("Erreur Firestore ❌\n\n" + (err?.message || "Vérifie les droits Firestore (rules)."));
+      }finally{
+        payBtn.disabled = false;
+      }
     }
   });
 
