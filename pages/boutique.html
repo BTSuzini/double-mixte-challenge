@@ -6,7 +6,7 @@
 
   <title>Boutique — Suzini Beach Tennis Double Mixte Challenge</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260412-boutique-challenge-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260412-boutique-challenge-v2" />
 
   <style>
     .subtabs{
@@ -31,6 +31,33 @@
       background:#fff;
       border-color:#cfcfcf;
       box-shadow:0 6px 14px rgba(0,0,0,.06);
+    }
+
+    .step-filters{
+      display:grid;
+      grid-template-columns:repeat(5, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .step-filter{
+      appearance:none;
+      border:1px solid #ddd;
+      background:#fafafa;
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      color:#111;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    .step-filter[aria-selected="true"]{
+      background:#111;
+      border-color:#111;
+      color:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.12);
     }
 
     .note{
@@ -80,30 +107,6 @@
       font-weight:700;
     }
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-weight:900;
-      border:1px solid #eee;
-      background:#fafafa;
-      white-space:nowrap;
-      flex:0 0 auto;
-    }
-
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      display:inline-block;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
-    }
-    .dot.red{ background:#e74c3c; }
-    .dot.orange{ background:#f39c12; }
-    .dot.green{ background:#2ecc71; }
-
     .players{
       display:grid;
       gap:8px;
@@ -130,10 +133,35 @@
     }
 
     .player-right{
-      font-weight:1000;
-      white-space:nowrap;
       flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
     }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:900;
+      border:1px solid #eee;
+      background:#fafafa;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
+    }
+
+    .dot.gray{ background:#9ca3af; }
+    .dot.red{ background:#e74c3c; }
+    .dot.green{ background:#2ecc71; }
 
     .empty{
       border:1px dashed #ddd;
@@ -142,9 +170,19 @@
       background:#fcfcfc;
     }
 
+    @media (max-width: 860px){
+      .step-filters{
+        grid-template-columns:1fr 1fr 1fr;
+      }
+    }
+
     @media (max-width: 520px){
       .subtabs{
         grid-template-columns:1fr;
+      }
+
+      .step-filters{
+        grid-template-columns:1fr 1fr;
       }
     }
   </style>
@@ -189,7 +227,7 @@
     <h2 style="margin-bottom:8px;">🛍️ Boutique / Paiements</h2>
 
     <p class="muted" style="margin-top:0;">
-      Paiement des inscriptions et suivi des règlements du challenge.
+      Paiement des inscriptions et suivi des statuts par étape.
     </p>
 
     <div class="subtabs" role="tablist" aria-label="Boutique et paiements">
@@ -208,12 +246,12 @@
       </p>
 
       <ul style="margin:0 0 10px 18px;">
-        <li>paiement possible <b>par équipe</b></li>
-        <li>ou <b>par joueur / joueuse</b> selon le produit disponible</li>
+        <li>paiement possible par équipe ou par joueur selon le produit disponible</li>
+        <li>pense à vérifier qu’un coéquipier n’a pas déjà réglé 😏</li>
       </ul>
 
       <p class="muted" style="margin:0;">
-        Pensez à vérifier qu’un coéquipier n’a pas déjà réglé 😏
+        Les statuts affichés dans l’onglet Paiements sont ceux renseignés côté JAT / vérification.
       </p>
     </div>
 
@@ -232,9 +270,17 @@
 
   <!-- ===== PAIEMENTS ===== -->
   <section id="panelPaid" class="card" style="display:none;">
-    <h2 style="margin:0 0 10px;">✅ Paiements du challenge</h2>
+    <h2 style="margin:0 0 10px;">✅ Paiements par étape</h2>
 
-    <p id="status" class="muted" style="margin-top:0;">Chargement…</p>
+    <div class="step-filters" role="tablist" aria-label="Filtrer par étape">
+      <button class="step-filter" type="button" data-scope="etape1" aria-selected="false">Étape 1</button>
+      <button class="step-filter" type="button" data-scope="etape2" aria-selected="false">Étape 2</button>
+      <button class="step-filter" type="button" data-scope="etape3" aria-selected="false">Étape 3</button>
+      <button class="step-filter" type="button" data-scope="etape4" aria-selected="false">Étape 4</button>
+      <button class="step-filter" type="button" data-scope="etape5" aria-selected="true">Étape 5</button>
+    </div>
+
+    <p id="status" class="muted" style="margin-top:12px;">Chargement…</p>
 
     <div id="list" class="pay-list"></div>
   </section>
@@ -254,24 +300,17 @@
   const tabPaid = document.getElementById("tabPaid");
   const panelShop = document.getElementById("panelShop");
   const panelPaid = document.getElementById("panelPaid");
+
   const statusEl = document.getElementById("status");
   const listEl = document.getElementById("list");
+  const stepButtons = Array.from(document.querySelectorAll(".step-filter"));
 
-  let paymentsStarted = false;
-  let unsubs = [];
+  let currentScope = "etape5";
+  let unsubTeams = null;
+  let unsubVerifs = null;
 
-  const TEAM_SOURCES = [
-    { scope: "etape1", col: "equipes_etape1_public", label: "Étape 1" },
-    { scope: "etape2", col: "equipes_etape2_public", label: "Étape 2" },
-    { scope: "etape3", col: "equipes_etape3_public", label: "Étape 3" },
-    { scope: "etape4", col: "equipes_etape4_public", label: "Étape 4" },
-    { scope: "etape5", col: "equipes_etape5_public", label: "Étape 5" }
-  ];
-
-  const PAYMENTS_COL = "paiements_challenge";
-
-  let teamsMap = new Map();
-  let paymentsMap = new Map();
+  let teams = [];
+  let verifsById = new Map();
 
   function esc(s){
     return (s ?? "").toString()
@@ -280,7 +319,11 @@
       .replaceAll(">","&gt;");
   }
 
-  function setActive(which){
+  function stepLabel(scope){
+    return `Étape ${String(scope || "").replace("etape", "")}`;
+  }
+
+  function setMainTab(which){
     const isShop = which === "shop";
     const isPaid = which === "paid";
 
@@ -291,89 +334,116 @@
     panelPaid.style.display = isPaid ? "block" : "none";
 
     if(isPaid){
-      startPayments();
+      startScopeListeners(currentScope);
+    } else {
+      stopScopeListeners();
     }
   }
 
-  tabShop.onclick = () => setActive("shop");
-  tabPaid.onclick = () => setActive("paid");
+  function setScope(scope){
+    currentScope = scope;
 
-  function statusDotClass(paidCount){
-    if(paidCount >= 2) return "green";
-    if(paidCount === 1) return "orange";
-    return "red";
+    stepButtons.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.scope === scope ? "true" : "false");
+    });
+
+    if(panelPaid.style.display !== "none"){
+      startScopeListeners(scope);
+    }
   }
 
-  function statusLabel(paidCount){
-    return paidCount >= 2 ? "Payé" : (paidCount === 1 ? "Partiel" : "Non payé");
+  function teamsCol(scope){
+    return collection(db, `equipes_${scope}_public`);
   }
 
-  function paidIcon(isPaid){
-    return isPaid ? "✅" : "❌";
+  function verifsCol(scope){
+    return collection(db, `verifications_${scope}`);
+  }
+
+  function stopScopeListeners(){
+    if(unsubTeams){
+      unsubTeams();
+      unsubTeams = null;
+    }
+    if(unsubVerifs){
+      unsubVerifs();
+      unsubVerifs = null;
+    }
+    teams = [];
+    verifsById = new Map();
+  }
+
+  function paymentStatusOf(v, playerKey){
+    const raw = v?.[playerKey]?.payment || "nv";
+
+    if(raw === "ok"){
+      return { code:"ok", label:"Payé", dot:"green", icon:"✅" };
+    }
+    if(raw === "nok"){
+      return { code:"nok", label:"Non payé", dot:"red", icon:"❌" };
+    }
+    return { code:"nv", label:"Non vérifié", dot:"gray", icon:"⏳" };
+  }
+
+  function teamGlobalStatus(p1, p2){
+    const arr = [p1.code, p2.code];
+
+    if(arr.every(x => x === "ok")){
+      return { label:"Payé", dot:"green" };
+    }
+    if(arr.includes("nok")){
+      return { label:"Non payé", dot:"red" };
+    }
+    if(arr.includes("ok") && arr.includes("nv")){
+      return { label:"Partiel", dot:"gray" };
+    }
+    return { label:"Non vérifié", dot:"gray" };
   }
 
   function rebuild(){
-    const arr = [];
+    statusEl.textContent = `🟢 En direct — ${stepLabel(currentScope)} — ${teams.length} équipe(s)`;
 
-    for(const [id, team] of teamsMap.entries()){
-      const payId = `${team.scope}_${id}`;
-      const pay = paymentsMap.get(payId) || { p1Paid:false, p2Paid:false };
-
-      const paidCount = (pay.p1Paid ? 1 : 0) + (pay.p2Paid ? 1 : 0);
-
-      arr.push({
-        scope: team.scope,
-        scopeLabel: team.scopeLabel,
-        teamName: team.teamName || "",
-        p1: team.p1FirstName || "",
-        p2: team.p2FirstName || "",
-        createdAtMs: team.createdAtMs || 0,
-        paidCount,
-        p1Paid: pay.p1Paid === true,
-        p2Paid: pay.p2Paid === true
-      });
-    }
-
-    arr.sort((a,b)=>{
-      if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
-      if(a.scope !== b.scope) return a.scope.localeCompare(b.scope, "fr");
-      return a.createdAtMs - b.createdAtMs;
-    });
-
-    statusEl.textContent = `🟢 En direct — ${arr.length} équipe(s)`;
-
-    if(!arr.length){
-      listEl.innerHTML = `<div class="empty muted">Aucune équipe trouvée pour le moment.</div>`;
+    if(!teams.length){
+      listEl.innerHTML = `<div class="empty muted">Aucune équipe trouvée pour ${esc(stepLabel(currentScope))}.</div>`;
       return;
     }
 
-    listEl.innerHTML = arr.map(t=>{
-      const dot = statusDotClass(t.paidCount);
-      const label = statusLabel(t.paidCount);
+    listEl.innerHTML = teams.map(team => {
+      const v = verifsById.get(team.id) || {};
+
+      const p1Status = paymentStatusOf(v, "p1");
+      const p2Status = paymentStatusOf(v, "p2");
+      const global = teamGlobalStatus(p1Status, p2Status);
 
       return `
         <div class="pay-card">
           <div class="pay-head">
             <div style="min-width:0;">
-              <div class="pay-team">${esc(t.teamName || "Équipe")}</div>
-              <div class="pay-meta">${esc(t.scopeLabel)}</div>
+              <div class="pay-team">${esc(team.teamName || "Équipe")}</div>
+              <div class="pay-meta">${esc(stepLabel(currentScope))}</div>
             </div>
 
-            <div class="badge" title="${esc(label)}">
-              <span class="dot ${dot}"></span>
-              ${esc(label)}
+            <div class="badge" title="${esc(global.label)}">
+              <span class="dot ${esc(global.dot)}"></span>
+              ${esc(global.label)}
             </div>
           </div>
 
           <div class="players">
             <div class="player-row">
-              <div class="player-name">${esc(t.p1 || "—")}</div>
-              <div class="player-right">${paidIcon(t.p1Paid)}</div>
+              <div class="player-name">${esc(team.p1FirstName || "—")}</div>
+              <div class="player-right">
+                <span class="dot ${esc(p1Status.dot)}"></span>
+                <span>${esc(p1Status.icon)} ${esc(p1Status.label)}</span>
+              </div>
             </div>
 
             <div class="player-row">
-              <div class="player-name">${esc(t.p2 || "—")}</div>
-              <div class="player-right">${paidIcon(t.p2Paid)}</div>
+              <div class="player-name">${esc(team.p2FirstName || "—")}</div>
+              <div class="player-right">
+                <span class="dot ${esc(p2Status.dot)}"></span>
+                <span>${esc(p2Status.icon)} ${esc(p2Status.label)}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -381,79 +451,58 @@
     }).join("");
   }
 
-  function stopPayments(){
-    unsubs.forEach(fn => {
-      try{ fn(); }catch(e){}
-    });
-    unsubs = [];
-    paymentsStarted = false;
-    teamsMap = new Map();
-    paymentsMap = new Map();
-  }
+  function startScopeListeners(scope){
+    stopScopeListeners();
 
-  function startPayments(){
-    if(paymentsStarted) return;
-    paymentsStarted = true;
-
-    statusEl.textContent = "Chargement…";
+    statusEl.textContent = `Chargement ${stepLabel(scope)}…`;
     listEl.innerHTML = "";
 
-    for(const src of TEAM_SOURCES){
-      const qTeams = query(collection(db, src.col), orderBy("createdAt", "asc"));
-
-      const unsub = onSnapshot(qTeams, (snap)=>{
-        for(const docSnap of snap.docs){
-          const x = docSnap.data() || {};
-          teamsMap.set(docSnap.id, {
-            scope: src.scope,
-            scopeLabel: src.label,
-            teamName: x.teamName || "",
-            p1FirstName: x.p1FirstName || "",
-            p2FirstName: x.p2FirstName || "",
-            createdAtMs: x.createdAt?.toMillis ? x.createdAt.toMillis() : 0
-          });
-        }
-
-        const liveIds = new Set(snap.docs.map(d => d.id));
-        for(const [id, team] of teamsMap.entries()){
-          if(team.scope === src.scope && !liveIds.has(id)){
-            teamsMap.delete(id);
-          }
-        }
-
-        rebuild();
-      }, (err)=>{
-        console.error(err);
-      });
-
-      unsubs.push(unsub);
-    }
-
-    const qPay = query(collection(db, PAYMENTS_COL), orderBy("updatedAt", "desc"));
-    const unsubPay = onSnapshot(qPay, (snap)=>{
-      paymentsMap = new Map();
-
-      snap.forEach(d=>{
+    const qTeams = query(teamsCol(scope), orderBy("createdAt", "asc"));
+    unsubTeams = onSnapshot(qTeams, (snap) => {
+      teams = snap.docs.map(d => {
         const x = d.data() || {};
-        paymentsMap.set(d.id, {
-          p1Paid: x.p1Paid === true,
-          p2Paid: x.p2Paid === true
-        });
+        return {
+          id: d.id,
+          teamName: x.teamName || "",
+          p1FirstName: x.p1FirstName || "",
+          p2FirstName: x.p2FirstName || "",
+          createdAtMs: x.createdAt?.toMillis ? x.createdAt.toMillis() : 0
+        };
       });
 
       rebuild();
-    }, (err)=>{
+    }, (err) => {
       console.error(err);
-      statusEl.textContent = "🔴 Erreur de connexion paiements";
+      statusEl.textContent = `🔴 Erreur de connexion équipes — ${stepLabel(scope)}`;
     });
 
-    unsubs.push(unsubPay);
+    unsubVerifs = onSnapshot(verifsCol(scope), (snap) => {
+      verifsById = new Map();
+
+      snap.forEach(d => {
+        verifsById.set(d.id, d.data() || {});
+      });
+
+      rebuild();
+    }, (err) => {
+      console.error(err);
+      statusEl.textContent = `⚠️ Équipes chargées, mais vérifications indisponibles — ${stepLabel(scope)}`;
+      rebuild();
+    });
   }
 
-  setActive("shop");
+  tabShop.onclick = () => setMainTab("shop");
+  tabPaid.onclick = () => setMainTab("paid");
 
-  window.addEventListener("beforeunload", ()=>{
-    stopPayments();
+  stepButtons.forEach(btn => {
+    btn.onclick = () => setScope(btn.dataset.scope);
+  });
+
+  setScope("etape5");
+  setMainTab("shop");
+
+  window.addEventListener("beforeunload", () => {
+    stopScopeListeners();
   });
 </script>
 
