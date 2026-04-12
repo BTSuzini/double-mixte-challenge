@@ -4,10 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Double Mixte Challenge</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260225-admin-index" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260412-admin-index-v2" />
 
   <style>
-    /* ✅ Onglet actif (Zone tabs) noir/blanc */
     .btn.is-active{
       background:#111 !important;
       border-color:#111 !important;
@@ -15,13 +14,13 @@
       box-shadow: 0 10px 22px rgba(0,0,0,.18);
     }
 
-    /* Sous-onglets dans Général */
     .subtabs{
       display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap:10px;
       margin-top:10px;
     }
+
     .subtab{
       appearance:none;
       border:1px solid #ddd;
@@ -34,7 +33,7 @@
       white-space:nowrap;
       color:#111;
     }
-    /* ✅ Bonus : sous-onglet actif noir/blanc */
+
     .subtab[aria-selected="true"]{
       background:#111;
       border-color:#111;
@@ -42,166 +41,10 @@
       box-shadow: 0 10px 22px rgba(0,0,0,.14);
     }
 
-    /* Paiements (Général) */
-    .pay-top{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:flex-end;
-      justify-content:space-between;
-      margin-top:10px;
-    }
-    .pay-top .field{
-      margin:0;
-      flex: 1 1 240px;
-      min-width: 220px;
-    }
-
-    .filters{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .search{
-      flex: 1 1 260px;
-      min-width: 220px;
-    }
-    .search input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid #ddd;
-      background:#fff;
-      font-weight:800;
-      outline:none;
-    }
-
-    .stats{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-      justify-content:flex-end;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #eee;
-      background:#fafafa;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      display:inline-block;
-      background:#bbb;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
-    }
-    .dot.red{ background:#e74c3c; }
-    .dot.orange{ background:#f39c12; }
-    .dot.green{ background:#2ecc71; }
-
-    /* list */
-    .pay-list{
-      display:grid;
-      gap:10px;
-      margin-top:12px;
-    }
-    .pay-card{
-      border:1px solid #eee;
-      border-radius:16px;
-      background:#fff;
-      padding:12px 12px;
-      box-shadow: 0 6px 16px rgba(0,0,0,.04);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-    .pay-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      min-width:0;
-    }
-    .pay-team{
-      font-weight:900;
-      font-size:16px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
-    }
-
-    .players{ display:grid; gap:8px; }
-    .player-row{
-      border:1px solid #f0f0f0;
-      background:#fbfbfb;
-      border-radius:12px;
-      padding:10px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      min-width:0;
-    }
-    .player-name{
-      font-weight:900;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
-    }
-    .toggle{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex: 0 0 auto;
-      white-space:nowrap;
-    }
-    .toggle button{
-      appearance:none;
-      border:1px solid #ddd;
-      background:#fff;
-      border-radius:999px;
-      padding:8px 10px;
-      font-weight:900;
-      cursor:pointer;
-    }
-    .toggle button.paid{
-      border-color:#bfe9c8;
-      background:#ecfff0;
-    }
-    .toggle button.unpaid{
-      border-color:#ffd0cb;
-      background:#fff0ef;
-    }
-
-    .meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:4px;
-    }
-    .meta small{ opacity:.75; }
-
     @media (max-width:420px){
-      .pay-team{ font-size:15px; }
-      .toggle button{ padding:7px 9px; font-size:13px; }
-      .subtabs{ grid-template-columns: 1fr; }
+      .subtabs{
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -240,7 +83,6 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- Zone selector -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
@@ -260,14 +102,12 @@
     <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
-  <!-- PANEL GENERAL -->
   <section class="card" id="panelGeneral" style="display:none;">
 
     <h2 style="margin:0 0 6px;">🌐 Général</h2>
 
     <div class="subtabs" role="tablist" aria-label="Général — onglets">
       <button class="subtab" id="tabInfos" type="button" aria-selected="true">📰 Infos</button>
-      <button class="subtab" id="tabPayments" type="button" aria-selected="false">✅ Paiements</button>
       <button class="subtab" id="tabGeneralRank" type="button" aria-selected="false">🏆 Classement général</button>
     </div>
 
@@ -297,46 +137,6 @@
       <div id="infosList" style="display:grid; gap:10px; margin-top:10px;"></div>
     </div>
 
-    <!-- ========= PAIEMENTS ========= -->
-    <div id="panelPay" style="display:none; margin-top:14px;">
-      <h2 style="margin:0;">✅ Paiements — Administration</h2>
-      <p class="muted" style="margin:8px 0 0;">
-        Cliquez sur “Payé / Non payé” pour chaque joueur. Enregistrement en direct.
-      </p>
-
-      <div class="pay-top">
-        <div class="field">
-          <label for="payEtape">Étape</label>
-          <select id="payEtape">
-            <option value="etape1">🎾 Étape 1</option>
-            <option value="etape2">🎾 Étape 2</option>
-            <option value="etape3">🎾 Étape 3</option>
-            <option value="etape4">🎾 Étape 4</option>
-            <option value="etape5">🧪 Étape 5 (test)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="q">Recherche</label>
-          <div class="search" style="margin-top:0;">
-            <input id="q" type="search" placeholder="Rechercher équipe / prénom…" autocomplete="off">
-          </div>
-        </div>
-      </div>
-
-      <div class="filters">
-        <div class="stats">
-          <span class="badge"><span class="dot red"></span><span id="c0">0</span> non payé</span>
-          <span class="badge"><span class="dot orange"></span><span id="c1">0</span> partiel</span>
-          <span class="badge"><span class="dot green"></span><span id="c2">0</span> payé</span>
-        </div>
-      </div>
-
-      <p class="muted" id="payStatus" style="margin:10px 0 0;">Chargement…</p>
-
-      <div id="payList" class="pay-list" aria-label="Liste paiements"></div>
-    </div>
-
     <!-- ========= CLASSEMENT GENERAL ========= -->
     <div id="panelGeneralRank" style="display:none; margin-top:14px;">
       <h2 style="margin:0 0 10px;">🏆 Classement général — Administration</h2>
@@ -361,32 +161,16 @@
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import {
     doc, getDoc,
-    collection, addDoc, deleteDoc, updateDoc, setDoc,
+    collection, addDoc, deleteDoc, updateDoc,
     serverTimestamp,
     query, orderBy, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // =========================
-  // CONFIG
-  // =========================
   const COL_INFOS = "infos";
-  const COL_PAYMENTS = "paiements_challenge";
 
-  const TEAM_COLLECTION_BY_ETAPE = {
-    etape1: "equipes_etape1_public",
-    etape2: "equipes_etape2_public",
-    etape3: "equipes_etape3_public",
-    etape4: "equipes_etape4_public",
-    etape5: "equipes_etape5_public",
-  };
+  const LS_SCOPE_KEY   = "admin_scope_last";
+  const LS_GENERAL_TAB = "challenge_admin_general_tab";
 
-  const LS_SCOPE_KEY    = "admin_scope_last";
-  const LS_GENERAL_TAB  = "challenge_admin_general_tab"; // "infos" | "pay" | "general-rank"
-  const LS_PAY_ETAPE    = "challenge_admin_pay_etape";
-
-  // =========================
-  // DOM
-  // =========================
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -395,38 +179,27 @@
 
   const panelGeneral = document.getElementById("panelGeneral");
 
-  // General subtabs
   const tabInfos = document.getElementById("tabInfos");
-  const tabPayments = document.getElementById("tabPayments");
   const tabGeneralRank = document.getElementById("tabGeneralRank");
 
   const panelInfos = document.getElementById("panelInfos");
-  const panelPay = document.getElementById("panelPay");
   const panelGeneralRank = document.getElementById("panelGeneralRank");
 
-  // Infos form
   const infoForm = document.getElementById("infoForm");
   const publishBtn = document.getElementById("publishBtn");
   const adminStatus = document.getElementById("adminStatus");
   const infosCount = document.getElementById("infosCount");
   const infosList = document.getElementById("infosList");
 
-  // Payments UI
-  const payEtape = document.getElementById("payEtape");
-  const qInput = document.getElementById("q");
-  const payStatus = document.getElementById("payStatus");
-  const payList = document.getElementById("payList");
-  const c0 = document.getElementById("c0");
-  const c1 = document.getElementById("c1");
-  const c2 = document.getElementById("c2");
+  let unsubscribeInfos = null;
 
-  // =========================
-  // Helpers
-  // =========================
   function esc(str){
     return (str ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
   function fmtDate(ts){
@@ -437,7 +210,9 @@
         year:"numeric", month:"long", day:"numeric",
         hour:"2-digit", minute:"2-digit"
       });
-    }catch{ return "—"; }
+    }catch{
+      return "—";
+    }
   }
 
   function getInitialScope(){
@@ -452,16 +227,16 @@
   }
 
   function persistScope(scope){
-    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
+    try{
+      localStorage.setItem(LS_SCOPE_KEY, scope);
+    }catch(e){}
   }
 
-  // =========================
-  // Infos (Général)
-  // =========================
-  let unsubscribeInfos = null;
-
   function stopInfos(){
-    if(unsubscribeInfos){ unsubscribeInfos(); unsubscribeInfos = null; }
+    if(unsubscribeInfos){
+      unsubscribeInfos();
+      unsubscribeInfos = null;
+    }
   }
 
   function startInfos(){
@@ -473,7 +248,7 @@
     const q = query(collection(db, COL_INFOS), orderBy("createdAt","desc"));
     unsubscribeInfos = onSnapshot(q, async (snap)=>{
       const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-      infosCount.textContent = `📌 ${items.length} info${items.length>1?"s":""}`;
+      infosCount.textContent = `📌 ${items.length} info${items.length > 1 ? "s" : ""}`;
       infosList.innerHTML = "";
 
       if(items.length === 0){
@@ -524,10 +299,14 @@
 
           const newTitle = prompt("Modifier le titre :", cur.title || "");
           if(newTitle === null) return;
+
           const newText = prompt("Modifier le texte :", cur.text || "");
           if(newText === null) return;
 
-          await updateDoc(ref, { title: newTitle.trim(), text: newText.trim() });
+          await updateDoc(ref, {
+            title: newTitle.trim(),
+            text: newText.trim()
+          });
         };
       });
 
@@ -537,260 +316,40 @@
     });
   }
 
-  // =========================
-  // Paiements (Général)
-  // =========================
-  let queryText = "";
-  let snapTeams = null;
-  let snapPay = null;
-  let unsubTeams = null;
-  let unsubPay = null;
-
-  function dotClass(paidCount){
-    if(paidCount >= 2) return "green";
-    if(paidCount === 1) return "orange";
-    return "red";
-  }
-  function label(paidCount){
-    return paidCount >= 2 ? "Payé" : paidCount === 1 ? "Partiel" : "Non payé";
-  }
-  function fmtUpdated(ts){
-    try{
-      const d = ts?.toDate ? ts.toDate() : null;
-      if(!d) return "—";
-      return d.toLocaleString("fr-FR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }catch{ return "—"; }
-  }
-
-  function stopPaymentsSubs(){
-    if(unsubTeams){ unsubTeams(); unsubTeams = null; }
-    if(unsubPay){ unsubPay(); unsubPay = null; }
-    snapTeams = null;
-    snapPay = null;
-  }
-
-  function startPaymentsSubs(etapeId){
-    stopPaymentsSubs();
-
-    const teamsCol = TEAM_COLLECTION_BY_ETAPE[etapeId];
-    if(!teamsCol){
-      payStatus.textContent = "Étape inconnue.";
-      return;
-    }
-
-    payStatus.textContent = "Chargement…";
-    payList.innerHTML = "";
-
-    const qTeams = query(collection(db, teamsCol), orderBy("createdAt","asc"));
-    const qPays  = query(collection(db, COL_PAYMENTS), orderBy("updatedAt","desc"));
-
-    unsubTeams = onSnapshot(qTeams, (s)=>{ snapTeams = s; renderPayments(etapeId); },
-      (e)=>{ console.error(e); payStatus.textContent = "🔴 Erreur équipes"; });
-
-    unsubPay = onSnapshot(qPays, (s)=>{ snapPay = s; renderPayments(etapeId); },
-      (e)=>{ console.error(e); snapPay = null; renderPayments(etapeId); });
-  }
-
-  async function setPaid(etapeId, teamDocId, who, paid){
-    const payId = `${etapeId}_${teamDocId}`;
-    const ref = doc(db, COL_PAYMENTS, payId);
-    const payload = { updatedAt: serverTimestamp() };
-    payload[who === "p1" ? "p1Paid" : "p2Paid"] = paid;
-    await setDoc(ref, payload, { merge: true });
-  }
-
-  function renderPayments(etapeId){
-    if(!snapTeams){
-      payStatus.textContent = "Chargement…";
-      return;
-    }
-
-    const payMap = new Map();
-    if(snapPay){
-      snapPay.forEach(d=>{
-        const x = d.data() || {};
-        payMap.set(d.id, {
-          p1Paid: x.p1Paid === true,
-          p2Paid: x.p2Paid === true,
-          updatedAt: x.updatedAt || null
-        });
-      });
-    }
-
-    const rows = [];
-    snapTeams.forEach(d=>{
-      const x = d.data() || {};
-      const teamName = (x.teamName || "").trim();
-      if(!teamName) return;
-
-      const p1 = (x.p1FirstName || "").trim();
-      const p2 = (x.p2FirstName || "").trim();
-
-      const payId = `${etapeId}_${d.id}`;
-      const pay = payMap.get(payId) || { p1Paid:false, p2Paid:false, updatedAt:null };
-      const paidCount = (pay.p1Paid?1:0) + (pay.p2Paid?1:0);
-
-      rows.push({
-        teamDocId: d.id, teamName,
-        p1, p2,
-        p1Paid: pay.p1Paid,
-        p2Paid: pay.p2Paid,
-        paidCount,
-        updatedAt: pay.updatedAt
-      });
-    });
-
-    const filtered = rows.filter(r=>{
-      if(!queryText) return true;
-      const hay = `${r.teamName} ${r.p1} ${r.p2}`.toLowerCase();
-      return hay.includes(queryText);
-    });
-
-    let n0=0, n1=0, n2=0;
-    for(const r of filtered){
-      if(r.paidCount === 0) n0++;
-      else if(r.paidCount === 1) n1++;
-      else n2++;
-    }
-    c0.textContent = String(n0);
-    c1.textContent = String(n1);
-    c2.textContent = String(n2);
-
-    filtered.sort((a,b)=>{
-      if(a.paidCount !== b.paidCount) return a.paidCount - b.paidCount;
-      return (a.teamName||"").localeCompare((b.teamName||""), "fr");
-    });
-
-    payStatus.textContent = `🟢 En direct — ${filtered.length} équipe(s) — ${esc(etapeId)}`;
-
-    if(filtered.length === 0){
-      payList.innerHTML = `<p class="muted" style="margin:0;">Aucun résultat.</p>`;
-      return;
-    }
-
-    payList.innerHTML = filtered.map(r=>{
-      const dot = dotClass(r.paidCount);
-      const lab = label(r.paidCount);
-      const meta = `Dernière mise à jour : ${esc(fmtUpdated(r.updatedAt))}`;
-
-      return `
-        <div class="pay-card" data-teamid="${esc(r.teamDocId)}">
-          <div class="pay-head">
-            <div class="pay-team">${esc(r.teamName)}</div>
-            <div class="badge" title="${esc(lab)}">
-              <span class="dot ${dot}"></span>
-              ${esc(lab)}
-            </div>
-          </div>
-
-          <div class="players">
-            <div class="player-row">
-              <div class="player-name">${esc(r.p1 || "—")}</div>
-              <div class="toggle">
-                <button class="${r.p1Paid ? "paid" : "unpaid"}" data-who="p1" data-next="${r.p1Paid ? "0" : "1"}">
-                  ${r.p1Paid ? "✅ Payé" : "❌ Non payé"}
-                </button>
-              </div>
-            </div>
-
-            <div class="player-row">
-              <div class="player-name">${esc(r.p2 || "—")}</div>
-              <div class="toggle">
-                <button class="${r.p2Paid ? "paid" : "unpaid"}" data-who="p2" data-next="${r.p2Paid ? "0" : "1"}">
-                  ${r.p2Paid ? "✅ Payé" : "❌ Non payé"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="meta">
-            <small class="muted">id: ${esc(r.teamDocId)}</small>
-            <small class="muted">${meta}</small>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    payList.querySelectorAll("button[data-who]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const card = btn.closest(".pay-card");
-        const teamId = card?.dataset?.teamid;
-        const who = btn.dataset.who;
-        const next = btn.dataset.next === "1";
-        btn.disabled = true;
-        try{
-          await setPaid(etapeId, teamId, who, next);
-        }catch(e){
-          console.error(e);
-          alert("❌ Erreur : impossible d’enregistrer (rules / droits ?).");
-        }finally{
-          btn.disabled = false;
-        }
-      });
-    });
-  }
-
-  qInput.addEventListener("input", ()=>{
-    queryText = (qInput.value || "").trim().toLowerCase();
-    renderPayments(payEtape.value);
-  });
-
-  payEtape.addEventListener("change", ()=>{
-    const eId = payEtape.value;
-    try{ localStorage.setItem(LS_PAY_ETAPE, eId); }catch(e){}
-    if(panelPay.style.display !== "none") startPaymentsSubs(eId);
-  });
-
-  // =========================
-  // Général tabs (infos / pay / classement général)
-  // =========================
   function showGeneralTab(which){
     const isInfos = which === "infos";
-    const isPay = which === "pay";
     const isGeneralRank = which === "general-rank";
 
     tabInfos.setAttribute("aria-selected", isInfos ? "true" : "false");
-    tabPayments.setAttribute("aria-selected", isPay ? "true" : "false");
     tabGeneralRank.setAttribute("aria-selected", isGeneralRank ? "true" : "false");
 
     panelInfos.style.display = isInfos ? "block" : "none";
-    panelPay.style.display   = isPay ? "block" : "none";
     panelGeneralRank.style.display = isGeneralRank ? "block" : "none";
 
-    try{ localStorage.setItem(LS_GENERAL_TAB, which); }catch(e){}
+    try{
+      localStorage.setItem(LS_GENERAL_TAB, which);
+    }catch(e){}
 
     if(isInfos){
       startInfos();
-      stopPaymentsSubs();
-    }else if(isPay){
-      stopInfos();
-      try{
-        const savedEtape = localStorage.getItem(LS_PAY_ETAPE);
-        if(savedEtape && payEtape.querySelector(`option[value="${savedEtape}"]`)){
-          payEtape.value = savedEtape;
-        }
-      }catch(e){}
-      startPaymentsSubs(payEtape.value);
     }else{
       stopInfos();
-      stopPaymentsSubs();
     }
   }
 
   tabInfos.onclick = ()=> showGeneralTab("infos");
-  tabPayments.onclick = ()=> showGeneralTab("pay");
   tabGeneralRank.onclick = ()=> showGeneralTab("general-rank");
 
-  // =========================
-  // Zone tabs
-  // =========================
   function makeDisabledBtn(label, reason){
     const a = document.createElement("a");
     a.className = "btn disabled";
     a.href = "#";
     a.setAttribute("aria-disabled","true");
     a.textContent = label;
-    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
+    a.onclick = (e)=>{
+      e.preventDefault();
+      alert(reason);
+    };
     return a;
   }
 
@@ -811,8 +370,11 @@
       panelGeneral.style.display = "block";
 
       let saved = "infos";
-      try{ saved = localStorage.getItem(LS_GENERAL_TAB) || "infos"; }catch(e){}
-      if(saved !== "pay" && saved !== "general-rank") saved = "infos";
+      try{
+        saved = localStorage.getItem(LS_GENERAL_TAB) || "infos";
+      }catch(e){}
+      if(saved !== "general-rank") saved = "infos";
+
       showGeneralTab(saved);
       return;
     }
@@ -828,6 +390,7 @@
       ["🎲 Tirage",         "tirage.html"],
       ["📅 Programmation",  "programmation.html"],
       ["🏁 Résultats",      "resultats.html"],
+      ["🔎 Vérification",   "verification.html"],
       ["🏆 Classement",     "classement.html"],
     ];
 
@@ -840,21 +403,29 @@
     }
 
     stopInfos();
-    stopPaymentsSubs();
   }
 
-  // Publish infos
   infoForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
+
     publishBtn.disabled = true;
     publishBtn.classList.add("disabled");
     adminStatus.textContent = "Publication…";
+
     try{
       const title = (infoForm.infoTitle.value || "").trim();
       const text  = (infoForm.infoText.value || "").trim();
-      if(!title || !text) throw new Error("Titre et texte obligatoires.");
 
-      await addDoc(collection(db, COL_INFOS), { title, text, createdAt: serverTimestamp() });
+      if(!title || !text){
+        throw new Error("Titre et texte obligatoires.");
+      }
+
+      await addDoc(collection(db, COL_INFOS), {
+        title,
+        text,
+        createdAt: serverTimestamp()
+      });
+
       infoForm.reset();
       adminStatus.textContent = "✅ Publié !";
     }catch(err){
@@ -866,7 +437,6 @@
     }
   });
 
-  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -878,7 +448,6 @@
     adminUI.style.display = "none";
     panelGeneral.style.display = "none";
     stopInfos();
-    stopPaymentsSubs();
   }
 
   function showAdmin(){
@@ -895,15 +464,23 @@
     };
   }
 
-  // Guard
-  const g = await requireRole(["admin","jat"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
+  const g = await requireRole(["admin"]);
+  if(!g.ok){
+    showDenied();
+  }else{
+    showAdmin();
+  }
 
   onAuthStateChanged(auth, async (user)=>{
-    if(!user){ showDenied(); return; }
-    const g2 = await requireRole(["admin","jat"]);
-    if(!g2.ok){ showDenied(); return; }
+    if(!user){
+      showDenied();
+      return;
+    }
+    const g2 = await requireRole(["admin"]);
+    if(!g2.ok){
+      showDenied();
+      return;
+    }
   });
 </script>
 
