@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TV — Étape 5 — Double Mixte Challenge</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v2" />
 
   <style>
     :root{
       --tv-band-h: clamp(60px, 6.5vh, 86px);
-      --tv-badge-band-h: clamp(46px, 5vh, 64px);
+      --tv-badge-band-h: clamp(132px, 15vh, 180px);
 
       --tv-logo-h: calc(var(--tv-band-h) * .68);
       --tv-mid-h:  calc(var(--tv-band-h) * .88);
@@ -134,11 +134,27 @@
       backdrop-filter: blur(3px);
     }
 
+    .tv-fs-btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius:999px;
+      padding:5px 10px;
+      font-weight:1000;
+      font-size:12px;
+      line-height:1;
+      cursor:pointer;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      backdrop-filter: blur(3px);
+    }
+    .tv-fs-btn:hover{ filter:brightness(1.05); }
+
     /* ===== Badges band ===== */
     .tv-badges-band{
       flex: 0 0 var(--tv-badge-band-h);
       height: var(--tv-badge-band-h);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
       border-top: 1px solid rgba(255,255,255,.04);
       border-bottom: 1px solid rgba(255,255,255,.05);
       overflow:hidden;
@@ -161,35 +177,35 @@
       min-width:max-content;
       will-change: transform;
       transform: translate3d(0,0,0);
-      animation: marqueeBadges 26s linear infinite;
+      animation: marqueeBadges 30s linear infinite;
     }
 
     .tv-badges-group{
       display:flex;
       align-items:center;
-      gap:14px;
+      gap:18px;
       white-space:nowrap;
-      padding-right:14px;
+      padding-right:18px;
       flex:0 0 auto;
     }
 
     .tv-badge-chip{
       display:inline-flex;
       align-items:center;
-      gap:8px;
-      height: calc(var(--tv-badge-band-h) - 10px);
-      padding: 5px 10px;
+      gap:14px;
+      height: calc(var(--tv-badge-band-h) - 16px);
+      padding: 10px 18px;
       border-radius: 999px;
       background: rgba(255,255,255,.95);
       border: 1px solid rgba(0,0,0,.08);
-      box-shadow: 0 6px 18px rgba(0,0,0,.10);
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
       flex: 0 0 auto;
     }
 
     .tv-badge-chip img{
-      height: calc(var(--tv-badge-band-h) - 20px);
+      height: calc(var(--tv-badge-band-h) - 36px);
       width: auto;
-      max-width: 54px;
+      max-width: 140px;
       object-fit: contain;
       display:block;
       flex: 0 0 auto;
@@ -198,9 +214,10 @@
 
     .tv-badge-name{
       font-weight:1000;
-      font-size: clamp(12px, 1.35vh, 15px);
+      font-size: clamp(24px, 2.8vh, 34px);
       color:#111;
       letter-spacing:.1px;
+      line-height:1;
     }
 
     @keyframes marqueeBadges{
@@ -550,8 +567,8 @@
 
     /* ===== Bottom sponsors ===== */
     .tv-bottom{
-      flex: 0 0 var(--tv-band-h);
-      height: var(--tv-band-h);
+      flex: 0 0 var(--tv-badge-band-h);
+      height: var(--tv-badge-band-h);
       display:flex;
       align-items:center;
       background: linear-gradient(90deg, rgba(18,88,46,.96), rgba(24,104,54,.92));
@@ -560,6 +577,7 @@
       padding: 0;
       overflow:hidden;
       z-index:2;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
     }
 
     .sponsors-viewport{
@@ -575,15 +593,15 @@
       min-width:max-content;
       will-change: transform;
       transform: translate3d(0,0,0);
-      animation: marquee 24s linear infinite;
+      animation: marquee 30s linear infinite;
     }
 
     .sponsor-group{
       display:flex;
-      gap:38px;
+      gap:28px;
       align-items:center;
       white-space:nowrap;
-      padding-right:38px;
+      padding-right:28px;
       flex:0 0 auto;
     }
 
@@ -591,17 +609,20 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:0;
+      padding:10px 14px;
       border:none;
-      background:transparent;
+      background: rgba(255,255,255,.94);
+      border-radius:999px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
       flex:0 0 auto;
     }
 
     .sponsor-item img{
-      height: calc(var(--tv-band-h) * .64);
+      height: calc(var(--tv-badge-band-h) - 36px);
       width:auto;
+      max-width: 180px;
       object-fit:contain;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.30));
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.18));
       display:block;
     }
 
@@ -660,6 +681,7 @@
           <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
           <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
           <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
+          <button class="tv-fs-btn" id="btnFullscreen" type="button">⛶ Plein écran</button>
         </div>
       </div>
 
@@ -762,10 +784,34 @@
   const rotBox   = document.getElementById("rotBox");
   const sponsorTrack = document.getElementById("sponsorTrack");
   const badgesTrack = document.getElementById("badgesTrack");
+  const btnFullscreen = document.getElementById("btnFullscreen");
 
   let generalConfig = { players:{}, order:[] };
   const classements = new Map();
   for(const s of STEP_IDS) classements.set(s, null);
+
+  function updateFullscreenBtn(){
+    const isFs = !!document.fullscreenElement;
+    btnFullscreen.textContent = isFs ? "🡼 Réduire" : "⛶ Plein écran";
+  }
+
+  async function toggleFullscreen(){
+    try{
+      if(document.fullscreenElement){
+        await document.exitFullscreen();
+      }else{
+        await document.documentElement.requestFullscreen();
+      }
+    }catch(e){
+      console.error(e);
+    }finally{
+      updateFullscreenBtn();
+    }
+  }
+
+  btnFullscreen.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenBtn);
+  updateFullscreenBtn();
 
   function tickClock(){
     const d = new Date();
@@ -848,13 +894,19 @@
 
   const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
   const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88,  6:76, 7:65, 8:52 };
+  const POINTS_BT500 = { 1:500, 2:350, 3:270, 4:210, 5:175, 6:150, 7:130, 8:105, 9:95, 10:87, 11:82, 12:75 };
 
   function stepType(stepId){
-    return (stepId === "etape1" || stepId === "etape4" || stepId === "etape5") ? "BT250" : "BT100";
+    if(stepId === "etape1" || stepId === "etape4") return "BT250";
+    if(stepId === "etape5") return "BT500";
+    return "BT100";
   }
 
   function pointsTable(stepId){
-    return stepType(stepId) === "BT250" ? POINTS_BT250 : POINTS_BT100;
+    const t = stepType(stepId);
+    if(t === "BT500") return POINTS_BT500;
+    if(t === "BT250") return POINTS_BT250;
+    return POINTS_BT100;
   }
 
   function normTeamName(s){
@@ -1140,14 +1192,14 @@
   }
 
   const SPONSOR_SLOTS = [
-    { alts: ["../assets/img/brico.png"] },
-    { alts: ["../assets/img/bt-fft.png"] },
-    { alts: ["../assets/img/matoque.png"] },
-    { alts: ["../assets/img/tcs.png"] },
-    { alts: ["../assets/img/brico.png"] },
-    { alts: ["../assets/img/logo-suzini.png"] },
-    { alts: ["../assets/img/psk.png"] },
-    { alts: ["../assets/img/lobstars.png"] },
+    { alts: ["../assets/img/brico.png", "../assets/img/brico.jpeg", "../assets/img/brico.jpg"] },
+    { alts: ["../assets/img/bt-fft.png", "../assets/img/bt-fft.jpeg", "../assets/img/bt-fft.jpg"] },
+    { alts: ["../assets/img/matoque.png", "../assets/img/matoque.jpeg", "../assets/img/matoque.jpg"] },
+    { alts: ["../assets/img/tcs.png", "../assets/img/tcs.jpeg", "../assets/img/tcs.jpg"] },
+    { alts: ["../assets/img/brico.png", "../assets/img/brico.jpeg", "../assets/img/brico.jpg"] },
+    { alts: ["../assets/img/logo-suzini.png", "../assets/img/logo-suzini.jpeg", "../assets/img/logo-suzini.jpg"] },
+    { alts: ["../assets/img/psk.png", "../assets/img/psk.jpeg", "../assets/img/psk.jpg"] },
+    { alts: ["../assets/img/lobstars.png", "../assets/img/lobstars.jpeg", "../assets/img/lobstars.jpg"] },
   ];
 
   function sponsorImgHTML(slot){
@@ -1179,10 +1231,10 @@
           if(next){
             img.setAttribute("src", next);
           } else {
-            img.style.opacity = "0.15";
+            img.style.opacity = "0.20";
           }
         }catch(e){
-          img.style.opacity = "0.15";
+          img.style.opacity = "0.20";
         }
       }, { once:false });
     });
