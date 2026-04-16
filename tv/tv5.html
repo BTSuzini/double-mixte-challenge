@@ -2,10 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>TV — Étape 5 — Double Mixte Challenge</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v2" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v3" />
 
   <style>
     :root{
@@ -29,21 +29,29 @@
       --tv-panel-radius: 20px;
     }
 
-    html, body{ height:100%; }
-    body{
+    html, body{
+      height:100%;
+      width:100%;
       margin:0;
+      padding:0;
       background:
         radial-gradient(circle at top, rgba(28,110,58,.20), transparent 34%),
         linear-gradient(180deg, #08110b 0%, #0b170f 100%);
-      color:#111;
       overflow:hidden;
+    }
+
+    body{
+      color:#111;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      overscroll-behavior:none;
+      position:fixed;
+      inset:0;
     }
 
     .container{
       width:100%;
-      max-width: 1600px;
+      max-width:1600px;
       margin:0 auto;
       box-sizing:border-box;
       padding:0 10px;
@@ -52,8 +60,15 @@
     .tv-wrap{
       height:100vh;
       height:100dvh;
+      width:100vw;
       display:flex;
       flex-direction:column;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-sizing:border-box;
+      background:
+        radial-gradient(circle at top, rgba(28,110,58,.20), transparent 34%),
+        linear-gradient(180deg, #08110b 0%, #0b170f 100%);
     }
 
     /* ===== Top bar ===== */
@@ -75,7 +90,7 @@
       display:grid;
       grid-template-columns: 72px 72px 1fr 72px 72px;
       align-items:center;
-      gap: 10px;
+      gap:10px;
       padding:0;
     }
 
@@ -101,39 +116,6 @@
       width:auto;
     }
 
-    .tv-subrow{
-      position:absolute;
-      right: 12px;
-      bottom: 6px;
-      max-width: calc(100% - 360px);
-    }
-
-    .tv-subrow-inner{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      color:#fff;
-      justify-content:flex-end;
-      align-items:center;
-    }
-
-    .tv-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:5px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.10);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
-      white-space:nowrap;
-      font-weight:1000;
-      font-size: 12px;
-      line-height:1;
-      opacity:.98;
-      backdrop-filter: blur(3px);
-    }
-
     .tv-fs-btn{
       appearance:none;
       border:1px solid rgba(255,255,255,.18);
@@ -147,6 +129,11 @@
       cursor:pointer;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
       backdrop-filter: blur(3px);
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:4;
     }
     .tv-fs-btn:hover{ filter:brightness(1.05); }
 
@@ -223,6 +210,42 @@
     @keyframes marqueeBadges{
       from{ transform: translate3d(0,0,0); }
       to{ transform: translate3d(-50%,0,0); }
+    }
+
+    /* ===== Status row under badges / left side only ===== */
+    .tv-info-row{
+      flex:0 0 auto;
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      padding:8px 10px 0;
+      z-index:2;
+    }
+
+    .tv-info-left{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      max-width: calc(100% - 12px);
+    }
+
+    .tv-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      white-space:nowrap;
+      font-weight:1000;
+      font-size:12px;
+      line-height:1;
+      opacity:.98;
+      backdrop-filter: blur(3px);
+      color:#fff;
     }
 
     /* ===== Main split ===== */
@@ -574,7 +597,7 @@
       background: linear-gradient(90deg, rgba(18,88,46,.96), rgba(24,104,54,.92));
       border-top:1px solid rgba(255,255,255,.08);
       color:#fff;
-      padding: 0;
+      padding:0;
       overflow:hidden;
       z-index:2;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
@@ -609,11 +632,11 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:10px 14px;
+      padding:0;
       border:none;
-      background: rgba(255,255,255,.94);
-      border-radius:999px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      background:transparent;
+      border-radius:0;
+      box-shadow:none;
       flex:0 0 auto;
     }
 
@@ -637,9 +660,6 @@
     @media (max-width: 1100px){
       .tv-main{
         grid-template-columns: 1.6fr 1fr;
-      }
-      .tv-subrow{
-        max-width: calc(100% - 260px);
       }
     }
   </style>
@@ -674,16 +694,7 @@
         </div>
       </div>
 
-      <div class="tv-subrow">
-        <div class="tv-subrow-inner">
-          <span class="tv-pill" id="tvClock">⏱️ —</span>
-          <span class="tv-pill" id="tvStatus">🟢 En direct</span>
-          <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
-          <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
-          <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
-          <button class="tv-fs-btn" id="btnFullscreen" type="button">⛶ Plein écran</button>
-        </div>
-      </div>
+      <button class="tv-fs-btn" id="btnFullscreen" type="button">⛶ Plein écran</button>
 
     </div>
   </header>
@@ -693,6 +704,18 @@
     <div class="container">
       <div class="tv-badges-viewport">
         <div class="tv-badges-inner" id="badgesTrack"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFOS -->
+  <section class="tv-info-row" aria-label="Informations match">
+    <div class="container">
+      <div class="tv-info-left">
+        <span class="tv-pill" id="tvClock">⏱️ —</span>
+        <span class="tv-pill" id="kpiDone">✅ Terminés : 0</span>
+        <span class="tv-pill" id="kpiLive">🟠 En cours : 0</span>
+        <span class="tv-pill" id="kpiNext">⏭️ À venir : 0</span>
       </div>
     </div>
   </section>
@@ -768,8 +791,6 @@
   const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
 
   const tvClock = document.getElementById("tvClock");
-  const tvStatus = document.getElementById("tvStatus");
-
   const kpiDone = document.getElementById("kpiDone");
   const kpiLive = document.getElementById("kpiLive");
   const kpiNext = document.getElementById("kpiNext");
@@ -815,8 +836,7 @@
 
   function tickClock(){
     const d = new Date();
-    tvClock.textContent = d.toLocaleString("fr-FR", {
-      weekday:"short", day:"2-digit", month:"2-digit",
+    tvClock.textContent = d.toLocaleTimeString("fr-FR", {
       hour:"2-digit", minute:"2-digit", second:"2-digit"
     });
   }
@@ -1707,9 +1727,7 @@
         }
       }
 
-      tvStatus.textContent = "🟢 En direct";
       prog = data || null;
-
       computeCourtBlocks();
       refreshTableaux();
     }
@@ -1720,7 +1738,6 @@
           settleWith(snap.data() || {}, idx);
         } else if(!decided && idx === refs.length - 1){
           prog = null;
-          tvStatus.textContent = "🟠 Programmation non trouvée";
           computeCourtBlocks();
           tableaux = [];
           startRotator();
@@ -1743,11 +1760,8 @@
 
     computeCourtBlocks();
     if(prog) refreshTableaux();
-
-    if(!tvStatus.textContent.includes("Programmation")) tvStatus.textContent = "🟢 En direct";
   }, (err)=>{
     console.error(err);
-    tvStatus.textContent = "🔴 Erreur résultats";
   });
 
   onSnapshot(doc(db, "config", "classement_general"), (snap)=>{
