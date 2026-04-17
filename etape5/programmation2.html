@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 5 (test)</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-prog2-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-prog2-v2" />
 
   <style>
     .topbar-row-step{
@@ -167,7 +167,6 @@
     }
   </style>
 </head>
-
 <body>
 
 <header class="topbar">
@@ -239,7 +238,8 @@
     <div id="tableList"></div>
 
     <p class="muted" style="margin-top:10px;">
-      Les équipes se placent automatiquement dès qu’un résultat est validé.
+      Les équipes se placent automatiquement dès qu’un résultat est validé.  
+      Pour les qualifiés de poules, le placement n’apparaît qu’après validation du classement des poules par le JAT.
     </p>
   </section>
 
@@ -258,7 +258,7 @@
       </div>
     </div>
 
-    <p class="muted" style="margin-top:10px;">
+    <p class="muted" id="poolValidationInfo" style="margin-top:10px;">
       Classement : victoire = 2 points, défaite = 1 point. En cas d’égalité : différence de sets, puis différence de jeux.
     </p>
   </section>
@@ -290,6 +290,7 @@
 
   const poolAStandings = document.getElementById("poolAStandings");
   const poolBStandings = document.getElementById("poolBStandings");
+  const poolValidationInfo = document.getElementById("poolValidationInfo");
 
   const PROG_REF = doc(db, "programmations", scope);
   const RESULTS_COL = collection(db, `resultats_${scope}`);
@@ -299,9 +300,7 @@
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
   }
 
   function normalizeScheduleEntry(entry, slotObj){
@@ -506,6 +505,13 @@
     });
   }
 
+  function poolValidationState(){
+    const validated = !!currentProg?.poolRankingValidated;
+    const by = currentProg?.poolRankingValidatedBy || null;
+    const at = currentProg?.poolRankingValidatedAt?.toDate ? currentProg.poolRankingValidatedAt.toDate() : null;
+    return { validated, by, at };
+  }
+
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -519,6 +525,7 @@
     }
 
     if(ref.type === "poolRank"){
+      if(!currentProg?.poolRankingValidated) return null;
       const ranking = computePoolRanking(currentProg, ref.pool);
       const row = ranking[Number(ref.rank) - 1];
       return row?.team || null;
@@ -543,6 +550,20 @@
     }
 
     return null;
+  }
+
+  function fallbackRefParts(ref){
+    if(!ref) return { title:"—", sub:"" };
+    if(ref.type === "team") return { title: ref.key, sub:"" };
+    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "loser") return { title: `P${ref.matchId.slice(1)}`, sub:"" };
+    if(ref.type === "poolRank"){
+      if(currentProg?.poolRankingValidated){
+        return { title: `${ref.rank}e poule ${ref.pool}`, sub:"" };
+      }
+      return { title: "Classement poule en attente de validation JAT", sub:"" };
+    }
+    return { title:"—", sub:"" };
   }
 
   function renderMatchCard({ time, courtKey, teamA, teamB, res, note="" }){
@@ -619,8 +640,8 @@
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
+      const teamA = resolveTeamRef(m.A) || fallbackRefParts(m.A);
+      const teamB = resolveTeamRef(m.B) || fallbackRefParts(m.B);
       const res = getMatchResult(mid) || null;
 
       cards.push(renderMatchCard({
@@ -654,8 +675,8 @@
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
-      const teamA = resolveTeamRef(m.A);
-      const teamB = resolveTeamRef(m.B);
+      const teamA = resolveTeamRef(m.A) || fallbackRefParts(m.A);
+      const teamB = resolveTeamRef(m.B) || fallbackRefParts(m.B);
       const res = getMatchResult(m.id) || null;
 
       let time = "—";
@@ -722,11 +743,22 @@
     if(!currentProg){
       poolAStandings.innerHTML = "";
       poolBStandings.innerHTML = "";
+      poolValidationInfo.textContent = "";
       return;
     }
 
     poolAStandings.innerHTML = renderStandingsTable("A");
     poolBStandings.innerHTML = renderStandingsTable("B");
+
+    const info = poolValidationState();
+    const base = "Classement : victoire = 2 points, défaite = 1 point. En cas d’égalité : différence de sets, puis différence de jeux.";
+
+    if(info.validated){
+      const when = info.at ? info.at.toLocaleString() : "—";
+      poolValidationInfo.textContent = `${base} ✅ Classement validé par ${info.by || "—"} le ${when}.`;
+    } else {
+      poolValidationInfo.textContent = `${base} ⏳ En attente de validation JAT : les qualifiés de poules ne sont pas encore injectés dans le tableau.`;
+    }
   }
 
   function refreshRounds(){
