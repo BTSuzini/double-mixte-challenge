@@ -5,28 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>TV — Étape 5 — Double Mixte Challenge</title>
 
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v3" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-tv5-pro-v4" />
 
   <style>
     :root{
-      --tv-band-h: clamp(60px, 6.5vh, 86px);
-      --tv-badge-band-h: clamp(132px, 15vh, 180px);
+      --tv-band-h: clamp(54px, 5.8vh, 76px);
+      --tv-badge-band-h: clamp(108px, 12.2vh, 148px);
 
-      --tv-logo-h: calc(var(--tv-band-h) * .68);
-      --tv-mid-h:  calc(var(--tv-band-h) * .88);
+      --tv-logo-h: calc(var(--tv-band-h) * .64);
+      --tv-mid-h:  calc(var(--tv-band-h) * .82);
 
-      --tv-pad: clamp(8px, 1vh, 14px);
-      --tv-gap: clamp(10px, 1.15vh, 16px);
+      --tv-pad: clamp(6px, 0.75vh, 10px);
+      --tv-gap: clamp(8px, 0.9vh, 12px);
 
-      --tv-h2: clamp(16px, 1.9vh, 22px);
-      --tv-court-head: clamp(20px, 2.6vh, 28px);
-      --tv-sec: clamp(15px, 1.9vh, 20px);
-      --tv-team: clamp(19px, 2.45vh, 27px);
-      --tv-sub: clamp(14px, 1.7vh, 18px);
-      --tv-score: clamp(20px, 2.7vh, 30px);
+      --tv-h2: clamp(14px, 1.55vh, 18px);
+      --tv-court-head: clamp(17px, 2.05vh, 22px);
+      --tv-sec: clamp(13px, 1.45vh, 16px);
+      --tv-team: clamp(15px, 1.8vh, 20px);
+      --tv-sub: clamp(11px, 1.2vh, 14px);
+      --tv-score: clamp(16px, 2.0vh, 22px);
 
-      --tv-card-radius: 18px;
-      --tv-panel-radius: 20px;
+      --tv-card-radius: 16px;
+      --tv-panel-radius: 18px;
     }
 
     html, body{
@@ -88,9 +88,9 @@
     .tv-top-row{
       height: var(--tv-band-h);
       display:grid;
-      grid-template-columns: 72px 72px 1fr 72px 72px;
+      grid-template-columns: 58px 58px 1fr 58px 58px;
       align-items:center;
-      gap:10px;
+      gap:8px;
       padding:0;
     }
 
@@ -122,15 +122,15 @@
       background: rgba(255,255,255,.10);
       color:#fff;
       border-radius:999px;
-      padding:5px 10px;
+      padding:4px 9px;
       font-weight:1000;
-      font-size:12px;
+      font-size:11px;
       line-height:1;
       cursor:pointer;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
       backdrop-filter: blur(3px);
       position:absolute;
-      right:12px;
+      right:10px;
       top:50%;
       transform:translateY(-50%);
       z-index:4;
@@ -170,18 +170,18 @@
     .tv-badges-group{
       display:flex;
       align-items:center;
-      gap:18px;
+      gap:12px;
       white-space:nowrap;
-      padding-right:18px;
+      padding-right:12px;
       flex:0 0 auto;
     }
 
     .tv-badge-chip{
       display:inline-flex;
       align-items:center;
-      gap:14px;
-      height: calc(var(--tv-badge-band-h) - 16px);
-      padding: 10px 18px;
+      gap:10px;
+      height: calc(var(--tv-badge-band-h) - 26px);
+      padding: 6px 14px;
       border-radius: 999px;
       background: rgba(255,255,255,.95);
       border: 1px solid rgba(0,0,0,.08);
@@ -190,9 +190,9 @@
     }
 
     .tv-badge-chip img{
-      height: calc(var(--tv-badge-band-h) - 36px);
+      height: calc(var(--tv-badge-band-h) - 50px);
       width: auto;
-      max-width: 140px;
+      max-width: 110px;
       object-fit: contain;
       display:block;
       flex: 0 0 auto;
@@ -201,7 +201,7 @@
 
     .tv-badge-name{
       font-weight:1000;
-      font-size: clamp(24px, 2.8vh, 34px);
+      font-size: clamp(18px, 2.1vh, 24px);
       color:#111;
       letter-spacing:.1px;
       line-height:1;
@@ -218,7 +218,7 @@
       display:flex;
       justify-content:flex-start;
       align-items:center;
-      padding:8px 10px 0;
+      padding:6px 10px 0;
       z-index:2;
     }
 
@@ -234,14 +234,14 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding:5px 10px;
+      padding:4px 8px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
       background: rgba(255,255,255,.10);
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
       white-space:nowrap;
       font-weight:1000;
-      font-size:12px;
+      font-size:11px;
       line-height:1;
       opacity:.98;
       backdrop-filter: blur(3px);
@@ -275,7 +275,7 @@
     }
 
     .panel-head{
-      padding: 14px 16px;
+      padding: 10px 12px;
       border-bottom: 1px solid rgba(0,0,0,.07);
       display:flex;
       align-items:center;
@@ -299,25 +299,25 @@
 
     /* ===== LEFT ===== */
     .left-body{
-      padding: 10px;
+      padding: 8px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
       min-height:0;
     }
 
     .courts-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:12px;
+      gap:10px;
       align-items:stretch;
       min-height:0;
       height:100%;
     }
 
     .court-col{
-      border-radius:18px;
+      border-radius:16px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
@@ -338,7 +338,7 @@
     }
 
     .court-head{
-      padding:14px 16px;
+      padding:10px;
       border-bottom:1px solid rgba(0,0,0,.08);
       font-weight:1000;
       font-size: var(--tv-court-head);
@@ -346,7 +346,7 @@
       align-items:center;
       justify-content:center;
       text-align:center;
-      gap:10px;
+      gap:8px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -356,10 +356,10 @@
     }
 
     .court-body{
-      padding:12px;
+      padding:8px;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:8px;
       min-height:0;
       overflow:hidden;
     }
@@ -367,7 +367,7 @@
     .sec-wrap{
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:6px;
     }
 
     .sec-title{
@@ -383,13 +383,13 @@
 
     .mcard2{
       border:1px solid rgba(0,0,0,.08);
-      border-radius:16px;
-      padding:12px 14px;
+      border-radius:14px;
+      padding:8px 10px;
       background: rgba(255,255,255,.78);
       box-shadow: 0 8px 22px rgba(0,0,0,.07);
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:8px;
       min-width:0;
     }
 
@@ -397,15 +397,15 @@
       font-weight:1000;
       color:#111;
       white-space:nowrap;
-      font-size:16px;
+      font-size:13px;
       opacity:.84;
       letter-spacing:.1px;
     }
 
     .teamline{
       display:grid;
-      grid-template-columns: 1fr 34px 34px 34px;
-      gap:10px;
+      grid-template-columns: 1fr 28px 28px 28px;
+      gap:6px;
       align-items:center;
       min-width:0;
     }
@@ -414,13 +414,13 @@
       min-width:0;
       display:flex;
       flex-direction:column;
-      gap:4px;
+      gap:2px;
     }
 
     .tname{
       font-weight:1000;
       font-size: var(--tv-team);
-      line-height:1.06;
+      line-height:1.04;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -436,6 +436,7 @@
       text-overflow:ellipsis;
       min-height: 1em;
       letter-spacing:-.1px;
+      line-height:1.05;
     }
 
     .g{
@@ -450,18 +451,19 @@
     .placeholder{
       color:#333;
       font-weight:900;
-      padding:8px 2px;
+      padding:6px 2px;
       opacity:.72;
-      font-size:15px;
+      font-size:13px;
+      line-height:1.15;
     }
 
     /* ===== Right: tableaux ===== */
     .right-body{
-      padding: 12px;
+      padding: 10px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
       min-height:0;
       flex: 1 1 auto;
     }
@@ -473,7 +475,7 @@
       gap:10px;
       font-weight:1000;
       flex: 0 0 auto;
-      font-size: clamp(18px, 2.1vh, 24px);
+      font-size: clamp(15px, 1.7vh, 18px);
       line-height:1.15;
     }
 
@@ -481,8 +483,8 @@
       flex:1 1 auto;
       border:1px solid rgba(0,0,0,.06);
       background:#fff;
-      border-radius:18px;
-      padding:12px;
+      border-radius:16px;
+      padding:10px;
       overflow:hidden;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
       min-height:0;
@@ -491,13 +493,13 @@
     .tv-match-list{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
     }
 
     .tv-match-card{
-      border-radius:16px;
+      border-radius:14px;
       border:1px solid rgba(0,0,0,.07);
-      padding:14px;
+      padding:10px;
       background:#fff;
       box-shadow:0 1px 0 rgba(0,0,0,.03);
     }
@@ -515,19 +517,19 @@
     .tv-m-head{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:8px;
       min-width:0;
     }
 
     .tv-m-time{
-      font-size:15px;
+      font-size:13px;
       font-weight:1000;
       white-space:nowrap;
       letter-spacing:.2px;
     }
 
     .tv-m-court{
-      font-size:15px;
+      font-size:13px;
       font-weight:900;
       opacity:.85;
       white-space:nowrap;
@@ -538,10 +540,10 @@
     }
 
     .tv-teamline{
-      margin-top:12px;
+      margin-top:10px;
       display:grid;
-      grid-template-columns: 1fr 28px 28px 30px;
-      gap:10px;
+      grid-template-columns: 1fr 24px 24px 24px;
+      gap:6px;
       align-items:center;
       min-width:0;
     }
@@ -551,9 +553,9 @@
     }
 
     .tv-team-title{
-      font-size:19px;
+      font-size:16px;
       font-weight:1000;
-      line-height:1.08;
+      line-height:1.06;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -561,31 +563,32 @@
     }
 
     .tv-team-sub{
-      margin-top:4px;
-      font-size:15px;
+      margin-top:2px;
+      font-size:13px;
       font-weight:900;
       opacity:.76;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       min-height: 1em;
+      line-height:1.05;
     }
 
     .tv-sc{
       text-align:right;
-      font-size:23px;
+      font-size:18px;
       font-weight:1000;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
 
     .tv-vs{
-      margin:12px 0 6px;
+      margin:10px 0 4px;
       text-align:center;
       font-weight:1000;
       letter-spacing:2px;
       opacity:.34;
-      font-size:12px;
+      font-size:11px;
     }
 
     /* ===== Bottom sponsors ===== */
@@ -621,10 +624,10 @@
 
     .sponsor-group{
       display:flex;
-      gap:28px;
+      gap:24px;
       align-items:center;
       white-space:nowrap;
-      padding-right:28px;
+      padding-right:24px;
       flex:0 0 auto;
     }
 
@@ -641,9 +644,9 @@
     }
 
     .sponsor-item img{
-      height: calc(var(--tv-badge-band-h) - 36px);
+      height: calc(var(--tv-badge-band-h) - 50px);
       width:auto;
-      max-width: 180px;
+      max-width: 170px;
       object-fit:contain;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.18));
       display:block;
@@ -961,7 +964,7 @@
       return `../assets/img/${String(file)}`;
     }
 
-    const fromMap = teamLogoFromDoc(stepDoc, teamName);
+    const fromMap = teamLogoFromDoc(stepId, stepDoc, teamName);
     if(fromMap){
       if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
       return `../assets/img/${String(fromMap)}`;
@@ -1574,7 +1577,7 @@
   }
 
   function courtClass(courtKey){
-    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+    return (courtKey === "A") ? "courtA" : (courtKey === "B") ? "courtB" : "";
   }
 
   function renderTableauMatchCard({ time, courtKey, teamARef, teamBRef, res }){
@@ -1786,4 +1789,4 @@
 </script>
 
 </body>
-</html>
+</html>i
