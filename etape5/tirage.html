@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-etape5-tirage" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage-v1" />
 </head>
 <body>
 
@@ -56,9 +56,9 @@
     <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
   </section>
 
-  <section class="card" id="panelMatches" style="display:none;">
-    <h2 style="margin:0 0 8px;">📋 Quarts de finale</h2>
-    <div id="matchesList" class="matches-list"></div>
+  <section class="card" id="panelBracket" style="display:none;">
+    <h2 style="margin:0 0 10px;">📋 Tableau principal (16)</h2>
+    <div id="bracketList" class="bracket-list"></div>
   </section>
 
   <section class="card" id="panelUrne" style="display:none;">
@@ -71,14 +71,24 @@
 
     <div class="grid">
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ TS #1</div>
+        <div style="font-weight:1000;">🏷️ TS #1 — ligne 16</div>
         <div class="muted" id="seed1">—</div>
       </div>
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ TS #2</div>
+        <div style="font-weight:1000;">🏷️ TS #2 — ligne 1</div>
         <div class="muted" id="seed2">—</div>
       </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #3</div>
+        <div class="muted" id="seed3">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #4</div>
+        <div class="muted" id="seed4">—</div>
+      </div>
     </div>
+
+    <p class="muted" id="seed34Info" style="margin:10px 0 0;">Tirage TS3/TS4 en attente.</p>
   </section>
 
 </main>
@@ -130,14 +140,12 @@
     .step-title-img{ max-height: 74px; }
   }
 
-  #panelRoulette.card, #panelMatches.card{
+  #panelRoulette.card, #panelBracket.card{
     padding:12px;
   }
   #panelUrne.card, #panelSeeds.card{
     padding:12px;
   }
-  #panelMatches h2{ margin-bottom:8px !important; }
-  #panelRoulette h2{ margin-bottom:10px !important; }
 
   .roulette-wheel{
     height:58px;
@@ -153,47 +161,70 @@
     padding:0 10px;
     text-align:center;
   }
-  #wheelSub{ margin-top:6px !important; }
 
-  .matches-list{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+  .bracket-list{
+    display:grid;
+    gap:10px;
   }
-  .match-line{
+
+  .match-block{
     border:1px solid #eee;
-    border-radius:12px;
+    border-radius:14px;
     background:#fff;
-    padding:8px 10px;
+    padding:10px;
     box-shadow: 0 4px 10px rgba(0,0,0,.03);
   }
-  .match-row{
+
+  .match-title{
+    font-size:12px;
+    font-weight:1000;
+    opacity:.6;
+    margin-bottom:8px;
+    letter-spacing:.3px;
+  }
+
+  .line-row{
     display:grid;
-    grid-template-columns: 1fr 34px 1fr;
+    grid-template-columns: 42px 1fr;
     gap:8px;
     align-items:center;
+    min-width:0;
   }
-  .m-team{
+
+  .line-row + .line-row{
+    margin-top:6px;
+  }
+
+  .line-no{
+    font-weight:1000;
+    color:#666;
+    text-align:center;
+    white-space:nowrap;
+  }
+
+  .line-team{
+    border:1px solid #f0f0f0;
+    border-radius:10px;
+    background:#fafafa;
+    padding:8px 10px;
     font-weight:900;
+    font-size:14px;
+    line-height:1.2;
+    min-width:0;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    font-size:14px;
-    line-height:1.15;
   }
-  .m-vs{
-    text-align:center;
-    font-weight:1000;
-    letter-spacing:1px;
-    opacity:.55;
-    font-size:12px;
-  }
-  .m-team.right{ text-align:right; }
 
-  @media (max-width: 360px){
-    .match-row{ grid-template-columns: 1fr 30px 1fr; gap:7px; }
-    .m-team{ font-size:13px; }
-    .roulette-wheel{ height:54px; font-size:16px; }
+  .line-team.seed{
+    background:#fff9e8;
+    border-color:#f1dca1;
+  }
+
+  .line-team.bye{
+    background:#f6f6f6;
+    border-color:#e6e6e6;
+    font-style:italic;
   }
 
   .pill{
@@ -205,15 +236,18 @@
     background:#fafafa;
     white-space:nowrap;
   }
+
   .urne-item{
     margin:0;
   }
+
   .urne-row{
     display:flex;
     justify-content:space-between;
     gap:10px;
     align-items:flex-start;
   }
+
   .urne-name{
     font-weight:900;
     font-size:13px;
@@ -223,6 +257,11 @@
     text-overflow:ellipsis;
     white-space:normal;
     word-break:break-word;
+  }
+
+  @media (max-width: 360px){
+    .roulette-wheel{ height:54px; font-size:16px; }
+    .line-team{ font-size:13px; }
   }
 </style>
 
@@ -238,18 +277,21 @@
   const validatedAtEl = document.getElementById("validatedAt");
 
   const panelRoulette = document.getElementById("panelRoulette");
-  const panelMatches = document.getElementById("panelMatches");
+  const panelBracket = document.getElementById("panelBracket");
   const panelUrne = document.getElementById("panelUrne");
   const panelSeeds = document.getElementById("panelSeeds");
 
   const seed1El = document.getElementById("seed1");
   const seed2El = document.getElementById("seed2");
+  const seed3El = document.getElementById("seed3");
+  const seed4El = document.getElementById("seed4");
+  const seed34Info = document.getElementById("seed34Info");
 
   const wheel = document.getElementById("wheel");
   const wheelSub = document.getElementById("wheelSub");
 
   const urneList = document.getElementById("urneList");
-  const matchesList = document.getElementById("matchesList");
+  const bracketList = document.getElementById("bracketList");
 
   const btnReplay = document.getElementById("btnReplay");
   const btnStopReplay = document.getElementById("btnStopReplay");
@@ -257,7 +299,7 @@
   let currentDraw = null;
 
   let shownCount = 0;
-  let revealedShownIds = [];
+  let revealedShown = [];
   let liveAnimating = false;
 
   let replayMode = false;
@@ -265,31 +307,293 @@
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   function fmtDate(ts){
     try{
       const d = ts?.toDate ? ts.toDate() : null;
       if(!d) return "";
-      return d.toLocaleString("fr-FR", { year:"numeric", month:"long", day:"numeric", hour:"2-digit", minute:"2-digit" });
-    }catch{ return ""; }
+      return d.toLocaleString("fr-FR", {
+        year:"numeric", month:"long", day:"numeric",
+        hour:"2-digit", minute:"2-digit"
+      });
+    }catch{
+      return "";
+    }
   }
 
-  function drawHasUrn(draw){
-    return !!(draw && draw.seed1 && draw.seed2 && Array.isArray(draw.pool) && draw.pool.length === 6);
+  function rouletteLabelTeam(t){
+    if(!t) return "—";
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
   }
 
   function teamNameOnly(t){
     return (t && t.teamName) ? t.teamName : "—";
   }
 
-  function rouletteLabel(t){
-    if(!t) return "—";
-    const tn = t.teamName || "Équipe";
-    const p1 = t.p1FirstName || "?";
-    const p2 = t.p2FirstName || "?";
-    return `${tn} (${p1} / ${p2})`;
+  function drawHasData(draw){
+    return !!(
+      draw &&
+      draw.seed1 &&
+      draw.seed2 &&
+      draw.seed3 &&
+      draw.seed4 &&
+      Array.isArray(draw.pool) &&
+      Array.isArray(draw.order)
+    );
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+    if(s.startsWith("SEED34:")) return { type:"seed34", value:s.slice(7) };
+    if(s.startsWith("BYE:")) return { type:"bye", value:Number(s.slice(4)) };
+    if(s.startsWith("TEAM:")) return { type:"team", value:s.slice(5) };
+    return { type:"unknown", value:s };
+  }
+
+  function byeCount(draw){
+    const totalTeams = 4 + (Array.isArray(draw?.pool) ? draw.pool.length : 0);
+    return Math.max(0, 16 - totalTeams);
+  }
+
+  function mandatoryByeLines(draw){
+    const n = byeCount(draw);
+    const lines = [];
+    if(n >= 1) lines.push(15);
+    if(n >= 2) lines.push(2);
+    if(n >= 3) lines.push(7);
+    if(n >= 4) lines.push(10);
+    return lines;
+  }
+
+  function extraByeCount(draw){
+    return Math.max(0, byeCount(draw) - 4);
+  }
+
+  function allLines(){
+    return Array.from({ length:16 }, (_,i)=> i+1);
+  }
+
+  function buildState(draw, revealedTokens){
+    const lines = new Map();
+    const pool = Array.isArray(draw?.pool) ? draw.pool : [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+
+    const s1 = draw?.seed1 || null;
+    const s2 = draw?.seed2 || null;
+    const s3 = draw?.seed3 || null;
+    const s4 = draw?.seed4 || null;
+
+    if(s2) lines.set(1, { type:"team", team:s2, seed:2 });
+    if(s1) lines.set(16, { type:"team", team:s1, seed:1 });
+
+    for(const line of mandatoryByeLines(draw)){
+      lines.set(line, { type:"bye" });
+    }
+
+    let seed34Placed = false;
+
+    for(const tok of revealedTokens){
+      const p = parseToken(tok);
+
+      if(p.type === "seed34" && !seed34Placed){
+        const picked = (p.value === s3?.id) ? s3 : (p.value === s4?.id ? s4 : null);
+        const other = picked?.id === s3?.id ? s4 : s3;
+
+        if(picked) lines.set(8, { type:"team", team:picked, seed:(picked?.id === s3?.id ? 3 : 4) });
+        if(other)  lines.set(9, { type:"team", team:other,  seed:(other?.id === s3?.id ? 3 : 4) });
+
+        seed34Placed = true;
+      }
+
+      if(p.type === "bye" && Number.isFinite(p.value)){
+        lines.set(p.value, { type:"bye" });
+      }
+    }
+
+    const occupied = new Set(lines.keys());
+    const freeLines = allLines().filter(n => !occupied.has(n));
+
+    for(const tok of revealedTokens){
+      const p = parseToken(tok);
+      if(p.type !== "team") continue;
+
+      const team = poolById.get(p.value);
+      if(!team) continue;
+
+      const nextFree = freeLines.shift();
+      if(!nextFree) break;
+
+      lines.set(nextFree, { type:"team", team, seed:null });
+    }
+
+    return { lines, poolById, seed34Placed };
+  }
+
+  function computeLists(draw){
+    const order = Array.isArray(draw?.order) ? draw.order : [];
+    const revealed = Number(draw?.revealed || 0);
+
+    const revealedTokens = order.slice(0, revealed);
+    const remainingTokens = order.slice(revealed);
+
+    return { revealedTokens, remainingTokens };
+  }
+
+  function lineHtml(lineNo, obj){
+    if(!obj){
+      return `
+        <div class="line-row">
+          <div class="line-no">L${lineNo}</div>
+          <div class="line-team">—</div>
+        </div>
+      `;
+    }
+
+    if(obj.type === "bye"){
+      return `
+        <div class="line-row">
+          <div class="line-no">L${lineNo}</div>
+          <div class="line-team bye">BYE</div>
+        </div>
+      `;
+    }
+
+    const cls = obj.seed ? "line-team seed" : "line-team";
+    const name = obj.seed ? `TS #${obj.seed} — ${teamNameOnly(obj.team)}` : teamNameOnly(obj.team);
+
+    return `
+      <div class="line-row">
+        <div class="line-no">L${lineNo}</div>
+        <div class="${cls}">${esc(name)}</div>
+      </div>
+    `;
+  }
+
+  function renderBracket(draw, revealedTokens){
+    panelBracket.style.display = "block";
+
+    const { lines } = buildState(draw, revealedTokens);
+
+    const blocks = [];
+    for(let i=1;i<=16;i+=2){
+      blocks.push(`
+        <div class="match-block">
+          <div class="match-title">MATCH ${((i+1)/2)}</div>
+          ${lineHtml(i, lines.get(i))}
+          ${lineHtml(i+1, lines.get(i+1))}
+        </div>
+      `);
+    }
+
+    bracketList.innerHTML = blocks.join("");
+  }
+
+  function renderSeeds(draw, revealedTokens){
+    panelSeeds.style.display = "block";
+
+    seed1El.textContent = draw?.seed1 ? rouletteLabelTeam(draw.seed1) : "—";
+    seed2El.textContent = draw?.seed2 ? rouletteLabelTeam(draw.seed2) : "—";
+    seed3El.textContent = draw?.seed3 ? rouletteLabelTeam(draw.seed3) : "—";
+    seed4El.textContent = draw?.seed4 ? rouletteLabelTeam(draw.seed4) : "—";
+
+    const { seed34Placed } = buildState(draw, revealedTokens);
+
+    if(!seed34Placed){
+      seed34Info.textContent = "Tirage TS3 / TS4 en attente → lignes 8 et 9.";
+      return;
+    }
+
+    const line8 = buildState(draw, revealedTokens).lines.get(8);
+    const line9 = buildState(draw, revealedTokens).lines.get(9);
+
+    seed34Info.textContent = `Ligne 8 : ${teamNameOnly(line8?.team)} — Ligne 9 : ${teamNameOnly(line9?.team)}`;
+  }
+
+  function renderUrne(draw, revealedTokens, remainingTokens){
+    panelUrne.style.display = "block";
+
+    if(!drawHasData(draw)){
+      urneList.innerHTML = `<div class="muted">⏳ Tirage non prêt.</div>`;
+      return;
+    }
+
+    if(!remainingTokens.length){
+      urneList.innerHTML = `<div class="muted">✅ Urne vide.</div>`;
+      return;
+    }
+
+    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+    const items = [];
+
+    for(const tok of remainingTokens){
+      const p = parseToken(tok);
+
+      if(p.type === "seed34"){
+        const team = poolById.get(p.value) || (draw.seed3?.id === p.value ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null));
+        items.push(`
+          <div class="card urne-item">
+            <div class="urne-row">
+              <div class="urne-name">Tirage TS3/TS4 → ${esc(rouletteLabelTeam(team))}</div>
+              <span class="pill">tête de série</span>
+            </div>
+          </div>
+        `);
+        continue;
+      }
+
+      if(p.type === "bye"){
+        items.push(`
+          <div class="card urne-item">
+            <div class="urne-row">
+              <div class="urne-name">BYE → ligne ${esc(String(p.value))}</div>
+              <span class="pill">bye</span>
+            </div>
+          </div>
+        `);
+        continue;
+      }
+
+      if(p.type === "team"){
+        const t = poolById.get(p.value);
+        items.push(`
+          <div class="card urne-item">
+            <div class="urne-row">
+              <div class="urne-name">${esc(rouletteLabelTeam(t))}</div>
+              <span class="pill">urne</span>
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    urneList.innerHTML = items.length ? items.join("") : `<div class="muted">—</div>`;
+  }
+
+  function tokenToRouletteLabel(draw, token){
+    const p = parseToken(token);
+
+    if(p.type === "seed34"){
+      const t = (draw.seed3?.id === p.value) ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null);
+      return `TS3/TS4 → ${rouletteLabelTeam(t)}`;
+    }
+
+    if(p.type === "bye"){
+      return `BYE → ligne ${p.value}`;
+    }
+
+    if(p.type === "team"){
+      const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+      return rouletteLabelTeam(poolById.get(p.value));
+    }
+
+    return "—";
   }
 
   async function rouletteSpin(finalText, durationMs = 1300){
@@ -299,7 +603,10 @@
 
     return new Promise((resolve) => {
       const tick = () => {
-        if(replayAbort){ resolve("aborted"); return; }
+        if(replayAbort){
+          resolve("aborted");
+          return;
+        }
         const t = Date.now() - start;
         if(t >= durationMs){
           wheel.textContent = finalText;
@@ -316,102 +623,10 @@
     });
   }
 
-  function computeLists(draw){
-    const order = draw?.order || [];
-    const pool = draw?.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-
-    const revealed = Number(draw?.revealed || 0);
-
-    const revealedIds = order.slice(0, revealed);
-    const remainingIds = order.length
-      ? order.slice(revealed)
-      : pool.map(x => x.id);
-
-    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
-    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
-
-    return { poolById, revealedIds, revealedTeams, remainingTeams };
-  }
-
-  function renderSeeds(draw){
-    panelSeeds.style.display = "block";
-    seed1El.textContent = draw?.seed1 ? rouletteLabel(draw.seed1) : "—";
-    seed2El.textContent = draw?.seed2 ? rouletteLabel(draw.seed2) : "—";
-  }
-
-  function renderUrne(remainingTeams, draw){
-    panelUrne.style.display = "block";
-
-    if(!drawHasUrn(draw)){
-      urneList.innerHTML = `<div class="muted">⏳ Urne non prête.</div>`;
-      return;
-    }
-
-    const revealed = Number(draw?.revealed || 0);
-    if(revealed >= 6){
-      urneList.innerHTML = `<div class="muted">✅ Urne vide.</div>`;
-      return;
-    }
-
-    if(!remainingTeams.length){
-      urneList.innerHTML = `<div class="muted">—</div>`;
-      return;
-    }
-
-    urneList.innerHTML = remainingTeams.map(t => `
-      <div class="card urne-item">
-        <div class="urne-row">
-          <div class="urne-name">${esc(rouletteLabel(t))}</div>
-          <span class="pill">urne</span>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function matchLineHtml(n, A, B){
-    return `
-      <div class="match-line">
-        <div class="match-row">
-          <div class="m-team">${esc(teamNameOnly(A))}</div>
-          <div class="m-vs">VS</div>
-          <div class="m-team right">${esc(teamNameOnly(B))}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderMatchesFromShown(draw){
-    panelMatches.style.display = "block";
-
-    const seed1 = draw?.seed1 || null;
-    const seed2 = draw?.seed2 || null;
-
-    const pool = draw?.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-
-    const shownTeams = revealedShownIds.map(id => poolById.get(id)).filter(Boolean);
-
-    const p1 = shownTeams[0] || null;
-    const p2 = shownTeams[1] || null;
-    const p3 = shownTeams[2] || null;
-    const p4 = shownTeams[3] || null;
-    const p5 = shownTeams[4] || null;
-    const p6 = shownTeams[5] || null;
-
-    const matches = [
-      { n: 1, A: seed1, B: p1 },
-      { n: 2, A: p2,    B: p3 },
-      { n: 3, A: p4,    B: p5 },
-      { n: 4, A: p6,    B: seed2 }
-    ];
-
-    matchesList.innerHTML = matches.map(m => matchLineHtml(m.n, m.A, m.B)).join("");
-  }
-
   function updateStatus(draw){
     const st = draw?.status || "idle";
     const revealed = Number(draw?.revealed || 0);
+    const total = Array.isArray(draw?.order) ? draw.order.length : 0;
 
     if(replayMode){
       modeBadge.textContent = "🎥 Mode REPLAY";
@@ -428,15 +643,15 @@
     }
 
     if(st === "idle"){
-      statusText.textContent = drawHasUrn(draw)
+      statusText.textContent = drawHasData(draw)
         ? "📥 Urne chargée. Tirage pas encore lancé."
-        : "⏳ Urne non prête (en attente du chargement côté admin).";
+        : "⏳ Tirage non prêt côté admin.";
       validatedAtEl.textContent = "";
       return;
     }
 
     if(st === "running"){
-      statusText.textContent = `🎰 Tirage en cours… (${revealed}/6 révélées)`;
+      statusText.textContent = `🎰 Tirage en cours… (${revealed}/${total} révélations)`;
       validatedAtEl.textContent = "";
       return;
     }
@@ -464,48 +679,40 @@
     const st = draw?.status || "idle";
 
     panelRoulette.style.display = "block";
-    panelMatches.style.display = "block";
+    panelBracket.style.display = "block";
     panelUrne.style.display = "block";
     panelSeeds.style.display = "block";
+
+    const { revealedTokens, remainingTokens } = computeLists(draw);
+
+    renderSeeds(draw, revealedShown);
+    renderBracket(draw, revealedShown);
+    renderUrne(draw, revealedShown, remainingTokens);
 
     if(st !== "running" && st !== "pending_validation" && st !== "validated"){
       wheel.textContent = "—";
       wheelSub.textContent = "—";
-
-      renderSeeds(draw);
-      renderMatchesFromShown(draw);
-
-      const { remainingTeams } = computeLists(draw);
-      renderUrne(remainingTeams, draw);
       return;
     }
 
-    const { revealedIds, remainingTeams } = computeLists(draw);
-
-    renderSeeds(draw);
-    renderUrne(remainingTeams, draw);
-    renderMatchesFromShown(draw);
-
-    if(revealedIds.length <= shownCount){
+    if(revealedTokens.length <= shownCount){
       return;
     }
 
     liveAnimating = true;
 
-    while(shownCount < revealedIds.length){
-      const id = revealedIds[shownCount];
+    while(shownCount < revealedTokens.length){
+      const token = revealedTokens[shownCount];
 
-      const poolById = new Map((draw?.pool || []).map(x => [x.id, x]));
-      const t = poolById.get(id);
+      await rouletteSpin(tokenToRouletteLabel(draw, token), 1300);
 
-      await rouletteSpin(rouletteLabel(t), 1300);
-
-      revealedShownIds.push(id);
+      revealedShown.push(token);
       shownCount++;
 
-      renderMatchesFromShown(currentDraw);
-      const { remainingTeams: rem2 } = computeLists(currentDraw);
-      renderUrne(rem2, currentDraw);
+      const { remainingTokens: rem2 } = computeLists(currentDraw);
+      renderSeeds(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      renderUrne(currentDraw, revealedShown, rem2);
     }
 
     liveAnimating = false;
@@ -526,34 +733,31 @@
     updateStatus(draw);
 
     shownCount = 0;
-    revealedShownIds = [];
+    revealedShown = [];
     wheel.textContent = "—";
     wheelSub.textContent = "Replay en cours…";
 
     panelRoulette.style.display = "block";
-    panelMatches.style.display = "block";
+    panelBracket.style.display = "block";
     panelSeeds.style.display = "block";
     panelUrne.style.display = "none";
 
-    renderSeeds(draw);
-    renderMatchesFromShown(draw);
+    renderSeeds(draw, revealedShown);
+    renderBracket(draw, revealedShown);
 
-    const order = draw.order || [];
-    const revealed = Number(draw.revealed || 0);
-    const revealedIds = order.slice(0, revealed);
-    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+    const revealedTokens = (draw.order || []).slice(0, Number(draw.revealed || 0));
 
-    for(let i=0;i<revealedIds.length;i++){
+    for(let i=0; i<revealedTokens.length; i++){
       if(replayAbort) break;
 
-      const id = revealedIds[i];
-      const t = poolById.get(id);
+      const token = revealedTokens[i];
+      await rouletteSpin(tokenToRouletteLabel(draw, token), 1300);
 
-      await rouletteSpin(rouletteLabel(t), 1300);
+      revealedShown.push(token);
+      shownCount = revealedShown.length;
 
-      revealedShownIds.push(id);
-      shownCount = revealedShownIds.length;
-      renderMatchesFromShown(draw);
+      renderSeeds(draw, revealedShown);
+      renderBracket(draw, revealedShown);
     }
 
     btnStopReplay.style.display = "none";
@@ -567,10 +771,10 @@
 
     updateStatus(currentDraw);
 
-    const { remainingTeams } = computeLists(currentDraw);
-    renderUrne(remainingTeams, currentDraw);
-    renderSeeds(currentDraw);
-    renderMatchesFromShown(currentDraw);
+    const { remainingTokens } = computeLists(currentDraw);
+    renderSeeds(currentDraw, revealedShown);
+    renderBracket(currentDraw, revealedShown);
+    renderUrne(currentDraw, revealedShown, remainingTokens);
   }
 
   btnReplay.onclick = async (e)=>{
@@ -588,7 +792,7 @@
 
     if(!currentDraw){
       panelRoulette.style.display = "none";
-      panelMatches.style.display = "none";
+      panelBracket.style.display = "none";
       panelUrne.style.display = "none";
       panelSeeds.style.display = "none";
 
@@ -602,7 +806,7 @@
     }
 
     panelRoulette.style.display = "block";
-    panelMatches.style.display = "block";
+    panelBracket.style.display = "block";
     panelUrne.style.display = "block";
     panelSeeds.style.display = "block";
 
@@ -615,24 +819,29 @@
       btnStopReplay.style.display = "none";
     }
 
-    renderSeeds(currentDraw);
-    const { remainingTeams } = computeLists(currentDraw);
-    renderUrne(remainingTeams, currentDraw);
+    const { revealedTokens, remainingTokens } = computeLists(currentDraw);
+
+    renderSeeds(currentDraw, revealedShown);
+    renderBracket(currentDraw, revealedShown);
+    renderUrne(currentDraw, revealedShown, remainingTokens);
 
     if(!replayMode && currentDraw.status === "idle"){
       shownCount = 0;
-      revealedShownIds = [];
+      revealedShown = [];
       wheel.textContent = "—";
       wheelSub.textContent = "—";
-      renderMatchesFromShown(currentDraw);
+      renderSeeds(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      renderUrne(currentDraw, revealedShown, remainingTokens);
       return;
     }
 
     if(!replayMode && (currentDraw.status === "pending_validation" || currentDraw.status === "validated")){
-      const { revealedIds } = computeLists(currentDraw);
-      revealedShownIds = revealedIds.slice(0);
-      shownCount = revealedShownIds.length;
-      renderMatchesFromShown(currentDraw);
+      revealedShown = revealedTokens.slice(0);
+      shownCount = revealedShown.length;
+      renderSeeds(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      renderUrne(currentDraw, revealedShown, remainingTokens);
       return;
     }
 
