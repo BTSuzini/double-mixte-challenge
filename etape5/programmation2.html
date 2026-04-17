@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Programmation — Étape 5 (test)</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-prog2-v2" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-prog2-v3" />
 
   <style>
     .topbar-row-step{
@@ -116,9 +116,10 @@
       font-size:13px;
       font-weight:800;
       opacity:.85;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+      line-height:1.25;
     }
 
     .sc{
@@ -156,6 +157,98 @@
     .pool-table th:nth-child(2),
     .pool-table td:nth-child(2){
       text-align:left;
+    }
+
+    .bracket-page{
+      width:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom:8px;
+    }
+
+    .bracket-board{
+      min-width:1180px;
+      padding:12px 10px 20px;
+    }
+
+    .bracket-grid{
+      display:grid;
+      grid-template-columns: 290px 290px 290px;
+      gap:90px;
+      align-items:start;
+      position:relative;
+      min-height:560px;
+    }
+
+    .bracket-col{
+      position:relative;
+      min-height:560px;
+    }
+
+    .bracket-col-title{
+      font-size:14px;
+      font-weight:1000;
+      margin-bottom:14px;
+      opacity:.8;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+
+    .bracket-match{
+      position:absolute;
+      width:250px;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.10);
+      border-radius:12px;
+      padding:8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.04);
+    }
+
+    .bracket-match-title{
+      font-size:11px;
+      font-weight:1000;
+      opacity:.55;
+      margin-bottom:6px;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+    }
+
+    .bracket-team{
+      border:1px solid rgba(0,0,0,.08);
+      background:#fafafa;
+      border-radius:8px;
+      padding:8px 9px;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.2;
+      min-height:38px;
+      display:flex;
+      align-items:center;
+    }
+
+    .bracket-team + .bracket-team{
+      margin-top:6px;
+    }
+
+    .bracket-team.seed{
+      background:#fff9e8;
+      border-color:#f1dca1;
+    }
+
+    .bracket-team.placeholder{
+      background:#f7fbff;
+      border-color:#d9ebfb;
+      font-weight:800;
+    }
+
+    .bracket-svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      overflow:visible;
     }
 
     @media (max-width: 380px){
@@ -206,6 +299,7 @@
       <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chrono</button>
       <button class="btn" id="tabTableau" style="font-weight:900; color:#111;">🧩 Tableau</button>
       <button class="btn" id="tabPoules" style="font-weight:900; color:#111;">🏖️ Poules</button>
+      <button class="btn" id="tabBracketFull" style="font-weight:900; color:#111;">🏆 Tableau final complet</button>
     </div>
 
     <p class="muted" id="subtitle" style="margin-top:10px;"></p>
@@ -238,8 +332,7 @@
     <div id="tableList"></div>
 
     <p class="muted" style="margin-top:10px;">
-      Les équipes se placent automatiquement dès qu’un résultat est validé.  
-      Pour les qualifiés de poules, le placement n’apparaît qu’après validation du classement des poules par le JAT.
+      Les équipes se placent automatiquement dès qu’un résultat est validé. Pour les qualifiés de poules, le placement n’apparaît qu’après validation du classement des poules par le JAT.
     </p>
   </section>
 
@@ -263,6 +356,75 @@
     </p>
   </section>
 
+  <section class="card" id="panelBracketFull" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏆 Tableau final complet</h2>
+    <p class="muted" style="margin:0 0 12px;">
+      Affichage large avec défilement horizontal. Ce tableau montre uniquement les quarts, demi-finales et finale.
+    </p>
+
+    <div class="bracket-page">
+      <div class="bracket-board">
+        <div class="bracket-grid" id="bracketGrid">
+          <svg class="bracket-svg" id="bracketSvg" viewBox="0 0 1180 560" preserveAspectRatio="none"></svg>
+
+          <div class="bracket-col">
+            <div class="bracket-col-title">Quarts de finale</div>
+
+            <div class="bracket-match" data-match="M7" style="top:20px; left:0;">
+              <div class="bracket-match-title">QF1</div>
+              <div id="bf-M7-A"></div>
+              <div id="bf-M7-B"></div>
+            </div>
+
+            <div class="bracket-match" data-match="M8" style="top:160px; left:0;">
+              <div class="bracket-match-title">QF2</div>
+              <div id="bf-M8-A"></div>
+              <div id="bf-M8-B"></div>
+            </div>
+
+            <div class="bracket-match" data-match="M9" style="top:300px; left:0;">
+              <div class="bracket-match-title">QF3</div>
+              <div id="bf-M9-A"></div>
+              <div id="bf-M9-B"></div>
+            </div>
+
+            <div class="bracket-match" data-match="M10" style="top:440px; left:0;">
+              <div class="bracket-match-title">QF4</div>
+              <div id="bf-M10-A"></div>
+              <div id="bf-M10-B"></div>
+            </div>
+          </div>
+
+          <div class="bracket-col">
+            <div class="bracket-col-title">Demi-finales</div>
+
+            <div class="bracket-match" data-match="M14" style="top:90px; left:0;">
+              <div class="bracket-match-title">SF1</div>
+              <div id="bf-M14-A"></div>
+              <div id="bf-M14-B"></div>
+            </div>
+
+            <div class="bracket-match" data-match="M15" style="top:370px; left:0;">
+              <div class="bracket-match-title">SF2</div>
+              <div id="bf-M15-A"></div>
+              <div id="bf-M15-B"></div>
+            </div>
+          </div>
+
+          <div class="bracket-col">
+            <div class="bracket-col-title">Finale</div>
+
+            <div class="bracket-match" data-match="M19" style="top:230px; left:0;">
+              <div class="bracket-match-title">Finale</div>
+              <div id="bf-M19-A"></div>
+              <div id="bf-M19-B"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <script type="module">
@@ -277,10 +439,12 @@
   const tabChrono = document.getElementById("tabChrono");
   const tabTableau = document.getElementById("tabTableau");
   const tabPoules = document.getElementById("tabPoules");
+  const tabBracketFull = document.getElementById("tabBracketFull");
 
   const panelChrono = document.getElementById("panelChrono");
   const panelTableau = document.getElementById("panelTableau");
   const panelPoules = document.getElementById("panelPoules");
+  const panelBracketFull = document.getElementById("panelBracketFull");
 
   const chronoList = document.getElementById("chronoList");
 
@@ -292,6 +456,8 @@
   const poolBStandings = document.getElementById("poolBStandings");
   const poolValidationInfo = document.getElementById("poolValidationInfo");
 
+  const bracketSvg = document.getElementById("bracketSvg");
+
   const PROG_REF = doc(db, "programmations", scope);
   const RESULTS_COL = collection(db, `resultats_${scope}`);
 
@@ -300,7 +466,9 @@
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   function normalizeScheduleEntry(entry, slotObj){
@@ -346,13 +514,16 @@
     panelChrono.style.display = which === "chrono" ? "block" : "none";
     panelTableau.style.display = which === "tableau" ? "block" : "none";
     panelPoules.style.display = which === "poules" ? "block" : "none";
+    panelBracketFull.style.display = which === "bracketFull" ? "block" : "none";
 
     tabChrono.style.fontWeight = which === "chrono" ? "900" : "800";
     tabTableau.style.fontWeight = which === "tableau" ? "900" : "800";
     tabPoules.style.fontWeight = which === "poules" ? "900" : "800";
+    tabBracketFull.style.fontWeight = which === "bracketFull" ? "900" : "800";
 
     if(which === "tableau") renderTableau();
     if(which === "poules") renderPoolStandings();
+    if(which === "bracketFull") renderFullBracket();
   }
 
   function teamPartsFromTeam(t){
@@ -512,6 +683,36 @@
     return { validated, by, at };
   }
 
+  function describeRef(ref){
+    if(!ref) return "—";
+
+    if(ref.type === "team"){
+      const t = currentProg?.teams?.[ref.key] || null;
+      return t?.teamName || ref.key || "—";
+    }
+
+    if(ref.type === "poolRank"){
+      return `${ref.rank}er poule ${ref.pool}`.replace("1er","1er").replace("2er","2e").replace("3er","3e");
+    }
+
+    if(ref.type === "winner" || ref.type === "loser"){
+      const label = ref.type === "winner" ? "Vainqueur" : "Perdant";
+      const m = currentProg?.matches?.[ref.matchId];
+      if(!m) return `${label} ${ref.matchId}`;
+      const left = teamDisplayText(m.A);
+      const right = teamDisplayText(m.B);
+      return `${label} (${left} vs ${right})`;
+    }
+
+    return "—";
+  }
+
+  function teamDisplayText(ref){
+    const resolved = resolveTeamRef(ref);
+    if(resolved?.teamName) return resolved.teamName;
+    return describeRef(ref);
+  }
+
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -552,18 +753,14 @@
     return null;
   }
 
-  function fallbackRefParts(ref){
-    if(!ref) return { title:"—", sub:"" };
-    if(ref.type === "team") return { title: ref.key, sub:"" };
-    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "loser") return { title: `P${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "poolRank"){
-      if(currentProg?.poolRankingValidated){
-        return { title: `${ref.rank}e poule ${ref.pool}`, sub:"" };
-      }
-      return { title: "Classement poule en attente de validation JAT", sub:"" };
-    }
-    return { title:"—", sub:"" };
+  function teamPartsForRef(ref){
+    const resolved = resolveTeamRef(ref);
+    if(resolved) return teamPartsFromTeam(resolved);
+
+    return {
+      title: describeRef(ref),
+      sub: ""
+    };
   }
 
   function renderMatchCard({ time, courtKey, teamA, teamB, res, note="" }){
@@ -578,8 +775,8 @@
     const s2B = fmt(res?.s2B);
     const tbB = fmt(res?.s3B);
 
-    const a = teamPartsFromTeam(teamA);
-    const b = teamPartsFromTeam(teamB);
+    const a = teamA;
+    const b = teamB;
 
     return `
       <div class="match-card ${esc(cls)}">
@@ -640,8 +837,8 @@
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
-      const teamA = resolveTeamRef(m.A) || fallbackRefParts(m.A);
-      const teamB = resolveTeamRef(m.B) || fallbackRefParts(m.B);
+      const teamA = teamPartsForRef(m.A);
+      const teamB = teamPartsForRef(m.B);
       const res = getMatchResult(mid) || null;
 
       cards.push(renderMatchCard({
@@ -675,8 +872,8 @@
       .sort((a,b)=> (a.n||0) - (b.n||0));
 
     const cards = list.map(m=>{
-      const teamA = resolveTeamRef(m.A) || fallbackRefParts(m.A);
-      const teamB = resolveTeamRef(m.B) || fallbackRefParts(m.B);
+      const teamA = teamPartsForRef(m.A);
+      const teamB = teamPartsForRef(m.B);
       const res = getMatchResult(m.id) || null;
 
       let time = "—";
@@ -761,6 +958,106 @@
     }
   }
 
+  function bracketTeamHtml(ref, isSeed=false){
+    const resolved = resolveTeamRef(ref);
+    const cls = isSeed ? "bracket-team seed" : (resolved ? "bracket-team" : "bracket-team placeholder");
+    const label = resolved?.teamName || describeRef(ref);
+    return `<div class="${cls}">${esc(label)}</div>`;
+  }
+
+  function previousMatchText(matchId){
+    const m = currentProg?.matches?.[matchId];
+    if(!m) return matchId;
+    return `${teamDisplayText(m.A)} vs ${teamDisplayText(m.B)}`;
+  }
+
+  function renderFullBracket(){
+    if(!currentProg){
+      ["M7","M8","M9","M10","M14","M15","M19"].forEach(mid=>{
+        const a = document.getElementById(`bf-${mid}-A`);
+        const b = document.getElementById(`bf-${mid}-B`);
+        if(a) a.innerHTML = `<div class="bracket-team placeholder">—</div>`;
+        if(b) b.innerHTML = `<div class="bracket-team placeholder">—</div>`;
+      });
+      drawBracketLines();
+      return;
+    }
+
+    const matches = currentProg.matches || {};
+
+    const isSeedRef = (ref) => ref?.type === "team" && ["TS1","TS2","TSQF2","TSQF3"].includes(ref.key);
+
+    const renderPair = (mid) => {
+      const m = matches[mid];
+      if(!m) return;
+      const a = document.getElementById(`bf-${mid}-A`);
+      const b = document.getElementById(`bf-${mid}-B`);
+      if(a) a.innerHTML = bracketTeamHtml(m.A, isSeedRef(m.A));
+      if(b) b.innerHTML = bracketTeamHtml(m.B, isSeedRef(m.B));
+    };
+
+    renderPair("M7");
+    renderPair("M8");
+    renderPair("M9");
+    renderPair("M10");
+    renderPair("M14");
+    renderPair("M15");
+    renderPair("M19");
+
+    drawBracketLines();
+  }
+
+  function drawBracketLines(){
+    const svg = bracketSvg;
+    if(!svg) return;
+
+    const lines = [];
+
+    function addPath(x1, y1, x2, y2){
+      const mid = (x1 + x2) / 2;
+      return `<path d="M ${x1} ${y1} L ${mid} ${y1} L ${mid} ${y2} L ${x2} ${y2}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="2"/>`;
+    }
+
+    const qfXRight = 250;
+    const sfXLeft = 380;
+    const sfXRight = 630;
+    const fXLeft = 760;
+
+    const qf1y1 = 20 + 38;
+    const qf1y2 = 20 + 82;
+    const qf2y1 = 160 + 38;
+    const qf2y2 = 160 + 82;
+    const qf3y1 = 300 + 38;
+    const qf3y2 = 300 + 82;
+    const qf4y1 = 440 + 38;
+    const qf4y2 = 440 + 82;
+
+    const sf1y1 = 90 + 38;
+    const sf1y2 = 90 + 82;
+    const sf2y1 = 370 + 38;
+    const sf2y2 = 370 + 82;
+
+    const fy1 = 230 + 38;
+    const fy2 = 230 + 82;
+
+    lines.push(addPath(qfXRight, qf1y1, sfXLeft, sf1y1));
+    lines.push(addPath(qfXRight, qf1y2, sfXLeft, sf1y1));
+    lines.push(addPath(qfXRight, qf2y1, sfXLeft, sf1y2));
+    lines.push(addPath(qfXRight, qf2y2, sfXLeft, sf1y2));
+
+    lines.push(addPath(qfXRight, qf3y1, sfXLeft, sf2y1));
+    lines.push(addPath(qfXRight, qf3y2, sfXLeft, sf2y1));
+    lines.push(addPath(qfXRight, qf4y1, sfXLeft, sf2y2));
+    lines.push(addPath(qfXRight, qf4y2, sfXLeft, sf2y2));
+
+    lines.push(addPath(sfXRight, sf1y1, fXLeft, fy1));
+    lines.push(addPath(sfXRight, sf1y2, fXLeft, fy1));
+    lines.push(addPath(sfXRight, sf2y1, fXLeft, fy2));
+    lines.push(addPath(sfXRight, sf2y2, fXLeft, fy2));
+
+    svg.innerHTML = lines.join("");
+  }
+
   function refreshRounds(){
     const opts = roundOptions(selBracket.value);
     selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
@@ -778,11 +1075,13 @@
     renderChrono();
     renderTableau();
     renderPoolStandings();
+    renderFullBracket();
   }
 
   tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
   tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
   tabPoules.onclick = (e)=>{ e.preventDefault(); setActiveTab("poules"); };
+  tabBracketFull.onclick = (e)=>{ e.preventDefault(); setActiveTab("bracketFull"); };
 
   selBracket.onchange = ()=>{
     refreshRounds();
@@ -822,15 +1121,17 @@
       panelChrono.style.display = "none";
       panelTableau.style.display = "none";
       panelPoules.style.display = "none";
+      panelBracketFull.style.display = "none";
       return;
     }
 
     statusText.textContent = "✅ Programmation disponible.";
-    subtitle.textContent = "🏖️ Poules + 🧩 Tableau + 🕒 Chrono (mise à jour en direct).";
+    subtitle.textContent = "🏖️ Poules + 🧩 Tableau + 🕒 Chrono + 🏆 Tableau final complet (mise à jour en direct).";
 
     panelChrono.style.display = "block";
     panelTableau.style.display = "none";
     panelPoules.style.display = "none";
+    panelBracketFull.style.display = "none";
     setActiveTab("chrono");
 
     refreshRounds();
