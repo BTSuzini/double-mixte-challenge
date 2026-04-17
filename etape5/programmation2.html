@@ -3,18 +3,60 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Programmation</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-prog-etape5-v1" />
+  <title>Programmation — Étape 5 (test)</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-prog2-v1" />
 
   <style>
-    .btn.is-active{
-      background:#111 !important;
-      border-color:#111 !important;
-      color:#fff !important;
-      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    .topbar-row-step{
+      grid-template-columns: var(--logo-size) 1fr var(--logo-size);
+    }
+    .step-title-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: calc(var(--logo-size) * 0.55);
+    }
+    .step-title-img{
+      width: min(520px, 100%);
+      max-height: 88px;
+      height: auto;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
     }
 
-    .match-list{ display:flex; flex-direction:column; gap:14px; }
+    .nav-step{
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-step::after{
+      content:"";
+      flex:auto;
+    }
+    .nav-step a{
+      padding:8px 12px;
+      flex: 1 1 auto;
+      text-align:center;
+    }
+
+    .nav a[aria-current="page"]{
+      background: rgba(255,255,255,.26);
+      box-shadow: 0 6px 14px rgba(0,0,0,.10);
+    }
+
+    @media (max-width: 420px){
+      .nav-step a{
+        padding:7px 10px;
+        font-size: 13px;
+      }
+      .step-title-img{ max-height: 74px; }
+    }
+
+    .match-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
 
     .match-card{
       border-radius:18px;
@@ -31,12 +73,6 @@
       align-items:center;
       gap:10px;
       min-width:0;
-    }
-    .m-slot{
-      font-size:12px;
-      font-weight:900;
-      opacity:.7;
-      white-space:nowrap;
     }
 
     .m-time{
@@ -57,23 +93,6 @@
       min-width:0;
       flex:1;
     }
-
-    .actions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      white-space:nowrap;
-    }
-    .btnx{
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid #ddd;
-      background:#fff;
-      cursor:pointer;
-      font-weight:900;
-    }
-    .btnx:hover{ background:#f5f5f5; }
-    .btnx:disabled{ opacity:.5; cursor:not-allowed; }
 
     .team-row{
       margin-top:10px;
@@ -119,6 +138,26 @@
       font-size:12px;
     }
 
+    .pool-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:8px;
+      font-size:13px;
+    }
+    .pool-table th,
+    .pool-table td{
+      padding:8px 6px;
+      border-bottom:1px solid rgba(0,0,0,.08);
+      text-align:center;
+      font-variant-numeric: tabular-nums;
+    }
+    .pool-table th:first-child,
+    .pool-table td:first-child,
+    .pool-table th:nth-child(2),
+    .pool-table td:nth-child(2){
+      text-align:left;
+    }
+
     @media (max-width: 380px){
       .m-time{ font-size:13px; }
       .m-court{ font-size:13px; }
@@ -133,16 +172,13 @@
 
 <header class="topbar">
   <div class="container">
-    <div class="topbar-row">
+    <div class="topbar-row topbar-row-step">
       <div class="brand-logo">
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
-        <img id="stepBanner"
-             src="../assets/img/etape1-rouge.png"
-             alt="Suzini Beach Tennis Double Mixte Challenge"
-             style="width:min(560px, 100%);max-height:90px;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));">
+      <div class="step-title-wrap" aria-label="Étape 5">
+        <img class="step-title-img" src="../assets/img/etape5.png" alt="Étape 5">
       </div>
 
       <div class="brand-logo">
@@ -150,259 +186,122 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <a href="../index.html">🏠 Accueil public</a>
-      <a href="#" id="btnLogout">🚪 Déconnexion</a>
+    <nav class="nav nav-step">
+      <a href="../index.html" title="Accueil" aria-label="Accueil">🏠</a>
+      <a href="inscriptions.html">📝 Inscriptions</a>
+      <a href="repas.html">🍽️ Repas</a>
+      <a href="programmation2.html" aria-current="page">🗓️ Programme</a>
+      <a href="equipes.html">👥 Équipes</a>
+      <a href="tirage2.html">🎲 Tirage</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
 
-  <section class="card" id="accessDenied" style="display:none;">
-    <h2 style="margin:0 0 8px;">⛔ Accès refusé</h2>
-    <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
-  </section>
-
-  <section class="card" id="adminZone" style="display:none;">
-    <h2 style="margin:0 0 10px;">🧭 Zone</h2>
-
-    <div class="field">
-      <label for="scope">Choisir</label>
-      <select id="scope">
-        <option value="general">🌐 Général</option>
-        <option value="etape1">🎾 Étape 1</option>
-        <option value="etape2">🎾 Étape 2</option>
-        <option value="etape3">🎾 Étape 3</option>
-        <option value="etape4">🎾 Étape 4</option>
-        <option value="etape5">🧪 Étape 5 (test)</option>
-      </select>
-    </div>
-
-    <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
-  </section>
-
-  <section class="card" id="panelNeedStep" style="display:none;">
-    <h2 style="margin:0 0 8px;">ℹ️ Choisir une étape</h2>
-    <p class="muted" style="margin:0;">
-      Sélectionne une <b>Étape</b> dans “Zone” pour gérer la programmation.
-      <br>(Le <b>Général</b> se gère depuis <b>admin/index.html</b>.)
-    </p>
-  </section>
-
-  <section class="card" id="panelBuild" style="display:none;">
-    <h2 style="margin:0 0 10px;">⚙️ Génération (selon règlement)</h2>
-    <p class="muted" id="buildStatus" style="margin:0;">Chargement…</p>
+  <section class="card">
+    <h2 style="margin:0 0 10px;">📅 Programmation</h2>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
 
     <div class="grid" style="margin-top:12px;">
-      <button class="btn" id="btnGenerate" style="font-weight:900; color:#111;">
-        🧩 Générer la programmation depuis le tirage VALIDÉ
-      </button>
-
-      <button class="btn" id="btnResetProg" style="font-weight:900; color:#111; border-color:#f1b2b2;">
-        🧨 RAZ programmation
-      </button>
-
-      <a class="btn" id="btnOpenPublic" href="#" style="font-weight:900; color:#111; text-align:center;">
-        👀 Ouvrir la programmation (test)
-      </a>
+      <button class="btn" id="tabChrono" style="font-weight:900; color:#111;">🕒 Chrono</button>
+      <button class="btn" id="tabTableau" style="font-weight:900; color:#111;">🧩 Tableau</button>
+      <button class="btn" id="tabPoules" style="font-weight:900; color:#111;">🏖️ Poules</button>
     </div>
 
-    <p class="muted" style="margin-top:12px;">
-      ✅ La programmation est générée depuis le <b>tirage validé</b>.
+    <p class="muted" id="subtitle" style="margin-top:10px;"></p>
+  </section>
+
+  <section class="card" id="panelChrono" style="display:none;">
+    <h2 style="margin:0 0 10px;">🕒 Planning des matchs</h2>
+    <div id="chronoList"></div>
+  </section>
+
+  <section class="card" id="panelTableau" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧩 Tableau</h2>
+
+    <div class="grid" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label for="selBracket">Tableau</label>
+        <select id="selBracket">
+          <option value="main">Tableau principal</option>
+          <option value="places">Classements</option>
+          <option value="pools">Poules</option>
+        </select>
+      </div>
+
+      <div class="field" style="margin:0;">
+        <label for="selRound">Tour</label>
+        <select id="selRound"></select>
+      </div>
+    </div>
+
+    <div id="tableList"></div>
+
+    <p class="muted" style="margin-top:10px;">
+      Les équipes se placent automatiquement dès qu’un résultat est validé.
     </p>
   </section>
 
-  <section class="card" id="panelSchedule" style="display:none;">
-    <h2 style="margin:0 0 10px;">🗓️ Ordre chronologique</h2>
-    <p class="muted" id="schedStatus" style="margin:0;">—</p>
+  <section class="card" id="panelPoules" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏖️ Classement des poules</h2>
 
-    <div id="adminList" style="margin-top:12px;"></div>
+    <div class="grid">
+      <div class="card" style="margin:0;">
+        <h3 style="margin:0 0 10px;">Poule A</h3>
+        <div id="poolAStandings"></div>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <h3 style="margin:0 0 10px;">Poule B</h3>
+        <div id="poolBStandings"></div>
+      </div>
+    </div>
 
     <p class="muted" style="margin-top:10px;">
-      💡 ↑ ↓ échangent les <b>créneaux</b> (heure). Le bouton 🐝/🌶️ change le <b>terrain</b> sans changer l’heure.
+      Classement : victoire = 2 points, défaite = 1 point. En cas d’égalité : différence de sets, puis différence de jeux.
     </p>
   </section>
 
 </main>
 
 <script type="module">
-  import { auth, db } from "../assets/js/firebase.js";
-  import { logout, requireRole } from "../assets/js/session.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, collection
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { db } from "../assets/js/firebase.js";
+  import { doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const LS_SCOPE_KEY = "admin_scope_last";
+  const scope = "etape5";
 
-  const params = new URLSearchParams(location.search);
-  const scopeFromUrl = params.get("scope");
+  const statusText = document.getElementById("statusText");
+  const subtitle = document.getElementById("subtitle");
 
-  function getInitialScope(){
-    if(scopeFromUrl) return scopeFromUrl;
-    try{
-      const saved = localStorage.getItem(LS_SCOPE_KEY);
-      if(saved) return saved;
-    }catch(e){}
-    return "etape1";
-  }
-  function persistScope(scope){
-    try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
-  }
+  const tabChrono = document.getElementById("tabChrono");
+  const tabTableau = document.getElementById("tabTableau");
+  const tabPoules = document.getElementById("tabPoules");
 
-  const accessDenied = document.getElementById("accessDenied");
-  const adminZone = document.getElementById("adminZone");
-  const scopeEl = document.getElementById("scope");
-  const tabsEl  = document.getElementById("tabs");
+  const panelChrono = document.getElementById("panelChrono");
+  const panelTableau = document.getElementById("panelTableau");
+  const panelPoules = document.getElementById("panelPoules");
 
-  const panelNeedStep = document.getElementById("panelNeedStep");
-  const panelBuild = document.getElementById("panelBuild");
-  const panelSchedule = document.getElementById("panelSchedule");
+  const chronoList = document.getElementById("chronoList");
 
-  const buildStatus = document.getElementById("buildStatus");
-  const schedStatus = document.getElementById("schedStatus");
-  const adminList = document.getElementById("adminList");
+  const selBracket = document.getElementById("selBracket");
+  const selRound = document.getElementById("selRound");
+  const tableList = document.getElementById("tableList");
 
-  const btnGenerate = document.getElementById("btnGenerate");
-  const btnResetProg = document.getElementById("btnResetProg");
-  const btnOpenPublic = document.getElementById("btnOpenPublic");
+  const poolAStandings = document.getElementById("poolAStandings");
+  const poolBStandings = document.getElementById("poolBStandings");
 
-  const stepBanner = document.getElementById("stepBanner");
-
-  let currentScope = getInitialScope();
-  let unsubProg = null;
-  let unsubRes = null;
+  const PROG_REF = doc(db, "programmations", scope);
+  const RESULTS_COL = collection(db, `resultats_${scope}`);
 
   let currentProg = null;
   let resultsByMatch = new Map();
 
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-  }
-
-  function makeDisabledBtn(label, reason){
-    const a = document.createElement("a");
-    a.className = "btn disabled";
-    a.href = "#";
-    a.setAttribute("aria-disabled","true");
-    a.textContent = label;
-    a.onclick = (e)=>{ e.preventDefault(); alert(reason); };
-    return a;
-  }
-
-  function setHeaderBanner(scope){
-    const stepImg = `../assets/img/${scope}-rouge.png`;
-    if(!scope || scope === "general"){
-      stepBanner.src = "../assets/img/challenge-gen.png";
-      stepBanner.alt = "Suzini Beach Tennis Double Mixte Challenge";
-      return;
-    }
-    stepBanner.src = stepImg;
-    stepBanner.alt = `Suzini Beach Tennis Double Mixte Challenge — ${scope}`;
-    stepBanner.onerror = ()=>{
-      stepBanner.onerror = null;
-      stepBanner.src = "../assets/img/challenge-gen.png";
-    };
-  }
-
-  function setTabs(scope){
-    tabsEl.innerHTML = "";
-
-    if(scope === "general"){
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = "index.html";
-      a.textContent = "📰 Aller à Admin — Général";
-      tabsEl.appendChild(a);
-      return;
-    }
-
-    if(scope === "etape5"){
-      tabsEl.appendChild(makeDisabledBtn("🍽️ Repas (plus tard)", "Repas non activé pour l’étape 5 (zone test)."));
-    }
-
-    const links = [
-      ["👥 Équipes",        "equipes.html"],
-      ["📝 Inscriptions",   "inscriptions.html"],
-      ...(scope !== "etape5" ? [["🍽️ Repas", "repas.html"]] : []),
-      ["🎲 Tirage",         "tirage.html"],
-      ["📅 Programmation",  "programmation.html"],
-      ["🏁 Résultats",      "resultats.html"],
-      ["🏆 Classement",     "classement.html"],
-    ];
-
-    for(const [label, url] of links){
-      const a = document.createElement("a");
-      a.className = "btn";
-      a.href = `${url}?scope=${encodeURIComponent(scope)}`;
-      a.textContent = label;
-
-      if(url === "programmation.html"){
-        a.classList.add("is-active");
-      }
-      tabsEl.appendChild(a);
-    }
-  }
-
-  function stopListeners(){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-    if(unsubRes){ unsubRes(); unsubRes = null; }
-  }
-
-  function progRef(scope){ return doc(db, "programmations", scope); }
-  function drawRef(scope){ return doc(db, "tirages", scope); }
-  function resultsCol(scope){ return collection(db, `resultats_${scope}`); }
-
-  function defaultCourts(){
-    return { A: "court Manon Queen Bee", B: "court Lisa de Los Pimentos" };
-  }
-
-  function defaultSlotsEtape5(){
-    return [
-      { slot:1,  time:"18:00", court:"A" },
-      { slot:2,  time:"18:00", court:"B" },
-      { slot:3,  time:"18:35", court:"A", note:"Arrivée Charline 19h00" },
-      { slot:4,  time:"18:35", court:"B", note:"Arrivée Charline 19h00" },
-      { slot:5,  time:"19:10", court:"A" },
-      { slot:6,  time:"19:10", court:"B" },
-      { slot:7,  time:"19:45", court:"A" },
-      { slot:8,  time:"19:45", court:"B" },
-      { slot:9,  time:"20:15", court:"A" },
-      { slot:10, time:"20:15", court:"B" },
-      { slot:11, time:"20:45", court:"A" },
-      { slot:12, time:"20:45", court:"B" },
-      { slot:13, time:"21:15", court:"A" },
-      { slot:14, time:"21:15", court:"B" },
-      { slot:15, time:"21:45", court:"A" },
-      { slot:16, time:"21:45", court:"B" },
-      { slot:17, time:"22:15", court:"A" },
-      { slot:18, time:"22:15", court:"B" },
-      { slot:19, time:"22:45", court:"A" }
-    ];
-  }
-
-  function defaultSlotsClassic(){
-    return [
-      { slot:1,  time:"18:00", court:"A" },
-      { slot:2,  time:"18:00", court:"B" },
-      { slot:3,  time:"18:50", court:"A" },
-      { slot:4,  time:"18:50", court:"B" },
-      { slot:5,  time:"19:40", court:"A" },
-      { slot:6,  time:"20:05", court:"B", note:"pause spécifique avant ce match" },
-      { slot:7,  time:"20:30", court:"A" },
-      { slot:8,  time:"20:55", court:"B" },
-      { slot:9,  time:"21:20", court:"A" },
-      { slot:10, time:"21:45", court:"B" },
-      { slot:11, time:"22:10", court:"A" },
-      { slot:12, time:"22:35", court:"B" },
-    ];
-  }
-
-  function defaultSlots(){
-    return currentScope === "etape5" ? defaultSlotsEtape5() : defaultSlotsClassic();
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
   }
 
   function normalizeScheduleEntry(entry, slotObj){
@@ -420,237 +319,72 @@
     return { slot: fallbackSlot, court: slotObj?.court || "A" };
   }
 
-  function buildMatchesClassic(){
-    return {
-      M1:{ id:"M1", n:1,  bracket:"main", round:"QF",  A:{type:"team",key:"TS1"}, B:{type:"team",key:"E3"} },
-      M2:{ id:"M2", n:2,  bracket:"main", round:"QF",  A:{type:"team",key:"E4"},  B:{type:"team",key:"E5"} },
-      M3:{ id:"M3", n:3,  bracket:"main", round:"QF",  A:{type:"team",key:"E6"},  B:{type:"team",key:"E7"} },
-      M4:{ id:"M4", n:4,  bracket:"main", round:"QF",  A:{type:"team",key:"E8"},  B:{type:"team",key:"TS2"} },
-      M5:{ id:"M5", n:5,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M1"}, B:{type:"loser", matchId:"M2"} },
-      M6:{ id:"M6", n:6,  bracket:"5-8",  round:"SF",  A:{type:"loser", matchId:"M3"}, B:{type:"loser", matchId:"M4"} },
-      M7:{ id:"M7", n:7,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M1"}, B:{type:"winner",matchId:"M2"} },
-      M8:{ id:"M8", n:8,  bracket:"main", round:"SF",  A:{type:"winner",matchId:"M3"}, B:{type:"winner",matchId:"M4"} },
-      M9:{ id:"M9", n:9,  bracket:"5-8", round:"7th", A:{type:"loser", matchId:"M5"}, B:{type:"loser", matchId:"M6"} },
-      M10:{ id:"M10", n:10, bracket:"5-8", round:"5th", A:{type:"winner",matchId:"M5"}, B:{type:"winner",matchId:"M6"} },
-      M11:{ id:"M11", n:11, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
-      M12:{ id:"M12", n:12, bracket:"main", round:"F",   A:{type:"winner",matchId:"M7"}, B:{type:"winner",matchId:"M8"} },
-    };
-  }
-
-  function buildMatchesEtape5(state){
-    const qf2Pool = state.qualifiedTop;
-    const qf3Pool = qf2Pool === "A" ? "B" : "A";
-    const qf4Pool = qf2Pool;
-    const qf1Pool = qf2Pool === "A" ? "B" : "A";
-
-    return {
-      M1:{ id:"M1", n:1,  bracket:"pools", round:"A", pool:"A", A:{type:"team",key:"PA2"}, B:{type:"team",key:"PA3"} },
-      M2:{ id:"M2", n:2,  bracket:"pools", round:"B", pool:"B", A:{type:"team",key:"PB2"}, B:{type:"team",key:"PB3"} },
-      M3:{ id:"M3", n:3,  bracket:"pools", round:"A", pool:"A", A:{type:"team",key:"PA1"}, B:{type:"team",key:"PA3"} },
-      M4:{ id:"M4", n:4,  bracket:"pools", round:"B", pool:"B", A:{type:"team",key:"PB1"}, B:{type:"team",key:"PB3"} },
-      M5:{ id:"M5", n:5,  bracket:"pools", round:"A", pool:"A", A:{type:"team",key:"PA1"}, B:{type:"team",key:"PA2"} },
-      M6:{ id:"M6", n:6,  bracket:"pools", round:"B", pool:"B", A:{type:"team",key:"PB1"}, B:{type:"team",key:"PB2"} },
-
-      M7:{ id:"M7", n:7,  bracket:"main", round:"QF", A:{type:"team",key:"TS2"}, B:{type:"poolRank", pool:qf1Pool, rank:2} },
-      M8:{ id:"M8", n:8,  bracket:"main", round:"QF", A:{type:"team",key:"TSQF2"}, B:{type:"poolRank", pool:qf2Pool, rank:1} },
-      M9:{ id:"M9", n:9,  bracket:"main", round:"QF", A:{type:"team",key:"TSQF3"}, B:{type:"poolRank", pool:qf3Pool, rank:1} },
-      M10:{ id:"M10", n:10, bracket:"main", round:"QF", A:{type:"team",key:"TS1"}, B:{type:"poolRank", pool:qf4Pool, rank:2} },
-
-      M11:{ id:"M11", n:11, bracket:"places", round:"9-10", A:{type:"poolRank", pool:"A", rank:3}, B:{type:"poolRank", pool:"B", rank:3} },
-      M12:{ id:"M12", n:12, bracket:"places", round:"5-8a", A:{type:"loser", matchId:"M7"}, B:{type:"loser", matchId:"M8"} },
-      M13:{ id:"M13", n:13, bracket:"places", round:"5-8b", A:{type:"loser", matchId:"M9"}, B:{type:"loser", matchId:"M10"} },
-      M14:{ id:"M14", n:14, bracket:"main", round:"SF", A:{type:"winner", matchId:"M7"}, B:{type:"winner", matchId:"M8"} },
-      M15:{ id:"M15", n:15, bracket:"main", round:"SF", A:{type:"winner", matchId:"M9"}, B:{type:"winner", matchId:"M10"} },
-      M16:{ id:"M16", n:16, bracket:"places", round:"7-8", A:{type:"loser", matchId:"M12"}, B:{type:"loser", matchId:"M13"} },
-      M17:{ id:"M17", n:17, bracket:"places", round:"5-6", A:{type:"winner", matchId:"M12"}, B:{type:"winner", matchId:"M13"} },
-      M18:{ id:"M18", n:18, bracket:"main", round:"3rd", A:{type:"loser", matchId:"M14"}, B:{type:"loser", matchId:"M15"} },
-      M19:{ id:"M19", n:19, bracket:"main", round:"F", A:{type:"winner", matchId:"M14"}, B:{type:"winner", matchId:"M15"} },
-    };
-  }
-
-  function parseEtape5Token(token){
-    const s = String(token || "");
-    if(s.startsWith("POOLA:")) return { type:"poolA", value:s.slice(6) };
-    if(s.startsWith("POOLB:")) return { type:"poolB", value:s.slice(6) };
-    if(s.startsWith("SEED34TOP:")) return { type:"seed34Top", value:s.slice(10) };
-    if(s.startsWith("QUALIFIEDTOP:")) return { type:"qualifiedTop", value:s.slice(13) };
-    return { type:"unknown", value:s };
-  }
-
-  function buildEtape5StateFromDraw(draw){
-    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
-    const revealed = Number(draw?.revealed || 0);
-    const order = Array.isArray(draw?.order) ? draw.order.slice(0, revealed) : [];
-
-    const state = {
-      poolA: [],
-      poolB: [],
-      seedTop: null,
-      seedBottom: null,
-      qualifiedTop: null
-    };
-
-    if(draw.seed5) state.poolA.push(draw.seed5);
-    if(draw.seed6) state.poolB.push(draw.seed6);
-
-    for(const tok of order){
-      const p = parseEtape5Token(tok);
-
-      if(p.type === "poolA"){
-        const t = poolById.get(p.value);
-        if(t && !state.poolA.some(x => x.id === t.id)) state.poolA.push(t);
-      }
-
-      if(p.type === "poolB"){
-        const t = poolById.get(p.value);
-        if(t && !state.poolB.some(x => x.id === t.id)) state.poolB.push(t);
-      }
-
-      if(p.type === "seed34Top" && !state.seedTop){
-        const picked = (draw.seed3?.id === p.value) ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null);
-        const other = picked?.id === draw.seed3?.id ? draw.seed4 : draw.seed3;
-        state.seedTop = picked || null;
-        state.seedBottom = other || null;
-      }
-
-      if(p.type === "qualifiedTop" && !state.qualifiedTop){
-        state.qualifiedTop = (p.value === "A" || p.value === "B") ? p.value : null;
-      }
+  function roundOptions(bracket){
+    if(bracket === "main"){
+      return [
+        ["QF", "Quarts de finale"],
+        ["SF", "Demi-finales"],
+        ["3rd", "Match 3e place"],
+        ["F", "Finale"]
+      ];
     }
-
-    return state;
-  }
-
-  function buildTeamsClassic(draw){
-    const order = draw.order || [];
-    const pool = draw.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
-    const picks = order.slice(0, 6).map(id => poolById.get(id)).filter(Boolean);
-
-    return {
-      TS1: draw.seed1 || null,
-      TS2: draw.seed2 || null,
-      E3: picks[0] || null,
-      E4: picks[1] || null,
-      E5: picks[2] || null,
-      E6: picks[3] || null,
-      E7: picks[4] || null,
-      E8: picks[5] || null,
-    };
-  }
-
-  function buildTeamsEtape5(draw, state){
-    return {
-      TS1: draw.seed1 || null,
-      TS2: draw.seed2 || null,
-      TSQF2: state.seedTop || null,
-      TSQF3: state.seedBottom || null,
-
-      PA1: state.poolA[0] || null,
-      PA2: state.poolA[1] || null,
-      PA3: state.poolA[2] || null,
-
-      PB1: state.poolB[0] || null,
-      PB2: state.poolB[1] || null,
-      PB3: state.poolB[2] || null,
-    };
-  }
-
-  async function generateFromValidatedDraw(scope){
-    const dSnap = await getDoc(drawRef(scope));
-    if(!dSnap.exists()) throw new Error("Tirage introuvable.");
-    const draw = dSnap.data() || {};
-    if(draw.status !== "validated") throw new Error("Le tirage doit être VALIDÉ avant de générer.");
-
-    if(scope === "etape5"){
-      const revealed = Number(draw.revealed || 0);
-      if(revealed < 6) throw new Error("Tirage étape 5 incomplet.");
-
-      const state = buildEtape5StateFromDraw(draw);
-
-      if(state.poolA.length !== 3 || state.poolB.length !== 3){
-        throw new Error("Poules incomplètes.");
-      }
-      if(!state.seedTop || !state.seedBottom){
-        throw new Error("Placement TS3 / TS4 incomplet.");
-      }
-      if(!state.qualifiedTop){
-        throw new Error("Placement des qualifiés de poules incomplet.");
-      }
-
-      const teams = buildTeamsEtape5(draw, state);
-      const matches = buildMatchesEtape5(state);
-      const slots = defaultSlotsEtape5();
-      const courts = defaultCourts();
-
-      const schedule = {};
-      for(const mid of Object.keys(matches)){
-        const n = Number(matches[mid].n);
-        const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court:(n%2? "A":"B") };
-        schedule[mid] = normalizeScheduleEntry({ slot:n, court: slotObj.court }, slotObj);
-      }
-
-      const payload = {
-        formatVersion: 5,
-        scope,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        courts,
-        source: { drawValidatedAt: draw.validatedAt || null, drawDoc: "tirages/" + scope },
-        teams, matches, slots, schedule
-      };
-
-      await setDoc(progRef(scope), payload, { merge:true });
-      return payload;
+    if(bracket === "places"){
+      return [
+        ["9-10", "Places 9 / 10"],
+        ["5-8a", "Classement 5–8 (A)"],
+        ["5-8b", "Classement 5–8 (B)"],
+        ["7-8", "Places 7 / 8"],
+        ["5-6", "Places 5 / 6"]
+      ];
     }
-
-    const order = draw.order || [];
-    const revealed = Number(draw.revealed || 0);
-    if(revealed < 6) throw new Error("Tirage incomplet.");
-
-    const teams = buildTeamsClassic(draw);
-    const matches = buildMatchesClassic();
-    const slots = defaultSlotsClassic();
-    const courts = defaultCourts();
-
-    const schedule = {};
-    for(const mid of Object.keys(matches)){
-      const n = Number(matches[mid].n);
-      const slotObj = slots.find(x => Number(x.slot) === n) || { slot:n, court:(n%2? "A":"B") };
-      schedule[mid] = normalizeScheduleEntry({ slot:n, court: slotObj.court }, slotObj);
-    }
-
-    const payload = {
-      formatVersion: 3,
-      scope,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      courts,
-      source: { drawValidatedAt: draw.validatedAt || null, drawDoc: "tirages/" + scope },
-      teams, matches, slots, schedule
-    };
-
-    await setDoc(progRef(scope), payload, { merge:true });
-    return payload;
+    return [
+      ["A", "Poule A"],
+      ["B", "Poule B"]
+    ];
   }
 
-  async function resetProgrammation(scope){
-    await deleteDoc(progRef(scope));
+  function setActiveTab(which){
+    panelChrono.style.display = which === "chrono" ? "block" : "none";
+    panelTableau.style.display = which === "tableau" ? "block" : "none";
+    panelPoules.style.display = which === "poules" ? "block" : "none";
+
+    tabChrono.style.fontWeight = which === "chrono" ? "900" : "800";
+    tabTableau.style.fontWeight = which === "tableau" ? "900" : "800";
+    tabPoules.style.fontWeight = which === "poules" ? "900" : "800";
+
+    if(which === "tableau") renderTableau();
+    if(which === "poules") renderPoolStandings();
   }
 
-  function courtLabel(prog, courtKey){
-    const name = prog?.courts?.[courtKey] || courtKey || "—";
-    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
-    return `${emo} ${name} ${emo}`;
+  function teamPartsFromTeam(t){
+    if(!t) return { title:"—", sub:"" };
+    const title = t.teamName || "Équipe";
+    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
+    return { title, sub };
   }
 
-  function getMatchResult(mid){
-    return resultsByMatch.get(mid) || null;
+  function courtLabel(courtKey){
+    const c = currentProg?.courts || {};
+    const name = c[courtKey] || (courtKey || "—");
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "");
+    return emo ? `${emo} ${name} ${emo}` : name;
+  }
+
+  function courtClass(courtKey){
+    return (courtKey === "A") ? "courtA" : (courtKey === "B" ? "courtB" : "");
+  }
+
+  function fmt(x){
+    return (x === null || x === undefined) ? "—" : String(x);
   }
 
   function scoreNum(v){
     const n = Number(v);
     return Number.isFinite(n) ? n : null;
+  }
+
+  function getMatchResult(mid){
+    return resultsByMatch.get(mid) || null;
   }
 
   function computeWinnerSideFromScore(res){
@@ -659,7 +393,6 @@
 
     let setsA = 0;
     let setsB = 0;
-
     const pairs = [
       [scoreNum(res.s1A), scoreNum(res.s1B)],
       [scoreNum(res.s2A), scoreNum(res.s2B)],
@@ -696,7 +429,7 @@
       stats.set(key, {
         key,
         team: teams[key] || null,
-        wins: 0,
+        points: 0,
         setsWon: 0,
         setsLost: 0,
         gamesWon: 0,
@@ -718,9 +451,8 @@
       const winnerSide = computeWinnerSideFromScore(res);
       if(!winnerSide) continue;
 
-      const s = stats;
-      const A = s.get(keyA);
-      const B = s.get(keyB);
+      const A = stats.get(keyA);
+      const B = stats.get(keyB);
 
       const sets = [
         [scoreNum(res.s1A), scoreNum(res.s1B)],
@@ -730,6 +462,7 @@
 
       let setsA = 0;
       let setsB = 0;
+
       for(const [ga, gb] of sets){
         if(ga === null || gb === null) continue;
 
@@ -738,11 +471,8 @@
         B.gamesWon += gb;
         B.gamesLost += ga;
 
-        if(ga > gb){
-          setsA++;
-        } else if(gb > ga){
-          setsB++;
-        }
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
       }
 
       A.setsWon += setsA;
@@ -751,45 +481,51 @@
       B.setsLost += setsA;
 
       if(winnerSide === "A"){
-        A.wins += 1;
-      } else if(winnerSide === "B"){
-        B.wins += 1;
+        A.points += 2;
+        B.points += 1;
+      } else {
+        B.points += 2;
+        A.points += 1;
       }
     }
 
     return Array.from(stats.values()).sort((x,y)=>{
-      if(y.wins !== x.wins) return y.wins - x.wins;
-      if((y.setsWon - y.setsLost) !== (x.setsWon - x.setsLost)) return (y.setsWon - y.setsLost) - (x.setsWon - x.setsLost);
-      if(y.setsWon !== x.setsWon) return y.setsWon - x.setsWon;
-      if((y.gamesWon - y.gamesLost) !== (x.gamesWon - x.gamesLost)) return (y.gamesWon - y.gamesLost) - (x.gamesWon - x.gamesLost);
-      if(y.gamesWon !== x.gamesWon) return y.gamesWon - x.gamesWon;
+      if(y.points !== x.points) return y.points - x.points;
+
+      const xSetsDiff = x.setsWon - x.setsLost;
+      const ySetsDiff = y.setsWon - y.setsLost;
+      if(ySetsDiff !== xSetsDiff) return ySetsDiff - xSetsDiff;
+
+      const xGamesDiff = x.gamesWon - x.gamesLost;
+      const yGamesDiff = y.gamesWon - y.gamesLost;
+      if(yGamesDiff !== xGamesDiff) return yGamesDiff - xGamesDiff;
+
       const rx = Number(x.team?.teamRank ?? 999999);
       const ry = Number(y.team?.teamRank ?? 999999);
       return rx - ry;
     });
   }
 
-  function resolveTeamRef(prog, ref, guard=new Set()){
-    if(!prog || !ref) return null;
+  function resolveTeamRef(ref){
+    if(!currentProg) return null;
 
-    const teams = prog.teams || {};
-    const matches = prog.matches || {};
+    const teams = currentProg.teams || {};
+    const matches = currentProg.matches || {};
+
+    if(!ref) return null;
 
     if(ref.type === "team"){
       return teams[ref.key] || null;
     }
 
     if(ref.type === "poolRank"){
-      const ranking = computePoolRanking(prog, ref.pool);
+      const ranking = computePoolRanking(currentProg, ref.pool);
       const row = ranking[Number(ref.rank) - 1];
       return row?.team || null;
     }
 
     if(ref.type === "winner" || ref.type === "loser"){
       const mid = ref.matchId;
-      if(!mid || guard.has(mid)) return null;
-      guard.add(mid);
-
       const m = matches[mid];
       if(!m) return null;
 
@@ -797,11 +533,11 @@
       const winnerSide = computeWinnerSideFromScore(res);
       if(winnerSide !== "A" && winnerSide !== "B") return null;
 
-      const teamA = resolveTeamRef(prog, m.A, guard);
-      const teamB = resolveTeamRef(prog, m.B, guard);
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
 
-      const winner = (winnerSide === "A") ? teamA : teamB;
-      const loser  = (winnerSide === "A") ? teamB : teamA;
+      const winner = winnerSide === "A" ? teamA : teamB;
+      const loser = winnerSide === "A" ? teamB : teamA;
 
       return ref.type === "winner" ? winner : loser;
     }
@@ -809,86 +545,57 @@
     return null;
   }
 
-  function teamPartsFromTeam(t){
-    if(!t) return { title:"—", sub:"" };
-    const title = t.teamName || "Équipe";
-    const sub = `${t.p1FirstName || "?"} / ${t.p2FirstName || "?"}`;
-    return { title, sub };
-  }
+  function renderMatchCard({ time, courtKey, teamA, teamB, res, note="" }){
+    const cls = courtClass(courtKey);
+    const court = courtLabel(courtKey);
 
-  function teamRefParts(prog, ref){
-    if(!ref) return { title:"—", sub:"" };
+    const s1A = fmt(res?.s1A);
+    const s2A = fmt(res?.s2A);
+    const tbA = fmt(res?.s3A);
 
-    const resolved = resolveTeamRef(prog, ref);
-    if(resolved) return teamPartsFromTeam(resolved);
+    const s1B = fmt(res?.s1B);
+    const s2B = fmt(res?.s2B);
+    const tbB = fmt(res?.s3B);
 
-    if(ref.type === "team"){
-      const t = prog?.teams?.[ref.key] || null;
-      return t ? teamPartsFromTeam(t) : { title: ref.key, sub:"" };
-    }
-    if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
-    if(ref.type === "poolRank"){
-      return { title: `${ref.rank}e poule ${ref.pool}`, sub:"" };
-    }
+    const a = teamPartsFromTeam(teamA);
+    const b = teamPartsFromTeam(teamB);
 
-    return { title:"—", sub:"" };
-  }
-
-  function fmtScoreCell(v){
-    return (v === null || typeof v === "undefined" || v === "") ? "—" : String(v);
-  }
-
-  function renderAdminCard({slot, time, courtKey, note, teamA, teamB, mid, stored, isDone}){
     return `
-      <div class="match-card ${esc(courtKey === "A" ? "courtA" : (courtKey === "B" ? "courtB" : ""))}">
+      <div class="match-card ${esc(cls)}">
         <div class="match-head">
-          <div class="m-slot">#${esc(slot)} · ${esc(mid)}</div>
           <div class="m-time">${esc(time)}</div>
-          <div class="m-court">${esc(courtLabel(currentProg, courtKey))}</div>
-
-          <div class="actions">
-            <button class="btnx" data-act="court" data-mid="${esc(mid)}" title="Changer de terrain">
-              ${courtKey === "A" ? "🐝" : "🌶️"}
-            </button>
-            <button class="btnx" data-act="up" data-slot="${esc(slot)}" ${slot<=1 ? "disabled":""}>↑</button>
-            <button class="btnx" data-act="down" data-slot="${esc(slot)}" ${slot>=(currentProg?.slots?.length || 0) ? "disabled":""}>↓</button>
-          </div>
+          <div class="m-court">${esc(court)}</div>
         </div>
 
         ${note ? `<div class="muted" style="margin-top:8px;">⚠️ ${esc(note)}</div>` : ""}
 
         <div class="team-row">
           <div class="team-block">
-            <div class="team-title">${esc(teamA.title)}</div>
-            ${teamA.sub ? `<div class="team-sub">${esc(teamA.sub)}</div>` : ``}
+            <div class="team-title">${esc(a.title)}</div>
+            ${a.sub ? `<div class="team-sub">${esc(a.sub)}</div>` : ``}
           </div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s1A))}</div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s2A))}</div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s3A))}</div>
+          <div class="sc">${esc(s1A)}</div>
+          <div class="sc">${esc(s2A)}</div>
+          <div class="sc">${esc(tbA)}</div>
         </div>
 
         <div class="vs-line">VS</div>
 
         <div class="team-row">
           <div class="team-block">
-            <div class="team-title">${esc(teamB.title)}</div>
-            ${teamB.sub ? `<div class="team-sub">${esc(teamB.sub)}</div>` : ``}
+            <div class="team-title">${esc(b.title)}</div>
+            ${b.sub ? `<div class="team-sub">${esc(b.sub)}</div>` : ``}
           </div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s1B))}</div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s2B))}</div>
-          <div class="sc">${esc(fmtScoreCell(stored?.s3B))}</div>
-        </div>
-
-        <div class="muted" style="margin-top:10px;">
-          ${isDone ? "✅ Résultat validé" : "⏳ Résultat en attente"}
+          <div class="sc">${esc(s1B)}</div>
+          <div class="sc">${esc(s2B)}</div>
+          <div class="sc">${esc(tbB)}</div>
         </div>
       </div>
     `;
   }
 
-  function renderAdminList(){
-    if(!currentProg){ adminList.innerHTML = ""; return; }
+  function renderChrono(){
+    if(!currentProg){ chronoList.innerHTML = ""; return; }
 
     const matches = currentProg.matches || {};
     const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
@@ -896,11 +603,9 @@
 
     const slotToMatch = new Map();
     for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
-      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
-      const norm = normalizeScheduleEntry(entry, sObj);
-      if(!slotToMatch.has(norm.slot)){
-        slotToMatch.set(norm.slot, mid);
+      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
+      if(!slotToMatch.has(slotNum)){
+        slotToMatch.set(slotNum, mid);
       }
     }
 
@@ -910,265 +615,199 @@
       const m = mid ? matches[mid] : null;
       if(!m) continue;
 
-      const a = teamRefParts(currentProg, m.A);
-      const b = teamRefParts(currentProg, m.B);
-
       const entry = schedule[mid];
       const norm = normalizeScheduleEntry(entry, s);
       const courtKey = norm.court;
 
-      const stored = getMatchResult(mid);
-      const isDone = (computeWinnerSideFromScore(stored) === "A" || computeWinnerSideFromScore(stored) === "B");
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+      const res = getMatchResult(mid) || null;
 
-      cards.push(renderAdminCard({
-        slot: s.slot,
+      cards.push(renderMatchCard({
         time: s.time,
         courtKey,
-        note: s.note || "",
-        teamA: a,
-        teamB: b,
-        mid,
-        stored,
-        isDone
+        teamA,
+        teamB,
+        res,
+        note: s.note || ""
       }));
     }
 
-    adminList.innerHTML = cards.length
+    chronoList.innerHTML = cards.length
       ? `<div class="match-list">${cards.join("")}</div>`
       : `<p class="muted">Aucun match.</p>`;
-
-    schedStatus.textContent = "✅ OK";
   }
 
-  async function swapSlots(scope, slotA, slotB){
-    const ref = progRef(scope);
-    const snap = await getDoc(ref);
-    if(!snap.exists()) throw new Error("Programmation introuvable.");
+  function renderTableau(){
+    if(!currentProg){ tableList.innerHTML = ""; return; }
 
-    const prog = snap.data() || {};
-    const slots = Array.isArray(prog.slots) ? prog.slots : [];
-    const schedule = prog.schedule || {};
+    const bracket = selBracket.value;
+    const round = selRound.value;
 
-    let mA = null, mB = null;
-    for(const [mid, entry] of Object.entries(schedule)){
-      const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
-      const sObj = slots.find(x => Number(x.slot) === slotNum) || null;
-      const norm = normalizeScheduleEntry(entry, sObj);
-      if(norm.slot === Number(slotA) && !mA) mA = mid;
-      if(norm.slot === Number(slotB) && !mB) mB = mid;
-    }
+    const matches = currentProg.matches || {};
+    const schedule = currentProg.schedule || {};
+    const slots = Array.isArray(currentProg.slots) ? currentProg.slots : [];
 
-    const newSchedule = { ...schedule };
+    const list = Object.entries(matches)
+      .map(([id, m]) => ({ id, ...m }))
+      .filter(m => m.bracket === bracket && m.round === round)
+      .sort((a,b)=> (a.n||0) - (b.n||0));
 
-    function setEntry(mid, newSlot){
-      if(!mid) return;
-      const curEntry = newSchedule[mid];
-      const slotObj = slots.find(x => Number(x.slot) === Number(newSlot)) || null;
-      const norm = normalizeScheduleEntry(curEntry, slotObj);
-      newSchedule[mid] = { slot: Number(newSlot), court: norm.court };
-    }
+    const cards = list.map(m=>{
+      const teamA = resolveTeamRef(m.A);
+      const teamB = resolveTeamRef(m.B);
+      const res = getMatchResult(m.id) || null;
 
-    setEntry(mA, slotB);
-    setEntry(mB, slotA);
+      let time = "—";
+      let courtKey = "A";
+      let note = "";
 
-    await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
-  }
+      const entry = schedule[m.id];
+      const slotNum = typeof entry === "number" ? Number(entry) : Number(entry?.slot);
 
-  async function toggleCourt(scope, mid){
-    const ref = progRef(scope);
-    const snap = await getDoc(ref);
-    if(!snap.exists()) throw new Error("Programmation introuvable.");
-
-    const prog = snap.data() || {};
-    const slots = Array.isArray(prog.slots) ? prog.slots : [];
-    const schedule = prog.schedule || {};
-
-    const entry = schedule[mid];
-    const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
-    const slotObj = slots.find(x => Number(x.slot) === slotNum) || null;
-
-    const norm = normalizeScheduleEntry(entry, slotObj);
-    const nextCourt = (norm.court === "A") ? "B" : "A";
-
-    const newSchedule = { ...schedule, [mid]: { slot: norm.slot, court: nextCourt } };
-    await updateDoc(ref, { schedule: newSchedule, updatedAt: serverTimestamp() });
-  }
-
-  function startResultsListener(scope){
-    if(unsubRes){ unsubRes(); unsubRes = null; }
-    resultsByMatch = new Map();
-
-    unsubRes = onSnapshot(resultsCol(scope), (snap)=>{
-      resultsByMatch = new Map();
-      snap.forEach(d => resultsByMatch.set(d.id, d.data() || {}));
-      renderAdminList();
-    }, (err)=>{
-      console.error(err);
-    });
-  }
-
-  function startProgListener(scope){
-    if(unsubProg){ unsubProg(); unsubProg = null; }
-
-    buildStatus.textContent = "Chargement…";
-    schedStatus.textContent = "Chargement…";
-    adminList.innerHTML = "";
-
-    unsubProg = onSnapshot(progRef(scope), (snap)=>{
-      currentProg = snap.exists() ? (snap.data() || {}) : null;
-
-      if(!currentProg){
-        buildStatus.textContent = "ℹ️ Aucune programmation enregistrée. Génère-la depuis le tirage validé.";
-        schedStatus.textContent = "—";
-        adminList.innerHTML = "";
-        return;
+      if(Number.isFinite(slotNum) && slotNum > 0){
+        const s = slots.find(x => Number(x.slot) === slotNum) || null;
+        const norm = normalizeScheduleEntry(entry, s);
+        courtKey = norm.court;
+        time = s?.time || "—";
+        note = s?.note || "";
       }
 
-      buildStatus.textContent = "✅ Programmation présente.";
-      renderAdminList();
-    }, (err)=>{
-      console.error(err);
-      buildStatus.textContent = "❌ Erreur Firestore (programmation).";
-      schedStatus.textContent = "❌ Erreur";
+      return renderMatchCard({ time, courtKey, teamA, teamB, res, note });
     });
+
+    tableList.innerHTML = cards.length
+      ? `<div class="match-list">${cards.join("")}</div>`
+      : `<p class="muted">Aucun match pour ce filtre.</p>`;
   }
 
-  function showPanelsForScope(scope){
-    setHeaderBanner(scope);
+  function renderStandingsTable(pool){
+    if(!currentProg) return `<p class="muted">—</p>`;
 
-    if(scope === "general"){
-      panelNeedStep.style.display = "block";
-      panelBuild.style.display = "none";
-      panelSchedule.style.display = "none";
-      stopListeners();
+    const rows = computePoolRanking(currentProg, pool);
+
+    if(!rows.length) return `<p class="muted">—</p>`;
+
+    return `
+      <table class="pool-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Équipe</th>
+            <th>Pts</th>
+            <th>Diff. sets</th>
+            <th>Diff. jeux</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r, i) => {
+            const setsDiff = r.setsWon - r.setsLost;
+            const gamesDiff = r.gamesWon - r.gamesLost;
+            return `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${esc(r.team?.teamName || "—")}</td>
+                <td>${esc(r.points)}</td>
+                <td>${esc(setsDiff)}</td>
+                <td>${esc(gamesDiff)}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderPoolStandings(){
+    if(!currentProg){
+      poolAStandings.innerHTML = "";
+      poolBStandings.innerHTML = "";
       return;
     }
 
-    panelNeedStep.style.display = "none";
-    panelBuild.style.display = "block";
-    panelSchedule.style.display = "block";
-
-    startProgListener(scope);
-    startResultsListener(scope);
+    poolAStandings.innerHTML = renderStandingsTable("A");
+    poolBStandings.innerHTML = renderStandingsTable("B");
   }
 
-  btnGenerate.onclick = async (e)=>{
-    e.preventDefault();
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
-    btnGenerate.disabled = true;
-    buildStatus.textContent = "Génération…";
-    try{
-      await generateFromValidatedDraw(currentScope);
-      buildStatus.textContent = "✅ Programmation générée.";
-    }catch(err){
-      console.error(err);
-      buildStatus.textContent = "❌ " + (err?.message || "Impossible.");
-      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
-    }finally{
-      btnGenerate.disabled = false;
-    }
+  function refreshRounds(){
+    const opts = roundOptions(selBracket.value);
+    selRound.innerHTML = opts.map(([v, lbl]) => `<option value="${esc(v)}">${esc(lbl)}</option>`).join("");
+  }
+
+  function ensureRoundValue(){
+    const wanted = selBracket.value === "main"
+      ? "QF"
+      : (selBracket.value === "places" ? "9-10" : "A");
+    const hasWanted = Array.from(selRound.options).some(o => o.value === wanted);
+    selRound.value = hasWanted ? wanted : (selRound.options[0]?.value || "");
+  }
+
+  function renderAll(){
+    renderChrono();
+    renderTableau();
+    renderPoolStandings();
+  }
+
+  tabChrono.onclick = (e)=>{ e.preventDefault(); setActiveTab("chrono"); };
+  tabTableau.onclick = (e)=>{ e.preventDefault(); setActiveTab("tableau"); };
+  tabPoules.onclick = (e)=>{ e.preventDefault(); setActiveTab("poules"); };
+
+  selBracket.onchange = ()=>{
+    refreshRounds();
+    ensureRoundValue();
+    renderTableau();
   };
+  selRound.onchange = ()=> renderTableau();
 
-  btnResetProg.onclick = async (e)=>{
-    e.preventDefault();
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+  refreshRounds();
+  ensureRoundValue();
+  setActiveTab("chrono");
 
-    const ok = confirm("Réinitialiser la programmation ?\n\n⚠️ Cela supprimera la programmation de cette étape.");
-    if(!ok) return;
-
-    btnResetProg.disabled = true;
-    buildStatus.textContent = "Réinitialisation…";
-    try{
-      await resetProgrammation(currentScope);
-      buildStatus.textContent = "✅ Programmation réinitialisée.";
-    }catch(err){
-      console.error(err);
-      buildStatus.textContent = "❌ " + (err?.message || "Impossible.");
-      alert("Erreur ❌\n\n" + (err?.message || "Impossible."));
-    }finally{
-      btnResetProg.disabled = false;
-    }
-  };
-
-  btnOpenPublic.onclick = (e)=>{
-    e.preventDefault();
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
-    window.location.href = `../${currentScope}/programmation2.html`;
-  };
-
-  adminList.addEventListener("click", async (e)=>{
-    const btn = e.target.closest("button[data-act]");
-    if(!btn) return;
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
-    if(!currentProg){ alert("Pas de programmation."); return; }
-
-    const act = btn.dataset.act;
-
-    try{
-      schedStatus.textContent = "Traitement…";
-
-      if(act === "up" || act === "down"){
-        const slot = Number(btn.dataset.slot);
-        const maxSlot = Number(currentProg?.slots?.length || 0);
-        if(!Number.isFinite(slot)) return;
-        if(act === "up" && slot > 1) await swapSlots(currentScope, slot, slot-1);
-        if(act === "down" && slot < maxSlot) await swapSlots(currentScope, slot, slot+1);
-      }
-
-      if(act === "court"){
-        const mid = btn.dataset.mid;
-        if(!mid) return;
-        await toggleCourt(currentScope, mid);
-      }
-
-      schedStatus.textContent = "✅ OK";
-    }catch(err){
-      console.error(err);
-      schedStatus.textContent = "❌ Erreur";
-      alert("Erreur ❌");
-    }
+  onSnapshot(RESULTS_COL, (snap)=>{
+    resultsByMatch = new Map();
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      resultsByMatch.set(d.id, {
+        winnerSide: x.winnerSide || null,
+        s1A: (x.s1A === undefined ? null : x.s1A),
+        s1B: (x.s1B === undefined ? null : x.s1B),
+        s2A: (x.s2A === undefined ? null : x.s2A),
+        s2B: (x.s2B === undefined ? null : x.s2B),
+        s3A: (x.s3A === undefined ? null : x.s3A),
+        s3B: (x.s3B === undefined ? null : x.s3B),
+        updatedAt: x.updatedAt || null
+      });
+    });
+    renderAll();
   });
 
-  document.getElementById("btnLogout").onclick = async (e)=>{
-    e.preventDefault();
-    await logout();
-    window.location.href = "../index.html";
-  };
+  onSnapshot(PROG_REF, (snap)=>{
+    currentProg = snap.exists() ? (snap.data() || {}) : null;
 
-  function showDenied(){
-    accessDenied.style.display = "block";
-    adminZone.style.display = "none";
-    panelNeedStep.style.display = "none";
-    panelBuild.style.display = "none";
-    panelSchedule.style.display = "none";
-    stopListeners();
-  }
+    if(!currentProg){
+      statusText.textContent = "⏳ Programmation non disponible (pas encore générée).";
+      subtitle.textContent = "";
+      panelChrono.style.display = "none";
+      panelTableau.style.display = "none";
+      panelPoules.style.display = "none";
+      return;
+    }
 
-  function showAdmin(){
-    accessDenied.style.display = "none";
-    adminZone.style.display = "block";
+    statusText.textContent = "✅ Programmation disponible.";
+    subtitle.textContent = "🏖️ Poules + 🧩 Tableau + 🕒 Chrono (mise à jour en direct).";
 
-    scopeEl.value = currentScope;
-    setTabs(currentScope);
-    showPanelsForScope(currentScope);
-    persistScope(currentScope);
+    panelChrono.style.display = "block";
+    panelTableau.style.display = "none";
+    panelPoules.style.display = "none";
+    setActiveTab("chrono");
 
-    scopeEl.onchange = ()=>{
-      currentScope = scopeEl.value || "general";
-      setTabs(currentScope);
-      showPanelsForScope(currentScope);
-      persistScope(currentScope);
-    };
-  }
+    refreshRounds();
+    ensureRoundValue();
 
-  const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
-
-  onAuthStateChanged(auth, async (user)=>{
-    if(!user){ showDenied(); return; }
-    const g2 = await requireRole(["admin"]);
-    if(!g2.ok){ showDenied(); return; }
+    renderAll();
+  }, (err)=>{
+    console.error(err);
+    statusText.textContent = "🔴 Erreur de connexion à la programmation.";
   });
 </script>
 
