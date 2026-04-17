@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Tirage</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-tirage-etape5" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-tirage-etape5-v2" />
 
   <style>
     .btn.is-active{
@@ -39,12 +39,13 @@
       white-space:nowrap;
     }
 
-    .bracket-preview{
+    .pool-grid, .mapping-grid{
       display:grid;
       gap:10px;
+      grid-template-columns: repeat(2, minmax(0,1fr));
     }
 
-    .match-block{
+    .pool-card, .mapping-card, .match-block, .future-item{
       border:1px solid #eee;
       border-radius:14px;
       background:#fff;
@@ -52,34 +53,20 @@
       box-shadow: 0 4px 10px rgba(0,0,0,.03);
     }
 
-    .match-title{
+    .pool-title, .mapping-title, .stage-title, .match-title{
       font-size:12px;
       font-weight:1000;
-      opacity:.6;
+      opacity:.7;
       margin-bottom:8px;
       letter-spacing:.3px;
     }
 
-    .line-row{
+    .pool-list, .future-list, .bracket-preview{
       display:grid;
-      grid-template-columns: 46px 1fr;
       gap:8px;
-      align-items:center;
-      min-width:0;
     }
 
-    .line-row + .line-row{
-      margin-top:6px;
-    }
-
-    .line-no{
-      font-weight:1000;
-      color:#666;
-      text-align:center;
-      white-space:nowrap;
-    }
-
-    .line-team{
+    .pool-slot, .line-team, .mapping-box{
       border:1px solid #f0f0f0;
       border-radius:10px;
       background:#fafafa;
@@ -93,15 +80,53 @@
       text-overflow:ellipsis;
     }
 
+    .pool-slot.empty, .line-team.placeholder{
+      background:#f7fbff;
+      border-color:#d9ebfb;
+      color:#444;
+    }
+
     .line-team.seed{
       background:#fff9e8;
       border-color:#f1dca1;
     }
 
-    .line-team.bye{
-      background:#f6f6f6;
-      border-color:#e6e6e6;
-      font-style:italic;
+    .line-row{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:6px;
+      min-width:0;
+    }
+
+    .vs{
+      text-align:center;
+      font-size:12px;
+      font-weight:1000;
+      color:#777;
+    }
+
+    .future-item{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+
+    .future-name{
+      font-size:13px;
+      font-weight:1000;
+    }
+
+    .future-desc{
+      font-size:12px;
+      color:#666;
+      text-align:right;
+    }
+
+    @media (max-width: 640px){
+      .pool-grid, .mapping-grid{
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -157,7 +182,6 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
   <section class="card" id="panelNeedStep" style="display:none;">
@@ -183,8 +207,9 @@
     </div>
 
     <p class="muted" id="ruleText" style="margin-top:10px;">
-      Règle : TS1 et TS2 = meilleures équipes (classement équipe le plus petit).<br>
-      Puis 6 tirées au sort : 1ère vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.
+      Règle étape 5 : TS1 à TS4 = 4 meilleures équipes globales.<br>
+      Dans les 6 équipes de poules, TS5 va en poule A position 1, TS6 en poule B position 1.<br>
+      Puis tirage des 4 autres : A2, B2, A3, B3. Ensuite tirage TS3/TS4, puis placement des 1ers et 2es de poule.
     </p>
   </section>
 
@@ -193,29 +218,44 @@
 
     <div class="grid" id="seedsGrid">
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;" id="seed1Title">🏷️ Tête de série #1</div>
+        <div style="font-weight:1000;">🏷️ TS #1 — QF4</div>
         <div class="muted" id="seed1">—</div>
       </div>
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;" id="seed2Title">🏷️ Tête de série #2</div>
+        <div style="font-weight:1000;">🏷️ TS #2 — QF1</div>
         <div class="muted" id="seed2">—</div>
       </div>
-      <div class="card" style="margin:0; display:none;" id="seed3Card">
-        <div style="font-weight:1000;">🏷️ Tête de série #3</div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #3</div>
         <div class="muted" id="seed3">—</div>
       </div>
-      <div class="card" style="margin:0; display:none;" id="seed4Card">
-        <div style="font-weight:1000;">🏷️ Tête de série #4</div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #4</div>
         <div class="muted" id="seed4">—</div>
       </div>
     </div>
 
-    <p class="muted" id="seedInfo" style="margin:10px 0 0; display:none;">—</p>
+    <p class="muted" id="seedInfo" style="margin:10px 0 0;">Placement TS3 / TS4 en attente.</p>
 
     <div style="margin-top:12px;">
       <div style="font-weight:1000; margin-bottom:8px;">🎰 Roulette (admin)</div>
       <div class="roulette-wheel" id="wheel">—</div>
       <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">🏖️ Poules</div>
+      <div class="pool-grid">
+        <div class="pool-card">
+          <div class="pool-title">Poule A</div>
+          <div id="poolAList" class="pool-list"></div>
+        </div>
+        <div class="pool-card">
+          <div class="pool-title">Poule B</div>
+          <div id="poolBList" class="pool-list"></div>
+        </div>
+      </div>
+      <p class="muted" id="poolInfo" style="margin:10px 0 0;">Répartition des poules en attente.</p>
     </div>
 
     <div style="margin-top:12px;">
@@ -228,9 +268,28 @@
       <div id="revealedList" style="display:grid; gap:8px;"></div>
     </div>
 
-    <div style="margin-top:12px; display:none;" id="bracketPreviewWrap">
-      <div style="font-weight:1000; margin-bottom:8px;">📋 Tableau 16 — aperçu</div>
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">🧭 Placement des qualifiés de poules</div>
+      <div class="mapping-grid">
+        <div class="mapping-card">
+          <div class="mapping-title">🥇 1ers de poule</div>
+          <div id="firstMapBox" class="mapping-box">En attente</div>
+        </div>
+        <div class="mapping-card">
+          <div class="mapping-title">🥈 2es de poule</div>
+          <div id="secondMapBox" class="mapping-box">En attente</div>
+        </div>
+      </div>
+      <p class="muted" id="mappingInfo" style="margin:10px 0 0;">Le chemin des 1ers et 2es de poule sera affiché ici.</p>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-weight:1000; margin-bottom:8px;">📋 Tableau — aperçu</div>
+      <div class="stage-title">Quarts de finale</div>
       <div id="bracketPreview" class="bracket-preview"></div>
+
+      <div class="stage-title" style="margin-top:12px;">Suite du tableau</div>
+      <div id="futureList" class="future-list"></div>
     </div>
   </section>
 
@@ -276,15 +335,21 @@
   const seed2El = document.getElementById("seed2");
   const seed3El = document.getElementById("seed3");
   const seed4El = document.getElementById("seed4");
-
-  const seed1Title = document.getElementById("seed1Title");
-  const seed2Title = document.getElementById("seed2Title");
-  const seed3Card = document.getElementById("seed3Card");
-  const seed4Card = document.getElementById("seed4Card");
   const seedInfo = document.getElementById("seedInfo");
+
+  const poolAList = document.getElementById("poolAList");
+  const poolBList = document.getElementById("poolBList");
+  const poolInfo = document.getElementById("poolInfo");
 
   const poolList = document.getElementById("poolList");
   const revealedList = document.getElementById("revealedList");
+  const firstMapBox = document.getElementById("firstMapBox");
+  const secondMapBox = document.getElementById("secondMapBox");
+  const mappingInfo = document.getElementById("mappingInfo");
+
+  const bracketPreview = document.getElementById("bracketPreview");
+  const futureList = document.getElementById("futureList");
+
   const wheel = document.getElementById("wheel");
   const wheelSub = document.getElementById("wheelSub");
 
@@ -296,10 +361,6 @@
   const btnPublic = document.getElementById("btnPublic");
 
   const stepBanner = document.getElementById("stepBanner");
-  const ruleText = document.getElementById("ruleText");
-
-  const bracketPreviewWrap = document.getElementById("bracketPreviewWrap");
-  const bracketPreview = document.getElementById("bracketPreview");
 
   let currentScope = getInitialScope();
   let cachedMainTeams = [];
@@ -376,10 +437,7 @@
       a.className = "btn";
       a.href = `${url}?scope=${encodeURIComponent(scope)}`;
       a.textContent = label;
-
-      if(url === "tirage.html"){
-        a.classList.add("is-active");
-      }
+      if(url === "tirage.html") a.classList.add("is-active");
       tabsEl.appendChild(a);
     }
   }
@@ -398,29 +456,6 @@
     panelNeedStep.style.display = "none";
     adminUI.style.display = "block";
     panel.style.display = "block";
-
-    if(isEtape5()){
-      ruleText.innerHTML =
-        "Règle étape 5 : tableau à 16 lignes.<br>" +
-        "TS1 ligne 16, TS2 ligne 1, tirage TS3/TS4 pour lignes 8 et 9.<br>" +
-        "Byes fixes : 15, 2, 7, 10. Byes restants tirés sur 4, 5, 12, 13. Puis tirage des équipes restantes sur la première ligne libre.";
-      seed1Title.textContent = "🏷️ Tête de série #1 — ligne 16";
-      seed2Title.textContent = "🏷️ Tête de série #2 — ligne 1";
-      seed3Card.style.display = "block";
-      seed4Card.style.display = "block";
-      seedInfo.style.display = "block";
-      bracketPreviewWrap.style.display = "block";
-    } else {
-      ruleText.innerHTML =
-        "Règle : TS1 et TS2 = meilleures équipes (classement équipe le plus petit).<br>" +
-        "Puis 6 tirées au sort : 1ère vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.";
-      seed1Title.textContent = "🏷️ Tête de série #1";
-      seed2Title.textContent = "🏷️ Tête de série #2";
-      seed3Card.style.display = "none";
-      seed4Card.style.display = "none";
-      seedInfo.style.display = "none";
-      bracketPreviewWrap.style.display = "none";
-    }
   }
 
   function COL_PUBLIC(scope){ return `equipes_${scope}_public`; }
@@ -442,6 +477,10 @@
   function teamLabel(t){
     if(!t) return "—";
     return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
+  }
+
+  function teamNameOnly(t){
+    return (t && t.teamName) ? t.teamName : "—";
   }
 
   function randomShuffle(arr){
@@ -476,7 +515,8 @@
     return !!(
       d &&
       d.seed1 && d.seed2 && d.seed3 && d.seed4 &&
-      Array.isArray(d.pool) &&
+      d.seed5 && d.seed6 &&
+      Array.isArray(d.pool) && d.pool.length === 4 &&
       Array.isArray(d.order)
     );
   }
@@ -487,104 +527,265 @@
 
   function parseToken(token){
     const s = String(token || "");
-    if(s.startsWith("SEED34:")) return { type:"seed34", value:s.slice(7) };
-    if(s.startsWith("BYE:")) return { type:"bye", value:Number(s.slice(4)) };
-    if(s.startsWith("TEAM:")) return { type:"team", value:s.slice(5) };
+    if(s.startsWith("POOLA:")) return { type:"poolA", value:s.slice(6) };
+    if(s.startsWith("POOLB:")) return { type:"poolB", value:s.slice(6) };
+    if(s.startsWith("SEED34TOP:")) return { type:"seed34Top", value:s.slice(10) };
+    if(s.startsWith("FIRSTTOP:")) return { type:"firstTop", value:s.slice(9) };
+    if(s.startsWith("SECONDTOP:")) return { type:"secondTop", value:s.slice(10) };
     return { type:"unknown", value:s };
-  }
-
-  function byeCountEtape5FromMain(mainTeamsCount){
-    return Math.max(0, 16 - mainTeamsCount);
-  }
-
-  function mandatoryByeLinesEtape5(mainTeamsCount){
-    const n = byeCountEtape5FromMain(mainTeamsCount);
-    const lines = [];
-    if(n >= 1) lines.push(15);
-    if(n >= 2) lines.push(2);
-    if(n >= 3) lines.push(7);
-    if(n >= 4) lines.push(10);
-    return lines;
-  }
-
-  function extraByeLinesEtape5(){
-    return [4, 5, 12, 13];
   }
 
   function computeEtape5DrawParts(teams){
     const sorted = teams.slice().sort((a,b)=> a.teamRank - b.teamRank);
+
     const seed1 = sorted[0] || null;
     const seed2 = sorted[1] || null;
     const seed3 = sorted[2] || null;
     const seed4 = sorted[3] || null;
-    const pool = sorted.slice(4);
-    return { seed1, seed2, seed3, seed4, pool };
+    const seed5 = sorted[4] || null;
+    const seed6 = sorted[5] || null;
+    const pool = sorted.slice(6, 10);
+
+    return { seed1, seed2, seed3, seed4, seed5, seed6, pool };
   }
 
-  function buildEtape5Order(mainTeamsCount, seed3, seed4, pool){
-    const byeCount = byeCountEtape5FromMain(mainTeamsCount);
-    const extraByeCount = Math.max(0, byeCount - 4);
-
-    const order = [];
-
-    const seed34Pick = randomShuffle([seed3.id, seed4.id])[0];
-    order.push(`SEED34:${seed34Pick}`);
-
-    const byeLines = randomShuffle(extraByeLinesEtape5()).slice(0, extraByeCount);
-    for(const line of byeLines){
-      order.push(`BYE:${line}`);
-    }
-
-    const teamTokens = randomShuffle(pool.map(t => `TEAM:${t.id}`));
-    order.push(...teamTokens);
-
+  function buildEtape5Order(seed3, seed4, pool){
+    const poolShuffled = randomShuffle(pool);
+    const order = [
+      `POOLA:${poolShuffled[0].id}`,
+      `POOLB:${poolShuffled[1].id}`,
+      `POOLA:${poolShuffled[2].id}`,
+      `POOLB:${poolShuffled[3].id}`,
+      `SEED34TOP:${randomShuffle([seed3.id, seed4.id])[0]}`,
+      `FIRSTTOP:${randomShuffle(["A","B"])[0]}`,
+      `SECONDTOP:${randomShuffle(["A","B"])[0]}`
+    ];
     return order;
   }
 
-  function pickTeamsFromDrawClassic(d){
-    const order = d?.order || [];
-    const pool = d?.pool || [];
-    const poolById = new Map(pool.map(x => [x.id, x]));
+  function buildStateEtape5(d){
     const revealed = Number(d?.revealed || 0);
+    const order = Array.isArray(d?.order) ? d.order.slice(0, revealed) : [];
+    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
 
-    const revealedIds = order.slice(0, revealed);
-    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
+    const state = {
+      poolA: [],
+      poolB: [],
+      seedTop: null,
+      seedBottom: null,
+      firstTop: null,
+      firstBottom: null,
+      secondTop: null,
+      secondBottom: null
+    };
 
-    const remainingIds = (order.length ? order.slice(revealed) : pool.map(x => x.id));
-    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
+    if(d?.seed5) state.poolA.push(d.seed5);
+    if(d?.seed6) state.poolB.push(d.seed6);
 
-    return { revealedTeams, remainingTeams };
+    for(const tok of order){
+      const p = parseToken(tok);
+
+      if(p.type === "poolA"){
+        const t = poolById.get(p.value);
+        if(t) state.poolA.push(t);
+      }
+
+      if(p.type === "poolB"){
+        const t = poolById.get(p.value);
+        if(t) state.poolB.push(t);
+      }
+
+      if(p.type === "seed34Top" && !state.seedTop){
+        const picked = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
+        const other = picked?.id === d.seed3?.id ? d.seed4 : d.seed3;
+        state.seedTop = picked || null;
+        state.seedBottom = other || null;
+      }
+
+      if(p.type === "firstTop" && !state.firstTop){
+        const letter = p.value === "A" ? "A" : "B";
+        state.firstTop = letter;
+        state.firstBottom = letter === "A" ? "B" : "A";
+      }
+
+      if(p.type === "secondTop" && !state.secondTop){
+        const letter = p.value === "A" ? "A" : "B";
+        state.secondTop = letter;
+        state.secondBottom = letter === "A" ? "B" : "A";
+      }
+    }
+
+    return state;
+  }
+
+  function tokenLabelEtape5(token, d){
+    const p = parseToken(token);
+    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
+
+    if(p.type === "poolA"){
+      return `Poule A → ${teamLabel(poolById.get(p.value))}`;
+    }
+    if(p.type === "poolB"){
+      return `Poule B → ${teamLabel(poolById.get(p.value))}`;
+    }
+    if(p.type === "seed34Top"){
+      const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
+      return `QF2 (TS3/TS4) → ${teamLabel(t)}`;
+    }
+    if(p.type === "firstTop"){
+      return `1ers de poule → QF2 : 1er poule ${p.value}`;
+    }
+    if(p.type === "secondTop"){
+      return `2es de poule → QF1 : 2e poule ${p.value}`;
+    }
+    return String(token);
   }
 
   function pickItemsFromDrawEtape5(d){
     const order = Array.isArray(d?.order) ? d.order : [];
-    const pool = Array.isArray(d?.pool) ? d.pool : [];
     const revealed = Number(d?.revealed || 0);
-
-    const poolById = new Map(pool.map(x => [x.id, x]));
     const revealedTokens = order.slice(0, revealed);
     const remainingTokens = order.slice(revealed);
 
-    function tokenLabel(tok){
-      const p = parseToken(tok);
-      if(p.type === "seed34"){
-        const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
-        return `Tirage TS3/TS4 → ${teamLabel(t)}`;
-      }
-      if(p.type === "bye"){
-        return `BYE → ligne ${p.value}`;
-      }
-      if(p.type === "team"){
-        const t = poolById.get(p.value);
-        return teamLabel(t);
-      }
-      return String(tok);
-    }
-
     return {
-      revealedItems: revealedTokens.map(tok => ({ token:tok, label:tokenLabel(tok) })),
-      remainingItems: remainingTokens.map(tok => ({ token:tok, label:tokenLabel(tok) }))
+      revealedItems: revealedTokens.map(tok => ({ token:tok, label:tokenLabelEtape5(tok, d) })),
+      remainingItems: remainingTokens.map(tok => ({ token:tok, label:tokenLabelEtape5(tok, d) }))
     };
+  }
+
+  function poolSlotHtml(team, index){
+    if(!team){
+      return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
+    }
+    return `<div class="pool-slot">${esc(teamNameOnly(team))}</div>`;
+  }
+
+  function renderPoolsEtape5(d){
+    const s = buildStateEtape5(d);
+
+    poolAList.innerHTML = [
+      poolSlotHtml(s.poolA[0], 0),
+      poolSlotHtml(s.poolA[1], 1),
+      poolSlotHtml(s.poolA[2], 2)
+    ].join("");
+
+    poolBList.innerHTML = [
+      poolSlotHtml(s.poolB[0], 0),
+      poolSlotHtml(s.poolB[1], 1),
+      poolSlotHtml(s.poolB[2], 2)
+    ].join("");
+
+    const count = s.poolA.length + s.poolB.length;
+    if(count <= 2){
+      poolInfo.textContent = "TS5 et TS6 placées d’office en tête de poule.";
+    } else if(count < 6){
+      poolInfo.textContent = `Répartition des poules en cours… (${count}/6 équipes placées)`;
+    } else {
+      poolInfo.textContent = "✅ Poules A et B entièrement définies.";
+    }
+  }
+
+  function renderMappingEtape5(d){
+    const s = buildStateEtape5(d);
+
+    firstMapBox.textContent = s.firstTop
+      ? `QF2 → 1er poule ${s.firstTop}\nQF3 → 1er poule ${s.firstBottom}`
+      : "En attente";
+
+    secondMapBox.textContent = s.secondTop
+      ? `QF1 → 2e poule ${s.secondTop}\nQF4 → 2e poule ${s.secondBottom}`
+      : "En attente";
+
+    if(!s.firstTop && !s.secondTop){
+      mappingInfo.textContent = "Le chemin des 1ers et 2es de poule sera affiché ici.";
+    } else if(s.firstTop && !s.secondTop){
+      mappingInfo.textContent = "Placement des 1ers de poule effectué. Placement des 2es en attente.";
+    } else if(!s.firstTop && s.secondTop){
+      mappingInfo.textContent = "Placement des 2es de poule effectué. Placement des 1ers en attente.";
+    } else {
+      mappingInfo.textContent = "✅ Chemin complet des qualifiés de poules défini.";
+    }
+  }
+
+  function qfTeamHtml(label, type = "normal"){
+    const cls = type === "seed" ? "line-team seed" : (type === "placeholder" ? "line-team placeholder" : "line-team");
+    return `<div class="${cls}">${esc(label)}</div>`;
+  }
+
+  function quarterBlockHtml(title, top, bottom){
+    return `
+      <div class="match-block">
+        <div class="match-title">${esc(title)}</div>
+        <div class="line-row">
+          ${top}
+          <div class="vs">VS</div>
+          ${bottom}
+        </div>
+      </div>
+    `;
+  }
+
+  function futureItemHtml(name, desc, right){
+    return `
+      <div class="future-item">
+        <div class="future-name">${esc(name)} — ${esc(desc)}</div>
+        <div class="future-desc">${esc(right)}</div>
+      </div>
+    `;
+  }
+
+  function renderBracketPreviewEtape5(d){
+    const s = buildStateEtape5(d);
+
+    const seedQF2 = s.seedTop ? teamNameOnly(s.seedTop) : "TS3 / TS4 à tirer";
+    const seedQF3 = s.seedBottom ? teamNameOnly(s.seedBottom) : "TS3 / TS4 à tirer";
+
+    const firstQF2 = s.firstTop ? `1er poule ${s.firstTop}` : "1er poule A / B à tirer";
+    const firstQF3 = s.firstBottom ? `1er poule ${s.firstBottom}` : "1er poule A / B à tirer";
+
+    const secondQF1 = s.secondTop ? `2e poule ${s.secondTop}` : "2e poule A / B à tirer";
+    const secondQF4 = s.secondBottom ? `2e poule ${s.secondBottom}` : "2e poule A / B à tirer";
+
+    bracketPreview.innerHTML = [
+      quarterBlockHtml(
+        "QF1 — Match 7",
+        qfTeamHtml(`TS #2 — ${teamNameOnly(d?.seed2)}`, "seed"),
+        qfTeamHtml(secondQF1, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF2 — Match 8",
+        qfTeamHtml(s.seedTop ? `TS — ${seedQF2}` : seedQF2, s.seedTop ? "seed" : "placeholder"),
+        qfTeamHtml(firstQF2, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF3 — Match 9",
+        qfTeamHtml(s.seedBottom ? `TS — ${seedQF3}` : seedQF3, s.seedBottom ? "seed" : "placeholder"),
+        qfTeamHtml(firstQF3, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF4 — Match 10",
+        qfTeamHtml(`TS #1 — ${teamNameOnly(d?.seed1)}`, "seed"),
+        qfTeamHtml(secondQF4, "placeholder")
+      )
+    ].join("");
+
+    futureList.innerHTML = [
+      futureItemHtml("Match 11", "3e poule A vs 3e poule B", "Places 9 / 10"),
+      futureItemHtml("Match 12", "Perdant M7 vs Perdant M8", "Vers 7 / 8 / 5 / 6"),
+      futureItemHtml("Match 13", "Perdant M9 vs Perdant M10", "Vers 7 / 8 / 5 / 6"),
+      futureItemHtml("Match 14", "Vainqueur M7 vs Vainqueur M8", "Demi-finale"),
+      futureItemHtml("Match 15", "Vainqueur M9 vs Vainqueur M10", "Demi-finale"),
+      futureItemHtml("Match 16", "Perdant M12 vs Perdant M13", "Places 7 / 8"),
+      futureItemHtml("Match 17", "Vainqueur M12 vs Vainqueur M13", "Places 5 / 6"),
+      futureItemHtml("Match 18", "Perdant M14 vs Perdant M15", "Places 3 / 4"),
+      futureItemHtml("Match 19", "Vainqueur M14 vs Vainqueur M15", "Finale 1 / 2")
+    ].join("");
+
+    if(!s.seedTop){
+      seedInfo.textContent = "Placement TS3 / TS4 en attente.";
+    } else {
+      seedInfo.textContent = `QF2 : ${teamNameOnly(s.seedTop)} — QF3 : ${teamNameOnly(s.seedBottom)}`;
+    }
   }
 
   function renderPreviewClassic(ts1, ts2, poolRemaining, revealedTeams=[]){
@@ -611,125 +812,31 @@
         </div>`).join("")
       : `<div class="muted">En attente…</div>`;
 
+    poolAList.innerHTML = `<div class="muted">—</div>`;
+    poolBList.innerHTML = `<div class="muted">—</div>`;
+    poolInfo.textContent = "—";
+    firstMapBox.textContent = "—";
+    secondMapBox.textContent = "—";
+    mappingInfo.textContent = "—";
+    bracketPreview.innerHTML = "";
+    futureList.innerHTML = "";
     wheel.textContent = "—";
     wheelSub.textContent = "—";
   }
 
-  function buildEtape5LinesFromDraw(d){
-    const lines = new Map();
-    const mainTeamsCount = Number(d?.mainTeamsCount || 0);
-    const mandatoryByes = mandatoryByeLinesEtape5(mainTeamsCount);
-
-    if(d?.seed2) lines.set(1,  { type:"team", team:d.seed2, seed:2 });
-    if(d?.seed1) lines.set(16, { type:"team", team:d.seed1, seed:1 });
-
-    for(const line of mandatoryByes){
-      lines.set(line, { type:"bye" });
-    }
-
-    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
+  function pickTeamsFromDrawClassic(d){
+    const order = d?.order || [];
+    const pool = d?.pool || [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
     const revealed = Number(d?.revealed || 0);
-    const order = Array.isArray(d?.order) ? d.order.slice(0, revealed) : [];
 
-    let seed34Placed = false;
+    const revealedIds = order.slice(0, revealed);
+    const revealedTeams = revealedIds.map(id => poolById.get(id)).filter(Boolean);
 
-    for(const tok of order){
-      const p = parseToken(tok);
+    const remainingIds = (order.length ? order.slice(revealed) : pool.map(x => x.id));
+    const remainingTeams = remainingIds.map(id => poolById.get(id)).filter(Boolean);
 
-      if(p.type === "seed34" && !seed34Placed){
-        const picked = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
-        const other = picked?.id === d.seed3?.id ? d.seed4 : d.seed3;
-
-        if(picked) lines.set(8, { type:"team", team:picked, seed:(picked?.id === d.seed3?.id ? 3 : 4) });
-        if(other)  lines.set(9, { type:"team", team:other,  seed:(other?.id === d.seed3?.id ? 3 : 4) });
-
-        seed34Placed = true;
-      }
-
-      if(p.type === "bye" && Number.isFinite(p.value)){
-        lines.set(p.value, { type:"bye" });
-      }
-    }
-
-    const occupied = new Set(lines.keys());
-    const freeLines = Array.from({ length:16 }, (_,i)=> i+1).filter(n => !occupied.has(n));
-
-    for(const tok of order){
-      const p = parseToken(tok);
-      if(p.type !== "team") continue;
-
-      const t = poolById.get(p.value);
-      if(!t) continue;
-
-      const nextLine = freeLines.shift();
-      if(!nextLine) break;
-
-      lines.set(nextLine, { type:"team", team:t });
-    }
-
-    return lines;
-  }
-
-  function renderBracketPreviewEtape5(d){
-    if(!isEtape5()){
-      bracketPreview.innerHTML = "";
-      return;
-    }
-
-    const lines = buildEtape5LinesFromDraw(d);
-
-    function lineHtml(lineNo){
-      const obj = lines.get(lineNo);
-
-      if(!obj){
-        return `
-          <div class="line-row">
-            <div class="line-no">L${lineNo}</div>
-            <div class="line-team">—</div>
-          </div>
-        `;
-      }
-
-      if(obj.type === "bye"){
-        return `
-          <div class="line-row">
-            <div class="line-no">L${lineNo}</div>
-            <div class="line-team bye">BYE</div>
-          </div>
-        `;
-      }
-
-      const cls = obj.seed ? "line-team seed" : "line-team";
-      const label = obj.seed ? `TS #${obj.seed} — ${obj.team.teamName}` : (obj.team.teamName || "Équipe");
-
-      return `
-        <div class="line-row">
-          <div class="line-no">L${lineNo}</div>
-          <div class="${cls}">${esc(label)}</div>
-        </div>
-      `;
-    }
-
-    const blocks = [];
-    for(let i=1; i<=16; i+=2){
-      blocks.push(`
-        <div class="match-block">
-          <div class="match-title">MATCH ${((i+1)/2)}</div>
-          ${lineHtml(i)}
-          ${lineHtml(i+1)}
-        </div>
-      `);
-    }
-
-    bracketPreview.innerHTML = blocks.join("");
-
-    const line8 = lines.get(8);
-    const line9 = lines.get(9);
-    if(line8?.team && line9?.team){
-      seedInfo.textContent = `TS3/TS4 : ligne 8 = ${line8.team.teamName} / ligne 9 = ${line9.team.teamName}`;
-    } else {
-      seedInfo.textContent = "Tirage TS3/TS4 en attente.";
-    }
+    return { revealedTeams, remainingTeams };
   }
 
   function renderPreviewEtape5(d){
@@ -762,10 +869,12 @@
         `).join("")
       : `<div class="muted">En attente…</div>`;
 
+    renderPoolsEtape5(d);
+    renderMappingEtape5(d);
+    renderBracketPreviewEtape5(d);
+
     wheel.textContent = "—";
     wheelSub.textContent = "—";
-
-    renderBracketPreviewEtape5(d);
   }
 
   function renderPreviewFromState(){
@@ -776,8 +885,8 @@
         renderPreviewEtape5(draw);
       } else {
         renderPreviewEtape5({
-          seed1:null, seed2:null, seed3:null, seed4:null,
-          pool:[], order:[], revealed:0, mainTeamsCount:0
+          seed1:null, seed2:null, seed3:null, seed4:null, seed5:null, seed6:null,
+          pool:[], order:[], revealed:0
         });
       }
       return;
@@ -856,18 +965,18 @@
     cachedMainTeams = rows.sort((a,b)=> a.teamRank - b.teamRank);
 
     if(isEtape5()){
-      if(cachedMainTeams.length < 4 || cachedMainTeams.length > 16){
-        uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Pour l’étape 5 il faut entre 4 et 16 équipes.`);
+      if(cachedMainTeams.length !== 10){
+        uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Pour cette logique étape 5, il faut 10 équipes exactement.`);
         renderPreviewEtape5({
-          seed1:null, seed2:null, seed3:null, seed4:null,
-          pool:[], order:[], revealed:0, mainTeamsCount:cachedMainTeams.length
+          seed1:null, seed2:null, seed3:null, seed4:null, seed5:null, seed6:null,
+          pool:[], order:[], revealed:0
         });
         setButtons();
         return;
       }
 
-      const { seed1, seed2, seed3, seed4, pool } = computeEtape5DrawParts(cachedMainTeams);
-      const order = buildEtape5Order(cachedMainTeams.length, seed3, seed4, pool);
+      const { seed1, seed2, seed3, seed4, seed5, seed6, pool } = computeEtape5DrawParts(cachedMainTeams);
+      const order = buildEtape5Order(seed3, seed4, pool);
 
       await setDoc(DRAW_REF(currentScope), {
         scope: currentScope,
@@ -876,6 +985,8 @@
         seed2: { id: seed2.id, teamName: seed2.teamName, p1FirstName: seed2.p1FirstName, p2FirstName: seed2.p2FirstName, teamRank: seed2.teamRank },
         seed3: { id: seed3.id, teamName: seed3.teamName, p1FirstName: seed3.p1FirstName, p2FirstName: seed3.p2FirstName, teamRank: seed3.teamRank },
         seed4: { id: seed4.id, teamName: seed4.teamName, p1FirstName: seed4.p1FirstName, p2FirstName: seed4.p2FirstName, teamRank: seed4.teamRank },
+        seed5: { id: seed5.id, teamName: seed5.teamName, p1FirstName: seed5.p1FirstName, p2FirstName: seed5.p2FirstName, teamRank: seed5.teamRank },
+        seed6: { id: seed6.id, teamName: seed6.teamName, p1FirstName: seed6.p1FirstName, p2FirstName: seed6.p2FirstName, teamRank: seed6.teamRank },
         pool: pool.map(p => ({
           id:p.id,
           teamName:p.teamName,
@@ -883,7 +994,6 @@
           p2FirstName:p.p2FirstName,
           teamRank:p.teamRank
         })),
-        mainTeamsCount: cachedMainTeams.length,
         order,
         revealed: 0,
         revealedAtMs: [],
@@ -899,7 +1009,7 @@
     }
 
     if(cachedMainTeams.length !== 8){
-      uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Il en faut 8 (list=main, stby=false).`);
+      uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Il en faut 8.`);
       renderPreviewClassic(null, null, cachedMainTeams.slice(0, 6), []);
       setButtons();
       return;
@@ -924,8 +1034,7 @@
 
     await readDraw();
     setButtons();
-
-    uiSet("✅ Équipes chargées (urne publiée). Tu peux lancer le tirage.");
+    uiSet("✅ Équipes chargées. Tu peux lancer le tirage.");
     renderPreviewFromState();
   }
 
@@ -1009,23 +1118,6 @@
       };
       tick();
     });
-  }
-
-  function tokenLabelEtape5(token, d){
-    const p = parseToken(token);
-    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
-
-    if(p.type === "seed34"){
-      const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
-      return `TS3/TS4 → ${teamLabel(t)}`;
-    }
-    if(p.type === "bye"){
-      return `BYE → ligne ${p.value}`;
-    }
-    if(p.type === "team"){
-      return teamLabel(poolById.get(p.value));
-    }
-    return String(token);
   }
 
   async function nextPick(){
@@ -1121,7 +1213,7 @@
       return;
     }
 
-    const ok = confirm("Valider le tirage ?\n\nLe public verra le tirage VALIDÉ + date/heure.");
+    const ok = confirm("Valider le tirage ?\n\nLe public verra le tirage validé.");
     if(!ok) return;
 
     await updateDoc(DRAW_REF(currentScope), {
@@ -1140,7 +1232,7 @@
       return;
     }
 
-    const ok1 = confirm("⚠️ Réinitialiser le tirage ?\n\nCela efface l’état du tirage pour cette étape.");
+    const ok1 = confirm("⚠️ Réinitialiser le tirage ?");
     if(!ok1) return;
 
     const typed = prompt('Tape exactement : RESET');
@@ -1157,8 +1249,9 @@
         seed2: null,
         seed3: null,
         seed4: null,
+        seed5: null,
+        seed6: null,
         pool: [],
-        mainTeamsCount: 0,
         order: [],
         revealed: 0,
         revealedAtMs: [],
