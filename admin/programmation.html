@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Programmation</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-prog-etape5-v2" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-prog-etape5-v3" />
 
   <style>
     .btn.is-active{
@@ -597,7 +597,10 @@
         updatedAt: serverTimestamp(),
         courts,
         source: { drawValidatedAt: draw.validatedAt || null, drawDoc: "tirages/" + scope },
-        teams, matches, slots, schedule
+        teams, matches, slots, schedule,
+        poolRankingValidated: false,
+        poolRankingValidatedAt: null,
+        poolRankingValidatedBy: null
       };
 
       await setDoc(progRef(scope), payload, { merge:true });
@@ -737,11 +740,8 @@
         B.gamesWon += gb;
         B.gamesLost += ga;
 
-        if(ga > gb){
-          setsA++;
-        } else if(gb > ga){
-          setsB++;
-        }
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
       }
 
       A.setsWon += setsA;
@@ -786,6 +786,7 @@
     }
 
     if(ref.type === "poolRank"){
+      if(!prog?.poolRankingValidated) return null;
       const ranking = computePoolRanking(prog, ref.pool);
       const row = ranking[Number(ref.rank) - 1];
       return row?.team || null;
@@ -835,7 +836,7 @@
     if(ref.type === "winner") return { title: `V${ref.matchId.slice(1)}`, sub:"" };
     if(ref.type === "loser")  return { title: `P${ref.matchId.slice(1)}`, sub:"" };
     if(ref.type === "poolRank"){
-      return { title: `${ref.rank}e poule ${ref.pool}`, sub:"" };
+      return { title: "Classement poule en attente de validation JAT", sub:"" };
     }
 
     return { title:"—", sub:"" };
