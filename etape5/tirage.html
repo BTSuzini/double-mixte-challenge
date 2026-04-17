@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage-v2" />
 </head>
 <body>
 
@@ -61,7 +61,7 @@
     <div id="bracketList" class="bracket-list"></div>
   </section>
 
-  <section class="card" id="panelUrne" style="display:none;">
+  <section class="card" id="panelUrne" style="display:none !important;">
     <h2 style="margin:0 0 10px;">📥 Urne</h2>
     <div id="urneList" style="display:grid; gap:8px;"></div>
   </section>
@@ -372,10 +372,6 @@
     return lines;
   }
 
-  function extraByeCount(draw){
-    return Math.max(0, byeCount(draw) - 4);
-  }
-
   function allLines(){
     return Array.from({ length:16 }, (_,i)=> i+1);
   }
@@ -503,77 +499,22 @@
     seed3El.textContent = draw?.seed3 ? rouletteLabelTeam(draw.seed3) : "—";
     seed4El.textContent = draw?.seed4 ? rouletteLabelTeam(draw.seed4) : "—";
 
-    const { seed34Placed } = buildState(draw, revealedTokens);
+    const state = buildState(draw, revealedTokens);
 
-    if(!seed34Placed){
+    if(!state.seed34Placed){
       seed34Info.textContent = "Tirage TS3 / TS4 en attente → lignes 8 et 9.";
       return;
     }
 
-    const line8 = buildState(draw, revealedTokens).lines.get(8);
-    const line9 = buildState(draw, revealedTokens).lines.get(9);
+    const line8 = state.lines.get(8);
+    const line9 = state.lines.get(9);
 
     seed34Info.textContent = `Ligne 8 : ${teamNameOnly(line8?.team)} — Ligne 9 : ${teamNameOnly(line9?.team)}`;
   }
 
   function renderUrne(draw, revealedTokens, remainingTokens){
-    panelUrne.style.display = "block";
-
-    if(!drawHasData(draw)){
-      urneList.innerHTML = `<div class="muted">⏳ Tirage non prêt.</div>`;
-      return;
-    }
-
-    if(!remainingTokens.length){
-      urneList.innerHTML = `<div class="muted">✅ Urne vide.</div>`;
-      return;
-    }
-
-    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
-    const items = [];
-
-    for(const tok of remainingTokens){
-      const p = parseToken(tok);
-
-      if(p.type === "seed34"){
-        const team = poolById.get(p.value) || (draw.seed3?.id === p.value ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null));
-        items.push(`
-          <div class="card urne-item">
-            <div class="urne-row">
-              <div class="urne-name">Tirage TS3/TS4 → ${esc(rouletteLabelTeam(team))}</div>
-              <span class="pill">tête de série</span>
-            </div>
-          </div>
-        `);
-        continue;
-      }
-
-      if(p.type === "bye"){
-        items.push(`
-          <div class="card urne-item">
-            <div class="urne-row">
-              <div class="urne-name">BYE → ligne ${esc(String(p.value))}</div>
-              <span class="pill">bye</span>
-            </div>
-          </div>
-        `);
-        continue;
-      }
-
-      if(p.type === "team"){
-        const t = poolById.get(p.value);
-        items.push(`
-          <div class="card urne-item">
-            <div class="urne-row">
-              <div class="urne-name">${esc(rouletteLabelTeam(t))}</div>
-              <span class="pill">urne</span>
-            </div>
-          </div>
-        `);
-      }
-    }
-
-    urneList.innerHTML = items.length ? items.join("") : `<div class="muted">—</div>`;
+    panelUrne.style.display = "none";
+    urneList.innerHTML = "";
   }
 
   function tokenToRouletteLabel(draw, token){
@@ -680,7 +621,7 @@
 
     panelRoulette.style.display = "block";
     panelBracket.style.display = "block";
-    panelUrne.style.display = "block";
+    panelUrne.style.display = "none";
     panelSeeds.style.display = "block";
 
     const { revealedTokens, remainingTokens } = computeLists(draw);
@@ -766,7 +707,7 @@
     replayMode = false;
     replayAbort = false;
 
-    panelUrne.style.display = "block";
+    panelUrne.style.display = "none";
     wheelSub.textContent = "✅ Replay terminé";
 
     updateStatus(currentDraw);
@@ -807,7 +748,7 @@
 
     panelRoulette.style.display = "block";
     panelBracket.style.display = "block";
-    panelUrne.style.display = "block";
+    panelUrne.style.display = "none";
     panelSeeds.style.display = "block";
 
     updateStatus(currentDraw);
