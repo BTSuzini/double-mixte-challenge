@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage — Étape 5 (test)</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage2-v1" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage2-v2" />
 </head>
 <body>
 
@@ -242,6 +242,11 @@
     font-style:italic;
   }
 
+  .pool-slot.fixed-seed{
+    background:#fff9e8;
+    border-color:#f1dca1;
+  }
+
   .mapping-box{
     border:1px solid #f0f0f0;
     border-radius:10px;
@@ -352,7 +357,7 @@
   import { db } from "../assets/js/firebase.js";
   import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  const scope = "etape5_tirage2";
+  const scope = "etape5";
   const DRAW_REF = doc(db, "tirages", scope);
 
   const statusText = document.getElementById("statusText");
@@ -436,6 +441,8 @@
       draw.seed2 &&
       draw.seed3 &&
       draw.seed4 &&
+      draw.seed5 &&
+      draw.seed6 &&
       Array.isArray(draw.pool) &&
       Array.isArray(draw.order)
     );
@@ -480,6 +487,9 @@
       secondBottom: null
     };
 
+    if(draw?.seed5) state.poolA.push(draw.seed5);
+    if(draw?.seed6) state.poolB.push(draw.seed6);
+
     for(const tok of revealedTokens){
       const p = parseToken(tok);
 
@@ -520,11 +530,12 @@
     return state;
   }
 
-  function poolSlotHtml(team, index){
+  function poolSlotHtml(team, index, isFixed = false){
     if(!team){
       return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
     }
-    return `<div class="pool-slot">${esc(teamNameOnly(team))}</div>`;
+    const cls = isFixed ? "pool-slot fixed-seed" : "pool-slot";
+    return `<div class="${cls}">${esc(teamNameOnly(team))}</div>`;
   }
 
   function renderPools(draw, revealedTokens){
@@ -533,24 +544,25 @@
     const state = buildState(draw, revealedTokens);
 
     poolAList.innerHTML = [
-      poolSlotHtml(state.poolA[0], 0),
-      poolSlotHtml(state.poolA[1], 1),
-      poolSlotHtml(state.poolA[2], 2)
+      poolSlotHtml(state.poolA[0], 0, true),
+      poolSlotHtml(state.poolA[1], 1, false),
+      poolSlotHtml(state.poolA[2], 2, false)
     ].join("");
 
     poolBList.innerHTML = [
-      poolSlotHtml(state.poolB[0], 0),
-      poolSlotHtml(state.poolB[1], 1),
-      poolSlotHtml(state.poolB[2], 2)
+      poolSlotHtml(state.poolB[0], 0, true),
+      poolSlotHtml(state.poolB[1], 1, false),
+      poolSlotHtml(state.poolB[2], 2, false)
     ].join("");
 
     const totalPlaced = state.poolA.length + state.poolB.length;
-    if(totalPlaced === 0){
-      poolInfo.textContent = "Répartition des poules en attente.";
+
+    if(totalPlaced <= 2){
+      poolInfo.textContent = "TS5 et TS6 placées d’office en tête de poule.";
     } else if(totalPlaced < 6){
       poolInfo.textContent = `Répartition en cours… (${totalPlaced}/6 équipes placées)`;
     } else {
-      poolInfo.textContent = "✅ Poules A et B entièrement tirées.";
+      poolInfo.textContent = "✅ Poules A et B entièrement définies.";
     }
   }
 
@@ -620,6 +632,15 @@
     `;
   }
 
+  function futureItemHtml(name, desc, right){
+    return `
+      <div class="future-item">
+        <div class="future-name">${esc(name)} — ${esc(desc)}</div>
+        <div class="future-desc">${esc(right)}</div>
+      </div>
+    `;
+  }
+
   function renderBracket(draw, revealedTokens){
     panelBracket.style.display = "block";
 
@@ -668,15 +689,6 @@
       futureItemHtml("Match 18", "Perdant M14 vs Perdant M15", "Places 3 / 4"),
       futureItemHtml("Match 19", "Vainqueur M14 vs Vainqueur M15", "Finale 1 / 2")
     ].join("");
-  }
-
-  function futureItemHtml(name, desc, right){
-    return `
-      <div class="future-item">
-        <div class="future-name">${esc(name)} — ${esc(desc)}</div>
-        <div class="future-desc">${esc(right)}</div>
-      </div>
-    `;
   }
 
   function tokenToRouletteLabel(draw, token){
