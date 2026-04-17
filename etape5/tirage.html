@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tirage — Étape 5</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-maintenance" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-etape5-tirage2-v3" />
 </head>
 <body>
 
@@ -36,15 +36,100 @@
 </header>
 
 <main class="container">
-  <section class="card" style="text-align:center;">
-    <h2 style="margin:0 0 10px;">🛠️ Maintenance en cours</h2>
-    <p class="muted" style="margin:0 0 10px;">
-      Le tirage au sort est en cours de préparation.
+
+  <section class="card">
+    <h2 style="margin:0 0 10px;" id="drawTitle">🎲 Tirage au sort</h2>
+    <p class="muted" id="drawExplain" style="margin:0 0 10px;">
+      Chargement…
     </p>
-    <p class="muted" style="margin:0;">
-      Merci de revenir dans quelques instants.
-    </p>
+    <p class="muted" id="statusText" style="margin:0;">Chargement…</p>
+
+    <div class="grid" style="margin-top:12px;">
+      <button class="btn" id="btnReplay" style="font-weight:900; color:#111; display:none;">▶️ Replay roulette</button>
+      <button class="btn" id="btnStopReplay" style="font-weight:900; color:#111; display:none;">⏹️ Stop replay</button>
+    </div>
+
+    <p class="muted" id="modeBadge" style="margin-top:10px;"></p>
+    <p class="muted" id="validatedAt" style="margin-top:6px;"></p>
   </section>
+
+  <section class="card" id="panelRoulette" style="display:none;">
+    <h2 style="margin:0 0 10px;">🎰 Roulette</h2>
+    <div class="roulette-wheel" id="wheel">—</div>
+    <div class="muted" id="wheelSub" style="margin-top:8px;">—</div>
+  </section>
+
+  <section class="card" id="panelPools" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏖️ Poules</h2>
+    <div class="pool-grid">
+      <div class="pool-card">
+        <div class="pool-title">Poule A</div>
+        <div id="poolAList" class="pool-list"></div>
+      </div>
+      <div class="pool-card">
+        <div class="pool-title">Poule B</div>
+        <div id="poolBList" class="pool-list"></div>
+      </div>
+    </div>
+    <p class="muted" id="poolInfo" style="margin:10px 0 0;">Répartition des poules en attente.</p>
+  </section>
+
+  <section class="card" id="panelSeeds" style="display:none;">
+    <h2 style="margin:0 0 10px;">🏷️ Têtes de série</h2>
+
+    <div class="grid">
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #1 — QF4</div>
+        <div class="muted" id="seed1">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #2 — QF1</div>
+        <div class="muted" id="seed2">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #3</div>
+        <div class="muted" id="seed3">—</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div style="font-weight:1000;">🏷️ TS #4</div>
+        <div class="muted" id="seed4">—</div>
+      </div>
+    </div>
+
+    <p class="muted" id="seed34Info" style="margin:10px 0 0;">Placement TS3 / TS4 en attente.</p>
+  </section>
+
+  <section class="card" id="panelMapping" style="display:none;">
+    <h2 style="margin:0 0 10px;">🧭 Placement des qualifiés de poules</h2>
+
+    <div class="mapping-grid">
+      <div class="mapping-card">
+        <div class="mapping-title">🔀 Tirage qualifiés</div>
+        <div id="qualifiedMapBox" class="mapping-box">En attente</div>
+      </div>
+      <div class="mapping-card">
+        <div class="mapping-title">📋 Conséquences</div>
+        <div id="qualifiedDetailsBox" class="mapping-box">En attente</div>
+      </div>
+    </div>
+
+    <p class="muted" id="mappingInfo" style="margin:10px 0 0;">Le placement des qualifiés de poules sera affiché ici.</p>
+  </section>
+
+  <section class="card" id="panelBracket" style="display:none;">
+    <h2 style="margin:0 0 10px;">📋 Tableau final</h2>
+
+    <div class="bracket-stage">
+      <div class="stage-title">Quarts de finale</div>
+      <div id="qfList" class="bracket-list"></div>
+    </div>
+
+    <div class="bracket-stage" style="margin-top:14px;">
+      <div class="stage-title">Demi-finales / finales / classements</div>
+      <div id="futureList" class="future-list"></div>
+    </div>
+  </section>
+
 </main>
 
 <style>
@@ -65,6 +150,7 @@
     display:block;
     filter: drop-shadow(0 1px 0 rgba(0,0,0,.15));
   }
+
   .nav-step{
     justify-content: space-between;
     gap: 8px;
@@ -78,11 +164,13 @@
     flex: 1 1 auto;
     text-align:center;
   }
+
   .nav a[aria-current="page"]{
     background: rgba(255,255,255,.26);
     border-color: rgba(255,255,255,.45);
     box-shadow: 0 6px 14px rgba(0,0,0,.10);
   }
+
   @media (max-width: 420px){
     .nav-step a{
       padding:7px 10px;
@@ -90,7 +178,872 @@
     }
     .step-title-img{ max-height: 74px; }
   }
+
+  #panelRoulette.card, #panelPools.card, #panelBracket.card, #panelSeeds.card, #panelMapping.card{
+    padding:12px;
+  }
+
+  .roulette-wheel{
+    height:58px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    font-size:17px;
+    letter-spacing:.2px;
+    background:linear-gradient(180deg,#fff,#fafafa);
+    padding:0 10px;
+    text-align:center;
+  }
+
+  .pool-grid, .mapping-grid{
+    display:grid;
+    gap:10px;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .pool-card, .mapping-card{
+    border:1px solid #eee;
+    border-radius:14px;
+    background:#fff;
+    padding:10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.03);
+  }
+
+  .pool-title, .mapping-title, .stage-title{
+    font-size:13px;
+    font-weight:1000;
+    opacity:.8;
+    margin-bottom:8px;
+    letter-spacing:.2px;
+  }
+
+  .pool-list{
+    display:grid;
+    gap:8px;
+  }
+
+  .pool-slot{
+    border:1px solid #f0f0f0;
+    border-radius:10px;
+    background:#fafafa;
+    padding:8px 10px;
+    font-weight:900;
+    font-size:14px;
+    line-height:1.2;
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .pool-slot.empty{
+    font-weight:700;
+    color:#777;
+    font-style:italic;
+  }
+
+  .pool-slot.fixed-seed{
+    background:#fff9e8;
+    border-color:#f1dca1;
+  }
+
+  .mapping-box{
+    border:1px solid #f0f0f0;
+    border-radius:10px;
+    background:#fafafa;
+    padding:10px;
+    font-weight:900;
+    font-size:14px;
+    line-height:1.35;
+    white-space:pre-line;
+  }
+
+  .bracket-list{
+    display:grid;
+    gap:10px;
+  }
+
+  .future-list{
+    display:grid;
+    gap:8px;
+  }
+
+  .match-block, .future-item{
+    border:1px solid #eee;
+    border-radius:14px;
+    background:#fff;
+    padding:10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.03);
+  }
+
+  .match-title{
+    font-size:12px;
+    font-weight:1000;
+    opacity:.6;
+    margin-bottom:8px;
+    letter-spacing:.3px;
+  }
+
+  .line-row{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:6px;
+    align-items:center;
+    min-width:0;
+  }
+
+  .line-team{
+    border:1px solid #f0f0f0;
+    border-radius:10px;
+    background:#fafafa;
+    padding:8px 10px;
+    font-weight:900;
+    font-size:14px;
+    line-height:1.2;
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .line-team.seed{
+    background:#fff9e8;
+    border-color:#f1dca1;
+  }
+
+  .line-team.placeholder{
+    background:#f7fbff;
+    border-color:#d9ebfb;
+  }
+
+  .vs{
+    text-align:center;
+    font-size:12px;
+    font-weight:1000;
+    color:#777;
+  }
+
+  .future-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+  }
+
+  .future-name{
+    font-size:13px;
+    font-weight:1000;
+  }
+
+  .future-desc{
+    font-size:12px;
+    color:#666;
+    text-align:right;
+  }
+
+  @media (max-width: 640px){
+    .pool-grid, .mapping-grid{
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 360px){
+    .roulette-wheel{ height:54px; font-size:16px; }
+    .line-team, .pool-slot, .mapping-box{ font-size:13px; }
+  }
 </style>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const scope = "etape5";
+  const DRAW_REF = doc(db, "tirages", scope);
+
+  const drawTitle = document.getElementById("drawTitle");
+  const drawExplain = document.getElementById("drawExplain");
+  const statusText = document.getElementById("statusText");
+  const modeBadge = document.getElementById("modeBadge");
+  const validatedAtEl = document.getElementById("validatedAt");
+
+  const panelRoulette = document.getElementById("panelRoulette");
+  const panelPools = document.getElementById("panelPools");
+  const panelSeeds = document.getElementById("panelSeeds");
+  const panelMapping = document.getElementById("panelMapping");
+  const panelBracket = document.getElementById("panelBracket");
+
+  const seed1El = document.getElementById("seed1");
+  const seed2El = document.getElementById("seed2");
+  const seed3El = document.getElementById("seed3");
+  const seed4El = document.getElementById("seed4");
+  const seed34Info = document.getElementById("seed34Info");
+
+  const poolAList = document.getElementById("poolAList");
+  const poolBList = document.getElementById("poolBList");
+  const poolInfo = document.getElementById("poolInfo");
+
+  const qualifiedMapBox = document.getElementById("qualifiedMapBox");
+  const qualifiedDetailsBox = document.getElementById("qualifiedDetailsBox");
+  const mappingInfo = document.getElementById("mappingInfo");
+
+  const qfList = document.getElementById("qfList");
+  const futureList = document.getElementById("futureList");
+
+  const wheel = document.getElementById("wheel");
+  const wheelSub = document.getElementById("wheelSub");
+
+  const btnReplay = document.getElementById("btnReplay");
+  const btnStopReplay = document.getElementById("btnStopReplay");
+
+  let currentDraw = null;
+
+  let shownCount = 0;
+  let revealedShown = [];
+  let liveAnimating = false;
+
+  let replayMode = false;
+  let replayAbort = false;
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function fmtDate(ts){
+    try{
+      const d = ts?.toDate ? ts.toDate() : null;
+      if(!d) return "";
+      return d.toLocaleString("fr-FR", {
+        year:"numeric", month:"long", day:"numeric",
+        hour:"2-digit", minute:"2-digit"
+      });
+    }catch{
+      return "";
+    }
+  }
+
+  function rouletteLabelTeam(t){
+    if(!t) return "—";
+    const tn = t.teamName || "Équipe";
+    const p1 = t.p1FirstName || "?";
+    const p2 = t.p2FirstName || "?";
+    return `${tn} (${p1} / ${p2})`;
+  }
+
+  function teamNameOnly(t){
+    return (t && t.teamName) ? t.teamName : "—";
+  }
+
+  function drawHasData(draw){
+    return !!(
+      draw &&
+      draw.seed1 &&
+      draw.seed2 &&
+      draw.seed3 &&
+      draw.seed4 &&
+      draw.seed5 &&
+      draw.seed6 &&
+      Array.isArray(draw.pool) &&
+      Array.isArray(draw.order)
+    );
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+
+    if(s.startsWith("POOLA:")) return { type:"poolA", value:s.slice(6) };
+    if(s.startsWith("POOLB:")) return { type:"poolB", value:s.slice(6) };
+
+    if(s.startsWith("SEED34TOP:")) return { type:"seed34Top", value:s.slice(10) };
+
+    if(s.startsWith("QUALIFIEDTOP:")) return { type:"qualifiedTop", value:s.slice(13) };
+
+    return { type:"unknown", value:s };
+  }
+
+  function computeLists(draw){
+    const order = Array.isArray(draw?.order) ? draw.order : [];
+    const revealed = Number(draw?.revealed || 0);
+
+    const revealedTokens = order.slice(0, revealed);
+    const remainingTokens = order.slice(revealed);
+
+    return { revealedTokens, remainingTokens };
+  }
+
+  function buildState(draw, revealedTokens){
+    const pool = Array.isArray(draw?.pool) ? draw.pool : [];
+    const poolById = new Map(pool.map(x => [x.id, x]));
+
+    const state = {
+      poolA: [],
+      poolB: [],
+      seedTop: null,
+      seedBottom: null,
+      qualifiedTop: null
+    };
+
+    if(draw?.seed5) state.poolA.push(draw.seed5);
+    if(draw?.seed6) state.poolB.push(draw.seed6);
+
+    for(const tok of revealedTokens){
+      const p = parseToken(tok);
+
+      if(p.type === "poolA"){
+        const team = poolById.get(p.value);
+        if(team && !state.poolA.some(x => x.id === team.id)) state.poolA.push(team);
+      }
+
+      if(p.type === "poolB"){
+        const team = poolById.get(p.value);
+        if(team && !state.poolB.some(x => x.id === team.id)) state.poolB.push(team);
+      }
+
+      if(p.type === "seed34Top" && !state.seedTop){
+        const picked = (draw.seed3?.id === p.value) ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null);
+        const other = picked?.id === draw.seed3?.id ? draw.seed4 : draw.seed3;
+        state.seedTop = picked || null;
+        state.seedBottom = other || null;
+      }
+
+      if(p.type === "qualifiedTop" && !state.qualifiedTop){
+        const letter = p.value === "A" ? "A" : (p.value === "B" ? "B" : null);
+        if(letter){
+          state.qualifiedTop = letter;
+        }
+      }
+    }
+
+    return state;
+  }
+
+  function getStageInfo(draw, revealedTokens){
+    const order = Array.isArray(draw?.order) ? draw.order : [];
+    const revealedCount = revealedTokens.length;
+
+    const poolPhaseCount = order.filter(t => t.startsWith("POOLA:") || t.startsWith("POOLB:")).length;
+
+    const seedPhaseStart = poolPhaseCount;
+    const qualifiedPhaseStart = seedPhaseStart + 1;
+
+    if(revealedCount < poolPhaseCount){
+      return {
+        title: "🎲 Tirage des poules",
+        explain:
+          "TS5 est placée d’office en tête de la poule A et TS6 en tête de la poule B. " +
+          "Les 4 autres équipes sont ensuite tirées dans l’ordre : A2, B2, A3, B3."
+      };
+    }
+
+    if(revealedCount < qualifiedPhaseStart){
+      return {
+        title: "🎲 Tirage des TS3 et TS4",
+        explain:
+          "On tire laquelle des deux têtes de série restantes va en QF2. " +
+          "L’autre est automatiquement placée en QF3."
+      };
+    }
+
+    if(revealedCount < order.length){
+      return {
+        title: "🎲 Tirage des qualifiés de poules",
+        explain:
+          "On tire une seule lettre : A ou B. " +
+          "La lettre tirée envoie le 1er de cette poule en QF2. " +
+          "Tout le reste du placement des 1ers et 2es de poule en découle automatiquement."
+      };
+    }
+
+    return {
+      title: "✅ Tirage terminé",
+      explain:
+        "Les poules, le placement des TS3/TS4 et le chemin des qualifiés de poules sont maintenant entièrement définis."
+    };
+  }
+
+  function poolSlotHtml(team, index, isFixed = false){
+    if(!team){
+      return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
+    }
+    const cls = isFixed ? "pool-slot fixed-seed" : "pool-slot";
+    return `<div class="${cls}">${esc(teamNameOnly(team))}</div>`;
+  }
+
+  function renderPools(draw, revealedTokens){
+    panelPools.style.display = "block";
+
+    const state = buildState(draw, revealedTokens);
+
+    poolAList.innerHTML = [
+      poolSlotHtml(state.poolA[0], 0, true),
+      poolSlotHtml(state.poolA[1], 1, false),
+      poolSlotHtml(state.poolA[2], 2, false)
+    ].join("");
+
+    poolBList.innerHTML = [
+      poolSlotHtml(state.poolB[0], 0, true),
+      poolSlotHtml(state.poolB[1], 1, false),
+      poolSlotHtml(state.poolB[2], 2, false)
+    ].join("");
+
+    const totalPlaced = state.poolA.length + state.poolB.length;
+    if(totalPlaced <= 2){
+      poolInfo.textContent = "TS5 et TS6 sont placées d’office en tête de poule.";
+    } else if(totalPlaced < 6){
+      poolInfo.textContent = `Répartition en cours… (${totalPlaced}/6 équipes placées)`;
+    } else {
+      poolInfo.textContent = "✅ Poules A et B entièrement définies.";
+    }
+  }
+
+  function renderSeeds(draw, revealedTokens){
+    panelSeeds.style.display = "block";
+
+    seed1El.textContent = draw?.seed1 ? rouletteLabelTeam(draw.seed1) : "—";
+    seed2El.textContent = draw?.seed2 ? rouletteLabelTeam(draw.seed2) : "—";
+    seed3El.textContent = draw?.seed3 ? rouletteLabelTeam(draw.seed3) : "—";
+    seed4El.textContent = draw?.seed4 ? rouletteLabelTeam(draw.seed4) : "—";
+
+    const state = buildState(draw, revealedTokens);
+
+    if(!state.seedTop || !state.seedBottom){
+      seed34Info.textContent = "Placement TS3 / TS4 en attente.";
+      return;
+    }
+
+    seed34Info.textContent = `QF2 : ${teamNameOnly(state.seedTop)} — QF3 : ${teamNameOnly(state.seedBottom)}`;
+  }
+
+  function renderQualifiedMapping(draw, revealedTokens){
+    panelMapping.style.display = "block";
+
+    const state = buildState(draw, revealedTokens);
+
+    if(!state.qualifiedTop){
+      qualifiedMapBox.textContent = "En attente";
+      qualifiedDetailsBox.textContent = "En attente";
+      mappingInfo.textContent = "Le placement des qualifiés de poules sera affiché ici.";
+      return;
+    }
+
+    qualifiedMapBox.textContent =
+      `Lettre tirée : ${state.qualifiedTop}\n` +
+      `→ 1er poule ${state.qualifiedTop} en QF2`;
+
+    if(state.qualifiedTop === "A"){
+      qualifiedDetailsBox.textContent =
+        "QF2 → 1er poule A\n" +
+        "QF3 → 1er poule B\n" +
+        "QF4 → 2e poule A\n" +
+        "QF1 → 2e poule B";
+    } else {
+      qualifiedDetailsBox.textContent =
+        "QF2 → 1er poule B\n" +
+        "QF3 → 1er poule A\n" +
+        "QF4 → 2e poule B\n" +
+        "QF1 → 2e poule A";
+    }
+
+    mappingInfo.textContent = "✅ Placement des qualifiés de poules défini.";
+  }
+
+  function qfTeamHtml(label, type = "normal"){
+    const cls = type === "seed" ? "line-team seed" : (type === "placeholder" ? "line-team placeholder" : "line-team");
+    return `<div class="${cls}">${esc(label)}</div>`;
+  }
+
+  function quarterBlockHtml(title, top, bottom){
+    return `
+      <div class="match-block">
+        <div class="match-title">${esc(title)}</div>
+        <div class="line-row">
+          ${top}
+          <div class="vs">VS</div>
+          ${bottom}
+        </div>
+      </div>
+    `;
+  }
+
+  function futureItemHtml(name, desc, right){
+    return `
+      <div class="future-item">
+        <div class="future-name">${esc(name)} — ${esc(desc)}</div>
+        <div class="future-desc">${esc(right)}</div>
+      </div>
+    `;
+  }
+
+  function renderBracket(draw, revealedTokens){
+    panelBracket.style.display = "block";
+
+    const state = buildState(draw, revealedTokens);
+
+    const seedQF2 = state.seedTop ? teamNameOnly(state.seedTop) : "TS3 / TS4 à tirer";
+    const seedQF3 = state.seedBottom ? teamNameOnly(state.seedBottom) : "TS3 / TS4 à tirer";
+
+    let firstQF2 = "1er poule A / B à tirer";
+    let firstQF3 = "1er poule A / B à tirer";
+    let secondQF1 = "2e poule A / B à tirer";
+    let secondQF4 = "2e poule A / B à tirer";
+
+    if(state.qualifiedTop === "A"){
+      firstQF2 = "1er poule A";
+      firstQF3 = "1er poule B";
+      secondQF1 = "2e poule B";
+      secondQF4 = "2e poule A";
+    } else if(state.qualifiedTop === "B"){
+      firstQF2 = "1er poule B";
+      firstQF3 = "1er poule A";
+      secondQF1 = "2e poule A";
+      secondQF4 = "2e poule B";
+    }
+
+    qfList.innerHTML = [
+      quarterBlockHtml(
+        "QF1 — Match 7",
+        qfTeamHtml(`TS #2 — ${teamNameOnly(draw?.seed2)}`, "seed"),
+        qfTeamHtml(secondQF1, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF2 — Match 8",
+        qfTeamHtml(state.seedTop ? `TS — ${seedQF2}` : seedQF2, state.seedTop ? "seed" : "placeholder"),
+        qfTeamHtml(firstQF2, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF3 — Match 9",
+        qfTeamHtml(state.seedBottom ? `TS — ${seedQF3}` : seedQF3, state.seedBottom ? "seed" : "placeholder"),
+        qfTeamHtml(firstQF3, "placeholder")
+      ),
+      quarterBlockHtml(
+        "QF4 — Match 10",
+        qfTeamHtml(`TS #1 — ${teamNameOnly(draw?.seed1)}`, "seed"),
+        qfTeamHtml(secondQF4, "placeholder")
+      )
+    ].join("");
+
+    futureList.innerHTML = [
+      futureItemHtml("Match 11", "3e poule A vs 3e poule B", "Classement 9 / 10"),
+      futureItemHtml("Match 12", "Perdant M7 vs Perdant M8", "Classement 7 / 8 / 5 / 6"),
+      futureItemHtml("Match 13", "Perdant M9 vs Perdant M10", "Classement 7 / 8 / 5 / 6"),
+      futureItemHtml("Match 14", "Vainqueur M7 vs Vainqueur M8", "Demi-finale"),
+      futureItemHtml("Match 15", "Vainqueur M9 vs Vainqueur M10", "Demi-finale"),
+      futureItemHtml("Match 16", "Perdant M12 vs Perdant M13", "Places 7 / 8"),
+      futureItemHtml("Match 17", "Vainqueur M12 vs Vainqueur M13", "Places 5 / 6"),
+      futureItemHtml("Match 18", "Perdant M14 vs Perdant M15", "Places 3 / 4"),
+      futureItemHtml("Match 19", "Vainqueur M14 vs Vainqueur M15", "Finale 1 / 2")
+    ].join("");
+  }
+
+  function tokenToRouletteLabel(draw, token){
+    const p = parseToken(token);
+    const poolById = new Map((draw.pool || []).map(x => [x.id, x]));
+
+    if(p.type === "poolA"){
+      return `Poule A → ${rouletteLabelTeam(poolById.get(p.value))}`;
+    }
+    if(p.type === "poolB"){
+      return `Poule B → ${rouletteLabelTeam(poolById.get(p.value))}`;
+    }
+    if(p.type === "seed34Top"){
+      const t = (draw.seed3?.id === p.value) ? draw.seed3 : (draw.seed4?.id === p.value ? draw.seed4 : null);
+      return `QF2 (TS3/TS4) → ${rouletteLabelTeam(t)}`;
+    }
+    if(p.type === "qualifiedTop"){
+      return `Qualifiés de poules → 1er poule ${p.value} en QF2`;
+    }
+
+    return "—";
+  }
+
+  async function rouletteSpin(finalText, durationMs = 1300){
+    const start = Date.now();
+    wheelSub.textContent = replayMode ? "Replay en cours…" : "La roulette tourne…";
+    const fake = ["🌪️","🎾","🔥","🍀","⚡️","🎲","🏖️"];
+
+    return new Promise((resolve) => {
+      const tick = () => {
+        if(replayAbort){
+          resolve("aborted");
+          return;
+        }
+        const t = Date.now() - start;
+        if(t >= durationMs){
+          wheel.textContent = finalText;
+          wheelSub.textContent = "✅ Révélé";
+          resolve("done");
+          return;
+        }
+        wheel.textContent =
+          fake[Math.floor(Math.random()*fake.length)] + " " +
+          fake[Math.floor(Math.random()*fake.length)];
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+  }
+
+  function updateStatus(draw){
+    const st = draw?.status || "idle";
+    const revealed = Number(draw?.revealed || 0);
+    const total = Array.isArray(draw?.order) ? draw.order.length : 0;
+
+    if(replayMode){
+      modeBadge.textContent = "🎥 Mode REPLAY";
+    } else if(st === "running"){
+      modeBadge.textContent = "🟢 En direct";
+    } else {
+      modeBadge.textContent = "";
+    }
+
+    if(!draw){
+      statusText.textContent = "⏳ Tirage non prêt.";
+      validatedAtEl.textContent = "";
+      drawTitle.textContent = "🎲 Tirage au sort";
+      drawExplain.textContent = "Le tirage n’est pas encore prêt.";
+      return;
+    }
+
+    const { revealedTokens } = computeLists(draw);
+    const stage = getStageInfo(draw, revealedTokens);
+    drawTitle.textContent = stage.title;
+    drawExplain.textContent = stage.explain;
+
+    if(st === "idle"){
+      statusText.textContent = drawHasData(draw)
+        ? "📥 Tirage prêt. En attente du lancement."
+        : "⏳ Tirage non prêt côté admin.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "running"){
+      statusText.textContent = `🎰 Tirage en cours… (${revealed}/${total} révélations)`;
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "pending_validation"){
+      statusText.textContent = "🏁 Tirage fini — en attente de validation.";
+      validatedAtEl.textContent = "";
+      return;
+    }
+
+    if(st === "validated"){
+      statusText.textContent = "✅ Tirage validé.";
+      const d = fmtDate(draw.validatedAt);
+      validatedAtEl.textContent = d ? ("🗓️ Validé le " + d) : "";
+      return;
+    }
+
+    statusText.textContent = "—";
+  }
+
+  async function applyLiveRevealAnimation(draw){
+    if(replayMode) return;
+    if(liveAnimating) return;
+
+    const st = draw?.status || "idle";
+
+    panelRoulette.style.display = "block";
+    panelPools.style.display = "block";
+    panelSeeds.style.display = "block";
+    panelMapping.style.display = "block";
+    panelBracket.style.display = "block";
+
+    const { revealedTokens } = computeLists(draw);
+
+    renderPools(draw, revealedShown);
+    renderSeeds(draw, revealedShown);
+    renderQualifiedMapping(draw, revealedShown);
+    renderBracket(draw, revealedShown);
+    updateStatus(draw);
+
+    if(st !== "running" && st !== "pending_validation" && st !== "validated"){
+      wheel.textContent = "—";
+      wheelSub.textContent = "—";
+      return;
+    }
+
+    if(revealedTokens.length <= shownCount){
+      return;
+    }
+
+    liveAnimating = true;
+
+    while(shownCount < revealedTokens.length){
+      const token = revealedTokens[shownCount];
+
+      await rouletteSpin(tokenToRouletteLabel(draw, token), 1300);
+
+      revealedShown.push(token);
+      shownCount++;
+
+      renderPools(currentDraw, revealedShown);
+      renderSeeds(currentDraw, revealedShown);
+      renderQualifiedMapping(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      updateStatus(currentDraw);
+    }
+
+    liveAnimating = false;
+  }
+
+  async function doReplay(draw){
+    if(!draw || draw.status !== "validated"){
+      alert("Replay disponible uniquement quand le tirage est validé.");
+      return;
+    }
+
+    replayMode = true;
+    replayAbort = false;
+
+    btnReplay.style.display = "none";
+    btnStopReplay.style.display = "inline-flex";
+
+    shownCount = 0;
+    revealedShown = [];
+    wheel.textContent = "—";
+    wheelSub.textContent = "Replay en cours…";
+
+    panelRoulette.style.display = "block";
+    panelPools.style.display = "block";
+    panelSeeds.style.display = "block";
+    panelMapping.style.display = "block";
+    panelBracket.style.display = "block";
+
+    renderPools(draw, revealedShown);
+    renderSeeds(draw, revealedShown);
+    renderQualifiedMapping(draw, revealedShown);
+    renderBracket(draw, revealedShown);
+    updateStatus(draw);
+
+    const revealedTokens = (draw.order || []).slice(0, Number(draw.revealed || 0));
+
+    for(let i=0; i<revealedTokens.length; i++){
+      if(replayAbort) break;
+
+      const token = revealedTokens[i];
+      await rouletteSpin(tokenToRouletteLabel(draw, token), 1300);
+
+      revealedShown.push(token);
+      shownCount = revealedShown.length;
+
+      renderPools(draw, revealedShown);
+      renderSeeds(draw, revealedShown);
+      renderQualifiedMapping(draw, revealedShown);
+      renderBracket(draw, revealedShown);
+      updateStatus(draw);
+    }
+
+    btnStopReplay.style.display = "none";
+    btnReplay.style.display = "inline-flex";
+
+    replayMode = false;
+    replayAbort = false;
+
+    wheelSub.textContent = "✅ Replay terminé";
+
+    updateStatus(currentDraw);
+
+    renderPools(currentDraw, revealedShown);
+    renderSeeds(currentDraw, revealedShown);
+    renderQualifiedMapping(currentDraw, revealedShown);
+    renderBracket(currentDraw, revealedShown);
+  }
+
+  btnReplay.onclick = async (e)=>{
+    e.preventDefault();
+    await doReplay(currentDraw);
+  };
+
+  btnStopReplay.onclick = (e)=>{
+    e.preventDefault();
+    replayAbort = true;
+  };
+
+  onSnapshot(DRAW_REF, async (snap)=>{
+    currentDraw = snap.exists() ? (snap.data() || {}) : null;
+
+    if(!currentDraw){
+      panelRoulette.style.display = "none";
+      panelPools.style.display = "none";
+      panelSeeds.style.display = "none";
+      panelMapping.style.display = "none";
+      panelBracket.style.display = "none";
+
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
+
+      statusText.textContent = "⏳ Tirage non prêt.";
+      modeBadge.textContent = "";
+      validatedAtEl.textContent = "";
+      drawTitle.textContent = "🎲 Tirage au sort";
+      drawExplain.textContent = "Le tirage n’est pas encore prêt.";
+      return;
+    }
+
+    panelRoulette.style.display = "block";
+    panelPools.style.display = "block";
+    panelSeeds.style.display = "block";
+    panelMapping.style.display = "block";
+    panelBracket.style.display = "block";
+
+    updateStatus(currentDraw);
+
+    if(currentDraw.status === "validated"){
+      if(!replayMode) btnReplay.style.display = "inline-flex";
+    } else {
+      btnReplay.style.display = "none";
+      btnStopReplay.style.display = "none";
+    }
+
+    const { revealedTokens } = computeLists(currentDraw);
+
+    renderPools(currentDraw, revealedShown);
+    renderSeeds(currentDraw, revealedShown);
+    renderQualifiedMapping(currentDraw, revealedShown);
+    renderBracket(currentDraw, revealedShown);
+
+    if(!replayMode && currentDraw.status === "idle"){
+      shownCount = 0;
+      revealedShown = [];
+      wheel.textContent = "—";
+      wheelSub.textContent = "—";
+      renderPools(currentDraw, revealedShown);
+      renderSeeds(currentDraw, revealedShown);
+      renderQualifiedMapping(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      updateStatus(currentDraw);
+      return;
+    }
+
+    if(!replayMode && (currentDraw.status === "pending_validation" || currentDraw.status === "validated")){
+      revealedShown = revealedTokens.slice(0);
+      shownCount = revealedShown.length;
+      renderPools(currentDraw, revealedShown);
+      renderSeeds(currentDraw, revealedShown);
+      renderQualifiedMapping(currentDraw, revealedShown);
+      renderBracket(currentDraw, revealedShown);
+      updateStatus(currentDraw);
+      return;
+    }
+
+    if(!replayMode){
+      await applyLiveRevealAnimation(currentDraw);
+    }
+  }, (err)=>{
+    console.error(err);
+    statusText.textContent = "🔴 Erreur de connexion au tirage.";
+    drawTitle.textContent = "🎲 Tirage au sort";
+    drawExplain.textContent = "Une erreur de connexion empêche l’affichage du tirage.";
+  });
+</script>
 
 </body>
 </html>
