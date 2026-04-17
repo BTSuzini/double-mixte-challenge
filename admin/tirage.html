@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Tirage</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-tirage-etape5-v2" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-tirage-etape5-v3" />
 
   <style>
     .btn.is-active{
@@ -86,7 +86,7 @@
       color:#444;
     }
 
-    .line-team.seed{
+    .pool-slot.fixed-seed, .line-team.seed{
       background:#fff9e8;
       border-color:#f1dca1;
     }
@@ -208,8 +208,9 @@
 
     <p class="muted" id="ruleText" style="margin-top:10px;">
       Règle étape 5 : TS1 à TS4 = 4 meilleures équipes globales.<br>
-      Dans les 6 équipes de poules, TS5 va en poule A position 1, TS6 en poule B position 1.<br>
-      Puis tirage des 4 autres : A2, B2, A3, B3. Ensuite tirage TS3/TS4, puis placement des 1ers et 2es de poule.
+      Parmi les équipes de poules, TS5 va en A1 et TS6 en B1.<br>
+      Puis tirage des 4 autres : A2, B2, A3, B3.<br>
+      Ensuite tirage TS3/TS4, puis un seul tirage A/B pour placer les qualifiés de poules.
     </p>
   </section>
 
@@ -272,15 +273,15 @@
       <div style="font-weight:1000; margin-bottom:8px;">🧭 Placement des qualifiés de poules</div>
       <div class="mapping-grid">
         <div class="mapping-card">
-          <div class="mapping-title">🥇 1ers de poule</div>
-          <div id="firstMapBox" class="mapping-box">En attente</div>
+          <div class="mapping-title">🔀 Tirage qualifiés</div>
+          <div id="qualifiedMapBox" class="mapping-box">En attente</div>
         </div>
         <div class="mapping-card">
-          <div class="mapping-title">🥈 2es de poule</div>
-          <div id="secondMapBox" class="mapping-box">En attente</div>
+          <div class="mapping-title">📋 Conséquences</div>
+          <div id="qualifiedDetailsBox" class="mapping-box">En attente</div>
         </div>
       </div>
-      <p class="muted" id="mappingInfo" style="margin:10px 0 0;">Le chemin des 1ers et 2es de poule sera affiché ici.</p>
+      <p class="muted" id="mappingInfo" style="margin:10px 0 0;">Le placement des qualifiés de poules sera affiché ici.</p>
     </div>
 
     <div style="margin-top:12px;">
@@ -343,8 +344,8 @@
 
   const poolList = document.getElementById("poolList");
   const revealedList = document.getElementById("revealedList");
-  const firstMapBox = document.getElementById("firstMapBox");
-  const secondMapBox = document.getElementById("secondMapBox");
+  const qualifiedMapBox = document.getElementById("qualifiedMapBox");
+  const qualifiedDetailsBox = document.getElementById("qualifiedDetailsBox");
   const mappingInfo = document.getElementById("mappingInfo");
 
   const bracketPreview = document.getElementById("bracketPreview");
@@ -517,7 +518,7 @@
       d.seed1 && d.seed2 && d.seed3 && d.seed4 &&
       d.seed5 && d.seed6 &&
       Array.isArray(d.pool) && d.pool.length === 4 &&
-      Array.isArray(d.order)
+      Array.isArray(d.order) && d.order.length === 6
     );
   }
 
@@ -530,8 +531,7 @@
     if(s.startsWith("POOLA:")) return { type:"poolA", value:s.slice(6) };
     if(s.startsWith("POOLB:")) return { type:"poolB", value:s.slice(6) };
     if(s.startsWith("SEED34TOP:")) return { type:"seed34Top", value:s.slice(10) };
-    if(s.startsWith("FIRSTTOP:")) return { type:"firstTop", value:s.slice(9) };
-    if(s.startsWith("SECONDTOP:")) return { type:"secondTop", value:s.slice(10) };
+    if(s.startsWith("QUALIFIEDTOP:")) return { type:"qualifiedTop", value:s.slice(13) };
     return { type:"unknown", value:s };
   }
 
@@ -551,16 +551,14 @@
 
   function buildEtape5Order(seed3, seed4, pool){
     const poolShuffled = randomShuffle(pool);
-    const order = [
+    return [
       `POOLA:${poolShuffled[0].id}`,
       `POOLB:${poolShuffled[1].id}`,
       `POOLA:${poolShuffled[2].id}`,
       `POOLB:${poolShuffled[3].id}`,
       `SEED34TOP:${randomShuffle([seed3.id, seed4.id])[0]}`,
-      `FIRSTTOP:${randomShuffle(["A","B"])[0]}`,
-      `SECONDTOP:${randomShuffle(["A","B"])[0]}`
+      `QUALIFIEDTOP:${randomShuffle(["A","B"])[0]}`
     ];
-    return order;
   }
 
   function buildStateEtape5(d){
@@ -573,10 +571,7 @@
       poolB: [],
       seedTop: null,
       seedBottom: null,
-      firstTop: null,
-      firstBottom: null,
-      secondTop: null,
-      secondBottom: null
+      qualifiedTop: null
     };
 
     if(d?.seed5) state.poolA.push(d.seed5);
@@ -587,12 +582,12 @@
 
       if(p.type === "poolA"){
         const t = poolById.get(p.value);
-        if(t) state.poolA.push(t);
+        if(t && !state.poolA.some(x => x.id === t.id)) state.poolA.push(t);
       }
 
       if(p.type === "poolB"){
         const t = poolById.get(p.value);
-        if(t) state.poolB.push(t);
+        if(t && !state.poolB.some(x => x.id === t.id)) state.poolB.push(t);
       }
 
       if(p.type === "seed34Top" && !state.seedTop){
@@ -602,16 +597,8 @@
         state.seedBottom = other || null;
       }
 
-      if(p.type === "firstTop" && !state.firstTop){
-        const letter = p.value === "A" ? "A" : "B";
-        state.firstTop = letter;
-        state.firstBottom = letter === "A" ? "B" : "A";
-      }
-
-      if(p.type === "secondTop" && !state.secondTop){
-        const letter = p.value === "A" ? "A" : "B";
-        state.secondTop = letter;
-        state.secondBottom = letter === "A" ? "B" : "A";
+      if(p.type === "qualifiedTop" && !state.qualifiedTop){
+        state.qualifiedTop = (p.value === "A" || p.value === "B") ? p.value : null;
       }
     }
 
@@ -632,11 +619,8 @@
       const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
       return `QF2 (TS3/TS4) → ${teamLabel(t)}`;
     }
-    if(p.type === "firstTop"){
-      return `1ers de poule → QF2 : 1er poule ${p.value}`;
-    }
-    if(p.type === "secondTop"){
-      return `2es de poule → QF1 : 2e poule ${p.value}`;
+    if(p.type === "qualifiedTop"){
+      return `Qualifiés de poules → 1er poule ${p.value} en QF2`;
     }
     return String(token);
   }
@@ -653,26 +637,27 @@
     };
   }
 
-  function poolSlotHtml(team, index){
+  function poolSlotHtml(team, index, isFixed = false){
     if(!team){
       return `<div class="pool-slot empty">Place ${index + 1} en attente</div>`;
     }
-    return `<div class="pool-slot">${esc(teamNameOnly(team))}</div>`;
+    const cls = isFixed ? "pool-slot fixed-seed" : "pool-slot";
+    return `<div class="${cls}">${esc(teamNameOnly(team))}</div>`;
   }
 
   function renderPoolsEtape5(d){
     const s = buildStateEtape5(d);
 
     poolAList.innerHTML = [
-      poolSlotHtml(s.poolA[0], 0),
-      poolSlotHtml(s.poolA[1], 1),
-      poolSlotHtml(s.poolA[2], 2)
+      poolSlotHtml(s.poolA[0], 0, true),
+      poolSlotHtml(s.poolA[1], 1, false),
+      poolSlotHtml(s.poolA[2], 2, false)
     ].join("");
 
     poolBList.innerHTML = [
-      poolSlotHtml(s.poolB[0], 0),
-      poolSlotHtml(s.poolB[1], 1),
-      poolSlotHtml(s.poolB[2], 2)
+      poolSlotHtml(s.poolB[0], 0, true),
+      poolSlotHtml(s.poolB[1], 1, false),
+      poolSlotHtml(s.poolB[2], 2, false)
     ].join("");
 
     const count = s.poolA.length + s.poolB.length;
@@ -685,26 +670,33 @@
     }
   }
 
-  function renderMappingEtape5(d){
+  function renderQualifiedMappingEtape5(d){
     const s = buildStateEtape5(d);
 
-    firstMapBox.textContent = s.firstTop
-      ? `QF2 → 1er poule ${s.firstTop}\nQF3 → 1er poule ${s.firstBottom}`
-      : "En attente";
-
-    secondMapBox.textContent = s.secondTop
-      ? `QF1 → 2e poule ${s.secondTop}\nQF4 → 2e poule ${s.secondBottom}`
-      : "En attente";
-
-    if(!s.firstTop && !s.secondTop){
-      mappingInfo.textContent = "Le chemin des 1ers et 2es de poule sera affiché ici.";
-    } else if(s.firstTop && !s.secondTop){
-      mappingInfo.textContent = "Placement des 1ers de poule effectué. Placement des 2es en attente.";
-    } else if(!s.firstTop && s.secondTop){
-      mappingInfo.textContent = "Placement des 2es de poule effectué. Placement des 1ers en attente.";
-    } else {
-      mappingInfo.textContent = "✅ Chemin complet des qualifiés de poules défini.";
+    if(!s.qualifiedTop){
+      qualifiedMapBox.textContent = "En attente";
+      qualifiedDetailsBox.textContent = "En attente";
+      mappingInfo.textContent = "Le placement des qualifiés de poules sera affiché ici.";
+      return;
     }
+
+    qualifiedMapBox.textContent = `Lettre tirée : ${s.qualifiedTop}\n→ 1er poule ${s.qualifiedTop} en QF2`;
+
+    if(s.qualifiedTop === "A"){
+      qualifiedDetailsBox.textContent =
+        "QF2 → 1er poule A\n" +
+        "QF3 → 1er poule B\n" +
+        "QF4 → 2e poule A\n" +
+        "QF1 → 2e poule B";
+    } else {
+      qualifiedDetailsBox.textContent =
+        "QF2 → 1er poule B\n" +
+        "QF3 → 1er poule A\n" +
+        "QF4 → 2e poule B\n" +
+        "QF1 → 2e poule A";
+    }
+
+    mappingInfo.textContent = "✅ Placement des qualifiés de poules défini.";
   }
 
   function qfTeamHtml(label, type = "normal"){
@@ -740,11 +732,22 @@
     const seedQF2 = s.seedTop ? teamNameOnly(s.seedTop) : "TS3 / TS4 à tirer";
     const seedQF3 = s.seedBottom ? teamNameOnly(s.seedBottom) : "TS3 / TS4 à tirer";
 
-    const firstQF2 = s.firstTop ? `1er poule ${s.firstTop}` : "1er poule A / B à tirer";
-    const firstQF3 = s.firstBottom ? `1er poule ${s.firstBottom}` : "1er poule A / B à tirer";
+    let firstQF2 = "1er poule A / B à tirer";
+    let firstQF3 = "1er poule A / B à tirer";
+    let secondQF1 = "2e poule A / B à tirer";
+    let secondQF4 = "2e poule A / B à tirer";
 
-    const secondQF1 = s.secondTop ? `2e poule ${s.secondTop}` : "2e poule A / B à tirer";
-    const secondQF4 = s.secondBottom ? `2e poule ${s.secondBottom}` : "2e poule A / B à tirer";
+    if(s.qualifiedTop === "A"){
+      firstQF2 = "1er poule A";
+      firstQF3 = "1er poule B";
+      secondQF1 = "2e poule B";
+      secondQF4 = "2e poule A";
+    } else if(s.qualifiedTop === "B"){
+      firstQF2 = "1er poule B";
+      firstQF3 = "1er poule A";
+      secondQF1 = "2e poule A";
+      secondQF4 = "2e poule B";
+    }
 
     bracketPreview.innerHTML = [
       quarterBlockHtml(
@@ -815,8 +818,8 @@
     poolAList.innerHTML = `<div class="muted">—</div>`;
     poolBList.innerHTML = `<div class="muted">—</div>`;
     poolInfo.textContent = "—";
-    firstMapBox.textContent = "—";
-    secondMapBox.textContent = "—";
+    qualifiedMapBox.textContent = "—";
+    qualifiedDetailsBox.textContent = "—";
     mappingInfo.textContent = "—";
     bracketPreview.innerHTML = "";
     futureList.innerHTML = "";
@@ -870,7 +873,7 @@
       : `<div class="muted">En attente…</div>`;
 
     renderPoolsEtape5(d);
-    renderMappingEtape5(d);
+    renderQualifiedMappingEtape5(d);
     renderBracketPreviewEtape5(d);
 
     wheel.textContent = "—";
@@ -1292,7 +1295,7 @@
       alert("Choisis une étape.");
       return;
     }
-    window.location.href = `../${currentScope}/tirage.html`;
+    window.location.href = `../${currentScope}/tirage2.html`;
   };
 
   document.getElementById("btnLogout").onclick = async (e)=>{
