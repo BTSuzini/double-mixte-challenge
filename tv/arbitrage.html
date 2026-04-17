@@ -1,1 +1,1542 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>TV — Arbitrage — Étape 5</title>
 
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260418-tv-arbitrage-v1" />
+
+  <style>
+    :root{
+      --tv-band-h: clamp(60px, 6.5vh, 86px);
+      --tv-badge-band-h: clamp(132px, 15vh, 180px);
+
+      --tv-logo-h: calc(var(--tv-band-h) * .68);
+      --tv-mid-h:  calc(var(--tv-band-h) * .88);
+
+      --tv-pad: clamp(8px, 1vh, 14px);
+      --tv-gap: clamp(10px, 1.15vh, 16px);
+
+      --tv-h2: clamp(16px, 1.9vh, 22px);
+      --tv-team: clamp(22px, 2.8vh, 34px);
+      --tv-sub: clamp(14px, 1.7vh, 18px);
+      --tv-score: clamp(26px, 3.3vh, 40px);
+      --tv-bigscore: clamp(38px, 5.2vh, 64px);
+      --tv-label: clamp(13px, 1.4vh, 16px);
+
+      --tv-card-radius: 18px;
+      --tv-panel-radius: 20px;
+    }
+
+    html, body{
+      height:100%;
+      width:100%;
+      margin:0;
+      padding:0;
+      background:
+        radial-gradient(circle at top, rgba(28,110,58,.20), transparent 34%),
+        linear-gradient(180deg, #08110b 0%, #0b170f 100%);
+      overflow:hidden;
+    }
+
+    body{
+      color:#111;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overscroll-behavior:none;
+      position:fixed;
+      inset:0;
+    }
+
+    .container{
+      width:100%;
+      max-width:1600px;
+      margin:0 auto;
+      box-sizing:border-box;
+      padding:0 10px;
+    }
+
+    .tv-wrap{
+      height:100vh;
+      height:100dvh;
+      width:100vw;
+      display:flex;
+      flex-direction:column;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-sizing:border-box;
+      background:
+        radial-gradient(circle at top, rgba(28,110,58,.20), transparent 34%),
+        linear-gradient(180deg, #08110b 0%, #0b170f 100%);
+    }
+
+    .tv-top{
+      flex:0 0 var(--tv-band-h);
+      height:var(--tv-band-h);
+      background: linear-gradient(90deg, rgba(18,88,46,.96), rgba(24,104,54,.92));
+      border-bottom:1px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 30px rgba(0,0,0,.24);
+      position:relative;
+      display:flex;
+      align-items:center;
+      z-index:3;
+    }
+
+    .tv-top-row{
+      height:var(--tv-band-h);
+      display:grid;
+      grid-template-columns:72px 72px 1fr 72px 72px;
+      align-items:center;
+      gap:10px;
+      padding:0;
+    }
+
+    .tv-top-cell{
+      height:var(--tv-band-h);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:0;
+    }
+
+    .tv-top-cell img{
+      height:var(--tv-logo-h);
+      width:auto;
+      max-width:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 2px 0 rgba(0,0,0,.22));
+      display:block;
+    }
+
+    .tv-top-cell.mid img{
+      height:var(--tv-mid-h);
+      width:auto;
+    }
+
+    .tv-fs-btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius:999px;
+      padding:5px 10px;
+      font-weight:1000;
+      font-size:12px;
+      line-height:1;
+      cursor:pointer;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      backdrop-filter: blur(3px);
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:4;
+    }
+    .tv-fs-btn:hover{ filter:brightness(1.05); }
+
+    .tv-badges-band{
+      flex:0 0 var(--tv-badge-band-h);
+      height:var(--tv-badge-band-h);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+      border-top:1px solid rgba(255,255,255,.04);
+      border-bottom:1px solid rgba(255,255,255,.05);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+      z-index:2;
+    }
+
+    .tv-badges-viewport{
+      overflow:hidden;
+      width:100%;
+    }
+
+    .tv-badges-inner{
+      display:flex;
+      align-items:center;
+      gap:0;
+      width:max-content;
+      min-width:max-content;
+      will-change:transform;
+      transform:translate3d(0,0,0);
+      animation: marqueeBadges 120s linear infinite;
+    }
+
+    .tv-badges-group{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      white-space:nowrap;
+      padding-right:18px;
+      flex:0 0 auto;
+    }
+
+    .tv-badge-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:14px;
+      height: calc(var(--tv-badge-band-h) - 16px);
+      padding:10px 18px;
+      border-radius:999px;
+      background: rgba(255,255,255,.95);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 24px rgba(0,0,0,.14);
+      flex:0 0 auto;
+    }
+
+    .tv-badge-chip img{
+      height: calc(var(--tv-badge-band-h) - 36px);
+      width:auto;
+      max-width:140px;
+      object-fit:contain;
+      display:block;
+      flex:0 0 auto;
+      border-radius:999px;
+    }
+
+    .tv-badge-name{
+      font-weight:1000;
+      font-size: clamp(24px, 2.8vh, 34px);
+      color:#111;
+      letter-spacing:.1px;
+      line-height:1;
+    }
+
+    @keyframes marqueeBadges{
+      from{ transform:translate3d(0,0,0); }
+      to{ transform:translate3d(-50%,0,0); }
+    }
+
+    .tv-info-row{
+      flex:0 0 auto;
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      padding:8px 10px 0;
+      z-index:2;
+    }
+
+    .tv-info-left{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      max-width:calc(100% - 12px);
+    }
+
+    .tv-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+      white-space:nowrap;
+      font-weight:1000;
+      font-size:12px;
+      line-height:1;
+      opacity:.98;
+      backdrop-filter: blur(3px);
+      color:#fff;
+    }
+
+    .tv-main{
+      flex:1 1 auto;
+      display:grid;
+      grid-template-columns: 1.35fr .95fr;
+      gap: var(--tv-gap);
+      padding: var(--tv-pad);
+      max-width: 1600px;
+      width:100%;
+      margin: 0 auto;
+      box-sizing:border-box;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.96);
+      border-radius: var(--tv-panel-radius);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 20px 45px rgba(0,0,0,.24);
+      overflow:hidden;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .panel-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(0,0,0,.07);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, #ffffff, #f8f8f8);
+      flex:0 0 auto;
+    }
+
+    .panel-head h2{
+      margin:0;
+      font-size: var(--tv-h2);
+      font-weight:1000;
+      letter-spacing:.1px;
+    }
+
+    .muted{
+      color:#666;
+      font-weight:900;
+    }
+
+    .left-body{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .live-match{
+      flex:1 1 auto;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:14px;
+      min-height:0;
+    }
+
+    .live-head{
+      border-radius:18px;
+      background: linear-gradient(180deg, #fff, #f7f7f7);
+      border:1px solid rgba(0,0,0,.07);
+      padding:14px;
+      box-shadow:0 8px 22px rgba(0,0,0,.07);
+    }
+
+    .live-head-title{
+      font-size:clamp(20px, 2.2vh, 28px);
+      font-weight:1000;
+      line-height:1.1;
+    }
+
+    .live-head-sub{
+      margin-top:6px;
+      font-size:15px;
+      font-weight:900;
+      opacity:.78;
+    }
+
+    .teams-board{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      min-height:0;
+    }
+
+    .team-box{
+      border-radius:18px;
+      padding:16px;
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:0 10px 22px rgba(0,0,0,.08);
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .team-box.a{
+      background: linear-gradient(180deg,#fff8df 0%, #fff1bf 100%);
+      border-color: rgba(255,196,0,.24);
+    }
+
+    .team-box.b{
+      background: linear-gradient(180deg,#ffe9ee 0%, #ffd9e3 100%);
+      border-color: rgba(255,0,60,.18);
+    }
+
+    .team-meta{
+      min-width:0;
+    }
+
+    .team-name{
+      font-size: var(--tv-team);
+      font-weight:1000;
+      line-height:1.05;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .team-sub{
+      margin-top:6px;
+      font-size: var(--tv-sub);
+      font-weight:900;
+      opacity:.82;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .live-points{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:8px;
+    }
+
+    .score-mini{
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:14px;
+      background: rgba(255,255,255,.82);
+      padding:10px 8px;
+      text-align:center;
+      min-width:0;
+    }
+
+    .score-mini .lbl{
+      font-size: var(--tv-label);
+      font-weight:1000;
+      opacity:.74;
+      line-height:1.1;
+    }
+
+    .score-mini .val{
+      margin-top:4px;
+      font-size: var(--tv-score);
+      font-weight:1000;
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .bottom-live{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:12px;
+      min-height:0;
+    }
+
+    .status-card{
+      border-radius:18px;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.07);
+      padding:14px;
+      box-shadow:0 8px 22px rgba(0,0,0,.07);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      min-width:0;
+    }
+
+    .status-title{
+      font-size:15px;
+      font-weight:1000;
+      opacity:.72;
+    }
+
+    .status-big{
+      margin-top:6px;
+      font-size: var(--tv-bigscore);
+      font-weight:1000;
+      line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .right-body{
+      padding:12px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:0;
+      flex:1 1 auto;
+    }
+
+    .mcard2{
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:16px;
+      padding:12px 14px;
+      background: rgba(255,255,255,.78);
+      box-shadow:0 8px 22px rgba(0,0,0,.07);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-width:0;
+    }
+
+    .m-time{
+      font-weight:1000;
+      color:#111;
+      white-space:nowrap;
+      font-size:16px;
+      opacity:.84;
+      letter-spacing:.1px;
+    }
+
+    .teamline{
+      display:grid;
+      grid-template-columns: 1fr 34px 34px 34px;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .tmeta{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .tname{
+      font-weight:1000;
+      font-size: clamp(20px, 2.5vh, 30px);
+      line-height:1.06;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      letter-spacing:-.2px;
+    }
+
+    .tsub{
+      font-weight:900;
+      font-size:16px;
+      opacity:.84;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-height:1em;
+      letter-spacing:-.1px;
+    }
+
+    .g{
+      text-align:right;
+      font-weight:1000;
+      font-size: clamp(22px, 3vh, 34px);
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      letter-spacing:.2px;
+    }
+
+    .placeholder{
+      color:#333;
+      font-weight:900;
+      padding:8px 2px;
+      opacity:.72;
+      font-size:15px;
+    }
+
+    .tv-bottom{
+      flex:0 0 var(--tv-badge-band-h);
+      height:var(--tv-badge-band-h);
+      display:flex;
+      align-items:center;
+      background: linear-gradient(90deg, rgba(18,88,46,.96), rgba(24,104,54,.92));
+      border-top:1px solid rgba(255,255,255,.08);
+      color:#fff;
+      padding:0;
+      overflow:hidden;
+      z-index:2;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .sponsors-viewport{
+      overflow:hidden;
+      width:100%;
+    }
+
+    .sponsor-track{
+      display:flex;
+      gap:0;
+      align-items:center;
+      width:max-content;
+      min-width:max-content;
+      will-change:transform;
+      transform:translate3d(0,0,0);
+      animation: marquee 30s linear infinite;
+    }
+
+    .sponsor-group{
+      display:flex;
+      gap:28px;
+      align-items:center;
+      white-space:nowrap;
+      padding-right:28px;
+      flex:0 0 auto;
+    }
+
+    .sponsor-item{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      border:none;
+      background:transparent;
+      border-radius:0;
+      box-shadow:none;
+      flex:0 0 auto;
+    }
+
+    .sponsor-item img{
+      height: calc(var(--tv-badge-band-h) - 36px);
+      width:auto;
+      max-width:180px;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.18));
+      display:block;
+    }
+
+    @keyframes marquee{
+      from{ transform:translate3d(0,0,0); }
+      to{ transform:translate3d(-50%,0,0); }
+    }
+
+    @media (max-width: 1100px){
+      .tv-main{
+        grid-template-columns:1fr;
+      }
+      .bottom-live{
+        grid-template-columns:1fr;
+      }
+      .team-box{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="tv-wrap">
+
+  <header class="tv-top">
+    <div class="container">
+      <div class="tv-top-row" aria-label="Bandeau images">
+        <div class="tv-top-cell">
+          <img src="../assets/img/logo-suzini.png" alt="Suzini">
+        </div>
+        <div class="tv-top-cell">
+          <img src="../assets/img/challenge-gen.png" alt="Challenge">
+        </div>
+        <div class="tv-top-cell mid">
+          <img src="../assets/img/etape5.png" alt="Étape 5">
+        </div>
+        <div class="tv-top-cell">
+          <img src="../assets/img/challenge-gen.png" alt="Challenge">
+        </div>
+        <div class="tv-top-cell">
+          <img src="../assets/img/logo-challenge.png" alt="Challenge">
+        </div>
+      </div>
+
+      <button class="tv-fs-btn" id="btnFullscreen" type="button">⛶ Plein écran</button>
+    </div>
+  </header>
+
+  <section class="tv-badges-band" aria-label="Badges joueurs">
+    <div class="container">
+      <div class="tv-badges-viewport">
+        <div class="tv-badges-inner" id="badgesTrack"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tv-info-row" aria-label="Informations arbitrage">
+    <div class="container">
+      <div class="tv-info-left">
+        <span class="tv-pill" id="tvClock">⏱️ —</span>
+        <span class="tv-pill" id="tvCourt">🎾 Terrain : —</span>
+        <span class="tv-pill" id="tvSetMode">⚙️ Set : —</span>
+        <span class="tv-pill" id="tvSetsWon">🏁 Manches : 0-0</span>
+      </div>
+    </div>
+  </section>
+
+  <main class="tv-main">
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>🎾 Match arbitré</h2>
+        <div class="muted" id="liveStatus">En attente…</div>
+      </div>
+
+      <div class="left-body">
+        <div class="live-match" id="liveMatchWrap">
+          <div class="placeholder">Aucune rencontre arbitrée.</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <h2>📋 Score officiel écrit dans résultats</h2>
+        <div class="muted" id="officialInfo">Étape 5</div>
+      </div>
+
+      <div class="right-body" id="officialWrap">
+        <p class="muted" style="margin:0;">En attente…</p>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer class="tv-bottom">
+    <div class="container">
+      <div class="sponsors-viewport">
+        <div class="sponsor-track" id="sponsorTrack" aria-label="Sponsors"></div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script type="module">
+  import { db } from "../assets/js/firebase.js";
+  import {
+    doc,
+    getDoc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const etapeId = "etape5";
+  const STEP_IDS = ["etape1","etape2","etape3","etape4","etape5"];
+
+  const PROG_REFS = [
+    doc(db, "programmations_public", etapeId),
+    doc(db, "programmationsPublic", etapeId),
+    doc(db, "programmations", etapeId),
+  ];
+
+  const DOC_ARB = doc(db, "arbitrages_live", etapeId);
+  const DOC_TIRAGE = doc(db, "tirages", etapeId);
+
+  const tvClock = document.getElementById("tvClock");
+  const tvCourt = document.getElementById("tvCourt");
+  const tvSetMode = document.getElementById("tvSetMode");
+  const tvSetsWon = document.getElementById("tvSetsWon");
+
+  const liveStatus = document.getElementById("liveStatus");
+  const liveMatchWrap = document.getElementById("liveMatchWrap");
+  const officialWrap = document.getElementById("officialWrap");
+
+  const badgesTrack = document.getElementById("badgesTrack");
+  const sponsorTrack = document.getElementById("sponsorTrack");
+  const btnFullscreen = document.getElementById("btnFullscreen");
+
+  let currentProg = null;
+  let currentArb = null;
+  let currentResult = null;
+
+  let generalConfig = { players:{}, order:[] };
+  const classements = new Map();
+  for(const s of STEP_IDS) classements.set(s, null);
+
+  function updateFullscreenBtn(){
+    const isFs = !!document.fullscreenElement;
+    btnFullscreen.textContent = isFs ? "🡼 Réduire" : "⛶ Plein écran";
+  }
+
+  async function toggleFullscreen(){
+    try{
+      if(document.fullscreenElement){
+        await document.exitFullscreen();
+      }else{
+        await document.documentElement.requestFullscreen();
+      }
+    }catch(e){
+      console.error(e);
+    }finally{
+      updateFullscreenBtn();
+    }
+  }
+
+  btnFullscreen.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenBtn);
+  updateFullscreenBtn();
+
+  function tickClock(){
+    const d = new Date();
+    tvClock.textContent = d.toLocaleTimeString("fr-FR", {
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function fmt(x){
+    return (x === null || x === undefined || x === "") ? "—" : String(x);
+  }
+
+  function normalizeScheduleEntry(entry, slotObj){
+    if(typeof entry === "number"){
+      const slot = Number(entry);
+      const court = slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    if(entry && typeof entry === "object"){
+      const slot = Number(entry.slot);
+      const court = entry.court || slotObj?.court || (slot % 2 === 1 ? "A" : "B");
+      return { slot, court };
+    }
+    const fallbackSlot = Number(slotObj?.slot || 1);
+    return { slot: fallbackSlot, court: slotObj?.court || "A" };
+  }
+
+  function courtLabel(p, courtKey){
+    const name = p?.courts?.[courtKey] || courtKey || "—";
+    const emo = (courtKey === "A") ? "🐝" : (courtKey === "B" ? "🌶️" : "🎾");
+    return `${emo} ${name} ${emo}`;
+  }
+
+  function teamParts(team){
+    if(!team) return { title:"—", sub:"" };
+    return {
+      title: team.teamName || "Équipe",
+      sub: `${team.p1FirstName || "?"} / ${team.p2FirstName || "?"}`
+    };
+  }
+
+  function getMatchMap(){
+    return currentProg?.matches || {};
+  }
+
+  function getTeamsMap(){
+    return currentProg?.teams || {};
+  }
+
+  function teamFromRef(ref){
+    if(!ref || ref.type !== "team") return null;
+    return getTeamsMap()[ref.key] || null;
+  }
+
+  function currentMatch(){
+    const mid = currentArb?.matchId || "";
+    if(!mid) return null;
+    const m = getMatchMap()[mid];
+    if(!m) return null;
+    return { id: mid, ...m };
+  }
+
+  function ensureSets(arr){
+    const sets = Array.isArray(arr) ? [...arr] : [];
+    while(sets.length < 3){
+      sets.push({
+        number: sets.length + 1,
+        mode: (sets.length + 1 === 3) ? "super_tb" : "classic",
+        gamesA: 0,
+        gamesB: 0,
+        pointsA: 0,
+        pointsB: 0,
+        finished: false,
+        winner: null
+      });
+    }
+    return sets.map((s, idx)=>({
+      number: idx + 1,
+      mode: s?.mode || ((idx + 1 === 3) ? "super_tb" : "classic"),
+      gamesA: Number(s?.gamesA || 0),
+      gamesB: Number(s?.gamesB || 0),
+      pointsA: Number(s?.pointsA || 0),
+      pointsB: Number(s?.pointsB || 0),
+      finished: s?.finished === true,
+      winner: (s?.winner === "A" || s?.winner === "B") ? s.winner : null
+    }));
+  }
+
+  function countFinishedSets(sets, side){
+    return sets.filter(s => s.finished && s.winner === side).length;
+  }
+
+  function classicDisplayPoints(a, b){
+    function label(x){
+      if(x <= 0) return "0";
+      if(x === 1) return "15";
+      if(x === 2) return "30";
+      return "40";
+    }
+    if(a >= 3 && b >= 3) return { a:"40", b:"40" };
+    return { a:label(a), b:label(b) };
+  }
+
+  function modeLabel(mode){
+    if(mode === "tb") return "Jeu décisif";
+    if(mode === "super_tb") return "Super tie-break";
+    return "Set classique";
+  }
+
+  function renderLiveMatch(){
+    const match = currentMatch();
+    if(!match){
+      liveStatus.textContent = "Aucun match";
+      tvCourt.textContent = "🎾 Terrain : —";
+      tvSetMode.textContent = "⚙️ Set : —";
+      tvSetsWon.textContent = "🏁 Manches : 0-0";
+      liveMatchWrap.innerHTML = `<div class="placeholder">Aucune rencontre arbitrée.</div>`;
+      officialWrap.innerHTML = `<p class="muted" style="margin:0;">En attente…</p>`;
+      return;
+    }
+
+    const teams = getTeamsMap();
+    const teamA = teamFromRef(match.A);
+    const teamB = teamFromRef(match.B);
+
+    const a = teamParts(teamA);
+    const b = teamParts(teamB);
+
+    const arb = currentArb || {};
+    const sets = ensureSets(arb.sets || []);
+    const currentSet = Math.max(1, Math.min(3, Number(arb.currentSet || 1)));
+    const s = sets[currentSet - 1];
+    const pDisp = (s.mode === "classic")
+      ? classicDisplayPoints(s.pointsA, s.pointsB)
+      : { a:String(s.pointsA), b:String(s.pointsB) };
+
+    const winsA = countFinishedSets(sets, "A");
+    const winsB = countFinishedSets(sets, "B");
+
+    const schedule = currentProg?.schedule || {};
+    const slots = Array.isArray(currentProg?.slots) ? currentProg.slots : [];
+    let time = "—";
+    let court = "—";
+
+    const entry = schedule[match.id];
+    const slotNum = (typeof entry === "number") ? Number(entry) : Number(entry?.slot);
+    if(Number.isFinite(slotNum)){
+      const slotObj = slots.find(x => Number(x.slot) === slotNum) || null;
+      const norm = normalizeScheduleEntry(entry, slotObj);
+      time = slotObj?.time || "—";
+      court = courtLabel(currentProg, norm.court);
+    }
+
+    tvCourt.textContent = `🎾 Terrain : ${court}`;
+    tvSetMode.textContent = `⚙️ Set ${currentSet} : ${modeLabel(s.mode)}`;
+    tvSetsWon.textContent = `🏁 Manches : ${winsA}-${winsB}`;
+
+    liveStatus.textContent = arb.winnerSide
+      ? `🏆 Match terminé — vainqueur ${arb.winnerSide === "A" ? "haut" : "bas"}`
+      : "🟢 Arbitrage en direct";
+
+    liveMatchWrap.innerHTML = `
+      <div class="live-head">
+        <div class="live-head-title">${esc(a.title)} VS ${esc(b.title)}</div>
+        <div class="live-head-sub">Horaire : ${esc(time)} — ${esc(court)} — Set ${currentSet}</div>
+      </div>
+
+      <div class="teams-board">
+        <div class="team-box a">
+          <div class="team-meta">
+            <div class="team-name">${esc(a.title)}</div>
+            <div class="team-sub">${esc(a.sub)}</div>
+          </div>
+          <div class="live-points">
+            <div class="score-mini">
+              <div class="lbl">Set 1</div>
+              <div class="val">${esc(String(sets[0].gamesA))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">Set 2</div>
+              <div class="val">${esc(String(sets[1].gamesA))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">${sets[2].mode === "classic" ? "Set 3" : "TB 3"}</div>
+              <div class="val">${esc(String(sets[2].mode === "classic" ? sets[2].gamesA : sets[2].pointsA))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">Live</div>
+              <div class="val">${esc(pDisp.a)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-box b">
+          <div class="team-meta">
+            <div class="team-name">${esc(b.title)}</div>
+            <div class="team-sub">${esc(b.sub)}</div>
+          </div>
+          <div class="live-points">
+            <div class="score-mini">
+              <div class="lbl">Set 1</div>
+              <div class="val">${esc(String(sets[0].gamesB))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">Set 2</div>
+              <div class="val">${esc(String(sets[1].gamesB))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">${sets[2].mode === "classic" ? "Set 3" : "TB 3"}</div>
+              <div class="val">${esc(String(sets[2].mode === "classic" ? sets[2].gamesB : sets[2].pointsB))}</div>
+            </div>
+            <div class="score-mini">
+              <div class="lbl">Live</div>
+              <div class="val">${esc(pDisp.b)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-live">
+        <div class="status-card">
+          <div class="status-title">Mode du set en cours</div>
+          <div class="status-big">${esc(modeLabel(s.mode))}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-title">Points live</div>
+          <div class="status-big">${esc(pDisp.a)} - ${esc(pDisp.b)}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-title">Manches gagnées</div>
+          <div class="status-big">${winsA} - ${winsB}</div>
+        </div>
+      </div>
+    `;
+
+    renderOfficialResult(match.id, a, b);
+  }
+
+  function renderOfficialResult(matchId, a, b){
+    const r = currentResult || {};
+
+    officialWrap.innerHTML = `
+      <div class="mcard2">
+        <div class="m-time">📝 resultats_etape5 / ${esc(matchId)}</div>
+
+        <div class="teamline">
+          <div class="tmeta">
+            <div class="tname">${esc(a.title)}</div>
+            <div class="tsub">${esc(a.sub)}</div>
+          </div>
+          <div class="g">${esc(fmt(r.s1A))}</div>
+          <div class="g">${esc(fmt(r.s2A))}</div>
+          <div class="g">${esc(fmt(r.s3A))}</div>
+        </div>
+
+        <div class="teamline">
+          <div class="tmeta">
+            <div class="tname">${esc(b.title)}</div>
+            <div class="tsub">${esc(b.sub)}</div>
+          </div>
+          <div class="g">${esc(fmt(r.s1B))}</div>
+          <div class="g">${esc(fmt(r.s2B))}</div>
+          <div class="g">${esc(fmt(r.s3B))}</div>
+        </div>
+
+        <div class="status-card" style="margin-top:6px;">
+          <div class="status-title">Vainqueur officiel</div>
+          <div class="status-big">${
+            r.winnerSide === "A" ? "Équipe du haut" :
+            r.winnerSide === "B" ? "Équipe du bas" :
+            "Non validé"
+          }</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function watchFirstAvailableProgram(refs){
+    let decided = false;
+    const unsubs = [];
+
+    function settleWith(data, whichIdx){
+      if(decided) return;
+      decided = true;
+
+      for(let i=0;i<unsubs.length;i++){
+        if(i !== whichIdx && typeof unsubs[i] === "function"){
+          try{ unsubs[i](); }catch(e){}
+        }
+      }
+
+      currentProg = data || null;
+      renderLiveMatch();
+    }
+
+    refs.forEach((ref, idx)=>{
+      const u = onSnapshot(ref, (snap)=>{
+        if(snap.exists()){
+          settleWith(snap.data() || {}, idx);
+        } else if(!decided && idx === refs.length - 1){
+          currentProg = null;
+          renderLiveMatch();
+        }
+      }, (err)=>{
+        console.error(err);
+      });
+      unsubs[idx] = u;
+    });
+
+    return () => {
+      unsubs.forEach(fn => {
+        try{ fn && fn(); }catch(e){}
+      });
+    };
+  }
+
+  const PLAYER_FIRSTNAME_ALIASES = { "charlyne": "charline" };
+
+  function normalizeTextBasic(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function canonicalFirstName(firstName){
+    const raw = normalizeTextBasic(firstName);
+    if(!raw) return "";
+    return PLAYER_FIRSTNAME_ALIASES[raw] || raw;
+  }
+
+  function canonicalLastName(lastName){
+    return normalizeTextBasic(lastName);
+  }
+
+  function canonicalPlayerKey(firstName, lastName){
+    const fn = canonicalFirstName(firstName);
+    const ln = canonicalLastName(lastName);
+    if(!fn && !ln) return "";
+    return `${fn}|${ln}`;
+  }
+
+  function nameInitial(lastName){
+    const s = (lastName || "").toString().trim();
+    if(!s) return "";
+    return s[0].toUpperCase() + ".";
+  }
+
+  function playerDisplay(firstName, lastName){
+    const fn = (firstName || "").toString().trim();
+    const ini = nameInitial(lastName);
+    if(!fn && !ini) return "—";
+    if(!ini) return fn || "—";
+    return `${fn} ${ini}`.trim();
+  }
+
+  function genderRank(g){
+    const s = (g ?? "").toString().toUpperCase().trim();
+    if(s === "F" || s === "FEMALE" || s === "W") return 0;
+    if(s === "M" || s === "MALE") return 2;
+    return 1;
+  }
+
+  function inferGenderFromPlayerObj(p){
+    if(!p || typeof p !== "object") return null;
+    if("gender" in p) return p.gender;
+    if("sex" in p) return p.sex;
+    if("isFemale" in p) return (p.isFemale === true ? "F" : (p.isFemale === false ? "M" : null));
+    return null;
+  }
+
+  const POINTS_BT100 = { 1:100, 2:75, 3:65, 4:55, 5:47, 6:45, 7:40, 8:35 };
+  const POINTS_BT250 = { 1:250, 2:175, 3:140, 4:105, 5:88, 6:76, 7:65, 8:52 };
+  const POINTS_BT500 = { 1:500, 2:350, 3:270, 4:210, 5:175, 6:150, 7:130, 8:105, 9:95, 10:87, 11:82, 12:75 };
+
+  function stepType(stepId){
+    if(stepId === "etape1" || stepId === "etape4") return "BT250";
+    if(stepId === "etape5") return "BT500";
+    return "BT100";
+  }
+
+  function pointsTable(stepId){
+    const t = stepType(stepId);
+    if(t === "BT500") return POINTS_BT500;
+    if(t === "BT250") return POINTS_BT250;
+    return POINTS_BT100;
+  }
+
+  function normTeamName(s){
+    return (s || "").toString().trim().toLowerCase()
+      .replaceAll("’","'")
+      .replace(/\s+/g," ");
+  }
+
+  function teamNameOf(team){
+    return (team?.teamName || team?.name || "Équipe").toString().trim() || "Équipe";
+  }
+
+  function teamLogoFromDoc(stepDoc, teamName){
+    if(!stepDoc) return null;
+    const map = stepDoc.teamLogos || stepDoc.logos || null;
+    if(map && typeof map === "object"){
+      if(map[teamName]) return map[teamName];
+      const tn = normTeamName(teamName);
+      for(const k of Object.keys(map)){
+        if(normTeamName(k) === tn) return map[k];
+      }
+    }
+    return null;
+  }
+
+  function teamLogoSrc(stepId, stepDoc, team){
+    const teamName = teamNameOf(team);
+
+    const file = team?.logoFile || team?.logo || team?.logoUrl || team?.teamLogo || null;
+    if(file){
+      if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+      return `../assets/img/${String(file)}`;
+    }
+
+    const fromMap = teamLogoFromDoc(stepDoc, teamName);
+    if(fromMap){
+      if(String(fromMap).startsWith("http://") || String(fromMap).startsWith("https://")) return String(fromMap);
+      return `../assets/img/${String(fromMap)}`;
+    }
+
+    if(stepId === "etape1" && normTeamName(teamName) === "les lobstars"){
+      return "../assets/img/lobstars.png";
+    }
+
+    return null;
+  }
+
+  function badgeToSrc(file){
+    if(!file) return "";
+    if(String(file).startsWith("http://") || String(file).startsWith("https://")) return String(file);
+    return `../assets/img/badges/${String(file)}`;
+  }
+
+  function normalizeStepTeams(stepId, stepDoc){
+    const ptsTable = pointsTable(stepId);
+
+    const positions = Array.isArray(stepDoc?.positions) ? stepDoc.positions : null;
+    if(positions && positions.length){
+      return positions
+        .map(r=>{
+          const pos = Number(r?.pos);
+          if(!Number.isFinite(pos)) return null;
+
+          const team = {
+            teamName: r?.teamName || r?.team?.teamName || "Équipe",
+            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
+            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
+            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
+          };
+
+          const pts = Number(ptsTable[pos] || 0);
+          return { pos, team, points: pts };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.pos-b.pos);
+    }
+
+    const legacy = Array.isArray(stepDoc?.teams) ? stepDoc.teams
+                 : (Array.isArray(stepDoc?.ranking) ? stepDoc.ranking : null);
+
+    if(legacy && legacy.length){
+      return legacy
+        .map(r=>{
+          const pos = Number(r?.pos);
+          if(!Number.isFinite(pos)) return null;
+
+          const team = {
+            teamName: r?.teamName || r?.team?.teamName || "Équipe",
+            p1FirstName: r?.p1FirstName || r?.team?.p1FirstName || "",
+            p1LastName:  r?.p1LastName  || r?.team?.p1LastName  || "",
+            p2FirstName: r?.p2FirstName || r?.team?.p2FirstName || "",
+            p2LastName:  r?.p2LastName  || r?.team?.p2LastName  || "",
+            logoFile: r?.logoFile || r?.logo || r?.logoUrl || r?.team?.logoFile || r?.team?.logo || r?.team?.logoUrl || null
+          };
+
+          const pts = Number(ptsTable[pos] || 0);
+          return { pos, team, points: pts };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.pos-b.pos);
+    }
+
+    const players = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
+    if(players.length){
+      const groups = new Map();
+      for(const p of players){
+        const pos = Number(p?.pos);
+        if(!Number.isFinite(pos)) continue;
+        const tname = (p?.teamName || "Équipe").toString().trim() || "Équipe";
+        const key = `${pos}||${tname}`;
+        if(!groups.has(key)) groups.set(key, { pos, teamName: tname, players: [] });
+        groups.get(key).players.push(p);
+      }
+
+      const rows = [];
+      for(const g of groups.values()){
+        const a = g.players[0] || {};
+        const b = g.players[1] || {};
+        const team = {
+          teamName: g.teamName,
+          p1FirstName: (a.firstName ?? a.p1FirstName ?? "").toString(),
+          p1LastName:  (a.lastName  ?? a.p1LastName  ?? "").toString(),
+          p2FirstName: (b.firstName ?? b.p2FirstName ?? "").toString(),
+          p2LastName:  (b.lastName  ?? b.p2LastName  ?? "").toString(),
+          logoFile: a.logoFile || a.logo || a.logoUrl || b.logoFile || b.logo || b.logoUrl || null
+        };
+        const pts = Number(ptsTable[g.pos] || 0);
+        rows.push({ pos: g.pos, team, points: pts });
+      }
+      rows.sort((a,b)=>a.pos-b.pos);
+      return rows;
+    }
+
+    return [];
+  }
+
+  function buildGeneralRowsForBadges(){
+    const map = new Map();
+
+    for(const stepId of STEP_IDS){
+      const stepDoc = classements.get(stepId) || null;
+      if(!stepDoc) continue;
+
+      const teams = normalizeStepTeams(stepId, stepDoc);
+      if(!teams.length) continue;
+
+      const playedThisStep = new Set();
+      const playersArr = Array.isArray(stepDoc?.players) ? stepDoc.players : [];
+
+      function findPlayerObj(firstName, lastName, teamName){
+        const wantedKey = canonicalPlayerKey(firstName, lastName);
+        const tn = (teamName || "").toString().trim();
+
+        return playersArr.find(p=>{
+          const pKey = canonicalPlayerKey(p?.firstName, p?.lastName);
+          const pTeam = (p?.teamName || "").toString().trim();
+          if(wantedKey && pKey && wantedKey !== pKey) return false;
+          if(tn && pTeam && tn !== pTeam) return false;
+          return !!wantedKey && !!pKey;
+        }) || null;
+      }
+
+      for(const row of teams){
+        const t = row.team || {};
+        const teamName = teamNameOf(t);
+        const logoSrc = teamLogoSrc(stepId, stepDoc, t);
+
+        const p1DisplayName = playerDisplay(t.p1FirstName, t.p1LastName);
+        const p2DisplayName = playerDisplay(t.p2FirstName, t.p2LastName);
+
+        const p1Canonical = canonicalPlayerKey(t.p1FirstName, t.p1LastName);
+        const p2Canonical = canonicalPlayerKey(t.p2FirstName, t.p2LastName);
+
+        const p1Obj = findPlayerObj(t.p1FirstName, t.p1LastName, teamName);
+        const p2Obj = findPlayerObj(t.p2FirstName, t.p2LastName, teamName);
+
+        const p1Gender = inferGenderFromPlayerObj(p1Obj);
+        const p2Gender = inferGenderFromPlayerObj(p2Obj);
+
+        for(const item of [
+          { canonical:p1Canonical, display:p1DisplayName, gender:p1Gender },
+          { canonical:p2Canonical, display:p2DisplayName, gender:p2Gender }
+        ]){
+          if(!item.canonical || !item.display || item.display === "—") continue;
+
+          if(!map.has(item.canonical)){
+            map.set(item.canonical, {
+              key: item.canonical,
+              name: item.display,
+              points: 0,
+              steps: new Set(),
+              gender: item.gender,
+              logo: null
+            });
+          }
+
+          const rec = map.get(item.canonical);
+          rec.points += Number(row.points || 0);
+          if(!rec.gender && item.gender) rec.gender = item.gender;
+          if(!rec.logo && logoSrc) rec.logo = logoSrc;
+
+          const mk = `${item.canonical}|${stepId}`;
+          if(!playedThisStep.has(mk)){
+            playedThisStep.add(mk);
+            rec.steps.add(stepId);
+          }
+        }
+      }
+    }
+
+    const out = [...map.values()].map(x=>{
+      const cfg = generalConfig?.players?.[x.key] || {};
+      return {
+        key: x.key,
+        name: x.name,
+        points: x.points,
+        stepsPlayed: x.steps.size,
+        gender: x.gender || null,
+        logo: x.logo || null,
+        badge: cfg.badge || null,
+        priority: Number(cfg.priority || 0)
+      };
+    });
+
+    out.sort((a,b)=>{
+      if(b.points !== a.points) return b.points - a.points;
+      if(a.priority !== b.priority) return a.priority - b.priority;
+
+      const ga = genderRank(a.gender);
+      const gb = genderRank(b.gender);
+      if(ga !== gb) return ga - gb;
+
+      const order = Array.isArray(generalConfig?.order) ? generalConfig.order : [];
+      const ia = order.indexOf(a.key);
+      const ib = order.indexOf(b.key);
+      if(ia !== -1 || ib !== -1){
+        if(ia === -1) return 1;
+        if(ib === -1) return -1;
+        if(ia !== ib) return ia - ib;
+      }
+
+      return a.name.localeCompare(b.name, "fr");
+    });
+
+    return out.filter(x => !!x.badge);
+  }
+
+  function renderBadgesBand(){
+    const rows = buildGeneralRowsForBadges();
+
+    if(!rows.length){
+      badgesTrack.innerHTML = `
+        <div class="tv-badges-group">
+          <div class="tv-badge-chip">
+            <span class="tv-badge-name">Badges joueurs en attente…</span>
+          </div>
+        </div>
+        <div class="tv-badges-group" aria-hidden="true">
+          <div class="tv-badge-chip">
+            <span class="tv-badge-name">Badges joueurs en attente…</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const chips = rows.map(r=>{
+      const src = badgeToSrc(r.badge);
+      return `
+        <div class="tv-badge-chip">
+          <img src="${esc(src)}" alt="${esc(r.name)}">
+          <span class="tv-badge-name">${esc(r.name)}</span>
+        </div>
+      `;
+    }).join("");
+
+    badgesTrack.innerHTML = `
+      <div class="tv-badges-group">${chips}</div>
+      <div class="tv-badges-group" aria-hidden="true">${chips}</div>
+    `;
+  }
+
+  const SPONSOR_SLOTS = [
+    { alts: ["../assets/img/brico.png", "../assets/img/brico.jpeg", "../assets/img/brico.jpg"] },
+    { alts: ["../assets/img/bt-fft.png", "../assets/img/bt-fft.jpeg", "../assets/img/bt-fft.jpg"] },
+    { alts: ["../assets/img/matoque.png", "../assets/img/matoque.jpeg", "../assets/img/matoque.jpg"] },
+    { alts: ["../assets/img/tcs.png", "../assets/img/tcs.jpeg", "../assets/img/tcs.jpg"] },
+    { alts: ["../assets/img/brico.png", "../assets/img/brico.jpeg", "../assets/img/brico.jpg"] },
+    { alts: ["../assets/img/logo-suzini.png", "../assets/img/logo-suzini.jpeg", "../assets/img/logo-suzini.jpg"] },
+    { alts: ["../assets/img/psk.png", "../assets/img/psk.jpeg", "../assets/img/psk.jpg"] },
+    { alts: ["../assets/img/lobstars.png", "../assets/img/lobstars.jpeg", "../assets/img/lobstars.jpg"] },
+  ];
+
+  function sponsorImgHTML(slot){
+    const safe = slot.alts.map(a=>String(a));
+    const first = safe[0] || "";
+    const data = esc(JSON.stringify(safe));
+    return `<span class="sponsor-item"><img src="${esc(first)}" data-alts="${data}" alt="sponsor"></span>`;
+  }
+
+  function renderSponsors(){
+    const items = SPONSOR_SLOTS.map(sponsorImgHTML).join("");
+    sponsorTrack.innerHTML = `
+      <div class="sponsor-group">${items}</div>
+      <div class="sponsor-group" aria-hidden="true">${items}</div>
+    `;
+  }
+
+  function wireSponsorFallbacks(){
+    const imgs = sponsorTrack.querySelectorAll("img[data-alts]");
+    imgs.forEach(img=>{
+      img.addEventListener("error", ()=>{
+        try{
+          const alts = JSON.parse(img.getAttribute("data-alts") || "[]");
+          const cur = img.getAttribute("src");
+          const idx = alts.indexOf(cur);
+          const next = alts[idx+1];
+          if(next){
+            img.setAttribute("src", next);
+          } else {
+            img.style.opacity = "0.20";
+          }
+        }catch(e){
+          img.style.opacity = "0.20";
+        }
+      }, { once:false });
+    });
+  }
+
+  renderSponsors();
+  wireSponsorFallbacks();
+
+  watchFirstAvailableProgram(PROG_REFS);
+
+  onSnapshot(DOC_ARB, (snap)=>{
+    currentArb = snap.exists() ? (snap.data() || {}) : null;
+
+    const matchId = currentArb?.matchId || "";
+    if(matchId){
+      onSnapshot(doc(db, `resultats_${etapeId}`, matchId), (resSnap)=>{
+        currentResult = resSnap.exists() ? (resSnap.data() || {}) : null;
+        renderLiveMatch();
+      }, (err)=>{
+        console.error(err);
+        currentResult = null;
+        renderLiveMatch();
+      });
+    } else {
+      currentResult = null;
+      renderLiveMatch();
+    }
+  }, (err)=>{
+    console.error(err);
+    currentArb = null;
+    currentResult = null;
+    renderLiveMatch();
+  });
+
+  onSnapshot(doc(db, "config", "classement_general"), (snap)=>{
+    generalConfig = snap.exists() ? (snap.data() || {}) : {};
+    if(!generalConfig.players) generalConfig.players = {};
+    if(!Array.isArray(generalConfig.order)) generalConfig.order = [];
+    renderBadgesBand();
+  });
+
+  for(const stepId of STEP_IDS){
+    onSnapshot(doc(db, "classements", stepId), (snap)=>{
+      classements.set(stepId, snap.exists() ? (snap.data() || {}) : null);
+      renderBadgesBand();
+    });
+  }
+
+  (async function loadTirageOnce(){
+    try{ await getDoc(DOC_TIRAGE); } catch(e){}
+  })();
+
+  setTimeout(()=> location.reload(), 30 * 60 * 1000);
+</script>
+
+</body>
+</html>
