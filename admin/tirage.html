@@ -4,10 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Tirage</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260301-admin-tirage-etape2" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260417-admin-tirage-etape5" />
 
   <style>
-    /* ✅ Onglet actif noir/blanc (tabs Zone) */
     .btn.is-active{
       background:#111 !important;
       border-color:#111 !important;
@@ -26,7 +25,10 @@
       font-size:18px;
       letter-spacing:.2px;
       background:linear-gradient(180deg,#fff,#fafafa);
+      text-align:center;
+      padding:0 10px;
     }
+
     .pill{
       display:inline-block;
       padding:4px 10px;
@@ -35,6 +37,71 @@
       border:1px solid #eee;
       background:#fafafa;
       white-space:nowrap;
+    }
+
+    .bracket-preview{
+      display:grid;
+      gap:10px;
+    }
+
+    .match-block{
+      border:1px solid #eee;
+      border-radius:14px;
+      background:#fff;
+      padding:10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.03);
+    }
+
+    .match-title{
+      font-size:12px;
+      font-weight:1000;
+      opacity:.6;
+      margin-bottom:8px;
+      letter-spacing:.3px;
+    }
+
+    .line-row{
+      display:grid;
+      grid-template-columns: 46px 1fr;
+      gap:8px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .line-row + .line-row{
+      margin-top:6px;
+    }
+
+    .line-no{
+      font-weight:1000;
+      color:#666;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    .line-team{
+      border:1px solid #f0f0f0;
+      border-radius:10px;
+      background:#fafafa;
+      padding:8px 10px;
+      font-weight:900;
+      font-size:14px;
+      line-height:1.2;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .line-team.seed{
+      background:#fff9e8;
+      border-color:#f1dca1;
+    }
+
+    .line-team.bye{
+      background:#f6f6f6;
+      border-color:#e6e6e6;
+      font-style:italic;
     }
   </style>
 </head>
@@ -48,7 +115,6 @@
         <img src="../assets/img/logo-suzini.png" alt="Logo Suzini">
       </div>
 
-      <!-- ✅ bandeau dynamique selon l’étape -->
       <div class="brand-title" style="display:flex;align-items:center;justify-content:center;">
         <img id="stepBanner"
              src="../assets/img/etape1-rouge.png"
@@ -75,7 +141,6 @@
     <p class="muted" style="margin:0;">Cette page est réservée aux administrateurs.</p>
   </section>
 
-  <!-- ✅ Zone (identique partout) -->
   <section class="card" id="adminZone" style="display:none;">
     <h2 style="margin:0 0 10px;">🧭 Zone</h2>
 
@@ -92,7 +157,6 @@
     </div>
 
     <div class="grid" style="margin-top:10px;" id="tabs"></div>
-    <!-- ✅ pas de texte sous les onglets -->
     <p class="muted" id="hint" style="margin-top:10px; display:none;"></p>
   </section>
 
@@ -104,7 +168,6 @@
     </p>
   </section>
 
-  <!-- ✅ UI Tirage -->
   <section class="card" id="adminUI" style="display:none;">
     <h2 style="margin:0 0 10px;">🎲 Tirage au sort — contrôle admin</h2>
 
@@ -113,13 +176,13 @@
     <div class="grid" style="margin-top:12px;">
       <button class="btn" id="btnLoad" style="font-weight:900; color:#111;">🔄 Charger équipes (liste principale)</button>
       <button class="btn" id="btnStart" style="font-weight:900; color:#111;">▶️ Lancer le tirage</button>
-      <button class="btn" id="btnNext" style="font-weight:900; color:#111;">🎰 Tirer la prochaine équipe</button>
+      <button class="btn" id="btnNext" style="font-weight:900; color:#111;">🎰 Tirage suivant</button>
       <button class="btn" id="btnValidate" style="font-weight:900; color:#111;">✅ Valider le tirage</button>
       <button class="btn" id="btnReset" style="font-weight:900; color:#111; border-color:#f1b2b2;">🧨 Réinitialiser</button>
       <a class="btn" id="btnPublic" href="#" style="font-weight:900; color:#111; text-align:center;">👀 Vue publique</a>
     </div>
 
-    <p class="muted" style="margin-top:10px;">
+    <p class="muted" id="ruleText" style="margin-top:10px;">
       Règle : TS1 et TS2 = meilleures équipes (classement équipe le plus petit).<br>
       Puis 6 tirées au sort : 1ère vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.
     </p>
@@ -128,16 +191,26 @@
   <section class="card" id="panel" style="display:none;">
     <h2 style="margin:0 0 10px;">📌 Aperçu</h2>
 
-    <div class="grid">
+    <div class="grid" id="seedsGrid">
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ Tête de série #1</div>
+        <div style="font-weight:1000;" id="seed1Title">🏷️ Tête de série #1</div>
         <div class="muted" id="seed1">—</div>
       </div>
       <div class="card" style="margin:0;">
-        <div style="font-weight:1000;">🏷️ Tête de série #2</div>
+        <div style="font-weight:1000;" id="seed2Title">🏷️ Tête de série #2</div>
         <div class="muted" id="seed2">—</div>
       </div>
+      <div class="card" style="margin:0; display:none;" id="seed3Card">
+        <div style="font-weight:1000;">🏷️ Tête de série #3</div>
+        <div class="muted" id="seed3">—</div>
+      </div>
+      <div class="card" style="margin:0; display:none;" id="seed4Card">
+        <div style="font-weight:1000;">🏷️ Tête de série #4</div>
+        <div class="muted" id="seed4">—</div>
+      </div>
     </div>
+
+    <p class="muted" id="seedInfo" style="margin:10px 0 0; display:none;">—</p>
 
     <div style="margin-top:12px;">
       <div style="font-weight:1000; margin-bottom:8px;">🎰 Roulette (admin)</div>
@@ -146,13 +219,18 @@
     </div>
 
     <div style="margin-top:12px;">
-      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (équipes restantes)</div>
+      <div style="font-weight:1000; margin-bottom:8px;">📥 Urne (restant à tirer)</div>
       <div id="poolList" style="display:grid; gap:8px;"></div>
     </div>
 
     <div style="margin-top:12px;">
-      <div style="font-weight:1000; margin-bottom:8px;">📌 Tirages révélés</div>
+      <div style="font-weight:1000; margin-bottom:8px;">📌 Révélations</div>
       <div id="revealedList" style="display:grid; gap:8px;"></div>
+    </div>
+
+    <div style="margin-top:12px; display:none;" id="bracketPreviewWrap">
+      <div style="font-weight:1000; margin-bottom:8px;">📋 Tableau 16 — aperçu</div>
+      <div id="bracketPreview" class="bracket-preview"></div>
     </div>
   </section>
 
@@ -168,8 +246,6 @@
   } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   const LS_SCOPE_KEY = "admin_scope_last";
-
-  // ---- scope (URL ?scope=etape1) + fallback localStorage
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope");
 
@@ -181,11 +257,11 @@
     }catch(e){}
     return "etape1";
   }
+
   function persistScope(scope){
     try{ localStorage.setItem(LS_SCOPE_KEY, scope); }catch(e){}
   }
 
-  // ---- DOM Zone
   const accessDenied = document.getElementById("accessDenied");
   const adminZone = document.getElementById("adminZone");
   const scopeEl = document.getElementById("scope");
@@ -195,10 +271,18 @@
   const adminUI = document.getElementById("adminUI");
   const panel = document.getElementById("panel");
 
-  // ---- DOM Tirage
   const statusEl = document.getElementById("status");
   const seed1El = document.getElementById("seed1");
   const seed2El = document.getElementById("seed2");
+  const seed3El = document.getElementById("seed3");
+  const seed4El = document.getElementById("seed4");
+
+  const seed1Title = document.getElementById("seed1Title");
+  const seed2Title = document.getElementById("seed2Title");
+  const seed3Card = document.getElementById("seed3Card");
+  const seed4Card = document.getElementById("seed4Card");
+  const seedInfo = document.getElementById("seedInfo");
+
   const poolList = document.getElementById("poolList");
   const revealedList = document.getElementById("revealedList");
   const wheel = document.getElementById("wheel");
@@ -212,6 +296,18 @@
   const btnPublic = document.getElementById("btnPublic");
 
   const stepBanner = document.getElementById("stepBanner");
+  const ruleText = document.getElementById("ruleText");
+
+  const bracketPreviewWrap = document.getElementById("bracketPreviewWrap");
+  const bracketPreview = document.getElementById("bracketPreview");
+
+  let currentScope = getInitialScope();
+  let cachedMainTeams = [];
+  let draw = null;
+
+  function isEtape5(){
+    return currentScope === "etape5";
+  }
 
   function setHeaderBanner(scope){
     const stepImg = `../assets/img/${scope}-rouge.png`;
@@ -228,16 +324,15 @@
     };
   }
 
-  // ---- state
-  let currentScope = getInitialScope();
-
-  // data
-  let cachedMainTeams = [];
-  let draw = null;
-
   function esc(s){
     return (s ?? "").toString()
-      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function uiSet(msg){
+    statusEl.textContent = msg;
   }
 
   function makeDisabledBtn(label, reason){
@@ -283,7 +378,7 @@
       a.textContent = label;
 
       if(url === "tirage.html"){
-        a.classList.add("is-active"); // ✅ onglet actif noir/blanc
+        a.classList.add("is-active");
       }
       tabsEl.appendChild(a);
     }
@@ -303,11 +398,31 @@
     panelNeedStep.style.display = "none";
     adminUI.style.display = "block";
     panel.style.display = "block";
+
+    if(isEtape5()){
+      ruleText.innerHTML =
+        "Règle étape 5 : tableau à 16 lignes.<br>" +
+        "TS1 ligne 16, TS2 ligne 1, tirage TS3/TS4 pour lignes 8 et 9.<br>" +
+        "Byes fixes : 15, 2, 7, 10. Byes restants tirés sur 4, 5, 12, 13. Puis tirage des équipes restantes sur la première ligne libre.";
+      seed1Title.textContent = "🏷️ Tête de série #1 — ligne 16";
+      seed2Title.textContent = "🏷️ Tête de série #2 — ligne 1";
+      seed3Card.style.display = "block";
+      seed4Card.style.display = "block";
+      seedInfo.style.display = "block";
+      bracketPreviewWrap.style.display = "block";
+    } else {
+      ruleText.innerHTML =
+        "Règle : TS1 et TS2 = meilleures équipes (classement équipe le plus petit).<br>" +
+        "Puis 6 tirées au sort : 1ère vs TS1, 2e vs 3e, 4e vs 5e, 6e vs TS2.";
+      seed1Title.textContent = "🏷️ Tête de série #1";
+      seed2Title.textContent = "🏷️ Tête de série #2";
+      seed3Card.style.display = "none";
+      seed4Card.style.display = "none";
+      seedInfo.style.display = "none";
+      bracketPreviewWrap.style.display = "none";
+    }
   }
 
-  function uiSet(msg){ statusEl.textContent = msg; }
-
-  // ---- Firestore refs (dynamiques selon scope)
   function COL_PUBLIC(scope){ return `equipes_${scope}_public`; }
   function DRAW_REF(scope){ return doc(db, "tirages", scope); }
 
@@ -329,37 +444,6 @@
     return `${t.teamName || "Équipe"} (${t.p1FirstName || "?"} / ${t.p2FirstName || "?"})`;
   }
 
-  async function readDraw(){
-    if(currentScope === "general"){ draw = null; return null; }
-    const s = await getDoc(DRAW_REF(currentScope));
-    draw = s.exists() ? (s.data() || {}) : null;
-    return draw;
-  }
-
-  function drawHasUrn(d){
-    return !!(d && d.seed1 && d.seed2 && Array.isArray(d.pool) && d.pool.length === 6);
-  }
-
-  function setButtons(){
-    if(currentScope === "general"){
-      btnLoad.disabled = true;
-      btnStart.disabled = true;
-      btnNext.disabled = true;
-      btnValidate.disabled = true;
-      btnReset.disabled = true;
-      return;
-    }
-
-    const st = draw?.status || "idle";
-    const okUrn = (cachedMainTeams.length >= 8) || drawHasUrn(draw);
-
-    btnLoad.disabled = false;
-    btnStart.disabled = !okUrn || (st === "running" || st === "pending_validation" || st === "validated");
-    btnNext.disabled = !(st === "running") || ((draw?.revealed || 0) >= 6);
-    btnValidate.disabled = !(st === "pending_validation");
-    btnReset.disabled = false;
-  }
-
   function randomShuffle(arr){
     const a = arr.slice();
     const rand = (n)=>{
@@ -367,14 +451,97 @@
       crypto.getRandomValues(u);
       return u[0] % n;
     };
-    for(let i=a.length-1;i>0;i--){
-      const j = rand(i+1);
+    for(let i = a.length - 1; i > 0; i--){
+      const j = rand(i + 1);
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
   }
 
-  function pickTeamsFromDraw(d){
+  async function readDraw(){
+    if(currentScope === "general"){
+      draw = null;
+      return null;
+    }
+    const s = await getDoc(DRAW_REF(currentScope));
+    draw = s.exists() ? (s.data() || {}) : null;
+    return draw;
+  }
+
+  function drawHasUrnClassic(d){
+    return !!(d && d.seed1 && d.seed2 && Array.isArray(d.pool) && d.pool.length === 6);
+  }
+
+  function drawHasUrnEtape5(d){
+    return !!(
+      d &&
+      d.seed1 && d.seed2 && d.seed3 && d.seed4 &&
+      Array.isArray(d.pool) &&
+      Array.isArray(d.order)
+    );
+  }
+
+  function drawHasUrn(d){
+    return isEtape5() ? drawHasUrnEtape5(d) : drawHasUrnClassic(d);
+  }
+
+  function parseToken(token){
+    const s = String(token || "");
+    if(s.startsWith("SEED34:")) return { type:"seed34", value:s.slice(7) };
+    if(s.startsWith("BYE:")) return { type:"bye", value:Number(s.slice(4)) };
+    if(s.startsWith("TEAM:")) return { type:"team", value:s.slice(5) };
+    return { type:"unknown", value:s };
+  }
+
+  function byeCountEtape5FromMain(mainTeamsCount){
+    return Math.max(0, 16 - mainTeamsCount);
+  }
+
+  function mandatoryByeLinesEtape5(mainTeamsCount){
+    const n = byeCountEtape5FromMain(mainTeamsCount);
+    const lines = [];
+    if(n >= 1) lines.push(15);
+    if(n >= 2) lines.push(2);
+    if(n >= 3) lines.push(7);
+    if(n >= 4) lines.push(10);
+    return lines;
+  }
+
+  function extraByeLinesEtape5(){
+    return [4, 5, 12, 13];
+  }
+
+  function computeEtape5DrawParts(teams){
+    const sorted = teams.slice().sort((a,b)=> a.teamRank - b.teamRank);
+    const seed1 = sorted[0] || null;
+    const seed2 = sorted[1] || null;
+    const seed3 = sorted[2] || null;
+    const seed4 = sorted[3] || null;
+    const pool = sorted.slice(4);
+    return { seed1, seed2, seed3, seed4, pool };
+  }
+
+  function buildEtape5Order(mainTeamsCount, seed3, seed4, pool){
+    const byeCount = byeCountEtape5FromMain(mainTeamsCount);
+    const extraByeCount = Math.max(0, byeCount - 4);
+
+    const order = [];
+
+    const seed34Pick = randomShuffle([seed3.id, seed4.id])[0];
+    order.push(`SEED34:${seed34Pick}`);
+
+    const byeLines = randomShuffle(extraByeLinesEtape5()).slice(0, extraByeCount);
+    for(const line of byeLines){
+      order.push(`BYE:${line}`);
+    }
+
+    const teamTokens = randomShuffle(pool.map(t => `TEAM:${t.id}`));
+    order.push(...teamTokens);
+
+    return order;
+  }
+
+  function pickTeamsFromDrawClassic(d){
     const order = d?.order || [];
     const pool = d?.pool || [];
     const poolById = new Map(pool.map(x => [x.id, x]));
@@ -389,9 +556,42 @@
     return { revealedTeams, remainingTeams };
   }
 
-  function renderPreview(ts1, ts2, poolRemaining, revealedTeams=[]){
+  function pickItemsFromDrawEtape5(d){
+    const order = Array.isArray(d?.order) ? d.order : [];
+    const pool = Array.isArray(d?.pool) ? d.pool : [];
+    const revealed = Number(d?.revealed || 0);
+
+    const poolById = new Map(pool.map(x => [x.id, x]));
+    const revealedTokens = order.slice(0, revealed);
+    const remainingTokens = order.slice(revealed);
+
+    function tokenLabel(tok){
+      const p = parseToken(tok);
+      if(p.type === "seed34"){
+        const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
+        return `Tirage TS3/TS4 → ${teamLabel(t)}`;
+      }
+      if(p.type === "bye"){
+        return `BYE → ligne ${p.value}`;
+      }
+      if(p.type === "team"){
+        const t = poolById.get(p.value);
+        return teamLabel(t);
+      }
+      return String(tok);
+    }
+
+    return {
+      revealedItems: revealedTokens.map(tok => ({ token:tok, label:tokenLabel(tok) })),
+      remainingItems: remainingTokens.map(tok => ({ token:tok, label:tokenLabel(tok) }))
+    };
+  }
+
+  function renderPreviewClassic(ts1, ts2, poolRemaining, revealedTeams=[]){
     seed1El.textContent = ts1 ? teamLabel(ts1) : "—";
     seed2El.textContent = ts2 ? teamLabel(ts2) : "—";
+    seed3El.textContent = "—";
+    seed4El.textContent = "—";
 
     poolList.innerHTML = poolRemaining.length
       ? poolRemaining.map(p=> `<div class="card" style="margin:0;">
@@ -415,15 +615,222 @@
     wheelSub.textContent = "—";
   }
 
+  function buildEtape5LinesFromDraw(d){
+    const lines = new Map();
+    const mainTeamsCount = Number(d?.mainTeamsCount || 0);
+    const mandatoryByes = mandatoryByeLinesEtape5(mainTeamsCount);
+
+    if(d?.seed2) lines.set(1,  { type:"team", team:d.seed2, seed:2 });
+    if(d?.seed1) lines.set(16, { type:"team", team:d.seed1, seed:1 });
+
+    for(const line of mandatoryByes){
+      lines.set(line, { type:"bye" });
+    }
+
+    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
+    const revealed = Number(d?.revealed || 0);
+    const order = Array.isArray(d?.order) ? d.order.slice(0, revealed) : [];
+
+    let seed34Placed = false;
+
+    for(const tok of order){
+      const p = parseToken(tok);
+
+      if(p.type === "seed34" && !seed34Placed){
+        const picked = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
+        const other = picked?.id === d.seed3?.id ? d.seed4 : d.seed3;
+
+        if(picked) lines.set(8, { type:"team", team:picked, seed:(picked?.id === d.seed3?.id ? 3 : 4) });
+        if(other)  lines.set(9, { type:"team", team:other,  seed:(other?.id === d.seed3?.id ? 3 : 4) });
+
+        seed34Placed = true;
+      }
+
+      if(p.type === "bye" && Number.isFinite(p.value)){
+        lines.set(p.value, { type:"bye" });
+      }
+    }
+
+    const occupied = new Set(lines.keys());
+    const freeLines = Array.from({ length:16 }, (_,i)=> i+1).filter(n => !occupied.has(n));
+
+    for(const tok of order){
+      const p = parseToken(tok);
+      if(p.type !== "team") continue;
+
+      const t = poolById.get(p.value);
+      if(!t) continue;
+
+      const nextLine = freeLines.shift();
+      if(!nextLine) break;
+
+      lines.set(nextLine, { type:"team", team:t });
+    }
+
+    return lines;
+  }
+
+  function renderBracketPreviewEtape5(d){
+    if(!isEtape5()){
+      bracketPreview.innerHTML = "";
+      return;
+    }
+
+    const lines = buildEtape5LinesFromDraw(d);
+
+    function lineHtml(lineNo){
+      const obj = lines.get(lineNo);
+
+      if(!obj){
+        return `
+          <div class="line-row">
+            <div class="line-no">L${lineNo}</div>
+            <div class="line-team">—</div>
+          </div>
+        `;
+      }
+
+      if(obj.type === "bye"){
+        return `
+          <div class="line-row">
+            <div class="line-no">L${lineNo}</div>
+            <div class="line-team bye">BYE</div>
+          </div>
+        `;
+      }
+
+      const cls = obj.seed ? "line-team seed" : "line-team";
+      const label = obj.seed ? `TS #${obj.seed} — ${obj.team.teamName}` : (obj.team.teamName || "Équipe");
+
+      return `
+        <div class="line-row">
+          <div class="line-no">L${lineNo}</div>
+          <div class="${cls}">${esc(label)}</div>
+        </div>
+      `;
+    }
+
+    const blocks = [];
+    for(let i=1; i<=16; i+=2){
+      blocks.push(`
+        <div class="match-block">
+          <div class="match-title">MATCH ${((i+1)/2)}</div>
+          ${lineHtml(i)}
+          ${lineHtml(i+1)}
+        </div>
+      `);
+    }
+
+    bracketPreview.innerHTML = blocks.join("");
+
+    const line8 = lines.get(8);
+    const line9 = lines.get(9);
+    if(line8?.team && line9?.team){
+      seedInfo.textContent = `TS3/TS4 : ligne 8 = ${line8.team.teamName} / ligne 9 = ${line9.team.teamName}`;
+    } else {
+      seedInfo.textContent = "Tirage TS3/TS4 en attente.";
+    }
+  }
+
+  function renderPreviewEtape5(d){
+    seed1El.textContent = d?.seed1 ? teamLabel(d.seed1) : "—";
+    seed2El.textContent = d?.seed2 ? teamLabel(d.seed2) : "—";
+    seed3El.textContent = d?.seed3 ? teamLabel(d.seed3) : "—";
+    seed4El.textContent = d?.seed4 ? teamLabel(d.seed4) : "—";
+
+    const { revealedItems, remainingItems } = pickItemsFromDrawEtape5(d);
+
+    poolList.innerHTML = remainingItems.length
+      ? remainingItems.map(item => `
+          <div class="card" style="margin:0;">
+            <div style="display:flex;justify-content:space-between;gap:10px;">
+              <div><b>${esc(item.label)}</b></div>
+              <span class="pill">urne</span>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="muted">—</div>`;
+
+    revealedList.innerHTML = revealedItems.length
+      ? revealedItems.map((item, i)=> `
+          <div class="card" style="margin:0;">
+            <div style="display:flex;justify-content:space-between;gap:10px;">
+              <div><b>#${i+1}</b> — ${esc(item.label)}</div>
+              <span class="pill">tiré</span>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="muted">En attente…</div>`;
+
+    wheel.textContent = "—";
+    wheelSub.textContent = "—";
+
+    renderBracketPreviewEtape5(d);
+  }
+
+  function renderPreviewFromState(){
+    if(currentScope === "general") return;
+
+    if(isEtape5()){
+      if(draw){
+        renderPreviewEtape5(draw);
+      } else {
+        renderPreviewEtape5({
+          seed1:null, seed2:null, seed3:null, seed4:null,
+          pool:[], order:[], revealed:0, mainTeamsCount:0
+        });
+      }
+      return;
+    }
+
+    if(draw){
+      const { revealedTeams, remainingTeams } = pickTeamsFromDrawClassic(draw);
+      renderPreviewClassic(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
+    } else {
+      renderPreviewClassic(null, null, [], []);
+    }
+  }
+
+  function setButtons(){
+    if(currentScope === "general"){
+      btnLoad.disabled = true;
+      btnStart.disabled = true;
+      btnNext.disabled = true;
+      btnValidate.disabled = true;
+      btnReset.disabled = true;
+      return;
+    }
+
+    const st = draw?.status || "idle";
+    const okUrn = drawHasUrn(draw);
+
+    btnLoad.disabled = false;
+    btnStart.disabled = !okUrn || (st === "running" || st === "pending_validation" || st === "validated");
+
+    const totalToReveal = isEtape5()
+      ? (Array.isArray(draw?.order) ? draw.order.length : 0)
+      : 6;
+
+    btnNext.disabled = !(st === "running") || ((draw?.revealed || 0) >= totalToReveal);
+    btnValidate.disabled = !(st === "pending_validation");
+    btnReset.disabled = false;
+  }
+
   async function loadMainTeams(){
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
 
     uiSet("Chargement équipes…");
-
     await readDraw();
+
     if(draw && (draw.status === "running" || draw.status === "pending_validation" || draw.status === "validated")){
-      const ok = confirm("Un tirage existe déjà (statut: " + draw.status + ").\n\nRecharger remet l’urne en mode “idle” et reset revealed.\nContinuer ?");
-      if(!ok){ uiSet("Annulé."); return; }
+      const ok = confirm("Un tirage existe déjà (statut : " + draw.status + ").\n\nRecharger remet l’urne en mode “idle”.\nContinuer ?");
+      if(!ok){
+        uiSet("Annulé.");
+        return;
+      }
     }
 
     const snap = await getDocs(query(collection(db, COL_PUBLIC(currentScope)), orderBy("createdAt","asc")));
@@ -448,9 +855,52 @@
 
     cachedMainTeams = rows.sort((a,b)=> a.teamRank - b.teamRank);
 
+    if(isEtape5()){
+      if(cachedMainTeams.length < 4 || cachedMainTeams.length > 16){
+        uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Pour l’étape 5 il faut entre 4 et 16 équipes.`);
+        renderPreviewEtape5({
+          seed1:null, seed2:null, seed3:null, seed4:null,
+          pool:[], order:[], revealed:0, mainTeamsCount:cachedMainTeams.length
+        });
+        setButtons();
+        return;
+      }
+
+      const { seed1, seed2, seed3, seed4, pool } = computeEtape5DrawParts(cachedMainTeams);
+      const order = buildEtape5Order(cachedMainTeams.length, seed3, seed4, pool);
+
+      await setDoc(DRAW_REF(currentScope), {
+        scope: currentScope,
+        status: "idle",
+        seed1: { id: seed1.id, teamName: seed1.teamName, p1FirstName: seed1.p1FirstName, p2FirstName: seed1.p2FirstName, teamRank: seed1.teamRank },
+        seed2: { id: seed2.id, teamName: seed2.teamName, p1FirstName: seed2.p1FirstName, p2FirstName: seed2.p2FirstName, teamRank: seed2.teamRank },
+        seed3: { id: seed3.id, teamName: seed3.teamName, p1FirstName: seed3.p1FirstName, p2FirstName: seed3.p2FirstName, teamRank: seed3.teamRank },
+        seed4: { id: seed4.id, teamName: seed4.teamName, p1FirstName: seed4.p1FirstName, p2FirstName: seed4.p2FirstName, teamRank: seed4.teamRank },
+        pool: pool.map(p => ({
+          id:p.id,
+          teamName:p.teamName,
+          p1FirstName:p.p1FirstName,
+          p2FirstName:p.p2FirstName,
+          teamRank:p.teamRank
+        })),
+        mainTeamsCount: cachedMainTeams.length,
+        order,
+        revealed: 0,
+        revealedAtMs: [],
+        createdAt: serverTimestamp(),
+        validatedAt: null
+      }, { merge:true });
+
+      await readDraw();
+      setButtons();
+      uiSet("✅ Étape 5 chargée. Tu peux lancer le tirage.");
+      renderPreviewFromState();
+      return;
+    }
+
     if(cachedMainTeams.length !== 8){
       uiSet(`⚠️ Liste principale détectée = ${cachedMainTeams.length} équipe(s). Il en faut 8 (list=main, stby=false).`);
-      renderPreview(null, null, cachedMainTeams.slice(0, 6), []);
+      renderPreviewClassic(null, null, cachedMainTeams.slice(0, 6), []);
       setButtons();
       return;
     }
@@ -476,13 +926,36 @@
     setButtons();
 
     uiSet("✅ Équipes chargées (urne publiée). Tu peux lancer le tirage.");
-    renderPreview(draw.seed1, draw.seed2, draw.pool || [], []);
+    renderPreviewFromState();
   }
 
   async function startDraw(){
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
 
     await readDraw();
+
+    if(isEtape5()){
+      if(!drawHasUrn(draw)){
+        alert("Urne étape 5 non prête. Clique d’abord “Charger équipes (liste principale)”.");
+        return;
+      }
+
+      await updateDoc(DRAW_REF(currentScope), {
+        status: "running",
+        revealed: 0,
+        revealedAtMs: [],
+        validatedAt: null
+      });
+
+      await readDraw();
+      uiSet("▶️ Tirage lancé. Clique “Tirage suivant”.");
+      setButtons();
+      renderPreviewFromState();
+      return;
+    }
 
     const ts1 = cachedMainTeams[0] || draw?.seed1;
     const ts2 = cachedMainTeams[1] || draw?.seed2;
@@ -512,11 +985,9 @@
     }, { merge:true });
 
     await readDraw();
-    uiSet("▶️ Tirage lancé. Clique “Tirer la prochaine équipe”.");
+    uiSet("▶️ Tirage lancé. Clique “Tirage suivant”.");
     setButtons();
-
-    const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
-    renderPreview(draw.seed1, draw.seed2, remainingTeams, revealedTeams);
+    renderPreviewFromState();
   }
 
   async function rouletteSpin(finalText, durationMs = 1300){
@@ -540,13 +1011,69 @@
     });
   }
 
+  function tokenLabelEtape5(token, d){
+    const p = parseToken(token);
+    const poolById = new Map((d?.pool || []).map(x => [x.id, x]));
+
+    if(p.type === "seed34"){
+      const t = (d.seed3?.id === p.value) ? d.seed3 : (d.seed4?.id === p.value ? d.seed4 : null);
+      return `TS3/TS4 → ${teamLabel(t)}`;
+    }
+    if(p.type === "bye"){
+      return `BYE → ligne ${p.value}`;
+    }
+    if(p.type === "team"){
+      return teamLabel(poolById.get(p.value));
+    }
+    return String(token);
+  }
+
   async function nextPick(){
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
 
     await readDraw();
 
     if(!draw || draw.status !== "running"){
       alert("Le tirage n’est pas en cours.");
+      return;
+    }
+
+    if(isEtape5()){
+      const order = Array.isArray(draw.order) ? draw.order : [];
+      const revealed = Number(draw.revealed || 0);
+
+      if(revealed >= order.length){
+        alert("Tout a déjà été tiré.");
+        return;
+      }
+
+      const token = order[revealed];
+      await rouletteSpin(tokenLabelEtape5(token, draw), 1300);
+
+      const newRevealed = revealed + 1;
+      const arr = Array.isArray(draw.revealedAtMs) ? draw.revealedAtMs.slice() : [];
+      arr.push(Date.now());
+
+      await updateDoc(DRAW_REF(currentScope), {
+        revealed: newRevealed,
+        revealedAtMs: arr
+      });
+
+      await readDraw();
+      renderPreviewFromState();
+
+      if(newRevealed >= order.length){
+        await updateDoc(DRAW_REF(currentScope), { status: "pending_validation" });
+        await readDraw();
+        uiSet("🏁 Tirage fini — en attente de validation.");
+      } else {
+        uiSet(`🎰 Révélation #${newRevealed} effectuée.`);
+      }
+
+      setButtons();
       return;
     }
 
@@ -575,9 +1102,7 @@
     });
 
     await readDraw();
-
-    const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
-    renderPreview(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
+    renderPreviewFromState();
 
     if(newRevealed >= 6){
       await updateDoc(DRAW_REF(currentScope), { status: "pending_validation" });
@@ -591,7 +1116,10 @@
   }
 
   async function validateDraw(){
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
 
     const ok = confirm("Valider le tirage ?\n\nLe public verra le tirage VALIDÉ + date/heure.");
     if(!ok) return;
@@ -607,49 +1135,73 @@
   }
 
   async function resetDraw(){
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
 
     const ok1 = confirm("⚠️ Réinitialiser le tirage ?\n\nCela efface l’état du tirage pour cette étape.");
     if(!ok1) return;
 
     const typed = prompt('Tape exactement : RESET');
-    if(typed !== "RESET"){ alert("Annulé."); return; }
+    if(typed !== "RESET"){
+      alert("Annulé.");
+      return;
+    }
 
-    await setDoc(DRAW_REF(currentScope), {
-      scope: currentScope,
-      status: "idle",
-      seed1: null,
-      seed2: null,
-      pool: [],
-      order: [],
-      revealed: 0,
-      revealedAtMs: [],
-      createdAt: serverTimestamp(),
-      validatedAt: null
-    }, { merge: true });
+    if(isEtape5()){
+      await setDoc(DRAW_REF(currentScope), {
+        scope: currentScope,
+        status: "idle",
+        seed1: null,
+        seed2: null,
+        seed3: null,
+        seed4: null,
+        pool: [],
+        mainTeamsCount: 0,
+        order: [],
+        revealed: 0,
+        revealedAtMs: [],
+        createdAt: serverTimestamp(),
+        validatedAt: null
+      }, { merge:true });
+    } else {
+      await setDoc(DRAW_REF(currentScope), {
+        scope: currentScope,
+        status: "idle",
+        seed1: null,
+        seed2: null,
+        pool: [],
+        order: [],
+        revealed: 0,
+        revealedAtMs: [],
+        createdAt: serverTimestamp(),
+        validatedAt: null
+      }, { merge:true });
+    }
 
     await readDraw();
     cachedMainTeams = [];
     uiSet("🧼 Tirage réinitialisé.");
-    renderPreview(null, null, [], []);
+    renderPreviewFromState();
     setButtons();
   }
 
-  // Buttons
   btnLoad.onclick = async (e)=>{ e.preventDefault(); await loadMainTeams(); };
   btnStart.onclick = async (e)=>{ e.preventDefault(); await startDraw(); };
   btnNext.onclick = async (e)=>{ e.preventDefault(); await nextPick(); };
   btnValidate.onclick = async (e)=>{ e.preventDefault(); await validateDraw(); };
   btnReset.onclick = async (e)=>{ e.preventDefault(); await resetDraw(); };
 
-  // Public view
   btnPublic.onclick = (e)=>{
     e.preventDefault();
-    if(currentScope === "general"){ alert("Choisis une étape."); return; }
+    if(currentScope === "general"){
+      alert("Choisis une étape.");
+      return;
+    }
     window.location.href = `../${currentScope}/tirage.html`;
   };
 
-  // Logout
   document.getElementById("btnLogout").onclick = async (e)=>{
     e.preventDefault();
     await logout();
@@ -662,6 +1214,34 @@
     panelNeedStep.style.display = "none";
     adminUI.style.display = "none";
     panel.style.display = "none";
+  }
+
+  async function hydrateCurrentScope(){
+    cachedMainTeams = [];
+    draw = null;
+
+    if(currentScope !== "general"){
+      await readDraw();
+      setButtons();
+
+      if(draw){
+        renderPreviewFromState();
+
+        if(draw.status === "pending_validation") uiSet("🏁 Tirage fini — en attente de validation.");
+        else if(draw.status === "validated") uiSet("✅ Tirage validé.");
+        else if(draw.status === "running") uiSet("▶️ Tirage en cours.");
+        else if(draw.status === "idle" && !drawHasUrn(draw)) uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
+        else if(draw.status === "idle") uiSet("✅ Admin prêt. Tu peux lancer le tirage.");
+        else uiSet("✅ Admin prêt.");
+      } else {
+        renderPreviewFromState();
+        uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
+      }
+    } else {
+      renderPreviewClassic(null, null, [], []);
+      statusEl.textContent = "—";
+      setButtons();
+    }
   }
 
   function showAdmin(){
@@ -678,60 +1258,27 @@
       setTabs(currentScope);
       showPanelsForScope(currentScope);
       persistScope(currentScope);
-
-      cachedMainTeams = [];
-      draw = null;
-
-      if(currentScope !== "general"){
-        await readDraw();
-        setButtons();
-        uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
-        if(draw){
-          const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
-          renderPreview(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
-          if(draw.status === "pending_validation") uiSet("🏁 Tirage fini — en attente de validation.");
-          if(draw.status === "validated") uiSet("✅ Tirage validé.");
-          if(draw.status === "idle" && !drawHasUrn(draw)) uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
-        }else{
-          renderPreview(null, null, [], []);
-          uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
-        }
-      }else{
-        renderPreview(null, null, [], []);
-        statusEl.textContent = "—";
-        setButtons();
-      }
+      await hydrateCurrentScope();
     };
   }
 
-  // Guard
   const g = await requireRole(["admin"]);
-  if(!g.ok){ showDenied(); }
-  else { showAdmin(); }
+  if(!g.ok){
+    showDenied();
+  } else {
+    showAdmin();
+    await hydrateCurrentScope();
+  }
 
   onAuthStateChanged(auth, async (user)=>{
-    if(!user){ showDenied(); return; }
+    if(!user){
+      showDenied();
+      return;
+    }
     const g2 = await requireRole(["admin"]);
-    if(!g2.ok){ showDenied(); return; }
-
-    // init content for non-general
-    if(currentScope !== "general"){
-      await readDraw();
-      setButtons();
-      uiSet("✅ Admin prêt. 1) Charger équipes, 2) Lancer, 3) Tirer x6, 4) Valider.");
-      if(draw){
-        const { revealedTeams, remainingTeams } = pickTeamsFromDraw(draw);
-        renderPreview(draw.seed1 || null, draw.seed2 || null, remainingTeams, revealedTeams);
-        if(draw.status === "pending_validation") uiSet("🏁 Tirage fini — en attente de validation.");
-        if(draw.status === "validated") uiSet("✅ Tirage validé.");
-        if(draw.status === "idle" && !drawHasUrn(draw)) uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
-      }else{
-        renderPreview(null, null, [], []);
-        uiSet("ℹ️ Urne non prête. Clique “Charger équipes (liste principale)”.");
-      }
-    }else{
-      setButtons();
-      statusEl.textContent = "—";
+    if(!g2.ok){
+      showDenied();
+      return;
     }
   });
 </script>
