@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>JAT — Classement</title>
-  <link rel="stylesheet" href="../assets/css/main.css?v=20260313-jat-classement-licences" />
+  <link rel="stylesheet" href="../assets/css/main.css?v=20260418-jat-classement-etape5-v2" />
 </head>
 <body>
 
@@ -91,10 +91,7 @@
     <h3 style="margin:0 0 8px;">🧍 Classement des joueurs</h3>
     <div id="playerList"></div>
 
-    <p class="muted" style="margin-top:12px;">
-      Le classement est calculé à partir des matchs :
-      <b>M9</b> (7e/8e), <b>M10</b> (5e/6e), <b>M11</b> (3e/4e), <b>M12</b> (Finale).
-    </p>
+    <p class="muted" id="helpText" style="margin-top:12px;"></p>
   </section>
 
 </main>
@@ -210,6 +207,19 @@
   const params = new URLSearchParams(location.search);
   const scopeFromUrl = params.get("scope") || "etape5";
 
+  const ETAPE5_INDIVIDUAL_POINTS = {
+    1: 350,
+    2: 245,
+    3: 189,
+    4: 147,
+    5: 123,
+    6: 105,
+    7: 91,
+    8: 74,
+    9: 67,
+    10: 61
+  };
+
   const accessDenied = document.getElementById("accessDenied");
   const adminUI = document.getElementById("adminUI");
 
@@ -224,6 +234,7 @@
   const statusText    = document.getElementById("statusText");
   const btnValidate   = document.getElementById("btnValidate");
   const validatedBox  = document.getElementById("validatedBox");
+  const helpText      = document.getElementById("helpText");
 
   const teamList      = document.getElementById("teamList");
   const playerList    = document.getElementById("playerList");
@@ -339,6 +350,129 @@
   function classementRef(scope){ return doc(db, "classements", scope); }
   function inscCol(scope){ return collection(db, `inscriptions_${scope}_private`); }
 
+  function scoreNum(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function computeWinnerSideFromScore(res){
+    if(!res) return null;
+    if(res.winnerSide === "A" || res.winnerSide === "B") return res.winnerSide;
+
+    let setsA = 0;
+    let setsB = 0;
+
+    const pairs = [
+      [scoreNum(res.s1A), scoreNum(res.s1B)],
+      [scoreNum(res.s2A), scoreNum(res.s2B)],
+      [scoreNum(res.s3A), scoreNum(res.s3B)]
+    ];
+
+    for(const [a,b] of pairs){
+      if(a === null || b === null) continue;
+      if(a > b) setsA++;
+      else if(b > a) setsB++;
+    }
+
+    if(setsA > setsB) return "A";
+    if(setsB > setsA) return "B";
+    return null;
+  }
+
+  function getPoolMatchIds(pool){
+    return pool === "A" ? ["M1","M3","M5"] : ["M2","M4","M6"];
+  }
+
+  function getPoolTeamKeys(pool){
+    return pool === "A" ? ["PA1","PA2","PA3"] : ["PB1","PB2","PB3"];
+  }
+
+  function computePoolRanking(pool){
+    const teams = currentProg?.teams || {};
+    const matches = currentProg?.matches || {};
+
+    const teamKeys = getPoolTeamKeys(pool);
+    const stats = new Map();
+
+    for(const key of teamKeys){
+      stats.set(key, {
+        key,
+        team: teams[key] || null,
+        points: 0,
+        setsWon: 0,
+        setsLost: 0,
+        gamesWon: 0,
+        gamesLost: 0
+      });
+    }
+
+    for(const mid of getPoolMatchIds(pool)){
+      const m = matches[mid];
+      if(!m) continue;
+
+      const keyA = m.A?.key;
+      const keyB = m.B?.key;
+      if(!stats.has(keyA) || !stats.has(keyB)) continue;
+
+      const res = resultsByMatch.get(mid);
+      const winnerSide = computeWinnerSideFromScore(res);
+      if(winnerSide !== "A" && winnerSide !== "B") continue;
+
+      const A = stats.get(keyA);
+      const B = stats.get(keyB);
+
+      const sets = [
+        [scoreNum(res.s1A), scoreNum(res.s1B)],
+        [scoreNum(res.s2A), scoreNum(res.s2B)],
+        [scoreNum(res.s3A), scoreNum(res.s3B)]
+      ];
+
+      let setsA = 0;
+      let setsB = 0;
+
+      for(const [ga, gb] of sets){
+        if(ga === null || gb === null) continue;
+
+        A.gamesWon += ga;
+        A.gamesLost += gb;
+        B.gamesWon += gb;
+        B.gamesLost += ga;
+
+        if(ga > gb) setsA++;
+        else if(gb > ga) setsB++;
+      }
+
+      A.setsWon += setsA;
+      A.setsLost += setsB;
+      B.setsWon += setsB;
+      B.setsLost += setsA;
+
+      if(winnerSide === "A"){
+        A.points += 2;
+        B.points += 1;
+      } else {
+        B.points += 2;
+        A.points += 1;
+      }
+    }
+
+    return Array.from(stats.values()).sort((x,y)=>{
+      if(y.points !== x.points) return y.points - x.points;
+
+      const xSetsDiff = x.setsWon - x.setsLost;
+      const ySetsDiff = y.setsWon - y.setsLost;
+      if(ySetsDiff !== xSetsDiff) return ySetsDiff - xSetsDiff;
+
+      const xGamesDiff = x.gamesWon - x.gamesLost;
+      const yGamesDiff = y.gamesWon - y.gamesLost;
+      if(yGamesDiff !== xGamesDiff) return yGamesDiff - xGamesDiff;
+
+      const rx = Number(x.team?.teamRank ?? 999999);
+      const ry = Number(y.team?.teamRank ?? 999999);
+      return rx - ry;
+    });
+  }
+
   function resolveTeamRef(ref){
     if(!currentProg) return null;
 
@@ -351,19 +485,26 @@
       return teams[ref.key] || null;
     }
 
+    if(ref.type === "poolRank"){
+      const ranking = computePoolRanking(ref.pool);
+      const row = ranking[Number(ref.rank) - 1];
+      return row?.team || null;
+    }
+
     if(ref.type === "winner" || ref.type === "loser"){
       const mid = ref.matchId;
       const m = matches[mid];
       if(!m) return null;
 
       const res = resultsByMatch.get(mid);
-      if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+      const winnerSide = computeWinnerSideFromScore(res);
+      if(winnerSide !== "A" && winnerSide !== "B") return null;
 
       const teamA = resolveTeamRef(m.A);
       const teamB = resolveTeamRef(m.B);
 
-      const winner = (res.winnerSide === "A") ? teamA : teamB;
-      const loser  = (res.winnerSide === "A") ? teamB : teamA;
+      const winner = (winnerSide === "A") ? teamA : teamB;
+      const loser  = (winnerSide === "A") ? teamB : teamA;
 
       return ref.type === "winner" ? winner : loser;
     }
@@ -376,13 +517,14 @@
     if(!m) return null;
 
     const res = resultsByMatch.get(matchId);
-    if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+    const winnerSide = computeWinnerSideFromScore(res);
+    if(winnerSide !== "A" && winnerSide !== "B") return null;
 
     const teamA = resolveTeamRef(m.A);
     const teamB = resolveTeamRef(m.B);
     if(!teamA || !teamB) return null;
 
-    return (res.winnerSide === "A") ? teamA : teamB;
+    return (winnerSide === "A") ? teamA : teamB;
   }
 
   function getLoserTeam(matchId){
@@ -390,13 +532,14 @@
     if(!m) return null;
 
     const res = resultsByMatch.get(matchId);
-    if(!res || (res.winnerSide !== "A" && res.winnerSide !== "B")) return null;
+    const winnerSide = computeWinnerSideFromScore(res);
+    if(winnerSide !== "A" && winnerSide !== "B") return null;
 
     const teamA = resolveTeamRef(m.A);
     const teamB = resolveTeamRef(m.B);
     if(!teamA || !teamB) return null;
 
-    return (res.winnerSide === "A") ? teamB : teamA;
+    return (winnerSide === "A") ? teamB : teamA;
   }
 
   function buildTeamDetails(team){
@@ -431,11 +574,44 @@
   }
 
   function buildFinalRanking(){
+    if(currentScope === "etape5"){
+      const needed = ["M11","M16","M17","M18","M19"];
+      const missing = [];
+
+      for(const mid of needed){
+        const r = resultsByMatch.get(mid);
+        const winnerSide = computeWinnerSideFromScore(r);
+        if(winnerSide !== "A" && winnerSide !== "B"){
+          missing.push(mid);
+        }
+      }
+
+      const positions = [
+        { pos: 1,  from: () => getWinnerTeam("M19"), label:"🥇 1er" },
+        { pos: 2,  from: () => getLoserTeam("M19"),  label:"🥈 2e"  },
+        { pos: 3,  from: () => getWinnerTeam("M18"), label:"🥉 3e"  },
+        { pos: 4,  from: () => getLoserTeam("M18"),  label:"4e"     },
+        { pos: 5,  from: () => getWinnerTeam("M17"), label:"5e"     },
+        { pos: 6,  from: () => getLoserTeam("M17"),  label:"6e"     },
+        { pos: 7,  from: () => getWinnerTeam("M16"), label:"7e"     },
+        { pos: 8,  from: () => getLoserTeam("M16"),  label:"8e"     },
+        { pos: 9,  from: () => getWinnerTeam("M11"), label:"9e"     },
+        { pos: 10, from: () => getLoserTeam("M11"),  label:"10e"    },
+      ];
+
+      const resolved = positions.map(x => ({ ...x, team: x.from() }));
+      const unresolved = resolved.filter(x => !x.team).map(x => x.pos);
+      const complete = (missing.length === 0 && unresolved.length === 0);
+
+      return { complete, missing, unresolved, resolved };
+    }
+
     const needed = ["M9","M10","M11","M12"];
     const missing = [];
     for(const mid of needed){
       const r = resultsByMatch.get(mid);
-      if(!r || (r.winnerSide !== "A" && r.winnerSide !== "B")){
+      const winnerSide = computeWinnerSideFromScore(r);
+      if(winnerSide !== "A" && winnerSide !== "B"){
         missing.push(mid);
       }
     }
@@ -513,8 +689,12 @@
     const players = [];
     for(const x of resolved){
       const t = buildTeamDetails(x.team);
-      players.push({ pos:x.pos, name:t.p1Display, team:t.teamName });
-      players.push({ pos:x.pos, name:t.p2Display, team:t.teamName });
+      const points = currentScope === "etape5"
+        ? Number(ETAPE5_INDIVIDUAL_POINTS[x.pos] || 0)
+        : 0;
+
+      players.push({ pos:x.pos, name:t.p1Display, team:t.teamName, points });
+      players.push({ pos:x.pos, name:t.p2Display, team:t.teamName, points });
     }
 
     const playerCards = players.map(p=>{
@@ -523,7 +703,7 @@
           <div class="rk">${esc(String(p.pos))}</div>
           <div class="rmain">
             <div class="rtitle">${esc(p.name)}</div>
-            <div class="rsub muted">${esc(p.team)}</div>
+            <div class="rsub muted">${esc(p.team)}${currentScope === "etape5" ? ` — ${esc(String(p.points))} pts` : ""}</div>
           </div>
           <div class="tag">Position ${esc(String(p.pos))}</div>
         </div>
@@ -607,26 +787,37 @@
 
     const players = [];
     for(const p of positions){
+      const points = currentScope === "etape5"
+        ? Number(ETAPE5_INDIVIDUAL_POINTS[p.pos] || 0)
+        : 0;
+
       players.push({
-        pos:p.pos,
-        lastName:p.p1LastName,
-        firstName:p.p1FirstName,
-        licence:p.p1Licence,
-        teamName:p.teamName
+        pos: p.pos,
+        lastName: p.p1LastName,
+        firstName: p.p1FirstName,
+        licence: p.p1Licence,
+        teamName: p.teamName,
+        points
       });
+
       players.push({
-        pos:p.pos,
-        lastName:p.p2LastName,
-        firstName:p.p2FirstName,
-        licence:p.p2Licence,
-        teamName:p.teamName
+        pos: p.pos,
+        lastName: p.p2LastName,
+        firstName: p.p2FirstName,
+        licence: p.p2Licence,
+        teamName: p.teamName,
+        points
       });
     }
 
     const payload = {
       scope: currentScope,
       computedAt: serverTimestamp(),
-      computedFrom: { matches: ["M9","M10","M11","M12"] },
+      computedFrom: {
+        matches: currentScope === "etape5"
+          ? ["M11","M16","M17","M18","M19"]
+          : ["M9","M10","M11","M12"]
+      },
       positions,
       players,
       validatedAt: serverTimestamp(),
@@ -637,7 +828,10 @@
   }
 
   function showPanelsForScope(scope){
-    pageSub.textContent = scope === "general" ? "Général" : `${stepLabel(scope)} — BT250`;
+    pageSub.textContent =
+      scope === "general"
+        ? "Général"
+        : `${stepLabel(scope)} — ${scope === "etape5" ? "BT500" : "BT250"}`;
 
     if(scope === "general"){
       panelNeedStep.style.display = "block";
@@ -645,6 +839,13 @@
       stopListeners();
       return;
     }
+
+    helpText.innerHTML = scope === "etape5"
+      ? `Le classement est calculé à partir des matchs :
+         <b>M11</b> (9e/10e), <b>M16</b> (7e/8e), <b>M17</b> (5e/6e),
+         <b>M18</b> (3e/4e), <b>M19</b> (Finale).`
+      : `Le classement est calculé à partir des matchs :
+         <b>M9</b> (7e/8e), <b>M10</b> (5e/6e), <b>M11</b> (3e/4e), <b>M12</b> (Finale).`;
 
     panelNeedStep.style.display = "none";
     panelRank.style.display = "block";
